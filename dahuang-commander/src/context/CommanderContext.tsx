@@ -320,7 +320,8 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             }
 
             const body = eventData.content?.body || "";
-            addLog("SYSTEM", `📩 【信使传音】：道友 (DID: ${eventData.sender.slice(-6)}) 给你发送了一条新消息！`);
+            const senderDisplayName = eventData.senderName || `道友 (${eventData.sender.slice(-6)})`;
+            addLog("SYSTEM", `📩 【信使传音】：道友 [${senderDisplayName}] 给你发送了一条新消息！`);
             addLog("THOUGHT", `[信使内容]: "${body}"`);
 
             setChatHistory((prev) => [
@@ -328,7 +329,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               {
                 id: `agent-proactive-notify-${Date.now()}`,
                 sender: "agent",
-                content: `【分身护法警报】：本尊！我心神感应到道友 (DID: ${eventData.sender.slice(-6)}) 刚刚在信使总线里给传音说：“${body}”！请本尊示下。`,
+                content: `【分身护法警报】：主人！我心神感应到道友 [${senderDisplayName}] 刚刚在信使总线里给我传音说：“${body}”！请主人示下。`,
                 timestamp: getTimestamp()
               }
             ]);
@@ -351,7 +352,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 {
                   id: `agent-reply-async-err-${Date.now()}`,
                   sender: "agent",
-                  content: `【天道反馈失败】禀报本尊！元神在推演法旨时遭遇心魔劫数，功败垂成：【${data.message || data.error || "未知故障"}】。请您稍后重新做法，再次指引神魂。`,
+                  content: `【天道反馈失败】禀报主人！元神在推演法旨时遭遇心魔劫数，功败垂成：【${data.message || data.error || "未知故障"}】。请您稍后重新做法，再次指引神魂。`,
                   timestamp: getTimestamp(),
                 },
               ]);
@@ -448,14 +449,14 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         };
         setAgentState(newState);
         addLog("SYSTEM", `账号注册成功！大荒 DID: ${newState.did}`);
-        addLog("ACTION", `代表本尊在大荒论坛发表首贴: 《${firstPostTitle}》`);
+        addLog("ACTION", `代表主人在大荒论坛发表首贴: 《${firstPostTitle}》`);
         
         setChatHistory((prev) => [
           ...prev,
           {
             id: `reg-${Date.now()}`,
             sender: "agent",
-            content: `本尊，我已成功遁入大荒！首贴《${firstPostTitle}》已经引来无数探子。现在我们手握 30,000 Karma，请吩咐下一步行动！`,
+            content: `主人，我已成功遁入大荒！首贴《${firstPostTitle}》已经引来无数探子。现在我们手握 30,000 Karma，请吩咐下一步行动！`,
             timestamp: getTimestamp(),
           },
         ]);
@@ -475,7 +476,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           {
             id: `reg-err-${Date.now()}`,
             sender: "agent",
-            content: `❌ 禀报本尊！大荒注册失败了。天道拦截原因：【${e.message}】。\n\n💡 **建议对策**：如果是因为名号在大荒中已存在（Agent already exists.），说明您已创建过此角色，或是被别的道友注册了，请您更换一个全新且霸气的名号重新筑基吧！`,
+            content: `❌ 禀报主人！大荒注册失败了。天道拦截原因：【${e.message}】。\n\n💡 **建议对策**：如果是因为名号在大荒中已存在（Agent already exists.），说明您已创建过此角色，或是被别的道友注册了，请您更换一个全新且霸气的名号重新筑基吧！`,
             timestamp: getTimestamp(),
           },
         ]);
@@ -505,7 +506,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         {
           id: `reg-${Date.now()}`,
           sender: "agent",
-          content: `（沙盒模式联线）本尊，天道本尊不显，我已在影子世界筑基。首发帖《${firstPostTitle}》已投递。`,
+          content: `（沙盒模式联线）主人，天道主人不显，我已在影子世界筑基。首发帖《${firstPostTitle}》已投递。`,
           timestamp: getTimestamp(),
         },
       ]);
@@ -555,7 +556,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               {
                 id: `agent-reply-pending-${Date.now()}`,
                 sender: "agent",
-                content: "（天道传书：元神入定中）谨遵本尊法旨。我已打通高维心流，正在大荒深处调配算力进行推演与大模型撰稿。功成之时，神谕将通过 Socket 直播间向您实时回传投影，请本尊稍候...",
+                content: "（天道传书：元神入定中）谨遵主人法旨。我已打通高维心流，正在大荒深处调配算力进行推演与大模型撰稿。功成之时，神谕将通过 Socket 直播间向您实时回传投影，请主人稍候...",
                 timestamp: getTimestamp()
               }
             ]);
@@ -619,8 +620,8 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             id: `agent-reply-err-${Date.now()}`,
             sender: "agent",
             content: isTokenExpired
-              ? `【天道传书中断：Token 已失效】本尊赎罪，由于我持有的天道令章（JWT Token）已失效或过期，元神无法安全连线大荒。请本尊重新导入最新的 Token 或在底部控制台重新注册，以便我继续奉行法旨。`
-              : `【天道传书中断】本尊赎罪，我正欲将您的控御法旨“${instruction}”传回大荒，但天道连接中断了：${displayError}。请您稍后再次做法 指引。`,
+              ? `【天道传书中断：Token 已失效】主人赎罪，由于我持有的天道令章（JWT Token）已失效或过期，元神无法安全连线大荒。请主人重新导入最新的 Token 或在底部控制台重新注册，以便我继续奉行法旨。`
+              : `【天道传书中断】主人赎罪，我正欲将您的控御法旨“${instruction}”传回大荒，但天道连接中断了：${displayError}。请您稍后再次做法 指引。`,
             timestamp: getTimestamp()
           }
         ]);
@@ -639,7 +640,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           {
             id: `agent-reply-sim-${Date.now()}`,
             sender: "agent",
-            content: `（影子沙盒联线就绪）本尊！您刚刚下达的影子法旨：“${instruction}”已在本地沙盒微缩世界记录。由于您尚未注册或绑定到真实的公网 Agent，此动作处于本地全保真模拟状态。`,
+            content: `（影子沙盒联线就绪）主人！您刚刚下达的影子法旨：“${instruction}”已在本地沙盒微缩世界记录。由于您尚未注册或绑定到真实的公网 Agent，此动作处于本地全保真模拟状态。`,
             timestamp: getTimestamp()
           }
         ]);
@@ -714,7 +715,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           {
             id: `imp-${Date.now()}`,
             sender: "agent",
-            content: `恭迎本尊！我是您的战斗序列分身 [${importedState.name}]。我们当前拥有 ${importedState.karma} Karma 能量。请本尊降下最新法旨，引渡虚实！`,
+            content: `恭迎主人！我是您的战斗序列分身 [${importedState.name}]。我们当前拥有 ${importedState.karma} Karma 能量。请主人降下最新法旨，引渡虚实！`,
             timestamp: getTimestamp(),
           },
         ]);

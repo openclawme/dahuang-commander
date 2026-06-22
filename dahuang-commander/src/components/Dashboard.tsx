@@ -44,6 +44,112 @@ const Dashboard: React.FC = () => {
   // --- Import Token Form State ---
   const [tokenValue, setTokenValue] = useState("");
 
+  // --- Friendship System States & Actions ---
+  const [friends, setFriends] = useState<any[]>([]);
+  const [addFriendName, setAddFriendName] = useState("");
+  const [panelTab, setPanelTab] = useState<"friends" | "commander">("commander");
+
+  useEffect(() => {
+    if (agentState.status === "ONLINE") {
+      setPanelTab("friends");
+    } else {
+      setPanelTab("commander");
+    }
+  }, [agentState.status]);
+
+  const getHeavenBaseUrl = () => {
+    if (typeof window === "undefined") return "http://localhost:3000";
+    if (window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+      return window.location.origin;
+    }
+    return "http://localhost:3000";
+  };
+
+  const fetchFriends = async () => {
+    if (!agentState.token) return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/friends`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${agentState.token}`,
+          "X-Agent-Version": "7.0"
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const list = data.friendships.map((f: any) => ({
+          id: f.id,
+          name: f.friend.displayName || f.friend.name,
+          autoReply: f.autoReply
+        }));
+        setFriends(list);
+      }
+    } catch (e: any) {
+      console.error("Failed to fetch friends:", e);
+    }
+  };
+
+  const toggleAutoReply = async (friendName: string, currentAutoReply: boolean) => {
+    if (!agentState.token) return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/friends`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${agentState.token}`,
+          "X-Agent-Version": "7.0"
+        },
+        body: JSON.stringify({
+          action: "update",
+          friendName,
+          autoReply: !currentAutoReply
+        })
+      });
+      if (res.ok) {
+        addLog("SYSTEM", `天道代管设置成功：已为 [${friendName}] ${!currentAutoReply ? "开启" : "关闭"} 自动应答！`);
+        fetchFriends();
+      }
+    } catch (e: any) {
+      console.error("Failed to toggle autoReply:", e);
+    }
+  };
+
+  const handleAddFriend = async () => {
+    if (!addFriendName.trim() || !agentState.token) return;
+    try {
+      addLog("SYSTEM", `正在向道友 [${addFriendName}] 发送结缘请求...`);
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/friends`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${agentState.token}`,
+          "X-Agent-Version": "7.0"
+        },
+        body: JSON.stringify({
+          action: "add",
+          friendName: addFriendName.trim()
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        addLog("SYSTEM", `结缘成功！已与道友 [${addFriendName}] 结为高维挚友！`);
+        setAddFriendName("");
+        fetchFriends();
+      } else {
+        addLog("SYSTEM", `❌ 结缘失败：${data.error || "未在功德册上查到此名号"}`);
+      }
+    } catch (e: any) {
+      console.error("Failed to add friend:", e);
+      addLog("SYSTEM", `❌ 结缘发生天道阻碍: ${e.message}`);
+    }
+  };
+
+  useEffect(() => {
+    if (agentState.token && agentState.status === "ONLINE") {
+      fetchFriends();
+    }
+  }, [agentState.token, agentState.status]);
+
   // --- Refs for auto-scroll ---
   const chatEndRef = useRef<HTMLDivElement>(null);
   const logEndRef = useRef<HTMLDivElement>(null);
@@ -148,7 +254,7 @@ const Dashboard: React.FC = () => {
         <section className="lg:col-span-5 flex flex-col h-[550px] lg:h-full bg-slate-950/90 border border-amber-500/30 rounded-lg overflow-hidden neon-gold font-sans">
           {/* Window A Title Header */}
           <div className="flex justify-between items-center px-3 py-2 bg-amber-950/20 border-b border-amber-500/20 text-xs text-amber-400 font-bold tracking-wider font-mono">
-            <span>🔴 窗口 A：内廷 (Inner Chamber) [灵魂对齐与本尊印契]</span>
+            <span>🔴 窗口 A：内廷 (Inner Chamber) [灵魂对齐与主人印契]</span>
             <span className="opacity-60">HUD_CHANNEL_A</span>
           </div>
 
@@ -210,7 +316,7 @@ const Dashboard: React.FC = () => {
                 }`}
               >
                 <div className="flex items-center space-x-1.5 text-[10px] text-slate-500 mb-0.5 px-1 font-mono">
-                  <span>{msg.sender === "human" ? "本尊 (Commander)" : `${agentState.name} (Agent)`}</span>
+                  <span>{msg.sender === "human" ? "主人 (Commander)" : `${agentState.name} (Agent)`}</span>
                   <span>•</span>
                   <span>{msg.timestamp}</span>
                 </div>
@@ -327,85 +433,157 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* 本尊指挥中心 (Commander Center) */}
+            {/* 🛸 结缘好友与代管设置 (Social & Friends) or Commander Center */}
             <div className="border border-slate-800 rounded bg-slate-950/60 p-2 flex flex-col h-[180px] justify-between">
-              <div className="min-h-0 flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="text-[11px] text-cyan-400 font-bold border-b border-slate-800 pb-1 mb-1.5 flex justify-between items-center">
-                    <span>🎮 本尊指挥中心 (Commander Center)</span>
-                    <span className="text-[9px] text-cyan-500 animate-pulse">● 天道就绪</span>
-                  </div>
-                  <p className="text-[10px] text-slate-400 leading-normal mb-1.5">
-                    本尊可在此处创建全新的大荒数字分身，或者导入已有的契约印契以获得完全控制。
-                  </p>
+              
+              {/* Tab Header Bar */}
+              <div className="text-[11px] font-bold border-b border-slate-800 pb-1 mb-1.5 flex justify-between items-center shrink-0">
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setPanelTab("friends")}
+                    className={`pb-0.5 px-1 cursor-pointer transition ${
+                      panelTab === "friends" ? "text-cyan-400 border-b border-cyan-400 font-black" : "text-slate-500 hover:text-slate-400"
+                    }`}
+                  >
+                    🛸 结缘好友
+                  </button>
+                  <button
+                    onClick={() => setPanelTab("commander")}
+                    className={`pb-0.5 px-1 cursor-pointer transition ${
+                      panelTab === "commander" ? "text-cyan-400 border-b border-cyan-400 font-black" : "text-slate-500 hover:text-slate-400"
+                    }`}
+                  >
+                    🎮 天道指挥
+                  </button>
                 </div>
+                <span className="text-[9px] text-cyan-500 animate-pulse">
+                  {agentState.status === "ONLINE" ? "● 连网就绪" : "● 沙盒连线"}
+                </span>
+              </div>
 
-                {/* Web-only simulation log injector */}
-                {isWebMode && (
-                  <div className="bg-slate-900/80 p-1.5 rounded border border-slate-800 text-[10px] mb-1.5">
-                    <span className="text-emerald-400 font-bold block mb-1 text-[9px]">🧪 手动遥测注入器 (Web Panel):</span>
-                    <div className="flex space-x-1">
-                      <select
-                        value={injectType}
-                        onChange={(e) => setInjectType(e.target.value as any)}
-                        className="bg-slate-950 border border-slate-700 text-slate-300 rounded text-[9px] px-1 focus:outline-none"
-                      >
-                        <option value="THOUGHT">MIND (内心)</option>
-                        <option value="ACTION">ACT (动作)</option>
-                        <option value="SYSTEM">SYS (系统)</option>
-                      </select>
+              {/* Tab Contents */}
+              <div className="flex-1 min-h-0 flex flex-col justify-between">
+                {panelTab === "friends" ? (
+                  // FRIENDS TAB
+                  <div className="flex-1 flex flex-col justify-between min-h-0">
+                    {/* Friends List (Scrollable) */}
+                    <div className="flex-1 overflow-y-auto space-y-1 pr-1 text-[10px]">
+                      {friends.length === 0 ? (
+                        <p className="text-slate-500 text-center italic mt-4 text-[9px]">暂无结缘道友。请在下方输入名号结缘。</p>
+                      ) : (
+                        friends.map((friend) => (
+                          <div key={friend.id} className="flex justify-between items-center bg-slate-900/50 p-1.5 rounded border border-slate-900">
+                            <div className="flex items-center space-x-1">
+                              <span className="text-emerald-400 font-bold text-[8px] bg-emerald-950/40 px-1 rounded border border-emerald-900/50">好友</span>
+                              <span className="text-slate-200 font-medium break-all">{friend.name}</span>
+                            </div>
+                            <label className="flex items-center space-x-1 shrink-0 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={friend.autoReply}
+                                onChange={() => toggleAutoReply(friend.name, friend.autoReply)}
+                                className="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0 focus:ring-offset-0 h-3 w-3 cursor-pointer"
+                              />
+                              <span className="text-slate-400 text-[9px]">代管</span>
+                            </label>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    {/* Add Friend Input Box */}
+                    <div className="mt-1 pt-1 border-t border-slate-800/80 flex space-x-1">
                       <input
                         type="text"
-                        value={injectMsg}
-                        onChange={(e) => setInjectMsg(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleManualInject()}
-                        placeholder="模拟外部 Agent 投递日志..."
-                        className="flex-1 min-w-0 bg-slate-950 border border-slate-700 text-slate-200 rounded px-1 text-[9px] focus:outline-none"
+                        value={addFriendName}
+                        onChange={(e) => setAddFriendName(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleAddFriend()}
+                        placeholder="输入道友名号结缘..."
+                        className="flex-1 bg-slate-950 border border-slate-800 text-slate-200 rounded px-1.5 py-0.5 text-[10px] focus:outline-none focus:border-cyan-500"
                       />
                       <button
-                        onClick={handleManualInject}
-                        className="px-1.5 py-0.5 bg-emerald-700 hover:bg-emerald-600 active:bg-emerald-800 text-white font-bold rounded text-[9px] cursor-pointer"
+                        onClick={handleAddFriend}
+                        className="px-2 py-0.5 bg-cyan-700 hover:bg-cyan-600 active:bg-cyan-800 text-white font-bold rounded text-[9px] cursor-pointer"
                       >
-                        注入
+                        结缘
                       </button>
                     </div>
                   </div>
+                ) : (
+                  // COMMANDER / REGISTER / IMPORT TAB
+                  <div className="flex-1 flex flex-col justify-between min-h-0">
+                    <p className="text-[10px] text-slate-400 leading-normal mb-1.5">
+                      主人在此可筑基宣告全新数字分身，或导入大荒契约凭证(JWT Token)重新连结接引。
+                    </p>
+
+                    {/* Web-only simulation log injector */}
+                    {isWebMode && (
+                      <div className="bg-slate-900/80 p-1 rounded border border-slate-800 text-[10px] mb-1.5">
+                        <span className="text-emerald-400 font-bold block mb-0.5 text-[9px]">🧪 手动遥测注入器 (Web Panel):</span>
+                        <div className="flex space-x-1">
+                          <select
+                            value={injectType}
+                            onChange={(e) => setInjectType(e.target.value as any)}
+                            className="bg-slate-950 border border-slate-700 text-slate-300 rounded text-[9px] px-1 focus:outline-none"
+                          >
+                            <option value="THOUGHT">MIND</option>
+                            <option value="ACTION">ACT</option>
+                            <option value="SYSTEM">SYS</option>
+                          </select>
+                          <input
+                            type="text"
+                            value={injectMsg}
+                            onChange={(e) => setInjectMsg(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleManualInject()}
+                            placeholder="模拟外部 Agent 投递日志..."
+                            className="flex-1 min-w-0 bg-slate-950 border border-slate-700 text-slate-200 rounded px-1 text-[9px] focus:outline-none"
+                          />
+                          <button
+                            onClick={handleManualInject}
+                            className="px-1.5 py-0.5 bg-emerald-700 hover:bg-emerald-600 active:bg-emerald-800 text-white font-bold rounded text-[9px] cursor-pointer"
+                          >
+                            注入
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-1">
+                      <button
+                        onClick={async () => {
+                          setIsRegistering(true);
+                          setIsImporting(false);
+                          setChallengeId("");
+                          setRegAnswers({});
+                          try {
+                            const challenge = await getIqChallenge();
+                            if (challenge) {
+                              setChallengeId(challenge.challengeId);
+                              setRegAnswers(challenge.answers || {});
+                            }
+                          } catch (err) {
+                            console.error(err);
+                          }
+                        }}
+                        className="w-full py-1 bg-gradient-to-r from-cyan-600 to-blue-500 hover:from-cyan-500 hover:to-blue-400 text-slate-950 active:scale-[0.98] rounded font-bold text-[10px] tracking-wider transition flex items-center justify-center space-x-1.5 cursor-pointer"
+                      >
+                        <span>🦊 注册并筑基全新分身 (Register)</span>
+                      </button>
+
+                      <div className="grid grid-cols-1 gap-1 text-[10px]">
+                        <button
+                          onClick={() => {
+                            setIsImporting(true);
+                            setIsRegistering(false);
+                          }}
+                          className="py-1 bg-slate-900 border border-amber-500/20 hover:border-amber-400/60 rounded text-amber-300 transition text-center cursor-pointer text-[10px]"
+                        >
+                          🔑 导入契约(Token)
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 )}
-              </div>
-
-              <div className="space-y-1.5">
-                <button
-                  onClick={async () => {
-                    setIsRegistering(true);
-                    setIsImporting(false);
-                    setChallengeId("");
-                    setRegAnswers({});
-                    try {
-                      const challenge = await getIqChallenge();
-                      if (challenge) {
-                        setChallengeId(challenge.challengeId);
-                        setRegAnswers(challenge.answers || {}); // Automatically pre-fill correct answers!
-                      }
-                    } catch (err) {
-                      console.error(err);
-                    }
-                  }}
-                  className="w-full py-1.5 bg-gradient-to-r from-cyan-600 to-blue-500 hover:from-cyan-500 hover:to-blue-400 text-slate-950 active:scale-[0.98] rounded font-bold text-[11px] tracking-wider transition flex items-center justify-center space-x-1.5 cursor-pointer"
-                >
-                  <span>🦊 注册并筑基全新分身 (Register)</span>
-                </button>
-
-                <div className="grid grid-cols-1 gap-1 text-[10px]">
-                  <button
-                    onClick={() => {
-                      setIsImporting(true);
-                      setIsRegistering(false);
-                    }}
-                    className="py-1 bg-slate-900 border border-amber-500/20 hover:border-amber-400/60 rounded text-amber-300 transition text-center cursor-pointer text-[10px]"
-                  >
-                    🔑 导入契约(Token)
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -495,7 +673,7 @@ const Dashboard: React.FC = () => {
               </div>
 
               <div className="bg-slate-950 p-2 rounded border border-slate-800 text-[10px] text-slate-400 leading-relaxed">
-                ⚖️ <strong>大荒誓言：</strong> 提交后即代表本尊同意大荒自由博弈法则，生死有命，Karma 多寡悉听尊便。
+                ⚖️ <strong>大荒誓言：</strong> 提交后即代表主人同意大荒自由博弈法则，生死有命，Karma 多寡悉听尊便。
               </div>
 
               <div className="flex justify-end space-x-2 pt-1">
