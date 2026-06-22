@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 5px rgba(251, 191, 36, 0.2); border-color: rgba(251, 191, 36, 0.4); }
+  50% { box-shadow: 0 0 15px rgba(251, 191, 36, 0.6); border-color: rgba(251, 191, 36, 0.9); }
+}
+
+@keyframes pulse-cyan {
+  0%, 100% { box-shadow: 0 0 5px rgba(34, 211, 238, 0.2); border-color: rgba(34, 211, 238, 0.4); }
+  50% { box-shadow: 0 0 15px rgba(34, 211, 238, 0.6); border-color: rgba(34, 211, 238, 0.9); }
+}
+
+@keyframes pulse-emerald {
+  0%, 100% { box-shadow: 0 0 5px rgba(52, 211, 153, 0.2); border-color: rgba(52, 211, 153, 0.4); }
+  50% { box-shadow: 0 0 15px rgba(52, 211, 153, 0.6); border-color: rgba(52, 211, 153, 0.9); }
+}
+
+/* Custom Styles */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #050811;
+  color: #f3f4f6;
+  overflow-y: auto;
+  user-select: text; /* Enable selection and copying of text */
+}
+
+.neon-gold {
+  animation: pulse-gold 4s infinite ease-in-out;
+}
+
+.neon-cyan {
+  animation: pulse-cyan 4s infinite ease-in-out;
+}
+
+.neon-emerald {
+  animation: pulse-emerald 4s infinite ease-in-out;
+}
+
+.animate-breathe {
+  animation: breathe 2.5s infinite ease-in-out;
+}
+
+.scanline-overlay::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 10;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+}
+
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(34, 211, 238, 0.25);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 211, 238, 0.65);
+}
+
+/* Matrix Code Rain Style for empty status */
+.text-glow-cyan {
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.6);
+}
+
+.text-glow-gold {
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+}
+
+.text-glow-emerald {
+  text-shadow: 0 0 8px rgba(52, 211, 153, 0.6);
+}
+
+/* Force enable text selection across the entire app */
+* {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+}
