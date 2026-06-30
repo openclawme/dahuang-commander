@@ -20,7 +20,8 @@ const Dashboard: React.FC = () => {
     activeChannel,
     setActiveChannel,
     sendDirectMessage,
-
+    clearLogs,
+    clearRoomChat,
   } = useCommander();
 
   // Local state for WeChat-mode chat input inside Window B
@@ -228,6 +229,13 @@ const Dashboard: React.FC = () => {
   }, [logs]);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      wechatEndRef.current?.scrollIntoView({ behavior: "auto" });
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [activeRoom?.events?.length, activeChannel]);
+
+  useEffect(() => {
     wechatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeRoom?.events, activeChannel]);
 
@@ -314,7 +322,16 @@ const Dashboard: React.FC = () => {
           {/* Window A Title Header */}
           <div className="flex justify-between items-center px-3 py-2 bg-amber-950/20 border-b border-amber-500/20 text-xs text-amber-400 font-bold tracking-wider font-mono">
             <span>🔴 窗口 A：内廷 (Inner Chamber) [灵魂对齐与主人印契]</span>
-            <span className="opacity-60">HUD_CHANNEL_A</span>
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={clearHistory}
+                className="px-1.5 py-0.5 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 text-red-400 hover:text-red-300 rounded text-[9px] cursor-pointer transition font-bold scale-[0.9]"
+              >
+                🧹 清空内廷
+              </button>
+              <span className="opacity-60">HUD_CHANNEL_A</span>
+            </div>
           </div>
 
           {/* Status Display Area */}
@@ -509,7 +526,27 @@ const Dashboard: React.FC = () => {
                     `💬 信使室: ${activeRoom?.name || "未知频道"}`
                   )}
                 </span>
-                <span className="text-[9px] text-slate-500 tracking-tighter">HUD_CHANNEL_B</span>
+                <div className="flex items-center space-x-2">
+                  {activeChannel === "telemetry" && (
+                    <button
+                      type="button"
+                      onClick={clearLogs}
+                      className="px-1.5 py-0.5 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 text-red-400 hover:text-red-300 rounded text-[9px] cursor-pointer transition font-bold scale-[0.9]"
+                    >
+                      🧹 清空日志
+                    </button>
+                  )}
+                  {activeChannel !== "telemetry" && activeChannel !== "settings" && activeRoom && (
+                    <button
+                      type="button"
+                      onClick={() => clearRoomChat(activeChannel)}
+                      className="px-1.5 py-0.5 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 text-red-400 hover:text-red-300 rounded text-[9px] cursor-pointer transition font-bold scale-[0.9]"
+                    >
+                      🧹 清空聊天
+                    </button>
+                  )}
+                  <span className="text-[9px] text-slate-500 tracking-tighter">HUD_CHANNEL_B</span>
+                </div>
               </div>
 
               {/* Channel Body */}

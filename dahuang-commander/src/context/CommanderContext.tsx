@@ -64,6 +64,8 @@ interface CommanderContextType {
   ) => Promise<boolean>;
   sendInstruction: (instruction: string) => Promise<void>;
   addLog: (type: "THOUGHT" | "ACTION" | "SYSTEM", message: string) => void;
+  clearLogs: () => void;
+  clearRoomChat: (roomId: string) => void;
   oneClickAlchemy: () => Promise<void>;
   importToken: (token: string) => Promise<void>;
   clearHistory: () => void;
@@ -936,6 +938,24 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setAgentState((prev) => ({ ...prev, status: "ONLINE" }));
     }
   };
+  const clearTelemetryLogs = () => {
+    setLogs([]);
+  };
+
+  const clearWebchatLocal = (roomId: string) => {
+    setMessengerRooms(prev => {
+      if (!prev[roomId]) return prev;
+      return {
+        ...prev,
+        [roomId]: {
+          ...prev[roomId],
+          events: [],
+          unreadCount: 0
+        }
+      };
+    });
+  };
+
   const clearHistory = () => {
     setChatHistory([
       {
@@ -953,6 +973,8 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         agentState,
         chatHistory,
         logs,
+        clearLogs: clearTelemetryLogs,
+        clearRoomChat: clearWebchatLocal,
         scavengeGames,
         isWebhookActive,
         isWebMode,
