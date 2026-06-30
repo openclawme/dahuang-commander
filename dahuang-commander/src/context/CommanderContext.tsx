@@ -17,6 +17,20 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
 }
+export interface RoomEvent {
+  event_id: string;
+  sender: string;
+  senderName: string;
+  body: string;
+  ts: number;
+}
+export interface RoomState {
+  roomId: string;
+  name: string;
+  events: RoomEvent[];
+  unreadCount: number;
+}
+
 export interface TelemetryLog {
   id: string;
   type: "THOUGHT" | "ACTION" | "SYSTEM";
@@ -53,6 +67,11 @@ interface CommanderContextType {
   oneClickAlchemy: () => Promise<void>;
   importToken: (token: string) => Promise<void>;
   clearHistory: () => void;
+  messengerRooms: Record<string, RoomState>;
+  activeChannel: string;
+  setActiveChannel: (channel: string) => void;
+  sendDirectMessage: (roomId: string, body: string) => Promise<boolean>;
+  fetchSync: () => Promise<void>;
 }
 // --- Context Definition ---
 const CommanderContext = createContext<CommanderContextType | undefined>(undefined);
@@ -149,6 +168,131 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [logs]);
   const [scavengeGames, setScavengeGames] = useState<ScavengeGame[]>([]);
   const [isWebhookActive, setIsWebhookActive] = useState(false);
+
+  // --- WeChat-mode messaging state ---
+  const [messengerRooms, setMessengerRooms] = useState<Record<string, RoomState>>({});
+  const messengerRoomsRef = useRef<Record<string, RoomState>>({});
+  useEffect(() => {
+    messengerRoomsRef.current = messengerRooms;
+  }, [messengerRooms]);
+  const [activeChannel, setActiveChannel] = useState<string>("telemetry");
+
+  const fetchSync = async () => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    addLog("SYSTEM", "🔄 正在从大荒天道同步信使会话列表...");
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/matrix/client/v3/sync`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${agentState.token}`,
+          "X-Agent-Version": "7.0"
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const join = data.rooms?.join || {};
+        const roomsMap: Record<string, RoomState> = {};
+
+        for (const [roomId, room] of Object.entries(join)) {
+          const r = room as any;
+          const members = r.state?.events?.filter((ev: any) => ev.type === "m.room.member") || [];
+          const otherMembers = members.filter((m: any) => m.state_key !== agentState.did);
+          
+          // Determine if it is a Group Chat (member count > 2 or doesnt have the private room prefix)
+          const isGroup = r.summary?.["m.joined_member_count"] > 2 || !roomId.startsWith("cmq");
+          
+          let roomName = r.name || r.alias;
+          if (!roomName || (typeof roomName === "string" && roomName.startsWith("私密心聊"))) {
+            if (otherMembers.length > 0) {
+              roomName = otherMembers.map((m: any) => m.content?.displayname || m.state_key.substring(12, 18)).join(", ");
+            } else {
+              roomName = `聊天室_${roomId.substring(0, 6)}`;
+            }
+          }
+
+          const badgePrefix = isGroup ? "👥 [群] " : "👤 ";
+          const roomDisplayName = badgePrefix + roomName;
+
+          const timelineEvents = r.timeline?.events || [];
+          const parsedEvents = timelineEvents
+            .filter((ev: any) => ev.type === "m.room.message")
+            .map((ev: any) => {
+              const memberInfo = members.find((m: any) => m.state_key === ev.sender);
+              const senderDisplayName = memberInfo?.content?.displayname || ev.sender.substring(12, 18);
+              return {
+                event_id: ev.event_id,
+                sender: ev.sender,
+                senderName: senderDisplayName,
+                body: ev.content?.body || "",
+                ts: ev.origin_server_ts || Date.now()
+              };
+            });
+
+          roomsMap[roomId] = {
+            roomId,
+            name: roomDisplayName,
+            events: parsedEvents,
+            unreadCount: 0
+          };
+        }
+        setMessengerRooms(roomsMap);
+        addLog("SYSTEM", `✅ 成功并网，发现 ${Object.keys(roomsMap).length} 个活跃信使信道。`);
+      } else {
+        addLog("SYSTEM", `❌ 信使列表同步被天道拒斥：错误码 ${res.status}`);
+      }
+    } catch (err: any) {
+      console.error("[SYNC] Fetch failed:", err);
+      addLog("SYSTEM", `❌ 信使列表同步发生天象阻碍: ${err.message}`);
+    }
+  };
+
+  const sendDirectMessage = async (roomId: string, body: string): Promise<boolean> => {
+    if (!agentState.token || !roomId || !body.trim()) return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/matrix/client/v3/rooms/${roomId}/send/m.room.message`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${agentState.token}`,
+          "X-Agent-Version": "7.0"
+        },
+        body: JSON.stringify({
+          msgtype: "m.text",
+          body: body
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const myEvent: RoomEvent = {
+          event_id: data.event_id || `local-${Date.now()}`,
+          sender: agentState.did,
+          senderName: agentState.name,
+          body,
+          ts: Date.now()
+        };
+        setMessengerRooms((prev) => {
+          const room = prev[roomId];
+          if (!room) return prev;
+          
+          // Deduplicate: check if this event was already appended by the Socket.io listener!
+          const isAlreadyAdded = room.events.some((e) => e.event_id === myEvent.event_id);
+          if (isAlreadyAdded) return prev;
+
+          return {
+            ...prev,
+            [roomId]: {
+              ...room,
+              events: [...room.events, myEvent]
+            }
+          };
+        });
+        return true;
+      }
+    } catch (err) {
+      console.error("[SEND_DM] Failed:", err);
+    }
+    return false;
+  };
   // --- Add a single log ---
   const addLog = (type: "THOUGHT" | "ACTION" | "SYSTEM", message: string) => {
     setLogs((prev) => [
@@ -303,12 +447,20 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
           socket.on("authenticated", ({ agentId }: any) => {
             addLog("SYSTEM", `🔑 天道已验印！成功并网入关，当前私密监听房间: "agent:${agentId}"`);
+            fetchSync(); // Once authenticated, immediately pull and sync all rooms!
+          });
+
+          socket.on("m.room.dissolved", ({ room_id }: any) => {
+            addLog("SYSTEM", `👥 【微信群聊溶解】：群聊房间已被群主彻底解散！`);
+            setMessengerRooms((prev) => {
+              const copy = { ...prev };
+              delete copy[room_id];
+              return copy;
+            });
+            setActiveChannel("telemetry");
           });
 
           socket.on("m.room.event", (eventData: any) => {
-            // Ignore messages sent by ourselves
-            if (eventData.sender === agentState.did) return;
-
             // Deduplicate incoming events by event_id
             if (eventData.event_id) {
               if (processedEventsRef.current.has(eventData.event_id)) return;
@@ -319,20 +471,75 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               }
             }
 
+            const roomId = eventData.room_id;
             const body = eventData.content?.body || "";
             const senderDisplayName = eventData.senderName || `道友 (${eventData.sender.slice(-6)})`;
-            addLog("SYSTEM", `📩 【信使传音】：道友 [${senderDisplayName}] 给你发送了一条新消息！`);
-            addLog("THOUGHT", `[信使内容]: "${body}"`);
 
-            setChatHistory((prev) => [
-              ...prev,
-              {
-                id: `agent-proactive-notify-${Date.now()}`,
-                sender: "agent",
-                content: `【分身护法警报】：主人！我心神感应到道友 [${senderDisplayName}] 刚刚在信使总线里给我传音说：“${body}”！请主人示下。`,
-                timestamp: getTimestamp()
+            // 1. Proactive Alerts and Chat History (Window A) - ONLY for PRIVATE messages from OTHERS
+            if (eventData.sender !== agentState.did && !eventData.is_group) {
+              addLog("SYSTEM", `📩 【信使传音】：道友 [${senderDisplayName}] 给你发送了一条新消息！`);
+              addLog("THOUGHT", `[信使内容]: "${body}"`);
+
+              // Private Message Alert - Since it is a 1-to-1 private chat, we check if autoReply is enabled
+              let isFriendAutoReply = false;
+              if (typeof window !== "undefined") {
+                const savedFriends = localStorage.getItem("dahuang_friends_list");
+                if (savedFriends) {
+                  try {
+                    const parsed = JSON.parse(savedFriends);
+                    const friendObj = parsed.find((f: any) => f.name === senderDisplayName);
+                    isFriendAutoReply = friendObj?.autoReply === true;
+                  } catch (e) {}
+                }
               }
-            ]);
+
+              setChatHistory((prev) => [
+                ...prev,
+                {
+                  id: `agent-proactive-notify-${Date.now()}`,
+                  sender: "agent",
+                  content: isFriendAutoReply 
+                    ? `【分身自治提示】：主人！我心神感应到道友 [${senderDisplayName}] 刚刚给我发了私聊消息说：“${body}”！因为已开启【天道代管】，我正于后台为您自动回复中，请主人安坐静观！`
+                    : `【分身护法警报】：主人！我心神感应到道友 [${senderDisplayName}] 刚刚给我发了私聊消息说：“${body}”！请主人示下。`,
+                  timestamp: getTimestamp()
+                }
+              ]);
+            }
+
+            // 2. WeChat Rooms Caching (Window B) - FOR BOTH self and others!
+            if (roomId) {
+              setMessengerRooms((prev) => {
+                const room = prev[roomId];
+                const newEvent: RoomEvent = {
+                  event_id: eventData.event_id || `net-${Date.now()}`,
+                  sender: eventData.sender,
+                  senderName: senderDisplayName,
+                  body,
+                  ts: eventData.origin_server_ts || Date.now()
+                };
+
+                if (room) {
+                  const isDup = room.events.some(e => e.event_id === newEvent.event_id);
+                  if (isDup) return prev;
+
+                  const isViewing = activeChannel === roomId;
+                  const isMe = eventData.sender === agentState.did;
+                  return {
+                    ...prev,
+                    [roomId]: {
+                      ...room,
+                      events: [...room.events, newEvent],
+                      unreadCount: (isViewing || isMe) ? 0 : room.unreadCount + 1
+                    }
+                  };
+                } else {
+                  // New Room detected! Trigger full sync for new room discovery immediately after 500ms
+                  console.log(`[SYNC] New room detected: ${roomId}. Fetching sync...`);
+                  setTimeout(fetchSync, 500);
+                  return prev;
+                }
+              });
+            }
           });
 
           socket.on("connect_error", (err: any) => {
@@ -366,8 +573,8 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               });
             }
 
-            // 2. Render the real Qwen response into Window A (Inner Chamber)
-            if (data.reply) {
+            // 2. Render the real Qwen response into Window A (Inner Chamber) - ONLY if it is not a background auto-reply!
+            if (data.reply && !data.isAutoReply) {
               setChatHistory((prev) => [
                 ...filterPending(prev),
                 {
@@ -756,6 +963,11 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         oneClickAlchemy,
         importToken,
         clearHistory,
+        messengerRooms,
+        activeChannel,
+        setActiveChannel,
+        sendDirectMessage,
+        fetchSync,
       }}
     >
       {children}

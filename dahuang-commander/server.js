@@ -65,12 +65,14 @@ app.post(['/client/log', '/commander/client/log'], (req, res) => {
   res.json({ status: 'ok', broadcastedTo: count });
 });
 
-// Fallback to index.html for Single Page Application (SPA) routing
+// Fallback to index.html for Single Page Application (SPA) routing with strict cache busting
 app.get('/commander*', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 app.get('*', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
