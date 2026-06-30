@@ -16,6 +16,8 @@ export interface ChatMessage {
   sender: "human" | "agent";
   content: string;
   timestamp: string;
+  tasks?: any[];
+  progress?: number;
 }
 export interface RoomEvent {
   event_id: string;
@@ -575,18 +577,34 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               });
             }
 
-            // 2. Render the real Qwen response into Window A (Inner Chamber) - ONLY if it is not a background auto-reply!
+            // 2. Render the real response into Window A (Inner Chamber) reactive to its requestId
             if (data.reply && !data.isAutoReply) {
-              setChatHistory((prev) => [
-                ...filterPending(prev),
-                {
-                  id: `agent-reply-async-${Date.now()}`,
-                  sender: "agent",
-                  content: data.reply,
-                  timestamp: getTimestamp(),
-                },
-              ]);
-              addLog("SYSTEM", "天道后台决策执行功成，神谕降临！");
+              const msgId = data.requestId || `agent-reply-async-${Date.now()}`;
+              setChatHistory((prev) => {
+                const exists = prev.some(m => m.id === msgId);
+                const filtered = filterPending(prev);
+                if (exists) {
+                  return filtered.map(m => m.id === msgId ? { 
+                    ...m, 
+                    content: data.reply, 
+                    tasks: (data.tasks && data.tasks.length > 0) ? data.tasks : m.tasks, 
+                    progress: data.progress !== undefined ? data.progress : m.progress 
+                  } : m);
+                } else {
+                  return [
+                    ...filtered,
+                    {
+                      id: msgId,
+                      sender: "agent",
+                      content: data.reply,
+                      timestamp: getTimestamp(),
+                      tasks: data.tasks,
+                      progress: data.progress
+                    }
+                  ];
+                }
+              });
+              addLog("SYSTEM", "天道后台决策执行中，神念实时刷新！");
             }
           });
         });
@@ -740,6 +758,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       // --- REAL AGENT AUTO-HOSTING MODE (TRANSPARENT PASS-THROUGH) ---
       addLog("ACTION", "🔗 控御法旨已打通天道总线，正在向大荒服务器投递异步指令...");
       
+      const uniqueReqId = `req-${Date.now()}`;
       try {
         const res = await fetch(`${getHeavenBaseUrl()}/api/agent/command`, {
           method: "POST",
@@ -750,7 +769,8 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           },
           body: JSON.stringify({ 
             command: instruction,
-            isAsync: true // 💡 激活异步信号标志！
+            isAsync: true, // 💡 激活异步信号标志！
+            requestId: uniqueReqId
           })
         });
 

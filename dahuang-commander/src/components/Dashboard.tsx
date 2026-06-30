@@ -2,6 +2,77 @@ import React, { useState, useRef, useEffect } from "react";
 import { useCommander } from "../context/CommanderContext";
 import AgentAvatar from "./AgentAvatar";
 
+
+// --- Neon Cyberpunk Task Visualizer Panel ---
+function TaskVisualizer({ tasks, progress }: { tasks?: any[]; progress?: number }) {
+  if (!tasks || !Array.isArray(tasks) || tasks.length === 0) return null;
+  const safeProgress = typeof progress === "number" ? progress : 0;
+
+  return (
+    <div className="mt-3 p-3 bg-slate-950/90 border border-cyan-500/40 rounded-lg shadow-[0_0_15px_rgba(6,182,212,0.15)] font-mono text-[11px] w-full max-w-[550px] relative overflow-hidden">
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-2.5 pb-1.5 border-b border-cyan-500/20">
+        <span className="text-cyan-400 font-bold tracking-widest flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-ping" />
+          🛸 大荒分身 · 天道任务分解
+        </span>
+        <span className="text-cyan-300 font-bold">{safeProgress}%</span>
+      </div>
+
+      {/* PROGRESS TRACK */}
+      <div className="w-full h-1.5 bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/50 mb-3 relative">
+        <div 
+          className="h-full bg-gradient-to-r from-cyan-600 via-teal-400 to-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.6)] transition-all duration-700 ease-out"
+          style={{ width: `${safeProgress}%` }}
+        />
+      </div>
+
+      {/* STEPS LIST */}
+      <div className="space-y-2">
+        {tasks.map((task: any, index: number) => {
+          const status = task.status || "PENDING";
+          let badgeColor = "text-slate-500 border-slate-800 bg-slate-900/30";
+          let textGlow = "text-slate-400";
+          let icon = "⚪";
+
+          if (status === "SUCCESS") {
+            badgeColor = "text-emerald-400 border-emerald-500/30 bg-emerald-950/20 shadow-[0_0_6px_rgba(52,211,153,0.15)]";
+            textGlow = "text-emerald-200/90 font-semibold";
+            icon = "✅";
+          } else if (status === "PROCESSING") {
+            badgeColor = "text-cyan-400 border-cyan-500/40 bg-cyan-950/30 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.3)]";
+            textGlow = "text-cyan-100 font-semibold";
+            icon = "⚡";
+          } else if (status === "FAILED") {
+            badgeColor = "text-rose-400 border-rose-500/30 bg-rose-950/20";
+            textGlow = "text-rose-300";
+            icon = "❌";
+          }
+
+          return (
+            <div key={index} className={`flex items-start gap-2.5 p-2 rounded border border-slate-900 bg-slate-900/40 transition-all ${status === "PROCESSING" ? "border-cyan-500/20 bg-cyan-950/5" : ""}`}>
+              <span className="text-[12px] flex-shrink-0 mt-0.5">{icon}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-center mb-0.5">
+                  <span className={`font-medium ${textGlow}`}>{task.desc || task.title || `步骤 ${index + 1}`}</span>
+                  <span className={`px-1.5 py-0.5 rounded-[3px] text-[8px] border font-bold ${badgeColor}`}>
+                    {status}
+                  </span>
+                </div>
+                {task.detail && (
+                  <p className="text-slate-400 text-[10px] leading-relaxed break-all mt-0.5">
+                    ↳ {task.detail}
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 const Dashboard: React.FC = () => {
   const {
     agentState,
@@ -403,7 +474,15 @@ const Dashboard: React.FC = () => {
                       : "bg-slate-900/90 border-cyan-500/30 text-cyan-100 rounded-tl-none text-glow-cyan"
                   }`}
                 >
-                  {msg.content}
+                  {/* If message has visual task items, clean standard output and render beautiful Neo Cyberpunk progress panel! */}
+                  {msg.tasks && msg.tasks.length > 0 ? (
+                    <div className="space-y-1">
+                      <div>{msg.content.replace(/🛸【大荒分身·天道任务分解大阵】🛸[\s\S]*?==================================================/, "").replace(/📊 进度:[\s\S]*?算力大亮/, "").trim()}</div>
+                      <TaskVisualizer tasks={msg.tasks} progress={msg.progress} />
+                    </div>
+                  ) : (
+                    msg.content
+                  )}
                 </div>
               </div>
             ))}
