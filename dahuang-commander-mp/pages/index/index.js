@@ -68,6 +68,12 @@ Page({
       return m;
     });
 
+    // Filter out high-frequency internal tech log entries if app.globalData.showDevLogs is false
+    const filteredLogs = logs.filter(l => {
+      if (app.globalData.showDevLogs) return true;
+      return l.type === "SYSTEM" || l.type === "ACTION";
+    });
+
     // Find all currently active/running commands for displaying multiple concurrent progress bars
     // We only scan the most recent 6 messages to prevent old historical/stale progress bars from sticking at the top
     const activeCommands = processedChatHistory
@@ -98,16 +104,45 @@ Page({
         };
       });
 
-    this.setData({
-      agentState: { ...agentState },
-      logs: [...logs],
-      chatHistory: processedChatHistory,
-      progress,
-      activeTasks,
-      latestCommand,
-      activeCommands
-    });
-    
+    // Build incremental updates
+    const updates = {};
+    updates.agentState = { ...agentState };
+    updates.progress = progress;
+    updates.activeTasks = activeTasks;
+    updates.latestCommand = latestCommand;
+    updates.activeCommands = activeCommands;
+
+    // Incremental update for chatHistory
+    const currentChatHistory = this.data.chatHistory || [];
+    if (processedChatHistory.length < currentChatHistory.length) {
+      updates.chatHistory = processedChatHistory;
+    } else {
+      for (let i = 0; i < currentChatHistory.length; i++) {
+        if (JSON.stringify(processedChatHistory[i]) !== JSON.stringify(currentChatHistory[i])) {
+          updates[`chatHistory[${i}]`] = processedChatHistory[i];
+        }
+      }
+      for (let i = currentChatHistory.length; i < processedChatHistory.length; i++) {
+        updates[`chatHistory[${i}]`] = processedChatHistory[i];
+      }
+    }
+
+    // Incremental update for logs
+    const currentLogs = this.data.logs || [];
+    if (filteredLogs.length < currentLogs.length) {
+      updates.logs = filteredLogs;
+    } else {
+      for (let i = 0; i < currentLogs.length; i++) {
+        if (JSON.stringify(filteredLogs[i]) !== JSON.stringify(currentLogs[i])) {
+          updates[`logs[${i}]`] = filteredLogs[i];
+        }
+      }
+      for (let i = currentLogs.length; i < filteredLogs.length; i++) {
+        updates[`logs[${i}]`] = filteredLogs[i];
+      }
+    }
+
+    this.setData(updates);
     this.scrollToBottom();
   },
 
@@ -132,10 +167,16 @@ Page({
   },
 
   onNewLog(newLog) {
+    if (!app.globalData.showDevLogs && newLog.type !== "SYSTEM" && newLog.type !== "ACTION") {
+      return;
+    }
+    const currentLogs = this.data.logs || [];
+    const index = currentLogs.length;
     this.setData({
-      logs: [...app.globalData.logs]
+      [`logs[${index}]`]: newLog
+    }, () => {
+      this.scrollToBottom();
     });
-    this.scrollToBottom();
   },
 
   scrollToBottom() {

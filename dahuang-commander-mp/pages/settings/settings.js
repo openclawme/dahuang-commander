@@ -7,6 +7,7 @@ Page({
     customToken: "",
     availableAgents: [],
     isLoading: false,
+    showDevLogs: false,
     
     // Registration data
     isRegistering: false,
@@ -25,7 +26,8 @@ Page({
 
   onShow() {
     this.setData({
-      agentState: { ...app.globalData.agentState }
+      agentState: { ...app.globalData.agentState },
+      showDevLogs: !!app.globalData.showDevLogs
     });
     this.loadAvailableAgents();
   },
@@ -41,6 +43,16 @@ Page({
     this.setData({
       [field]: e.detail.value
     });
+  },
+
+  toggleDevLogs(e) {
+    const value = e.detail.value;
+    this.setData({
+      showDevLogs: value
+    });
+    app.globalData.showDevLogs = value;
+    wx.setStorageSync("dahuang_show_dev_logs", value);
+    app.addLog("SYSTEM", value ? "🔮 开启「天机泄露模式」：展示高维 ReAct 完整调试日志..." : "🧘 开启「返璞归真模式」：已折叠底层高频思考细节。");
   },
 
   saveServerUrl() {

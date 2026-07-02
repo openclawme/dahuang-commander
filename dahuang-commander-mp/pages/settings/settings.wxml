@@ -141,11 +141,19 @@
   <!-- 5. 天道服务器并网配置 -->
   <view class="cyber-panel glow-cyan server-config-panel" wx:if="{{!isRegistering}}">
     <view class="panel-header">
-      <text class="panel-title text-cyan">🌐 天道服务器并网配置</text>
-      <text class="panel-desc">设定大荒指挥官客户端所连接的远程天道主脑服务器并网地址。</text>
+      <text class="panel-title text-cyan">🌐 天道遥测与并网配置</text>
+      <text class="panel-desc">设定大荒指挥官客户端所连接的远程天道主脑服务器并网地址与调试日志开关。</text>
     </view>
     <view class="form-container">
-      <view class="form-item" style="margin-top: 20rpx;">
+      <view class="form-item flex-row justify-between align-center" style="margin-top: 20rpx; border-bottom: 1rpx solid rgba(0, 240, 255, 0.2); padding-bottom: 20rpx;">
+        <view class="flex-col">
+          <text class="form-label" style="margin: 0;">天机显隐 (显示 ReAct 底层思考)</text>
+          <text class="panel-desc" style="margin: 5rpx 0 0 0; padding: 0;">开启后可查看智能体的高频思考、动作、观察等底层元神细节</text>
+        </view>
+        <switch checked="{{showDevLogs}}" bindchange="toggleDevLogs" color="#00f0ff" />
+      </view>
+
+      <view class="form-item" style="margin-top: 25rpx;">
         <text class="form-label">并网天线地址 (Server URL):</text>
         <input class="form-input" value="{{serverUrl}}" bindinput="onInputChange" data-field="serverUrl" placeholder="https://dahuang.land" style="margin-top: 10rpx;" />
       </view>

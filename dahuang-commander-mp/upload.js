@@ -15,8 +15,8 @@ async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
   const uploadResult = await ci.upload({
     project,
-    version: '1.1.0',
-    desc: '「我是分身」微信小程序优化底层Socket总线关闭事件回调，清除偶发性多路重连竞态故障（版本1.1.0）',
+    version: '1.2.0',
+    desc: '「我是分身」微信小程序 1.2.0 版本：接纳三大架构进阶改进（增量节点更新、灵台记忆熔断机制、天机泄露调试日志过滤开关）',
     setting: {
       es6: true,
       minify: true,

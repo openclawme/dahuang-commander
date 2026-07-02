@@ -18,7 +18,8 @@ App({
       { id: "init-log", type: "SYSTEM", message: "大荒信使小程序端已就绪", timestamp: "00:00:00" }
     ],
     messengerRooms: {},
-    socket: null
+    socket: null,
+    showDevLogs: false
   },
 
   onLaunch() {
@@ -37,6 +38,11 @@ App({
     const cachedHistory = wx.getStorageSync("dahuang_chat_history");
     if (cachedHistory) {
       this.globalData.chatHistory = cachedHistory;
+    }
+
+    const cachedDevLogs = wx.getStorageSync("dahuang_show_dev_logs");
+    if (cachedDevLogs !== undefined && cachedDevLogs !== "") {
+      this.globalData.showDevLogs = !!cachedDevLogs;
     }
 
     if (this.globalData.agentState.token) {
@@ -158,6 +164,14 @@ App({
     }
   },
 
+  trimChatHistory() {
+    if (this.globalData.chatHistory && this.globalData.chatHistory.length > 50) {
+      const removedCount = this.globalData.chatHistory.length - 50;
+      this.globalData.chatHistory = this.globalData.chatHistory.slice(-50);
+      this.addLog("SYSTEM", `🧹 灵台清静：触发记忆熔断，自动归档清理 ${removedCount} 环因果业障。`);
+    }
+  },
+
   handleAgentCommandResult(data) {
     this.addLog("SYSTEM", "⚡ 收到天道决策反馈！");
     
@@ -189,6 +203,7 @@ App({
           tasks: []
         });
       }
+      this.trimChatHistory();
       wx.setStorageSync("dahuang_chat_history", this.globalData.chatHistory);
       this.triggerPageCallback("onChatHistoryUpdate");
       return;
@@ -234,6 +249,7 @@ App({
         if (data.reply) {
           msg.content = data.reply;
         }
+        this.trimChatHistory();
         wx.setStorageSync("dahuang_chat_history", this.globalData.chatHistory);
         this.triggerPageCallback("onChatHistoryUpdate");
       }
@@ -257,6 +273,7 @@ App({
         this.globalData.chatHistory[index] = msgObj;
       }
 
+      this.trimChatHistory();
       wx.setStorageSync("dahuang_chat_history", this.globalData.chatHistory);
       this.triggerPageCallback("onChatHistoryUpdate");
     }
@@ -375,6 +392,7 @@ App({
             tasks: []
           };
           this.globalData.chatHistory.push(pendingMsg);
+          this.trimChatHistory();
           wx.setStorageSync("dahuang_chat_history", this.globalData.chatHistory);
           this.triggerPageCallback("onChatHistoryUpdate");
           
@@ -394,6 +412,7 @@ App({
               timestamp: this.getTimestamp()
             };
             this.globalData.chatHistory.push(replyMsg);
+            this.trimChatHistory();
             wx.setStorageSync("dahuang_chat_history", this.globalData.chatHistory);
             this.triggerPageCallback("onChatHistoryUpdate");
             this.addLog("SYSTEM", "天道大模型心流决策反馈成功，法旨已完美奉行！");
