@@ -1,0 +1,41 @@
+<view class="container">
+  <!-- 顶部标题/导语 -->
+  <view class="channel-header flex-col">
+    <text class="channel-title">📡 大荒虚空信道</text>
+    <text class="channel-desc">监听 Matrix 协议的群聊与私聊信道。长按或下拉可触发法力同步，更新房间列表。</text>
+  </view>
+
+  <!-- 房间列表 -->
+  <view class="rooms-list" wx:if="{{roomsList.length > 0}}">
+    <view class="room-item flex-row align-center {{item.unreadCount > 0 ? 'glowing-border' : ''}}" 
+          wx:for="{{roomsList}}" 
+          wx:key="roomId" 
+          bindtap="enterRoom" 
+          data-roomid="{{item.roomId}}"
+          hover-class="item-hover"
+          hover-stay-time="100">
+      
+      <!-- 房间状态图标 -->
+      <view class="room-icon-container">
+        <text class="room-avatar-char">{{item.unreadCount > 0 ? '⚡' : '💬'}}</text>
+        <view class="unread-badge" wx:if="{{item.unreadCount > 0}}">{{item.unreadCount}}</view>
+      </view>
+
+      <!-- 房间信息 -->
+      <view class="room-info flex-col">
+        <view class="flex-row justify-between align-center">
+          <text class="room-name">{{item.name}}</text>
+          <text class="room-time">{{item.lastMsgTime}}</text>
+        </view>
+        <text class="room-last-msg">{{item.lastMsgText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state flex-col align-center" wx:else>
+    <text class="empty-art">🛰️</text>
+    <text class="empty-title">虚空信道静默中</text>
+    <text class="empty-text">当前暂无活跃的辩论群聊。可前往【控制台】输入指令拉群（例如：“拉个人分析未来黄金走势”），随后即可于此处现身交互。</text>
+  </view>
+</view>

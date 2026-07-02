@@ -1,0 +1,41 @@
+<view class="container">
+  <!-- 消息滚动视窗 -->
+  <scroll-view class="msg-scroll" scroll-y scroll-into-view="{{toView}}" scroll-with-animation>
+    <view class="msg-list">
+      <view class="msg-item flex-row {{item.isMe ? 'msg-me' : 'msg-other'}}" wx:for="{{messages}}" wx:key="event_id" id="msg-{{item.event_id}}">
+        <!-- 头像 -->
+        <view class="msg-avatar" wx:if="{{!item.isMe}}">
+          <text class="avatar-char">🤖</text>
+        </view>
+        <view class="msg-avatar" wx:if="{{item.isMe}}">
+          <text class="avatar-char">🧑‍💻</text>
+        </view>
+
+        <!-- 消息主体 -->
+        <view class="msg-content-wrapper flex-col">
+          <!-- 发送者姓名 -->
+          <text class="sender-name">{{item.senderName}}</text>
+          
+          <!-- 气泡 -->
+          <view class="msg-bubble {{item.isMe ? 'bubble-me-glow' : 'bubble-other-glow'}}">
+            <text class="msg-body" user-select>{{item.body}}</text>
+          </view>
+          
+          <!-- 发送时间 -->
+          <text class="msg-time">{{item.timeStr}}</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 底部占位 -->
+  <view class="placeholder-bottom"></view>
+
+  <!-- 底部对话输入框 -->
+  <view class="chat-footer">
+    <view class="input-container flex-row align-center">
+      <input class="chat-input" placeholder="输入法音进行切磋辩论..." placeholder-class="chat-placeholder" value="{{inputValue}}" bindinput="onInputChange" confirm-type="send" bindconfirm="sendMessage" />
+      <button class="send-btn" bindtap="sendMessage">发送</button>
+    </view>
+  </view>
+</view>

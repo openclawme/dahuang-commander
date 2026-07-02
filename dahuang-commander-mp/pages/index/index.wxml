@@ -1,0 +1,128 @@
+<view class="container">
+
+  <!-- 2. 分类法门选项卡 (Tab Header) -->
+  <view class="tab-header flex-row">
+    <view class="tab-item {{activeTab === 'chat' ? 'tab-active text-cyan' : ''}}" bindtap="switchTab" data-tab="chat">💬 神魂对话仙幕</view>
+    <view class="tab-item {{activeTab === 'logs' ? 'tab-active text-emerald' : ''}}" bindtap="switchTab" data-tab="logs">📊 遥测法力日志</view>
+  </view>
+
+  <!-- 4.1 选项卡内容: 神魂对话仙幕 -->
+  <view class="cyber-panel glow-cyan chat-panel-container" wx:if="{{activeTab === 'chat'}}">
+    <scroll-view class="chat-scroll" scroll-y scroll-into-view="{{toChatView}}" scroll-with-animation>
+      <view class="chat-item chat-item-{{item.sender}}" wx:for="{{chatHistory}}" wx:key="id" id="chat-{{item.id}}">
+        <!-- 气泡头部: 头像/尊号/时间 -->
+        <view class="chat-bubble-header flex-row">
+          <text class="chat-avatar">{{item.sender === 'human' ? '👑' : '🧙‍♂️'}}</text>
+          <text class="chat-bubble-name">{{item.sender === 'human' ? '本尊' : (agentState.name || '大荒分身')}}</text>
+          <text class="chat-bubble-time">{{item.timestamp}}</text>
+        </view>
+        
+        <!-- 气泡正文 -->
+        <view class="chat-bubble-body bubble-{{item.sender === 'human' ? 'user' : 'agent'}}">
+          <text selectable="true">{{item.content}}</text>
+          
+          <!-- 任务分解进度条（如果是 Agent 发出的报告，并且含有 progress 属性或子任务） -->
+          <view class="bubble-task-container" wx:if="{{item.sender === 'agent' && (item.progress > 0 || (item.tasks && item.tasks.length > 0))}}">
+            <view class="bubble-progress-row">
+              <text class="bubble-progress-lbl">⚙️ 法力演化进度</text>
+              <text class="bubble-progress-pct">{{item.progress || 0}}%</text>
+            </view>
+            <view class="bubble-progress-track">
+              <view class="bubble-progress-fill" style="width: {{item.progress || 0}}%;"></view>
+            </view>
+            <!-- 气泡内的子任务清单 -->
+            <view class="bubble-task-list" wx:if="{{item.tasks && item.tasks.length > 0}}">
+              <view class="bubble-task-item flex-col" wx:for="{{item.tasks}}" wx:for-item="task" wx:key="id" style="{{task.status === 'PROCESSING' ? 'border-color: rgba(6, 182, 212, 0.25); background: rgba(6, 182, 212, 0.04);' : ''}}">
+                <!-- 第一行：状态图标 + 步骤描述 + 状态徽章 -->
+                <view class="bubble-task-item-header flex-row align-center justify-between">
+                  <view class="flex-row align-center" style="flex: 1; min-width: 0;">
+                    <icon type="{{task.status === 'SUCCESS' ? 'success' : (task.status === 'FAILED' ? 'warn' : 'waiting')}}" size="10" color="{{task.status === 'SUCCESS' ? '#10b981' : (task.status === 'FAILED' ? '#f43f5e' : '#06b6d4')}}" style="margin-right: 8rpx; flex-shrink: 0;"></icon>
+                    <text class="bubble-task-title {{task.status === 'SUCCESS' ? 'bubble-task-done' : ''}} text-ellipsis">{{task.desc || task.title || '演化步骤'}}</text>
+                  </view>
+                  <text class="bubble-task-status-badge status-{{task.status}}">{{task.status}}</text>
+                </view>
+
+                <!-- 第二行：步骤专属微型进度条 -->
+                <view class="bubble-step-progress-track">
+                  <view class="bubble-step-progress-fill fill-{{task.status}}" style="width: {{task.status === 'SUCCESS' ? '100%' : (task.status === 'PROCESSING' ? '60%' : (task.status === 'FAILED' ? '100%' : '0%'))}};"></view>
+                </view>
+
+                <!-- 第三行：步骤详情 (如果存在) -->
+                <view class="bubble-task-detail" wx:if="{{task.detail}}">
+                  <text>↳ {{task.detail}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 列表空状态 -->
+      <view class="empty-tasks flex-col align-center" wx:if="{{chatHistory.length === 0}}">
+        <text class="empty-icon">🧘</text>
+        <text class="empty-text">灵台空空，请在下方输入法旨，召唤分身执行...</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 4.2 选项卡内容: 系统遥测日志 -->
+  <view class="cyber-panel glow-emerald logs-panel-container" wx:if="{{activeTab === 'logs'}}">
+    <scroll-view class="logs-scroll" scroll-y scroll-into-view="{{toLogView}}" scroll-with-animation>
+      <view class="log-line flex-row" wx:for="{{logs}}" wx:key="id" id="log-{{item.id}}">
+        <text class="log-time">{{item.timestamp}}</text>
+        <text class="log-tag tag-{{item.type}}">[{{item.type}}]</text>
+        <text class="log-msg msg-{{item.type}}">{{item.message}}</text>
+      </view>
+      
+      <!-- 列表空状态 -->
+      <view class="empty-tasks flex-col align-center" wx:if="{{logs.length === 0}}">
+        <text class="empty-icon">🛰️</text>
+        <text class="empty-text">尚无遥测日志</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 4. 快捷法门 (Quick Actions) -->
+  <view class="quick-actions flex-row">
+    <button class="quick-btn" bindtap="triggerQuickCommand" data-cmd="查询最近4天A股算力走势并分析">📈 算力分析</button>
+    <button class="quick-btn" bindtap="triggerQuickCommand" data-cmd="拉个3人讨论群，研判未来黄金的走势如何，把讨论结果发到大荒网站">🏆 黄金研判</button>
+    <button class="quick-btn" bindtap="triggerQuickCommand" data-cmd="查询最近1个月A股算力板块走势并拉群研讨">👥 算力群聊</button>
+  </view>
+
+  <!-- 占位防止被底部固定输入框遮挡 -->
+  <view class="placeholder-bottom"></view>
+
+  <!-- 5. 底部固定终端输入框 -->
+  <view class="terminal-footer">
+    <view class="terminal-console">
+      <view class="console-header flex-row align-center justify-between">
+        <view class="flex-row align-center">
+          <text class="console-dot dot-red">●</text>
+          <text class="console-dot dot-yellow">●</text>
+          <text class="console-dot dot-green">●</text>
+          <text class="console-title text-cyan">天道控御终端 (Commander Console)</text>
+        </view>
+        <text class="console-clear-btn" bindtap="clearInput" wx:if="{{inputValue}}">清空</text>
+      </view>
+      <view class="console-body flex-row">
+        <text class="prompt-symbol">></text>
+        <textarea 
+          class="terminal-textarea" 
+          placeholder="在此输入您的宏大天道法旨（支持换行与复杂指令）..." 
+          placeholder-class="terminal-placeholder" 
+          value="{{inputValue}}" 
+          bindinput="onInputChange" 
+          maxlength="1000"
+          show-confirm-bar="{{false}}"
+          disable-default-padding
+        />
+      </view>
+      <view class="console-footer flex-row justify-between align-center">
+        <text class="console-char-count">{{inputValue.length || 0}}/1000 字</text>
+        <button class="submit-btn-premium" bindtap="sendInstruction">
+          <text class="btn-icon">⚡</text> 投递法旨
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

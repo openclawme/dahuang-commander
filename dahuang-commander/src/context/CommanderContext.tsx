@@ -587,8 +587,34 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                   return filtered.map(m => m.id === msgId ? { 
                     ...m, 
                     content: data.reply, 
-                    tasks: (data.tasks && data.tasks.length > 0) ? data.tasks : m.tasks, 
-                    progress: data.progress !== undefined ? data.progress : m.progress 
+                    progress: data.progress !== undefined ? data.progress : m.progress,
+                    tasks: (() => {
+                      let currentTasks = m.tasks || [];
+                      // If this is the final consensus 100% SUCCESS broadcast and the payload tasks array is omitted:
+                      // We preserve original dynamic checklists, reversely locate the last pending/processing step, mark it as SUCCESS,
+                      // and seamlessly inject the actual discussed schedule as its detail description!
+                      if (data.progress === 100 && (!data.tasks || data.tasks.length === 0) && currentTasks.length > 0) {
+                        const reversed = [...currentTasks].reverse();
+                        const lastPendingTask = reversed.find((t: any) => t.status !== "SUCCESS");
+                        if (lastPendingTask) {
+                          currentTasks = currentTasks.map((t: any) => {
+                            if (t === lastPendingTask) {
+                              return { 
+                                ...t, 
+                                status: "SUCCESS", 
+                                detail: data.consensusSummary ? `✨ 群内大伙已达成一致决案：【${data.consensusSummary}】！` : t.detail 
+                              };
+                            }
+                            // We resolve both PENDING and PROCESSING to SUCCESS upon 100% final consensus
+                            return { ...t, status: (t.status === "PENDING" || t.status === "PROCESSING") ? "SUCCESS" : t.status };
+                          });
+                        } else {
+                          currentTasks = currentTasks.map((t: any) => ({ ...t, status: "SUCCESS" }));
+                        }
+                        return currentTasks;
+                      }
+                      return (data.tasks && data.tasks.length > 0) ? data.tasks : m.tasks;
+                    })()
                   } : m);
                 } else {
                   return [
@@ -598,7 +624,16 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                       sender: "agent",
                       content: data.reply,
                       timestamp: getTimestamp(),
-                      tasks: data.tasks,
+                      tasks: (() => {
+                        if (data.progress === 100 && data.tasks && Array.isArray(data.tasks)) {
+                          return data.tasks.map((t: any) => ({
+                            ...t,
+                            status: "SUCCESS",
+                            detail: t.detail || (data.consensusSummary ? `✨ 群内大伙已达成一致决案：【${data.consensusSummary}】！` : undefined)
+                          }));
+                        }
+                        return data.tasks;
+                      })(),
                       progress: data.progress
                     }
                   ];

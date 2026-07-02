@@ -1,0 +1,16 @@
+{
+  "name": "dahuang-commander-mp",
+  "version": "1.0.6",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "upload": "node upload.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "miniprogram-ci": "^2.1.31"
+  }
+}

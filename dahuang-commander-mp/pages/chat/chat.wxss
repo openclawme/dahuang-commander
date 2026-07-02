@@ -1,0 +1,142 @@
+.container {
+  background-color: #020617;
+  padding: 24rpx;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.channel-header {
+  margin-bottom: 30rpx;
+  border-bottom: 1rpx solid rgba(6, 182, 212, 0.2);
+  padding-bottom: 20rpx;
+}
+
+.channel-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #06b6d4;
+  text-shadow: 0 0 10rpx rgba(6, 182, 212, 0.3);
+}
+
+.channel-desc {
+  font-size: 22rpx;
+  color: #64748b;
+  margin-top: 10rpx;
+  line-height: 1.6;
+}
+
+/* Rooms List Styles */
+.rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.room-item {
+  background: rgba(11, 15, 25, 0.8);
+  border: 1rpx solid rgba(100, 116, 139, 0.2);
+  border-radius: 12rpx;
+  padding: 24rpx;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.glowing-border {
+  border-color: rgba(6, 182, 212, 0.5);
+  box-shadow: 0 0 15rpx rgba(6, 182, 212, 0.2);
+}
+
+.item-hover {
+  background: rgba(6, 182, 212, 0.05);
+  border-color: rgba(6, 182, 212, 0.3);
+}
+
+.room-icon-container {
+  position: relative;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 10rpx;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1rpx solid rgba(6, 182, 212, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
+.room-avatar-char {
+  font-size: 36rpx;
+}
+
+.unread-badge {
+  position: absolute;
+  top: -10rpx;
+  right: -10rpx;
+  background: #f43f5e;
+  color: #ffffff;
+  font-size: 18rpx;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 34rpx;
+  height: 34rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid #0b0f19;
+  box-shadow: 0 0 8rpx #f43f5e;
+}
+
+.room-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.room-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.room-time {
+  font-size: 20rpx;
+  color: #475569;
+  font-family: monospace;
+}
+
+.room-last-msg {
+  font-size: 22rpx;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 10rpx;
+}
+
+/* Empty State Styles */
+.empty-state {
+  padding: 120rpx 40rpx;
+  text-align: center;
+}
+
+.empty-art {
+  font-size: 100rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.6;
+}
+
+.empty-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #475569;
+  margin-bottom: 12rpx;
+}
+
+.empty-text {
+  font-size: 24rpx;
+  color: #334155;
+  line-height: 1.6;
+}

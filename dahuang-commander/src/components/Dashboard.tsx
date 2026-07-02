@@ -50,21 +50,37 @@ function TaskVisualizer({ tasks, progress }: { tasks?: any[]; progress?: number 
           }
 
           return (
-            <div key={index} className={`flex items-start gap-2.5 p-2 rounded border border-slate-900 bg-slate-900/40 transition-all ${status === "PROCESSING" ? "border-cyan-500/20 bg-cyan-950/5" : ""}`}>
-              <span className="text-[12px] flex-shrink-0 mt-0.5">{icon}</span>
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-center mb-0.5">
-                  <span className={`font-medium ${textGlow}`}>{task.desc || task.title || `步骤 ${index + 1}`}</span>
-                  <span className={`px-1.5 py-0.5 rounded-[3px] text-[8px] border font-bold ${badgeColor}`}>
-                    {status}
-                  </span>
+            <div key={index} className={`flex flex-col gap-1.5 p-2 rounded border border-slate-900 bg-slate-900/40 transition-all ${status === "PROCESSING" ? "border-cyan-500/20 bg-cyan-950/5" : ""}`}>
+              <div className="flex items-start gap-2.5">
+                <span className="text-[12px] flex-shrink-0 mt-0.5">{icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-center">
+                    <span className={`font-medium text-[11px] ${status === "SUCCESS" ? "line-through text-slate-500" : textGlow}`}>{task.desc || task.title || `步骤 ${index + 1}`}</span>
+                    <span className={`px-1.5 py-0.5 rounded-[3px] text-[8px] border font-bold ${badgeColor}`}>
+                      {status}
+                    </span>
+                  </div>
                 </div>
-                {task.detail && (
-                  <p className="text-slate-400 text-[10px] leading-relaxed break-all mt-0.5">
-                    ↳ {task.detail}
-                  </p>
-                )}
               </div>
+
+              {/* STEP PROGRESS TRACK */}
+              <div className="w-full h-1 bg-slate-950 rounded-full overflow-hidden border border-slate-800/40 relative">
+                <div 
+                  className={`h-full rounded-full transition-all duration-500 ease-out ${
+                    status === "SUCCESS" ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]" :
+                    status === "PROCESSING" ? "bg-cyan-500 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.6)]" :
+                    status === "FAILED" ? "bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.5)]" :
+                    "bg-slate-800"
+                  }`}
+                  style={{ width: status === "SUCCESS" ? "100%" : status === "PROCESSING" ? "60%" : status === "FAILED" ? "100%" : "0%" }}
+                />
+              </div>
+
+              {task.detail && (
+                <p className="text-slate-500 text-[10px] leading-relaxed break-all pl-5">
+                  ↳ {task.detail}
+                </p>
+              )}
             </div>
           );
         })}

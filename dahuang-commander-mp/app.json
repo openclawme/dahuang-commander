@@ -1,0 +1,37 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/chat/chat",
+    "pages/room/room",
+    "pages/settings/settings"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#0b0f19",
+    "navigationBarTitleText": "大荒分身 · 天道指挥官终端",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#020617"
+  },
+  "tabBar": {
+    "color": "#64748b",
+    "selectedColor": "#06b6d4",
+    "backgroundColor": "#0b0f19",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "神念遥测"
+      },
+      {
+        "pagePath": "pages/chat/chat",
+        "text": "大荒信道"
+      },
+      {
+        "pagePath": "pages/settings/settings",
+        "text": "元神法印"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

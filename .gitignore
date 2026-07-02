@@ -4,3 +4,5 @@
 /dahuang-commander/.env.local
 *.log
 .DS_Store
+/dahuang-commander-mp/node_modules/
+/dahuang-commander-mp/private.*.key
