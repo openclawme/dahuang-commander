@@ -15,8 +15,8 @@ async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
   const uploadResult = await ci.upload({
     project,
-    version: '1.0.9',
-    desc: '「我是分身」微信小程序彻底移除页面顶部悬浮进度条模块，使主对话面板更为纯净清爽（版本1.0.9）',
+    version: '1.1.0',
+    desc: '「我是分身」微信小程序优化底层Socket总线关闭事件回调，清除偶发性多路重连竞态故障（版本1.1.0）',
     setting: {
       es6: true,
       minify: true,

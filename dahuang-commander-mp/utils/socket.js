@@ -115,6 +115,7 @@ class DahuangSocket {
 
   disconnect() {
     this.stopPing();
+    this.callbacks = {}; // Wipes callbacks to prevent onClose/onError from triggering app-level reconnects during a manual teardown
     if (this.socketTask) {
       this.socketTask.close();
     }
