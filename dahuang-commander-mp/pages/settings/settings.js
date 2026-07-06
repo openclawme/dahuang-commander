@@ -8,6 +8,8 @@ Page({
     availableAgents: [],
     isLoading: false,
     showDevLogs: false,
+    logs: [],
+    showLogs: false,
     
     // Registration data
     isRegistering: false,
@@ -25,9 +27,15 @@ Page({
   },
 
   onShow() {
+    const filteredLogs = app.globalData.logs.filter(l => {
+      if (app.globalData.showDevLogs) return true;
+      return l.type === "SYSTEM" || l.type === "ACTION";
+    });
+
     this.setData({
       agentState: { ...app.globalData.agentState },
-      showDevLogs: !!app.globalData.showDevLogs
+      showDevLogs: !!app.globalData.showDevLogs,
+      logs: filteredLogs
     });
     this.loadAvailableAgents();
   },
@@ -376,6 +384,23 @@ Page({
           });
         }
       }
+    });
+  },
+
+  toggleLogs() {
+    this.setData({
+      showLogs: !this.data.showLogs
+    });
+  },
+
+  clearLogs() {
+    app.globalData.logs = [];
+    this.setData({
+      logs: []
+    });
+    wx.showToast({
+      title: "法力日志已扫除",
+      icon: "success"
     });
   },
 

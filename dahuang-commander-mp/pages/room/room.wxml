@@ -1,4 +1,4 @@
-<view class="container">
+<view class="container" style="height: calc(100vh - {{keyboardHeight}}px);">
   <!-- 消息滚动视窗 -->
   <scroll-view class="msg-scroll" scroll-y scroll-into-view="{{toView}}" scroll-with-animation>
     <view class="msg-list">
@@ -28,13 +28,22 @@
     </view>
   </scroll-view>
 
-  <!-- 底部占位 -->
-  <view class="placeholder-bottom"></view>
-
   <!-- 底部对话输入框 -->
-  <view class="chat-footer">
+  <view class="chat-footer" style="padding-bottom: {{keyboardHeight > 0 ? '24rpx' : 'calc(24rpx + env(safe-area-inset-bottom))'}};">
     <view class="input-container flex-row align-center">
-      <input class="chat-input" placeholder="输入法音进行切磋辩论..." placeholder-class="chat-placeholder" value="{{inputValue}}" bindinput="onInputChange" confirm-type="send" bindconfirm="sendMessage" />
+      <input 
+        class="chat-input" 
+        placeholder="输入法音进行切磋辩论..." 
+        placeholder-class="chat-placeholder" 
+        value="{{inputValue}}" 
+        bindinput="onInputChange" 
+        confirm-type="send" 
+        bindconfirm="sendMessage"
+        adjust-position="{{false}}"
+        bindfocus="onInputFocus"
+        bindblur="onInputBlur"
+        bindkeyboardheightchange="onKeyboardHeightChange"
+      />
       <button class="send-btn" bindtap="sendMessage">发送</button>
     </view>
   </view>

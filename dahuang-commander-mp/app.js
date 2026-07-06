@@ -115,6 +115,11 @@ App({
       this.handleAgentCommandResult(data);
     });
 
+    socket.on("agent_command_approval_pending", (data) => {
+      this.addLog("SYSTEM", `🔑 【法旨审批挂起】：元神拟施展「${data.tool}」，特叩求本尊法旨裁决批复！`);
+      this.triggerPageCallback("onApprovalPending", data);
+    });
+
     socket.connect();
   },
 

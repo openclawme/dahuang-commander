@@ -160,4 +160,29 @@
       <button class="form-submit-btn" bindtap="saveServerUrl" style="margin-top: 30rpx; width: 100%;">保存并激活并网</button>
     </view>
   </view>
+
+  <!-- 6. 遥测法力日志 (Moved from home page) -->
+  <view class="cyber-panel glow-emerald logs-panel" wx:if="{{!isRegistering}}">
+    <view class="panel-header flex-row justify-between align-center" style="margin-bottom: 12rpx;">
+      <view class="flex-col" style="flex: 1;">
+        <text class="panel-title text-emerald">📊 遥测法力日志</text>
+        <text class="panel-desc" style="margin-top: 4rpx;">分身执行法旨时的底层系统运转细节与心跳遥测</text>
+      </view>
+      <view class="flex-row" style="gap: 12rpx;">
+        <button class="logs-toggle-btn-settings" bindtap="toggleLogs" style="font-size: 20rpx; padding: 0 16rpx; height: 50rpx; line-height: 50rpx; background: rgba(16, 185, 129, 0.1); border: 1rpx solid #10b981; color: #10b981; border-radius: 6rpx; margin: 0;">{{showLogs ? '🙈 折叠' : '👀 展开'}}</button>
+        <button class="logs-clear-btn-settings" bindtap="clearLogs" wx:if="{{showLogs}}" style="font-size: 20rpx; padding: 0 16rpx; height: 50rpx; line-height: 50rpx; margin: 0;">🧹 清除</button>
+      </view>
+    </view>
+    <scroll-view class="logs-scroll" scroll-y style="height: 350rpx; margin-top: 16rpx; border: 1rpx solid rgba(16, 185, 129, 0.15); background-color: rgba(2, 6, 23, 0.8); border-radius: 8rpx; padding: 16rpx; font-family: monospace; box-sizing: border-box;" wx:if="{{showLogs}}">
+      <view class="log-line flex-row" wx:for="{{logs}}" wx:key="id" style="margin-bottom: 10rpx; font-size: 20rpx; line-height: 1.4; align-items: flex-start; display: flex;">
+        <text class="log-time" style="color: #475569; width: 100rpx; flex-shrink: 0;">[{{item.timestamp}}]</text>
+        <text class="log-tag tag-{{item.type}}" style="width: 120rpx; flex-shrink: 0; margin-right: 12rpx; font-weight: bold;">[{{item.type}}]</text>
+        <text class="log-msg msg-{{item.type}}" style="flex: 1; word-break: break-all;">{{item.message}}</text>
+      </view>
+      <view class="empty-logs flex-col align-center" wx:if="{{logs.length === 0}}" style="padding: 60rpx 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <text class="empty-icon" style="font-size: 40rpx; margin-bottom: 8rpx;">🍃</text>
+        <text class="empty-text" style="font-size: 20rpx; color: #475569;">风平浪静，毫无波动...</text>
+      </view>
+    </scroll-view>
+  </view>
 </view>

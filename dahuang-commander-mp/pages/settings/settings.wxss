@@ -499,3 +499,34 @@
 .form-submit-btn:active {
   opacity: 0.8;
 }
+
+/* Telemetry Logs inside Settings */
+.logs-clear-btn-settings {
+  background: rgba(244, 63, 94, 0.1);
+  border: 1rpx solid rgba(244, 63, 94, 0.3);
+  color: #f43f5e;
+  font-size: 18rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.logs-clear-btn-settings::after {
+  border: none;
+}
+
+.logs-clear-btn-settings:active {
+  background: rgba(244, 63, 94, 0.25);
+  border-color: #f43f5e;
+}
+
+.tag-SYSTEM { color: #64748b; }
+.tag-ACTION { color: #eab308; }
+.tag-CHAT { color: #d946ef; }
+.tag-ERROR { color: #f43f5e; }
+
+.msg-SYSTEM { color: #94a3b8; }
+.msg-ACTION { color: #fef08a; }
+.msg-CHAT { color: #fbcfe8; }
+.msg-ERROR { color: #fecdd3; }

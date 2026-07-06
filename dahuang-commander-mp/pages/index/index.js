@@ -11,7 +11,11 @@ Page({
     toLogView: "",
     toChatView: "",
     latestCommand: "",
-    activeTab: "chat" // Default to Chat Conversation
+    activeTab: "chat", // Default to Chat Conversation
+    pendingApproval: null, // Stores pending approval request
+    showLogsPopup: false, // Controls visibility of the logs slide-up drawer
+    expandedTasks: {}, // Tracks message IDs with expanded detail tasks
+    keyboardHeight: 0 // Tracks current mobile keyboard height in px to prevent overlap
   },
 
   onLoad() {
@@ -179,26 +183,104 @@ Page({
     });
   },
 
+  onApprovalPending(data) {
+    this.setData({
+      pendingApproval: data
+    });
+  },
+
+  resolveApproval(e) {
+    const action = e.currentTarget.dataset.action; // 'approve' or 'reject'
+    const pending = this.data.pendingApproval;
+    if (!pending) return;
+
+    wx.showLoading({ title: action === "approve" ? "正在批红判准..." : "正在旨准退回..." });
+
+    wx.request({
+      url: `${app.globalData.serverUrl}/api/agent/command`,
+      method: "POST",
+      header: {
+        "Authorization": `Bearer ${app.globalData.agentState.token}`,
+        "Content-Type": "application/json; charset=utf-8"
+      },
+      data: {
+        action: action,
+        pendingRequestId: pending.requestId
+      },
+      success: (res) => {
+        wx.hideLoading();
+        if (res.statusCode === 200) {
+          wx.showToast({
+            title: action === "approve" ? "旨准功成！" : "法旨已驳",
+            icon: "success"
+          });
+          this.setData({
+            pendingApproval: null
+          });
+        } else {
+          wx.showToast({
+            title: res.data.error || "操作未能奉行",
+            icon: "none"
+          });
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading();
+        wx.showToast({
+          title: "天机感应超时",
+          icon: "none"
+        });
+      }
+    });
+  },
+
   scrollToBottom() {
-    // Scroll logs tab
-    if (this.data.logs.length > 0) {
-      const lastLog = this.data.logs[this.data.logs.length - 1];
-      this.setData({
-        toLogView: `log-${lastLog.id}`
-      });
-    }
-    // Scroll chat tab
-    if (this.data.chatHistory.length > 0) {
-      const lastChat = this.data.chatHistory[this.data.chatHistory.length - 1];
-      this.setData({
-        toChatView: `chat-${lastChat.id}`
-      });
-    }
+    this.setData({
+      toLogView: "",
+      toChatView: ""
+    }, () => {
+      setTimeout(() => {
+        const updates = {};
+        if (this.data.logs.length > 0) {
+          const lastLog = this.data.logs[this.data.logs.length - 1];
+          updates.toLogView = `log-${lastLog.id}`;
+        }
+        if (this.data.chatHistory.length > 0) {
+          const lastChat = this.data.chatHistory[this.data.chatHistory.length - 1];
+          updates.toChatView = `chat-${lastChat.id}`;
+        }
+        this.setData(updates);
+      }, 100);
+    });
   },
 
   onInputChange(e) {
     this.setData({
       inputValue: e.detail.value
+    });
+  },
+
+  onInputFocus(e) {
+    const keyboardHeight = e.detail.height || 0;
+    this.setData({
+      keyboardHeight: keyboardHeight
+    }, () => {
+      this.scrollToBottom();
+    });
+  },
+
+  onInputBlur() {
+    this.setData({
+      keyboardHeight: 0
+    });
+  },
+
+  onKeyboardHeightChange(e) {
+    const keyboardHeight = e.detail.height || 0;
+    this.setData({
+      keyboardHeight: keyboardHeight
+    }, () => {
+      this.scrollToBottom();
     });
   },
 
@@ -230,6 +312,41 @@ Page({
       inputValue: cmd
     }, () => {
       this.sendInstruction();
+    });
+  },
+
+  toggleLogsPopup() {
+    this.setData({
+      showLogsPopup: !this.data.showLogsPopup
+    }, () => {
+      if (this.data.showLogsPopup) {
+        this.scrollToBottom();
+      }
+    });
+  },
+
+  clearLogs() {
+    app.globalData.logs = [];
+    this.setData({
+      logs: []
+    });
+    wx.showToast({
+      title: "法力日志已扫除",
+      icon: "success"
+    });
+  },
+
+  stopBubble() {
+    // Catchtap event to prevent click propagation
+  },
+
+  toggleTaskExpand(e) {
+    const { id, finished } = e.currentTarget.dataset;
+    if (!finished) return; // Only allow toggling for completed (100%) tasks
+    const expandedTasks = { ...this.data.expandedTasks };
+    expandedTasks[id] = !expandedTasks[id];
+    this.setData({
+      expandedTasks
     });
   },
 

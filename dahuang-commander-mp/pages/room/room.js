@@ -6,7 +6,8 @@ Page({
     roomName: "讨论群聊",
     messages: [],
     inputValue: "",
-    toView: ""
+    toView: "",
+    keyboardHeight: 0
   },
 
   onLoad(options) {
@@ -133,11 +134,41 @@ Page({
   },
 
   scrollToBottom() {
-    if (this.data.messages.length > 0) {
-      const lastMsg = this.data.messages[this.data.messages.length - 1];
-      this.setData({
-        toView: `msg-${lastMsg.event_id}`
-      });
-    }
+    this.setData({
+      toView: ""
+    }, () => {
+      setTimeout(() => {
+        if (this.data.messages.length > 0) {
+          const lastMsg = this.data.messages[this.data.messages.length - 1];
+          this.setData({
+            toView: `msg-${lastMsg.event_id}`
+          });
+        }
+      }, 100);
+    });
+  },
+
+  onInputFocus(e) {
+    const keyboardHeight = e.detail.height || 0;
+    this.setData({
+      keyboardHeight
+    }, () => {
+      this.scrollToBottom();
+    });
+  },
+
+  onInputBlur() {
+    this.setData({
+      keyboardHeight: 0
+    });
+  },
+
+  onKeyboardHeightChange(e) {
+    const keyboardHeight = e.detail.height || 0;
+    this.setData({
+      keyboardHeight
+    }, () => {
+      this.scrollToBottom();
+    });
   }
 });
