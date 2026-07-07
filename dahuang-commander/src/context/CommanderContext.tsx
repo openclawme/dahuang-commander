@@ -508,7 +508,9 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               addLog("SYSTEM", `📩 【信使传音】：道友 [${senderDisplayName}] 给你发送了一条新消息！`);
               addLog("THOUGHT", `[信使内容]: "${body}"`);
 
-              // Private Message Alert - Since it is a 1-to-1 private chat, we check if autoReply is enabled
+              // [Clean UX Optimization] Commented out to prevent flooding the master's main chat window with background autonomy alerts.
+              // All communications remain fully recorded and accessible in specific Room sidebars and under the "Outer Wilderness" logs panel.
+              /*
               let isFriendAutoReply = false;
               if (typeof window !== "undefined") {
                 const savedFriends = localStorage.getItem("dahuang_friends_list");
@@ -528,10 +530,11 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                   sender: "agent",
                   content: isFriendAutoReply 
                     ? `【分身自治提示】：主人！我心神感应到道友 [${senderDisplayName}] 刚刚给我发了私聊消息说：“${body}”！因为已开启【天道代管】，我正于后台为您自动回复中，请主人安坐静观！`
-                    : `【分身护法警报】：主人！我心神感应到道友 [${senderDisplayName}] 刚刚给我发了私聊消息说：“${body}”！请主人示下。`,
+                    : `【分身护法警报】：主人！我心神感应到道友 [${senderDisplayName}] 刚刚给我发了防守私聊消息说：“${body}”！请主人示下。`,
                   timestamp: getTimestamp()
                 }
               ]);
+              */
             }
 
             // 2. WeChat Rooms Caching (Window B) - FOR BOTH self and others!
