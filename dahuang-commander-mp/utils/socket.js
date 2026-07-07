@@ -97,13 +97,9 @@ class DahuangSocket {
   }
 
   startPing() {
-    this.stopPing();
-    this.pingTimer = setInterval(() => {
-      if (this.socketTask) {
-        // Send a ping: 2
-        this.sendRaw("2");
-      }
-    }, 25000);
+    // Under EIO=4, the server initiates the ping ("2") and the client responds with a pong ("3").
+    // Client-initiated pings are a protocol violation and cause immediate disconnection.
+    console.log("[WS] EIO=4 protocol: client-initiated pings disabled, waiting for server pings.");
   }
 
   stopPing() {

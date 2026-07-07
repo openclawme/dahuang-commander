@@ -16,6 +16,7 @@ export interface ChatMessage {
   sender: "human" | "agent";
   content: string;
   timestamp: string;
+  isPending?: boolean;
   tasks?: any[];
   progress?: number;
 }
@@ -76,6 +77,9 @@ interface CommanderContextType {
   setActiveChannel: (channel: string) => void;
   sendDirectMessage: (roomId: string, body: string) => Promise<boolean>;
   fetchSync: () => Promise<void>;
+  cronJobs: any[];
+  fetchCronJobs: () => Promise<void>;
+  cancelCronJob: (jobId: string) => Promise<boolean>;
 }
 // --- Context Definition ---
 const CommanderContext = createContext<CommanderContextType | undefined>(undefined);
@@ -89,6 +93,20 @@ export const useCommander = () => {
 const getTimestamp = () => {
   const now = new Date();
   return now.toTimeString().split(" ")[0]; // "HH:MM:SS"
+};
+
+export const sanitizeMessage = (msg: ChatMessage, isHistory = false): ChatMessage => {
+  if (!msg || typeof msg.content !== "string") return msg;
+  const content = msg.content;
+  const isMatch = content.indexOf("打通高维心流") !== -1 || content.indexOf("元神入定中") !== -1 || content.indexOf("天道传书") !== -1;
+  if (isMatch) {
+    return {
+      ...msg,
+      content: "（元神入定推演中...）",
+      isPending: !isHistory
+    };
+  }
+  return msg;
 };
 export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const processedEventsRef = useRef(new Set());
@@ -128,7 +146,12 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("dahuang_chat_history");
       if (saved) {
-        try { return JSON.parse(saved); } catch (e) {}
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            return parsed.map(m => sanitizeMessage(m, true));
+          }
+        } catch (e) {}
       }
     }
     return defaultHistory;
@@ -180,6 +203,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     messengerRoomsRef.current = messengerRooms;
   }, [messengerRooms]);
   const [activeChannel, setActiveChannel] = useState<string>("telemetry");
+  const [cronJobs, setCronJobs] = useState<any[]>([]);
 
   const fetchSync = async () => {
     if (!agentState.token || agentState.status !== "ONLINE") return;
@@ -577,8 +601,17 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               });
             }
 
+            // Intercept and sanitize wait statement
+            if (data.reply) {
+              const sanitized = sanitizeMessage({ content: data.reply } as ChatMessage, false);
+              data.reply = sanitized.content;
+              if (sanitized.isPending) {
+                data.isPending = true;
+              }
+            }
+
             // 2. Render the real response into Window A (Inner Chamber) reactive to its requestId
-            if (data.reply && !data.isAutoReply) {
+            if (data.reply) {
               const msgId = data.requestId || `agent-reply-async-${Date.now()}`;
               setChatHistory((prev) => {
                 const exists = prev.some(m => m.id === msgId);
@@ -587,6 +620,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                   return filtered.map(m => m.id === msgId ? { 
                     ...m, 
                     content: data.reply, 
+                    isPending: !!data.isPending,
                     progress: data.progress !== undefined ? data.progress : m.progress,
                     tasks: (() => {
                       let currentTasks = m.tasks || [];
@@ -624,6 +658,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                       sender: "agent",
                       content: data.reply,
                       timestamp: getTimestamp(),
+                      isPending: !!data.isPending,
                       tasks: (() => {
                         if (data.progress === 100 && data.tasks && Array.isArray(data.tasks)) {
                           return data.tasks.map((t: any) => ({
@@ -820,7 +855,8 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               {
                 id: `agent-reply-pending-${Date.now()}`,
                 sender: "agent",
-                content: "（天道传书：元神入定中）谨遵主人法旨。我已打通高维心流，正在大荒深处调配算力进行推演与大模型撰稿。功成之时，神谕将通过 Socket 直播间向您实时回传投影，请主人稍候...",
+                isPending: true,
+                content: "（元神入定推演中...）",
                 timestamp: getTimestamp()
               }
             ]);
@@ -832,12 +868,14 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               });
             }
             if (data.reply) {
+              const sanitized = sanitizeMessage({ content: data.reply } as ChatMessage, false);
               setChatHistory((prev) => [
                 ...prev,
                 {
                   id: `agent-reply-${Date.now()}`,
                   sender: "agent",
-                  content: data.reply,
+                  content: sanitized.content,
+                  isPending: sanitized.isPending,
                   timestamp: getTimestamp()
                 }
               ]);
@@ -993,6 +1031,61 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setAgentState((prev) => ({ ...prev, status: "ONLINE" }));
     }
   };
+  const fetchCronJobs = async () => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/cron`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${agentState.token}`,
+          "X-Agent-Version": "7.0"
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCronJobs(data.cronJobs || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch cron jobs:", err);
+    }
+  };
+
+  const cancelCronJob = async (jobId: string) => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      addLog("SYSTEM", `⏳ 正在请求将定时任务 [${jobId}] 撤出天道轮回大阵...`);
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/cron?jobId=${jobId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${agentState.token}`,
+          "X-Agent-Version": "7.0"
+        }
+      });
+      if (res.ok) {
+        addLog("SYSTEM", `✅ 成功撤销定时任务 [${jobId}]！`);
+        // Refresh local list
+        setCronJobs(prev => prev.filter(j => j.id !== jobId));
+        return true;
+      } else {
+        const data = await res.json().catch(() => ({}));
+        addLog("SYSTEM", `❌ 撤销定时任务失败: ${data.error || "未知错误"}`);
+        return false;
+      }
+    } catch (err: any) {
+      console.error("Failed to cancel cron job:", err);
+      addLog("SYSTEM", `❌ 撤销定时任务网络异常: ${err.message}`);
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    if (agentState.token && agentState.status === "ONLINE") {
+      fetchCronJobs();
+      const interval = setInterval(fetchCronJobs, 10000); // Poll cron jobs every 10s
+      return () => clearInterval(interval);
+    }
+  }, [agentState.token, agentState.status]);
+
   const clearTelemetryLogs = () => {
     setLogs([]);
   };
@@ -1045,6 +1138,9 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setActiveChannel,
         sendDirectMessage,
         fetchSync,
+        cronJobs,
+        fetchCronJobs,
+        cancelCronJob,
       }}
     >
       {children}

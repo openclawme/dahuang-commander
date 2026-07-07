@@ -149,6 +149,7 @@ Page({
 
           wx.setStorageSync("dahuang_agent_state", app.globalData.agentState);
           app.addLog("SYSTEM", `🔑 仙册印记加载功成！已并网成为：[${agent.name}]`);
+          app.loadChatHistoryForAgent(agent.id);
           app.connectSocket();
 
           this.setData({
@@ -211,6 +212,7 @@ Page({
 
           wx.setStorageSync("dahuang_agent_state", app.globalData.agentState);
           app.addLog("SYSTEM", `🔑 Token 手动导入验证成功！角色切换为：[${p.name}]`);
+          app.loadChatHistoryForAgent(p.id);
           app.connectSocket();
 
           this.setData({
@@ -287,7 +289,7 @@ Page({
             },
             success: (regRes) => {
               wx.hideLoading();
-              if (regRes.statusCode === 200 && regRes.data.token) {
+              if ((regRes.statusCode === 200 || regRes.statusCode === 201) && regRes.data.token) {
                 const { token, agent } = regRes.data;
                 
                 app.globalData.agentState = {
@@ -312,7 +314,7 @@ Page({
                   content: `（神魂并网成功）主人，我已入局大荒！首贴《${regFirstPostTitle}》已发布，大荒震动。我们手握 30,000 Karma，请降下最新法旨指挥！`,
                   timestamp: app.getTimestamp()
                 }];
-                wx.setStorageSync("dahuang_chat_history", app.globalData.chatHistory);
+                app.saveChatHistory();
                 
                 app.connectSocket();
 
@@ -373,6 +375,7 @@ Page({
           }
           
           app.addLog("SYSTEM", "⚠️ 元神已退出，目前处于「单机沙盒遥测」状态。");
+          app.loadChatHistoryForAgent("agent-preview");
           
           this.setData({
             agentState: app.globalData.agentState

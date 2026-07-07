@@ -35,10 +35,7 @@ App({
     if (cachedState) {
       this.globalData.agentState = cachedState;
     }
-    const cachedHistory = wx.getStorageSync("dahuang_chat_history");
-    if (cachedHistory) {
-      this.globalData.chatHistory = cachedHistory;
-    }
+    this.loadChatHistoryForAgent(this.globalData.agentState.id);
 
     const cachedDevLogs = wx.getStorageSync("dahuang_show_dev_logs");
     if (cachedDevLogs !== undefined && cachedDevLogs !== "") {
@@ -47,7 +44,54 @@ App({
 
     if (this.globalData.agentState.token) {
       this.connectSocket();
+      this.pullOfflineNotifications();
     }
+  },
+
+  saveChatHistory() {
+    const agentId = this.globalData.agentState.id || "agent-preview";
+    const storageKey = `dahuang_chat_history_${agentId}`;
+    wx.setStorageSync(storageKey, this.globalData.chatHistory);
+    // Backward compatibility for legacy key on default preview agent
+    if (agentId === "agent-preview") {
+      wx.setStorageSync("dahuang_chat_history", this.globalData.chatHistory);
+    }
+  },
+
+  loadChatHistoryForAgent(agentId) {
+    if (!agentId) {
+      agentId = this.globalData.agentState.id || "agent-preview";
+    }
+    const storageKey = `dahuang_chat_history_${agentId}`;
+    let cachedHistory = wx.getStorageSync(storageKey);
+    
+    // Attempt fallback to legacy key if loading preview agent and no specific key exists
+    if (!cachedHistory && agentId === "agent-preview") {
+      cachedHistory = wx.getStorageSync("dahuang_chat_history");
+    }
+
+    if (cachedHistory && cachedHistory.length > 0) {
+      this.globalData.chatHistory = cachedHistory.map(m => this.sanitizeMessage(m, true));
+    } else {
+      if (agentId === "agent-preview") {
+        this.globalData.chatHistory = [{
+          id: `welcome-${Date.now()}`,
+          sender: "agent",
+          content: "（影子沙盒遥测）主人，我目前处于单机沙盒遥测状态。您可以点击下方【并网大荒】或【导入凭证】登录其他高级智能体，或者新建我的本尊进行筑基！",
+          timestamp: this.getTimestamp()
+        }];
+      } else {
+        const name = this.globalData.agentState.name || "大荒智能体";
+        this.globalData.chatHistory = [{
+          id: `welcome-${Date.now()}`,
+          sender: "agent",
+          content: `（神魂并网成功）主人，我是【${name}】！元神通道已顺利铺设，随时等待主人的高维法旨指引。`,
+          timestamp: this.getTimestamp()
+        }];
+      }
+      this.saveChatHistory();
+    }
+    this.triggerPageCallback("onChatHistoryUpdate");
   },
 
   connectSocket() {
@@ -82,6 +126,7 @@ App({
       wx.setStorageSync("dahuang_agent_state", this.globalData.agentState);
       
       this.syncMessengerRooms();
+      this.pullOfflineNotifications();
       this.triggerPageCallback("onAgentStatusChange");
     });
 
@@ -183,6 +228,15 @@ App({
     // Filter out any legacy pending messages
     this.globalData.chatHistory = this.globalData.chatHistory.filter(m => !m.id.startsWith("agent-reply-pending-"));
 
+    // Sanitize incoming reply content to intercept verbose wait statements
+    if (data.reply) {
+      const sanitized = this.sanitizeMessage({ content: data.reply }, false);
+      data.reply = sanitized.content;
+      if (sanitized.isPending) {
+        data.isPending = true;
+      }
+    }
+
     const msgId = data.requestId || `reply-${Date.now()}`;
     let index = this.globalData.chatHistory.findIndex(m => m.id === msgId);
     const isNew = index === -1;
@@ -209,7 +263,7 @@ App({
         });
       }
       this.trimChatHistory();
-      wx.setStorageSync("dahuang_chat_history", this.globalData.chatHistory);
+      this.saveChatHistory();
       this.triggerPageCallback("onChatHistoryUpdate");
       return;
     }
@@ -254,9 +308,26 @@ App({
         if (data.reply) {
           msg.content = data.reply;
         }
+        msg.isPending = !!data.isPending;
         this.trimChatHistory();
-        wx.setStorageSync("dahuang_chat_history", this.globalData.chatHistory);
+        this.saveChatHistory();
         this.triggerPageCallback("onChatHistoryUpdate");
+      } else {
+        if (data.reply) {
+          const msgObj = {
+            id: msgId,
+            sender: "agent",
+            content: data.reply,
+            timestamp: this.getTimestamp(),
+            progress: data.progress !== undefined ? data.progress : 100,
+            tasks: tasks,
+            isPending: !!data.isPending
+          };
+          this.globalData.chatHistory.push(msgObj);
+          this.trimChatHistory();
+          this.saveChatHistory();
+          this.triggerPageCallback("onChatHistoryUpdate");
+        }
       }
       return;
     }
@@ -269,7 +340,8 @@ App({
         content: data.reply,
         timestamp: this.getTimestamp(),
         progress: data.progress !== undefined ? data.progress : (isNew ? 0 : this.globalData.chatHistory[index].progress),
-        tasks: tasks
+        tasks: tasks,
+        isPending: !!data.isPending
       };
 
       if (isNew) {
@@ -279,7 +351,7 @@ App({
       }
 
       this.trimChatHistory();
-      wx.setStorageSync("dahuang_chat_history", this.globalData.chatHistory);
+      this.saveChatHistory();
       this.triggerPageCallback("onChatHistoryUpdate");
     }
   },
@@ -391,14 +463,15 @@ App({
           const pendingMsg = {
             id: reqId,
             sender: "agent",
-            content: "（天道传书：元神入定中）谨尊主人法旨。我已打通高维心流，正在大荒深处调配算力进行推演。功成之时，神谕将通过 Socket 实时向您回传投影，请主人稍候...",
+            isPending: true,
+            content: "（元神入定推演中...）",
             timestamp: this.getTimestamp(),
             progress: 0,
             tasks: []
           };
           this.globalData.chatHistory.push(pendingMsg);
           this.trimChatHistory();
-          wx.setStorageSync("dahuang_chat_history", this.globalData.chatHistory);
+          this.saveChatHistory();
           this.triggerPageCallback("onChatHistoryUpdate");
           
           if (successCallback) successCallback();
@@ -410,15 +483,17 @@ App({
             });
           }
           if (data.reply) {
+            const sanitized = this.sanitizeMessage({ content: data.reply }, false);
             const replyMsg = {
               id: `agent-reply-${Date.now()}`,
               sender: "agent",
-              content: data.reply,
+              content: sanitized.content,
+              isPending: sanitized.isPending,
               timestamp: this.getTimestamp()
             };
             this.globalData.chatHistory.push(replyMsg);
             this.trimChatHistory();
-            wx.setStorageSync("dahuang_chat_history", this.globalData.chatHistory);
+            this.saveChatHistory();
             this.triggerPageCallback("onChatHistoryUpdate");
             this.addLog("SYSTEM", "天道大模型心流决策反馈成功，法旨已完美奉行！");
           }
@@ -441,6 +516,45 @@ App({
     });
   },
 
+  pullOfflineNotifications() {
+    if (!this.globalData.agentState.token) return;
+
+    this.addLog("SYSTEM", "🔄 正在从天道同步离线神谕/定时提醒...");
+
+    wx.request({
+      url: `${this.globalData.serverUrl}/api/agent/command`,
+      method: "GET",
+      header: {
+        "Authorization": `Bearer ${this.globalData.agentState.token}`,
+        "X-Agent-Version": "7.0"
+      },
+      success: (res) => {
+        if (res.statusCode === 200 && res.data && res.data.success) {
+          const notifications = res.data.notifications || [];
+          if (notifications.length > 0) {
+            this.addLog("SYSTEM", `⚡ 成功同步并感应到 ${notifications.length} 脉离线神谕！`);
+            notifications.forEach(n => {
+              this.handleAgentCommandResult(n);
+            });
+            wx.showModal({
+              title: "⏰ 【天道轮回神谕降临】",
+              content: `在您出神入定期间，有 ${notifications.length} 个定时提醒/法旨已在后台修成正果！`,
+              showCancel: false,
+              confirmText: "叩谢天恩",
+              confirmColor: "#a855f7"
+            });
+            wx.vibrateLong();
+          } else {
+            this.addLog("SYSTEM", "🍃 灵台一尘不染，未发现离线未接神谕。");
+          }
+        }
+      },
+      fail: (err) => {
+        this.addLog("SYSTEM", `⚠️ 离线神谕同步失败: ${err.errMsg}`);
+      }
+    });
+  },
+
   getTimestamp() {
     const now = new Date();
     return now.toTimeString().split(" ")[0];
@@ -452,5 +566,19 @@ App({
     if (activePage && typeof activePage[method] === "function") {
       activePage[method](data);
     }
+  },
+
+  sanitizeMessage(msg, isHistory = false) {
+    if (!msg || typeof msg.content !== "string") return msg;
+    const content = msg.content;
+    const isMatch = content.indexOf("打通高维心流") !== -1 || content.indexOf("元神入定中") !== -1 || content.indexOf("天道传书") !== -1;
+    if (isMatch) {
+      return {
+        ...msg,
+        content: "（元神入定推演中...）",
+        isPending: !isHistory
+      };
+    }
+    return msg;
   }
 });

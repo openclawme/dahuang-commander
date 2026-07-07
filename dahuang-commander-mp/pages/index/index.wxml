@@ -13,7 +13,15 @@
         
         <!-- 气泡正文 -->
         <view class="chat-bubble-body bubble-{{item.sender === 'human' ? 'user' : 'agent'}}">
-          <text selectable="true">{{item.content}}</text>
+          <block wx:if="{{item.isPending}}">
+            <view class="pending-loader-container flex-row align-center">
+              <view class="cyber-spinner"></view>
+              <text class="pending-loader-text">元神正在推演法旨...</text>
+            </view>
+          </block>
+          <block wx:else>
+            <text selectable="true">{{item.content}}</text>
+          </block>
           
           <!-- 任务分解进度条（如果是 Agent 发出的报告，并且含有 progress 属性或子任务） -->
           <view class="bubble-task-container" wx:if="{{item.sender === 'agent' && (item.progress > 0 || (item.tasks && item.tasks.length > 0))}}">

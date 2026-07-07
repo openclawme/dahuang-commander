@@ -1345,4 +1345,41 @@
   font-weight: bold;
 }
 
+/* Cyberpunk Pending Loader styles */
+.pending-loader-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16rpx;
+  padding: 8rpx 4rpx;
+}
+
+.cyber-spinner {
+  width: 32rpx;
+  height: 32rpx;
+  border: 3rpx solid rgba(168, 85, 247, 0.2);
+  border-top: 3rpx solid #a855f7;
+  border-right: 3rpx solid #06b6d4;
+  border-radius: 50%;
+  animation: cyber-spin 1s linear infinite;
+}
+
+.pending-loader-text {
+  font-size: 24rpx;
+  color: #a855f7;
+  font-weight: 500;
+  text-shadow: 0 0 10rpx rgba(168, 85, 247, 0.4);
+  animation: cyber-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes cyber-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes cyber-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1.0; }
+}
+
 

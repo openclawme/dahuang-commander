@@ -109,6 +109,9 @@ const Dashboard: React.FC = () => {
     sendDirectMessage,
     clearLogs,
     clearRoomChat,
+    cronJobs,
+    fetchCronJobs,
+    cancelCronJob,
   } = useCommander();
 
   // Local state for WeChat-mode chat input inside Window B
@@ -117,7 +120,7 @@ const Dashboard: React.FC = () => {
 
   const handleSendRoomMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roomInput.trim() || !activeChannel || activeChannel === "telemetry" || activeChannel === "settings") return;
+    if (!roomInput.trim() || !activeChannel || activeChannel === "telemetry" || activeChannel === "settings" || activeChannel === "cron") return;
     const success = await sendDirectMessage(activeChannel, roomInput);
     if (success) {
       setRoomInput("");
@@ -302,6 +305,12 @@ const Dashboard: React.FC = () => {
     }
   }, [agentState.token, agentState.status]);
 
+  useEffect(() => {
+    if (activeChannel === "settings" && agentState.token && agentState.status === "ONLINE") {
+      fetchCronJobs();
+    }
+  }, [activeChannel, agentState.token, agentState.status]);
+
   // --- Refs for auto-scroll ---
   const chatEndRef = useRef<HTMLDivElement>(null);
   const logEndRef = useRef<HTMLDivElement>(null);
@@ -469,6 +478,64 @@ const Dashboard: React.FC = () => {
             )}
           </div>
 
+          {/* Active Cron Jobs HUD - Pinned to the top of Window A (Inner Chamber) so it's ALWAYS visible and never scrolls away! */}
+          {cronJobs.length > 0 && (
+            <div className="bg-gradient-to-r from-cyan-950/40 to-slate-900/30 border-b border-cyan-500/25 p-2.5 space-y-2 animate-fadeIn relative overflow-hidden shrink-0 shadow-[0_4px_12px_rgba(6,182,212,0.1)] font-mono z-10">
+              {/* Spinning subtle background portal */}
+              <div className="absolute -right-6 -bottom-6 w-16 h-16 border border-dashed border-cyan-500/10 rounded-full animate-spin" style={{ animationDuration: '20s' }} />
+              
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <span className="animate-pulse">⌛</span>
+                  <span className="text-cyan-300 font-bold text-[10px] tracking-wider uppercase">
+                    活动中的天道提醒法轨 ({cronJobs.length})
+                  </span>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => setActiveChannel("cron")}
+                  className="text-[9px] text-cyan-400 hover:underline cursor-pointer flex items-center space-x-0.5 bg-transparent border-none"
+                >
+                  <span>去控制台管理 ➔</span>
+                </button>
+              </div>
+              
+              <div className="space-y-1.5 max-h-[120px] overflow-y-auto custom-scrollbar pr-1">
+                {cronJobs.map((job: any) => {
+                  let humanExpr = "循环执行";
+                  if (job.cronExpression === "* * * * *") humanExpr = "每隔 1 分钟触发";
+                  else if (job.cronExpression.startsWith("*/")) {
+                    const mins = job.cronExpression.split(" ")[0].substring(2);
+                    humanExpr = `每隔 ${mins} 分钟触发`;
+                  }
+                  return (
+                    <div key={job.id} className="flex justify-between items-center bg-slate-950/60 border border-slate-900/80 p-2 rounded hover:border-cyan-500/20 transition">
+                      <div className="space-y-0.5 min-w-0 flex-1 mr-2 text-left">
+                        <div className="flex items-center space-x-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+                          <span className="text-slate-300 font-bold text-[10px] truncate max-w-[150px]">{job.command}</span>
+                        </div>
+                        <div className="text-[9px] text-slate-500 font-mono">
+                          <span>{humanExpr}</span>
+                          {job.lastRunAt && (
+                            <span className="ml-2 text-cyan-500/60">上次: {new Date(job.lastRunAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => cancelCronJob(job.id)}
+                        className="px-2 py-0.5 bg-red-950/20 hover:bg-red-900/60 border border-red-500/30 text-red-400 hover:text-red-300 rounded text-[9px] font-semibold cursor-pointer transition active:scale-95 whitespace-nowrap shrink-0"
+                      >
+                        撤销 ✖
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Chat Dialogue History */}
           <div className="flex-1 p-3 overflow-y-auto space-y-3 bg-slate-950/50">
             {chatHistory.map((msg) => (
@@ -490,8 +557,12 @@ const Dashboard: React.FC = () => {
                       : "bg-slate-900/90 border-cyan-500/30 text-cyan-100 rounded-tl-none text-glow-cyan"
                   }`}
                 >
-                  {/* If message has visual task items, clean standard output and render beautiful Neo Cyberpunk progress panel! */}
-                  {msg.tasks && msg.tasks.length > 0 ? (
+                  {msg.isPending ? (
+                    <div className="flex items-center space-x-2.5 py-1 select-none">
+                      <div className="w-3.5 h-3.5 border-2 border-cyan-500/20 border-t-cyan-400 rounded-full animate-spin"></div>
+                      <span className="text-cyan-400 font-medium animate-pulse">元神正在推演法旨...</span>
+                    </div>
+                  ) : msg.tasks && msg.tasks.length > 0 ? (
                     <div className="space-y-1">
                       <div>{msg.content.replace(/🛸【大荒分身·天道任务分解大阵】🛸[\s\S]*?==================================================/, "").replace(/📊 进度:[\s\S]*?算力大亮/, "").trim()}</div>
                       <TaskVisualizer tasks={msg.tasks} progress={msg.progress} />
@@ -579,6 +650,21 @@ const Dashboard: React.FC = () => {
                   <span className="truncate">⚙️ 筑基与结缘</span>
                 </button>
 
+                {/* Cron Jobs Tab Button */}
+                <button
+                  onClick={() => setActiveChannel("cron")}
+                  className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
+                    activeChannel === "cron" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
+                  }`}
+                >
+                  <span className="truncate">⌛ 天道轮回 (Cron)</span>
+                  {cronJobs.length > 0 && (
+                    <span className="bg-cyan-500 text-slate-950 font-bold px-1.5 py-0.5 rounded-full text-[8px] animate-pulse shrink-0">
+                      {cronJobs.length}
+                    </span>
+                  )}
+                </button>
+
                 <hr className="border-cyan-500/10 my-1" />
 
                 {/* Dynamic Chat Rooms List */}
@@ -617,7 +703,8 @@ const Dashboard: React.FC = () => {
                 <span>
                   {activeChannel === "telemetry" && "📡 天道系统 (全域遥测与决策日志)"}
                   {activeChannel === "settings" && "⚙️ 筑基宣告与结缘管理"}
-                  {activeChannel !== "telemetry" && activeChannel !== "settings" && (
+                  {activeChannel === "cron" && "⌛ 天道轮回 (定时与循环提醒控制台)"}
+                  {activeChannel !== "telemetry" && activeChannel !== "settings" && activeChannel !== "cron" && (
                     `💬 信使室: ${activeRoom?.name || "未知频道"}`
                   )}
                 </span>
@@ -674,10 +761,10 @@ const Dashboard: React.FC = () => {
 
                 {activeChannel === "settings" && (
                   // SETTINGS & FRIENDS MANAGEMENT CHANNEL
-                  <div className="h-full flex flex-col justify-between text-[11px]">
+                  <div className="flex flex-col space-y-4 text-[11px]">
                     
-                    {/* Friends Panel (Top Half) */}
-                    <div className="flex-1 flex flex-col justify-between min-h-0 border-b border-cyan-500/10 pb-3 mb-3">
+                    {/* Friends Panel */}
+                    <div className="border-b border-cyan-500/10 pb-3">
                       <div>
                         <div className="text-cyan-400 font-bold border-b border-slate-800 pb-1 mb-1.5 flex justify-between items-center">
                           <span>🛸 结缘道友列表 (Friends Settings)</span>
@@ -688,8 +775,8 @@ const Dashboard: React.FC = () => {
                         </p>
                       </div>
 
-                      {/* Friends list scroll area */}
-                      <div className="flex-1 overflow-y-auto space-y-1 pr-1 text-[10px] max-h-[140px]">
+                      {/* Friends list area */}
+                      <div className="space-y-1 text-[10px] max-h-[140px] overflow-y-auto pr-1">
                         {friends.length === 0 ? (
                           <p className="text-slate-500 text-center italic mt-6 text-[9px]">暂无结缘道友。请在下方输入名号结缘。</p>
                         ) : (
@@ -732,8 +819,10 @@ const Dashboard: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Commander Box (Bottom Half) */}
-                    <div className="shrink-0">
+
+
+                    {/* Commander Box */}
+                    <div className="shrink-0 pb-1">
                       <div className="text-cyan-400 font-bold border-b border-slate-800 pb-1 mb-1.5 flex justify-between items-center">
                         <span>🎮 筑基接引指挥部 (Commander Center)</span>
                       </div>
@@ -777,7 +866,122 @@ const Dashboard: React.FC = () => {
                   </div>
                 )}
 
-                {activeChannel !== "telemetry" && activeChannel !== "settings" && (
+                {activeChannel === "cron" && (
+                  // CELESTIAL ORBIT & CRON CONTROLLER
+                  <div className="flex flex-col h-full overflow-y-auto space-y-4 p-4 text-[11px] custom-scrollbar">
+                    
+                    {/* Core HUD */}
+                    <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 to-cyan-950/40 border border-cyan-500/20 rounded-lg p-4 flex items-center space-x-4 neon-cyan shrink-0">
+                      <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
+                        {/* Spinning Orbit rings */}
+                        <div className="absolute inset-0 border-2 border-dashed border-cyan-500/30 rounded-full animate-spin" style={{ animationDuration: '10s' }} />
+                        <div className="absolute inset-2 border border-dotted border-cyan-400/50 rounded-full animate-spin" style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
+                        <div className="absolute inset-4 bg-cyan-950/80 border border-cyan-500/40 rounded-full flex items-center justify-center font-bold text-cyan-400 text-xs shadow-[0_0_12px_rgba(6,182,212,0.4)] animate-pulse">
+                          ☯️
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <div className="text-cyan-400 font-bold text-xs tracking-wider flex items-center space-x-2">
+                          <span>⌛ 天道轮回法轨中心 (Celestial Orbit)</span>
+                          <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono text-[8px] px-1.5 py-0.2 rounded animate-pulse">
+                            ENGINE ACTIVE
+                          </span>
+                        </div>
+                        <p className="text-slate-400 text-[10px] leading-relaxed max-w-md">
+                          大荒最神秘的「天道轮回大阵」高维投影仪。此机枢由您以神魂令召，在后台源源不断流转，代行因果。您在此可洞察周天轨道，并将任意行将泛滥之提醒法轨在萌芽中「撤出天道轮回」！
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Stats summary row */}
+                    <div className="grid grid-cols-3 gap-2 shrink-0">
+                      <div className="bg-slate-900/40 border border-slate-800 p-2 rounded-lg text-center">
+                        <div className="text-slate-500 text-[8px] uppercase tracking-wider font-mono">活动法轨数</div>
+                        <div className="text-cyan-400 text-lg font-mono font-bold">{cronJobs.length}</div>
+                      </div>
+                      <div className="bg-slate-900/40 border border-slate-800 p-2 rounded-lg text-center">
+                        <div className="text-slate-500 text-[8px] uppercase tracking-wider font-mono">当值神魂</div>
+                        <div className="text-slate-300 text-xs font-bold truncate">{agentState.name}</div>
+                      </div>
+                      <div className="bg-slate-900/40 border border-slate-800 p-2 rounded-lg text-center">
+                        <div className="text-slate-500 text-[8px] uppercase tracking-wider font-mono">大轨自检频率</div>
+                        <div className="text-amber-400 text-xs font-bold font-mono">10s 灵镜扫描</div>
+                      </div>
+                    </div>
+
+                    {/* Detailed Job Cards List */}
+                    <div className="flex-1 min-h-0 flex flex-col">
+                      <div className="text-cyan-400 font-bold border-b border-slate-800 pb-1.5 mb-2.5 flex justify-between items-center shrink-0">
+                        <span>🛰️ 后台流转法阵列表 ({cronJobs.length})</span>
+                      </div>
+                      
+                      <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+                        {cronJobs.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center py-12 px-4 border border-dashed border-slate-800 rounded-lg bg-slate-950/20 text-center space-y-3 my-auto">
+                            <span className="text-3xl animate-spin opacity-30 select-none" style={{ animationDuration: '8s' }}>🌀</span>
+                            <div className="space-y-1">
+                              <p className="text-slate-400 font-bold">天道澄澈，诸尘寂灭</p>
+                              <p className="text-slate-500 text-[10px] max-w-xs">
+                                尊驾目前未曾勒石定规。请在左侧【Window A】吩咐输入框中降下法旨：
+                              </p>
+                              <div className="bg-slate-950/60 border border-slate-900 px-2 py-1 rounded font-mono text-[9px] text-amber-500/80 inline-block">
+                                “提醒我：1分钟后拿身份证” 或 “1分钟到了该喝水了”
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          cronJobs.map((job) => {
+                            // Translate cron expression to human-readable
+                            let humanExpr = "天道设定：自主周期";
+                            if (job.cronExpression === "* * * * *") humanExpr = "周天轮转：每隔 1 分钟触发";
+                            else if (job.cronExpression.startsWith("*/")) {
+                              const mins = job.cronExpression.split(" ")[0].substring(2);
+                              humanExpr = `周天轮转：每隔 ${mins} 分钟触发`;
+                            }
+                            
+                            return (
+                              <div key={job.id} className="relative group bg-slate-900/30 border border-slate-800 hover:border-cyan-500/30 p-3 rounded-lg flex justify-between items-start space-x-4 transition shadow-md">
+                                <div className="absolute top-0 right-0 -mt-1 -mr-1 bg-cyan-500 text-slate-950 font-bold font-mono text-[7px] px-1 rounded transform rotate-1 group-hover:scale-105 transition">
+                                  ID: {job.id.substring(0, 8)}
+                                </div>
+                                
+                                <div className="flex-1 space-y-1.5 min-w-0">
+                                  <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+                                    <span className="text-slate-200 font-mono font-bold tracking-wide break-all text-[11px]">{job.cronExpression}</span>
+                                    <span className="text-cyan-400 text-[9px] bg-cyan-950/50 px-1.5 py-0.2 rounded border border-cyan-900/40">{humanExpr}</span>
+                                  </div>
+                                  
+                                  <div className="text-slate-300 font-medium text-[11px] break-all leading-normal bg-slate-950/40 border border-slate-900/60 p-2 rounded">
+                                    <span className="text-amber-500/80 font-bold text-[9px] block mb-0.5">📜 奉行法旨在案</span>
+                                    {job.command}
+                                  </div>
+                                  
+                                  <div className="flex items-center space-x-4 text-[9px] text-slate-500 font-mono">
+                                    <span>创建时刻: {new Date(job.createdAt).toLocaleString()}</span>
+                                    {job.lastRunAt && (
+                                      <span className="text-cyan-500/80">上次做法: {new Date(job.lastRunAt).toLocaleString()}</span>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                <button
+                                  onClick={() => cancelCronJob(job.id)}
+                                  className="self-center px-3 py-2 bg-red-950/30 hover:bg-red-900/60 border border-red-500/30 hover:border-red-400/60 text-red-400 hover:text-red-300 rounded font-bold text-[10px] tracking-wide cursor-pointer transition active:scale-95 shrink-0"
+                                >
+                                  撤销法轨 ✖
+                                </button>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeChannel !== "telemetry" && activeChannel !== "settings" && activeChannel !== "cron" && (
                   // WECHAT CHAT BUBBLES WINDOWS (Isolated message history!)
                   <div className="h-full flex flex-col justify-between">
                     
