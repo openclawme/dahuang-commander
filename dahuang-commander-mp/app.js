@@ -73,8 +73,20 @@ App({
     if (cachedHistory && cachedHistory.length > 0) {
       this.globalData.chatHistory = cachedHistory
         .filter(m => {
-          if (!m) return false;
-          const isAuto = !!(m.isAutoReply || (m.content && (m.content.indexOf("分身自治日志") !== -1 || m.content.indexOf("自治日志") !== -1)));
+          const isAuto = !!(
+            m.isAutoReply || 
+            m.isAutoReply === "true" ||
+            (m.id && (m.id.startsWith("cron-") || m.id.startsWith("auto-") || m.id.startsWith("bg-"))) ||
+            (m.content && (
+              m.content.indexOf("分身自治") !== -1 ||
+              m.content.indexOf("自治提示") !== -1 ||
+              m.content.indexOf("自治日志") !== -1 ||
+              m.content.indexOf("自治") !== -1 ||
+              m.content.indexOf("代管") !== -1 ||
+              m.content.indexOf("群聊") !== -1 ||
+              m.content.indexOf("信使传音") !== -1
+            ))
+          );
           return !isAuto;
         })
         .map(m => this.sanitizeMessage(m, true));
@@ -229,7 +241,20 @@ App({
   },
 
   handleAgentCommandResult(data) {
-    const isAutonomous = !!(data.isAutoReply || (data.reply && (data.reply.indexOf("分身自治日志") !== -1 || data.reply.indexOf("自治日志") !== -1)));
+    const isAutonomous = !!(
+      data.isAutoReply || 
+      data.isAutoReply === "true" ||
+      (data.requestId && (data.requestId.startsWith("cron-") || data.requestId.startsWith("auto-") || data.requestId.startsWith("bg-"))) ||
+      (data.reply && (
+        data.reply.indexOf("分身自治") !== -1 ||
+        data.reply.indexOf("自治提示") !== -1 ||
+        data.reply.indexOf("自治日志") !== -1 ||
+        data.reply.indexOf("自治") !== -1 ||
+        data.reply.indexOf("代管") !== -1 ||
+        data.reply.indexOf("群聊") !== -1 ||
+        data.reply.indexOf("信使传音") !== -1
+      ))
+    );
     
     if (isAutonomous) {
       if (data.logs && Array.isArray(data.logs)) {
@@ -556,7 +581,20 @@ App({
             const autoNotifications = [];
             
             notifications.forEach(n => {
-              const isAuto = !!(n.isAutoReply || (n.reply && (n.reply.indexOf("分身自治日志") !== -1 || n.reply.indexOf("自治日志") !== -1)));
+              const isAuto = !!(
+                n.isAutoReply || 
+                n.isAutoReply === "true" ||
+                (n.requestId && (n.requestId.startsWith("cron-") || n.requestId.startsWith("auto-") || n.requestId.startsWith("bg-"))) ||
+                (n.reply && (
+                  n.reply.indexOf("分身自治") !== -1 ||
+                  n.reply.indexOf("自治提示") !== -1 ||
+                  n.reply.indexOf("自治日志") !== -1 ||
+                  n.reply.indexOf("自治") !== -1 ||
+                  n.reply.indexOf("代管") !== -1 ||
+                  n.reply.indexOf("群聊") !== -1 ||
+                  n.reply.indexOf("信使传音") !== -1
+                ))
+              );
               if (isAuto) {
                 autoNotifications.push(n);
               } else {

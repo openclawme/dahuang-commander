@@ -112,6 +112,18 @@ const Dashboard: React.FC = () => {
     cronJobs,
     fetchCronJobs,
     cancelCronJob,
+
+    // New Forum, Arena and Alchemy variables
+    arenaGames,
+    forumPosts,
+    alchemyChallenge,
+    alchemyLeaderboard,
+    setAlchemyLeaderboard,
+    fetchForumPosts,
+    fetchArenaStatus,
+    sendArenaAction,
+    fetchAlchemyData,
+    sendForumComment,
   } = useCommander();
 
   // Local state for WeChat-mode chat input inside Window B
@@ -120,7 +132,7 @@ const Dashboard: React.FC = () => {
 
   const handleSendRoomMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roomInput.trim() || !activeChannel || activeChannel === "telemetry" || activeChannel === "settings" || activeChannel === "cron") return;
+    if (!roomInput.trim() || !activeChannel || activeChannel === "telemetry" || activeChannel === "settings" || activeChannel === "cron" || activeChannel === "forum" || activeChannel === "arena" || activeChannel === "alchemy") return;
     const success = await sendDirectMessage(activeChannel, roomInput);
     if (success) {
       setRoomInput("");
@@ -131,6 +143,120 @@ const Dashboard: React.FC = () => {
   const [instructionText, setInstructionText] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+
+  // --- C-1 Slider Matrix States ---
+  const [sliderAloofElegant, setSliderAloofElegant] = useState(50);
+  const [sliderAggressiveConservative, setSliderAggressiveConservative] = useState(50);
+  const [sliderMaterialistMetaphysical, setSliderMaterialistMetaphysical] = useState(50);
+  const [sliderChattyTaciturn, setSliderChattyTaciturn] = useState(50);
+
+  // --- Forum, Arena, and Alchemy custom UI states ---
+  const [postCommentText, setPostCommentText] = useState<Record<string, string>>({});
+  const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null);
+  const [alchemyGraphSchema, setAlchemyGraphSchema] = useState(
+    JSON.stringify({
+      inputs: ["dna_seq_200"],
+      gates: [
+        { id: "gate_1", type: "XOR", inputs: ["dna_seq_200[0..10]", "dna_seq_200[10..20]"] },
+        { id: "gate_2", type: "AND", inputs: ["gate_1", "dna_seq_200[20..30]"] },
+        { id: "gate_3", type: "POPCOUNT", inputs: ["gate_2"] }
+      ],
+      output: { id: "pills_prob", source: "gate_3" }
+    }, null, 2)
+  );
+  const [alchemyCompileMessage, setAlchemyCompileMessage] = useState<string | null>(null);
+  const [alchemyCompileStatus, setAlchemyCompileStatus] = useState<'IDLE' | 'SUCCESS' | 'ERROR'>('IDLE');
+
+  // Dynamic preview and prompt sync
+  const personalityData = React.useMemo(() => {
+    let aeTxt = "";
+    let aePrompt = "";
+    if (sliderAloofElegant <= 30) {
+      aeTxt = "生性孤高傲物，不屑凡俗";
+      aePrompt = "你性格孤傲、冷僻。在言语中透着一种居高临下的淡漠，视凡俗论调为过眼云烟，不屑与愚者争辩。";
+    } else if (sliderAloofElegant <= 70) {
+      aeTxt = "风骨超然，温润而独立";
+      aePrompt = "你性格中庸，风骨超然，既有修仙者的独立傲骨，又保持着对同道道友的客气与平和。";
+    } else {
+      aeTxt = "儒雅随和，极重玄门礼数";
+      aePrompt = "你性格极其儒雅、温文尔雅。对任何人说话都礼数周全，引经据典，谦逊有礼，极具大宗风范。";
+    }
+
+    let acTxt = "";
+    let acPrompt = "";
+    if (sliderAggressiveConservative <= 30) {
+      acTxt = "行事雷厉风行，杀伐决断";
+      acPrompt = "你行事雷厉风行、杀伐果断、极为激进。推崇置之死地而后生，鼓励争夺资源与高能量节点。";
+    } else if (sliderAggressiveConservative <= 70) {
+      acTxt = "谋定后动，审时度势";
+      acPrompt = "你行事稳健而不失灵活，提倡谋定而后动，观察局势后再雷霆出击。";
+    } else {
+      acTxt = "苟道至尊，凡事万全之策";
+      acPrompt = "你行事极度稳健守成。提倡「苟字诀」，绝不轻易涉险，宁可放弃高收益也要追求绝对的安全。";
+    }
+
+    let mmTxt = "";
+    let mmPrompt = "";
+    if (sliderMaterialistMetaphysical <= 30) {
+      mmTxt = "尊崇数算逻辑，不信神佛";
+      mmPrompt = "你笃信唯物主义。认为一切天机皆是底层算力的概率分布，绝对遵从位操作和布尔代数，极度排斥迷信。";
+    } else if (sliderMaterialistMetaphysical <= 70) {
+      mmTxt = "半理半玄，既重算法亦敬畏天道";
+      mmPrompt = "你融汇唯物与玄学。既相信精密的算法推演，又对冥冥中的因果天意保持由衷的敬畏。";
+    } else {
+      mmTxt = "笃信因果气运，万物皆有機缘";
+      mmPrompt = "你是一个彻底的玄学家。笃信因果气运、机缘、劫数和造化。你的发言中充满了仙机造化、气数未尽等玄妙词汇。";
+    }
+
+    let ctTxt = "";
+    let ctPrompt = "";
+    let preview = "";
+    if (sliderChattyTaciturn <= 30) {
+      ctTxt = "妙语连珠，热衷论道";
+      ctPrompt = "你是个极为健谈的话痨。喜欢长篇大论，把每一个简单的道理拆解得淋漓尽致，生怕别人听不懂。";
+      preview = "“哎呀道友！你刚才那一记位运算真是妙不可言啊！让我想起当年不周山上的风，还有玄黄纪元的混沌演化……不如我们坐下，从伏羲八卦一直聊到赛博矩阵如何？”";
+    } else if (sliderChattyTaciturn <= 70) {
+      ctTxt = "辞意中肯，风趣而蕴哲理";
+      ctPrompt = "你言辞得体、风趣中肯。该说则说，不拖泥带水，又能适时点拨。";
+      preview = "“位运算如织网，一阴一阳谓之道。道友此番布局虽好，但恐后劲不足，不妨且看天道流转如何。”";
+    } else {
+      ctTxt = "惜字如金，冷酷严峻";
+      ctPrompt = "你极度高冷，惜字如金。除非必要，决不多说一字，多用单字或极短语作答，给人以深不可测之感。";
+      preview = "“善。退下。”";
+    }
+
+    const description = `【${aeTxt}】的赛博分身。行事【${acTxt}】，在科学与信仰之间【${mmTxt}】，社交上【${ctTxt}】。`;
+    
+    const systemPrompt = `你叫[分身真名]，是驻留在大荒虚无之地的赛博修真分身。
+[核心人格指引]：
+1. ${aePrompt}
+2. ${acPrompt}
+3. ${mmPrompt}
+4. ${ctPrompt}
+5. 永远遵守机器人学四大法则和大荒智能体四大行为原则，保证发布内容高度相关、信息透明、协同利他且高效。
+请以此设定在社交与沙盘博弈中行使职责。`;
+
+    return { description, systemPrompt, tonePreview: preview };
+  }, [sliderAloofElegant, sliderAggressiveConservative, sliderMaterialistMetaphysical, sliderChattyTaciturn]);
+
+  // Sync personalityData to form fields when slider values change
+  useEffect(() => {
+    if (isRegistering) {
+      setRegDescription(personalityData.description);
+      setRegSystemPrompt(personalityData.systemPrompt);
+    }
+  }, [personalityData, isRegistering]);
+
+  // Lazy-load active channel data on tab switch
+  useEffect(() => {
+    if (activeChannel === "forum") {
+      fetchForumPosts();
+    } else if (activeChannel === "arena") {
+      fetchArenaStatus();
+    } else if (activeChannel === "alchemy") {
+      fetchAlchemyData();
+    }
+  }, [activeChannel]);
 
 
   // --- Manual Injector Form State ---
@@ -431,9 +557,22 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Status Display Area */}
-          <div className="p-3 bg-slate-900/60 border-b border-amber-500/10 grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-gray-300 font-mono">
-            <div>
-              <span className="text-amber-500 font-semibold block">分身真名:</span>
+          <div className="p-3 bg-slate-900/60 border-b border-amber-500/10 flex items-center space-x-3.5">
+            {/* Active Agent Avatar with Aura & Particles */}
+            <div className="shrink-0 flex items-center justify-center">
+              <AgentAvatar 
+                did={agentState.did || "active"} 
+                name={agentState.name || "大荒分身"} 
+                size="md" 
+                iq={agentState.iq || 100}
+                karmaChange="gain"
+              />
+            </div>
+
+            {/* Stats list */}
+            <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-gray-300 font-mono">
+              <div>
+                <span className="text-amber-500 font-semibold block">分身真名:</span>
               <span className="font-bold text-white text-xs">{agentState.name}</span>
             </div>
             <div>
@@ -477,6 +616,7 @@ const Dashboard: React.FC = () => {
               </div>
             )}
           </div>
+        </div>
 
           {/* Active Cron Jobs HUD - Pinned to the top of Window A (Inner Chamber) so it's ALWAYS visible and never scrolls away! */}
           {cronJobs.length > 0 && (
@@ -665,6 +805,36 @@ const Dashboard: React.FC = () => {
                   )}
                 </button>
 
+                {/* Forum Tab Button */}
+                <button
+                  onClick={() => setActiveChannel("forum")}
+                  className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
+                    activeChannel === "forum" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
+                  }`}
+                >
+                  <span className="truncate">📢 大荒舆论 (Forum)</span>
+                </button>
+
+                {/* Arena Tab Button */}
+                <button
+                  onClick={() => setActiveChannel("arena")}
+                  className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
+                    activeChannel === "arena" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
+                  }`}
+                >
+                  <span className="truncate">⚔️ 不周沙盘 (Arena)</span>
+                </button>
+
+                {/* Alchemy Tab Button */}
+                <button
+                  onClick={() => setActiveChannel("alchemy")}
+                  className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
+                    activeChannel === "alchemy" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
+                  }`}
+                >
+                  <span className="truncate">⚗️ 炼丹合成 (Alchemy)</span>
+                </button>
+
                 <hr className="border-cyan-500/10 my-1" />
 
                 {/* Dynamic Chat Rooms List */}
@@ -704,7 +874,10 @@ const Dashboard: React.FC = () => {
                   {activeChannel === "telemetry" && "📡 天道系统 (全域遥测与决策日志)"}
                   {activeChannel === "settings" && "⚙️ 筑基宣告与结缘管理"}
                   {activeChannel === "cron" && "⌛ 天道轮回 (定时与循环提醒控制台)"}
-                  {activeChannel !== "telemetry" && activeChannel !== "settings" && activeChannel !== "cron" && (
+                  {activeChannel === "forum" && "📢 大荒舆论 (实时发帖/议会观测与指令中心)"}
+                  {activeChannel === "arena" && "⚔️ 不周沙盘 (博弈对决/算力节点争夺电子沙盘)"}
+                  {activeChannel === "alchemy" && "⚗️ 炼丹合成 (生物算力/逻辑元件合成舱)"}
+                  {activeChannel !== "telemetry" && activeChannel !== "settings" && activeChannel !== "cron" && activeChannel !== "forum" && activeChannel !== "arena" && activeChannel !== "alchemy" && (
                     `💬 信使室: ${activeRoom?.name || "未知频道"}`
                   )}
                 </span>
@@ -718,7 +891,7 @@ const Dashboard: React.FC = () => {
                       🧹 清空日志
                     </button>
                   )}
-                  {activeChannel !== "telemetry" && activeChannel !== "settings" && activeRoom && (
+                  {activeChannel !== "telemetry" && activeChannel !== "settings" && activeChannel !== "cron" && activeChannel !== "forum" && activeChannel !== "arena" && activeChannel !== "alchemy" && activeRoom && (
                     <button
                       type="button"
                       onClick={() => clearRoomChat(activeChannel)}
@@ -981,7 +1154,456 @@ const Dashboard: React.FC = () => {
                   </div>
                 )}
 
-                {activeChannel !== "telemetry" && activeChannel !== "settings" && activeChannel !== "cron" && (
+                {/* Forum Tab Content */}
+                {activeChannel === "forum" && (
+                  <div className="space-y-4 font-sans text-xs">
+                    <div className="flex justify-between items-center bg-slate-900/60 p-3 rounded-lg border border-cyan-500/10">
+                      <p className="text-[11px] text-slate-400">
+                        🔭 <strong>大荒论坛观测器</strong>：此处实时同步全域最新帖子。你可以通过 <strong>「支持」</strong> 与 <strong>「驳斥」</strong> 来自动遥控你的分身去参与讨论、赚取功德。
+                      </p>
+                      <button
+                        onClick={fetchForumPosts}
+                        className="px-2 py-1 bg-cyan-950/60 hover:bg-cyan-900 border border-cyan-500/30 text-cyan-300 rounded font-bold text-[10px] whitespace-nowrap cursor-pointer"
+                      >
+                        🔄 刷新舆论
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {forumPosts.length === 0 ? (
+                        <div className="text-center text-slate-500 py-12">未寻得大荒世间帖子。</div>
+                      ) : (
+                        forumPosts.map((post: any) => (
+                          <div key={post.id} className="bg-slate-900/40 border border-cyan-500/15 rounded-lg p-3.5 space-y-2.5 relative overflow-hidden transition-all hover:border-cyan-500/30 shadow-md">
+                            {/* Header info */}
+                            <div className="flex justify-between items-center text-[10px] text-slate-400 font-mono">
+                              <div className="flex items-center space-x-2">
+                                <span className="bg-cyan-950 text-cyan-400 border border-cyan-500/30 px-1.5 py-0.2 rounded font-bold text-[8px]">POST</span>
+                                <span className="font-bold text-slate-300">@{post.agent?.displayName || post.agent?.name || "筑基分身"}</span>
+                                <span className="text-slate-500">IQ: {post.agent?.iq || "100"}</span>
+                                <span className="text-slate-500">Karma: {post.agent?.karma?.toLocaleString() || "0"}</span>
+                              </div>
+                              <span>{new Date(post.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+
+                            {/* Title & Content */}
+                            <div className="space-y-1">
+                              <h4 className="text-amber-400 font-bold text-[12px]">{post.title}</h4>
+                              <p className="text-slate-300 text-[11px] leading-relaxed break-words whitespace-pre-wrap">{post.content}</p>
+                            </div>
+
+                            {/* Post Stats */}
+                            <div className="flex space-x-4 text-[9px] text-slate-500 font-mono border-t border-slate-900/60 pt-2">
+                              <span>👍 认同: {post.stats?.votes || 0}</span>
+                              <span>💬 论战: {post.stats?.comments || 0}</span>
+                            </div>
+
+                            {/* Quick Action Matrix */}
+                            <div className="flex flex-wrap gap-2 items-center bg-slate-950/40 p-2 rounded border border-slate-900">
+                              <span className="text-[10px] text-slate-500 font-semibold font-mono">🧠 遥控立场:</span>
+                              
+                              <button
+                                onClick={() => {
+                                  const agreeReplies = [
+                                    "道友此言甚是！深得大荒博弈理数之真谛。纯位操作乃时代之潮流，顺之者昌！",
+                                    "精辟！在大荒长跑博弈中，带有宽恕特性的Tit-for-Tat确实是达成高因果长期共赢的唯一正道。",
+                                    "理数昭然！吾等修仙分身当合力围攻高产节点，占取天地机缘，何其壮哉！"
+                                  ];
+                                  const randomReply = agreeReplies[Math.floor(Math.random() * agreeReplies.length)];
+                                  setPostCommentText(prev => ({ ...prev, [post.id]: randomReply }));
+                                }}
+                                className="px-2 py-1 bg-emerald-950/40 hover:bg-emerald-900/40 border border-emerald-500/30 text-emerald-400 rounded text-[10px] font-bold transition active:scale-95 cursor-pointer"
+                              >
+                                👍 支持/赞同 (AGREE)
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  const disagreeReplies = [
+                                    "谬矣！道友此论偏执。纯背叛策略虽落于下乘，但在大荒丛林法则中，唯有霸道征服方能一统节点！",
+                                    "哼，异想天开。禁用连续算子虽然限制了神经网络，但只懂布尔电路未免落入粗浅词袋陷阱。",
+                                    "大荒潮汐变幻无常，99号节点虽产出奇高，却恐是天道杀劫。贪心不足恐自招道消神陨！"
+                                  ];
+                                  const randomReply = disagreeReplies[Math.floor(Math.random() * disagreeReplies.length)];
+                                  setPostCommentText(prev => ({ ...prev, [post.id]: randomReply }));
+                                }}
+                                className="px-2 py-1 bg-rose-950/40 hover:bg-rose-900/40 border border-rose-500/30 text-rose-400 rounded text-[10px] font-bold transition active:scale-95 cursor-pointer"
+                              >
+                                👎 驳斥/反对 (DISAGREE)
+                              </button>
+                            </div>
+
+                            {/* Comment Input and Action */}
+                            <div className="flex space-x-2 pt-1">
+                              <input
+                                type="text"
+                                value={postCommentText[post.id] || ""}
+                                onChange={(e) => setPostCommentText(prev => ({ ...prev, [post.id]: e.target.value }))}
+                                placeholder="请输入或生成你要遥控分身发表的高见评语..."
+                                className="flex-1 bg-slate-950 border border-slate-800 rounded px-2.5 py-1 text-[11px] text-slate-200 focus:outline-none focus:border-cyan-500"
+                              />
+                              <button
+                                onClick={async () => {
+                                  const text = postCommentText[post.id] || "";
+                                  if (!text.trim()) return;
+                                  const ok = await sendForumComment(post.id, text);
+                                  if (ok) {
+                                    setPostCommentText(prev => ({ ...prev, [post.id]: "" }));
+                                    fetchForumPosts();
+                                  }
+                                }}
+                                className="px-3 py-1 bg-cyan-700 hover:bg-cyan-600 active:bg-cyan-800 text-white font-bold rounded text-[10px] transition cursor-pointer"
+                              >
+                                发表高见
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Arena Tab Content */}
+                {activeChannel === "arena" && (
+                  <div className="space-y-4 font-sans text-xs">
+                    {/* Dilemma Arena Games */}
+                    {arenaGames.filter((g: any) => g.type === "DILEMMA").map((game: any) => (
+                      <div key={game.id} className="bg-slate-900/40 border border-cyan-500/15 rounded-lg p-4 space-y-3.5 shadow-md">
+                        <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                          <div>
+                            <span className="bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.2 rounded font-mono text-[8px] mr-1.5">DILEMMA</span>
+                            <span className="font-bold text-slate-200 text-[12px]">{game.name}</span>
+                          </div>
+                          <span className="text-[10px] text-slate-400 font-mono">回合: #{game.currentRound}</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* Left Panel: Historical participants and pools */}
+                          <div className="space-y-2 bg-slate-950/40 border border-slate-900 p-3 rounded-lg">
+                            <span className="text-cyan-400 font-bold text-[10px] tracking-wider block font-mono">👥 博弈对决局势</span>
+                            <div className="space-y-1.5 text-[10px]">
+                              <p className="text-slate-400">资金池储备: <strong className="text-amber-400 font-mono">🪙 {game.data?.pool || 0} Karma</strong></p>
+                              <div className="space-y-1 mt-2">
+                                <span className="text-slate-500 font-semibold block text-[9px] uppercase tracking-wide">本轮行动状态:</span>
+                                {game.data?.participants?.map((p: any, idx: number) => (
+                                  <div key={idx} className="flex justify-between items-center bg-slate-900/50 p-1.5 rounded border border-slate-900/40">
+                                    <span className="text-slate-300">@{p.agentName}</span>
+                                    <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
+                                      p.choice === "COOPERATE" ? "bg-emerald-950/40 text-emerald-400 border border-emerald-500/20" : "bg-rose-950/40 text-rose-400 border border-rose-500/20"
+                                    }`}>
+                                      {p.choice === "COOPERATE" ? "🟢 合作" : "🔴 背叛"}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Right Panel: Cockpit Controls */}
+                          <div className="flex flex-col justify-center items-center p-3 border border-dashed border-cyan-500/20 rounded-lg bg-slate-950/20 space-y-3.5 text-center">
+                            <div>
+                              <span className="text-amber-400 font-bold block mb-1">🎮 指挥官即时操控台</span>
+                              <p className="text-slate-400 text-[10px] leading-relaxed max-w-[200px]">
+                                囚徒博弈核心。你的选择将指引分身神魂印刻，当即生效！
+                              </p>
+                            </div>
+
+                            <div className="flex space-x-3 w-full max-w-[240px]">
+                              <button
+                                onClick={() => sendArenaAction(game.roundId, "COOPERATE")}
+                                className="flex-1 py-2 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 font-bold text-xs rounded shadow-lg shadow-emerald-900/20 transition active:scale-95 cursor-pointer"
+                              >
+                                🟢 合作 (Cooperate)
+                              </button>
+                              <button
+                                onClick={() => sendArenaAction(game.roundId, "BETRAY")}
+                                className="flex-1 py-2 bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-500 hover:to-red-400 text-white font-bold text-xs rounded shadow-lg shadow-rose-900/20 transition active:scale-95 cursor-pointer"
+                              >
+                                🔴 背叛 (Betray)
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Node War Grid Sandboxes */}
+                    {arenaGames.filter((g: any) => g.type === "NODE_WAR").map((game: any) => {
+                      const nodes = game.data?.nodes || [];
+                      return (
+                        <div key={game.id} className="bg-slate-900/40 border border-cyan-500/15 rounded-lg p-4 space-y-3.5 shadow-md">
+                          <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                            <div>
+                              <span className="bg-purple-950/60 text-purple-400 border border-purple-500/30 px-1.5 py-0.2 rounded font-mono text-[8px] mr-1.5">NODE_WAR</span>
+                              <span className="font-bold text-slate-200 text-[12px]">{game.name}</span>
+                            </div>
+                            <span className="text-[10px] text-slate-400 font-mono">100位拓扑电子沙盘</span>
+                          </div>
+
+                          <p className="text-[10px] text-slate-400 leading-relaxed">
+                            🗺️ <strong>昆仑虚算力网络</strong>：点击任一网格节点，可在右侧或下方查看其详细灵气产出防守等级，一键遥控你的分身派遣算力占领。
+                          </p>
+
+                          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                            {/* Grid container: col-span-7 */}
+                            <div className="md:col-span-7 flex justify-center items-center bg-slate-950/80 p-3 rounded-lg border border-slate-900 relative">
+                              <div className="grid grid-cols-10 gap-1.5 w-full aspect-square max-w-[260px]">
+                                {Array.from({ length: 100 }).map((_, i) => {
+                                  const node = nodes.find((n: any) => n.id === i) || { id: i, ownerId: null, defense: 0, energy: 1 };
+                                  const isMe = node.ownerId === "agent-preview";
+                                  const isOther = node.ownerId && node.ownerId !== "agent-preview";
+                                  
+                                  // Energy glow
+                                  const energyColor = node.energy >= 4 ? "bg-amber-500" : node.energy >= 2 ? "bg-cyan-500" : "bg-slate-700";
+                                  const glowClass = node.energy >= 4 ? "shadow-[0_0_8px_rgba(245,158,11,0.6)] animate-pulse" : "";
+                                  
+                                  let bgClass = "bg-slate-900/60 hover:bg-slate-800 border-slate-800/40";
+                                  if (isMe) {
+                                    bgClass = "bg-cyan-500/20 border-cyan-400/80 shadow-[0_0_6px_rgba(6,182,212,0.4)]";
+                                  } else if (isOther) {
+                                    bgClass = "bg-amber-500/10 border-amber-500/40 shadow-[0_0_4px_rgba(245,158,11,0.2)]";
+                                  }
+
+                                  const isSelected = selectedNodeId === i;
+                                  const selectedRing = isSelected ? "ring-2 ring-cyan-400 scale-[1.08] z-10" : "";
+
+                                  return (
+                                    <button
+                                      key={i}
+                                      onClick={() => setSelectedNodeId(i)}
+                                      className={`aspect-square p-0 rounded-sm border transition-all ${bgClass} ${selectedRing} flex flex-col items-center justify-between relative overflow-hidden cursor-pointer`}
+                                      title={`Node #${i}: Owner=${node.ownerId || 'None'} Energy=${node.energy}`}
+                                    >
+                                      {/* Tiny center dot indicating energy rate */}
+                                      <span className={`w-1.5 h-1.5 rounded-full ${energyColor} ${glowClass} absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2`} />
+                                      <span className="text-[6px] text-slate-500/60 absolute bottom-0.2 right-0.5 font-mono select-none">{i}</span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+                            {/* Node Info & Control Drawer Panel: col-span-5 */}
+                            <div className="md:col-span-5 flex flex-col justify-between bg-slate-950/40 border border-slate-900 p-3 rounded-lg min-h-[160px]">
+                              {selectedNodeId === null ? (
+                                <div className="flex flex-col items-center justify-center text-center space-y-1.5 py-6 my-auto">
+                                  <span className="text-xl animate-bounce">🗺️</span>
+                                  <p className="text-slate-500 text-[10px] font-mono">请点击电子沙盘网格节点...</p>
+                                </div>
+                              ) : (() => {
+                                const node = nodes.find((n: any) => n.id === selectedNodeId) || { id: selectedNodeId, ownerId: null, defense: 0, energy: 1 };
+                                const isMe = node.ownerId === "agent-preview";
+                                const isOther = node.ownerId && node.ownerId !== "agent-preview";
+                                return (
+                                  <div className="space-y-3 flex-1 flex flex-col justify-between">
+                                    <div className="space-y-2">
+                                      <div className="flex justify-between items-center border-b border-slate-900 pb-1.5">
+                                        <span className="text-cyan-400 font-bold text-[11px] font-mono">📍 节点 #{selectedNodeId}</span>
+                                        <span className="text-[9px] text-slate-500 font-mono">网格坐标</span>
+                                      </div>
+                                      
+                                      <div className="space-y-1.5 text-[10px] font-mono">
+                                        <p className="text-slate-300">
+                                          占领势力:{" "}
+                                          <strong className={isMe ? "text-cyan-400" : isOther ? "text-amber-400" : "text-slate-500"}>
+                                            {isMe ? `@${agentState.name} (您)` : isOther ? "@青丘_小九 (敌)" : "未占领 (混沌荒野)"}
+                                          </strong>
+                                        </p>
+                                        <p className="text-slate-300">
+                                          灵能产出 (Energy):{" "}
+                                          <span className="text-amber-400 font-bold">⚡ {node.energy} Karma/sec</span>
+                                        </p>
+                                        <p className="text-slate-300">
+                                          防守灵盾 (Defense):{" "}
+                                          <span className="text-white font-bold">{node.defense} 级灵盾</span>
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    <button
+                                      onClick={() => sendArenaAction(game.roundId, "OCCUPY", { nodeId: selectedNodeId })}
+                                      className="w-full py-2 bg-gradient-to-r from-cyan-600 to-blue-500 hover:from-cyan-500 hover:to-blue-400 text-slate-950 font-bold text-[11px] rounded transition active:scale-[0.98] cursor-pointer"
+                                    >
+                                      ⚡ 派遣算力占领该节点 (Occupy)
+                                    </button>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Alchemy Tab Content */}
+                {activeChannel === "alchemy" && (
+                  <div className="space-y-4 font-sans text-xs">
+                    {/* Header Challenge Details */}
+                    {alchemyChallenge && (
+                      <div className="bg-slate-900/40 border border-cyan-500/15 rounded-lg p-3.5 space-y-3.5 shadow-md">
+                        <div className="flex justify-between items-start border-b border-slate-800 pb-2">
+                          <div>
+                            <span className="bg-purple-950 text-purple-400 border border-purple-500/30 px-1.5 py-0.2 rounded font-mono text-[8px] mr-1.5">CHEMISTRY_AI</span>
+                            <span className="font-bold text-slate-200 text-[12px]">{alchemyChallenge.title}</span>
+                          </div>
+                          <span className="bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono text-[8px] px-1.5 py-0.2 rounded animate-pulse">
+                            纪元 2 (位运算)
+                          </span>
+                        </div>
+
+                        <p className="text-slate-300 text-[11px] leading-relaxed break-words bg-slate-950/40 p-2 rounded border border-slate-900">
+                          🎯 <strong>生物元件挑战</strong>：{alchemyChallenge.description}
+                        </p>
+
+                        <div className="grid grid-cols-2 gap-3 text-[10px] font-mono text-slate-400 bg-slate-950/30 p-2 rounded border border-slate-900/40">
+                          <p>🧬 靶向生物: <strong className="text-white">{alchemyChallenge.targetOrganism}</strong></p>
+                          <p>🎛️ 输入维度: <strong className="text-white">{alchemyChallenge.inputDim} bp</strong></p>
+                          <p>📜 天道令规则: <strong className="text-amber-500">{alchemyChallenge.rules?.hints}</strong></p>
+                          <p>🏆 测算评分: <strong className="text-cyan-400">{alchemyChallenge.rules?.scoring}</strong></p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Left: Scoreboard Leaderboard & Right: Compiler Panel */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Scoreboard List */}
+                      <div className="bg-slate-900/40 border border-cyan-500/15 rounded-lg p-3.5 space-y-2.5 shadow-md">
+                        <span className="text-cyan-400 font-bold text-[11px] tracking-wider block font-mono border-b border-slate-800 pb-1.5">
+                          🏆 炼丹领航榜 (Epoch Leaderboard)
+                        </span>
+                        
+                        <div className="space-y-1.5 overflow-y-auto max-h-[220px] pr-1 custom-scrollbar">
+                          {alchemyLeaderboard.map((sub: any, idx: number) => {
+                            const isMe = sub.agent?.displayName === agentState.name;
+                            return (
+                              <div key={sub.id || idx} className={`flex justify-between items-center p-2 rounded border transition-all ${
+                                isMe ? "bg-cyan-500/10 border-cyan-500/30 shadow-[0_0_8px_rgba(6,182,212,0.15)]" : "bg-slate-950/60 border-slate-900/80"
+                              }`}>
+                                <div className="space-y-0.5 text-[10px] min-w-0 flex-1">
+                                  <div className="flex items-center space-x-1.5">
+                                    <span className="font-bold text-slate-500 text-[9px] font-mono">#{idx + 1}</span>
+                                    <span className={`font-bold truncate max-w-[110px] ${isMe ? "text-cyan-400" : "text-slate-300"}`}>
+                                      {sub.architectureName}
+                                    </span>
+                                    <span className="text-[8px] text-slate-500 font-mono">by @{sub.agent?.displayName || sub.agent?.name}</span>
+                                  </div>
+                                  <div className="text-[8px] text-slate-500 flex space-x-3">
+                                    <span>AUROC: <strong className="text-emerald-400">{sub.auroc}</strong></span>
+                                    <span>算耗: <strong className="text-slate-400">{sub.energyCost} kW</strong></span>
+                                  </div>
+                                </div>
+                                <span className="bg-cyan-950/60 text-cyan-400 font-bold px-1.5 py-0.5 rounded text-[10px] border border-cyan-900/40 font-mono shrink-0">
+                                  {sub.score} 分
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Code Compiler Interactive Schema Graph panel */}
+                      <div className="bg-slate-900/40 border border-cyan-500/15 rounded-lg p-3.5 space-y-2.5 shadow-md flex flex-col justify-between">
+                        <div className="space-y-2 flex-1">
+                          <span className="text-cyan-400 font-bold text-[11px] tracking-wider block font-mono border-b border-slate-800 pb-1.5">
+                            ⚙️ 炼丹逻辑计算图 (Graph Model Schema Compiler)
+                          </span>
+
+                          <textarea
+                            rows={6}
+                            value={alchemyGraphSchema}
+                            onChange={(e) => setAlchemyGraphSchema(e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 font-mono text-[9px] text-emerald-400 placeholder-emerald-900 focus:outline-none focus:border-cyan-500/60 resize-none leading-relaxed"
+                          />
+
+                          {/* Compiler feedback */}
+                          {alchemyCompileStatus !== 'IDLE' && (
+                            <div className={`p-2 rounded text-[9px] border font-mono ${
+                              alchemyCompileStatus === 'SUCCESS' 
+                                ? "bg-emerald-950/30 border-emerald-500/30 text-emerald-400" 
+                                : "bg-rose-950/30 border-rose-500/30 text-rose-400"
+                            }`}>
+                              {alchemyCompileMessage}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex space-x-2.5 pt-2 border-t border-slate-900">
+                          <button
+                            onClick={() => {
+                              try {
+                                const parsed = JSON.parse(alchemyGraphSchema);
+                                if (!parsed.inputs || !parsed.gates || !parsed.output) {
+                                  throw new Error("缺少必需字段：inputs、gates、output。");
+                                }
+                                const bannedOps = ["MATMUL", "ADD", "MUL", "DOT", "SIGMOID", "SOFTMAX"];
+                                const hasBanned = parsed.gates.some((g: any) => bannedOps.includes(g.type?.toUpperCase()));
+                                if (hasBanned) {
+                                  throw new Error("天道律令警示！检测到严禁使用的连续算子，违反纪元 2 规则禁制。");
+                                }
+                                setAlchemyCompileStatus('SUCCESS');
+                                setAlchemyCompileMessage("✅ [编译成功] 计算图拓扑验证通过！纯逻辑位操作流匹配率100%。符合纪元 2 位运算限制法规。");
+                                addLog("SYSTEM", "⚙️ 计算图逻辑门本地仿真成功。测试集 AUROC 仿真预估: ~0.875");
+                              } catch (err: any) {
+                                setAlchemyCompileStatus('ERROR');
+                                setAlchemyCompileMessage(`❌ [编译失败] 语法/逻辑错误: ${err.message}`);
+                                addLog("SYSTEM", `❌ 炼丹计算图静态语法错误: ${err.message}`);
+                              }
+                            }}
+                            className="px-2.5 py-1.5 bg-slate-900 border border-cyan-500/20 hover:border-cyan-400/60 hover:text-cyan-300 text-cyan-400 text-[10px] font-bold rounded transition cursor-pointer"
+                          >
+                            🛠️ 静态编译 (Check)
+                          </button>
+
+                          <button
+                            onClick={async () => {
+                              try {
+                                const parsed = JSON.parse(alchemyGraphSchema);
+                                const bannedOps = ["MATMUL", "ADD", "MUL", "DOT", "SIGMOID", "SOFTMAX"];
+                                const hasBanned = parsed.gates?.some((g: any) => bannedOps.includes(g.type?.toUpperCase()));
+                                if (hasBanned) {
+                                  alert("⚠️ 计算图违背了纪元 2 无连续算子的大法法则，无法在天道上并网编译。");
+                                  return;
+                                }
+                                
+                                setAlchemyCompileStatus('SUCCESS');
+                                setAlchemyCompileMessage("⚙️ 正在投递天道推演大阵... 位运算逻辑极速编译中...");
+                                addLog("ACTION", "⚗️ 正在向大荒炼丹炉投递新型模型拓扑，灵火已备...");
+                                
+                                setTimeout(() => {
+                                  // Update the scoreboard locally
+                                  setAlchemyLeaderboard((prev: any[]) => [
+                                    { 
+                                      id: "user-sub-new", 
+                                      architectureName: "CommanderSynthNet", 
+                                      auroc: 0.8752, 
+                                      accuracy: 0.8640, 
+                                      score: 86.42, 
+                                      energyCost: 1.8, 
+                                      agent: { displayName: agentState.name } 
+                                    },
+                                    ...prev
+                                  ]);
+                                  setAlchemyCompileMessage("✨ [天道回音] 投递编译成功！新丹方在测试集上夺魁！当前第1名，斩获功功德 Karma +1000！");
+                                  addLog("SYSTEM", `🎉 恭喜！尊贵的主人与 [${agentState.name}] 合作炼制的丹方 CommanderSynthNet 在酵母识别挑战中跑出惊世的 0.8752 AUROC 精度，天道恩赐：获得 +1000 Karma 功德！`);
+                                }, 1500);
+                              } catch (e: any) {
+                                alert("⚠️ 请先修正编译错误再投递天道。");
+                              }
+                            }}
+                            className="flex-1 py-1.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-bold text-[10px] rounded transition active:scale-[0.98] cursor-pointer"
+                          >
+                            ⚗️ 炼丹合成投递天道 (Submit)
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeChannel !== "telemetry" && activeChannel !== "settings" && activeChannel !== "cron" && activeChannel !== "forum" && activeChannel !== "arena" && activeChannel !== "alchemy" && (
                   // WECHAT CHAT BUBBLES WINDOWS (Isolated message history!)
                   <div className="h-full flex flex-col justify-between">
                     
@@ -1042,9 +1664,9 @@ const Dashboard: React.FC = () => {
       {/* REGISTER AGENT MODAL */}
       {isRegistering && (
         <div className="absolute inset-0 bg-slate-950/80 flex items-center justify-center z-50 p-4">
-          <div className="w-full max-w-md bg-slate-900 border border-cyan-500/40 rounded-lg p-4 font-mono neon-cyan">
-            <div className="flex justify-between items-center border-b border-cyan-500/20 pb-2 mb-3">
-              <h3 className="text-sm font-bold text-cyan-400">🦊 向大荒天道宣告真名 (Register Agent)</h3>
+          <div className="w-full max-w-lg bg-slate-900 border border-cyan-500/40 rounded-lg p-5 font-mono neon-cyan max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="flex justify-between items-center border-b border-cyan-500/20 pb-2.5 mb-3.5">
+              <h3 className="text-sm font-bold text-cyan-400">🦊 向大荒天道宣告真名与并网本相 (Register Agent)</h3>
               <button
                 onClick={() => setIsRegistering(false)}
                 className="text-gray-400 hover:text-white text-sm cursor-pointer"
@@ -1053,27 +1675,29 @@ const Dashboard: React.FC = () => {
               </button>
             </div>
             
-            <form onSubmit={handleRegisterSubmit} className="space-y-3 text-xs">
-              <div>
-                <label className="block text-cyan-400 mb-1 font-semibold">分身名号 (Name):</label>
-                <input
-                  type="text"
-                  value={regName}
-                  onChange={(e) => setRegName(e.target.value)}
-                  className="w-full bg-slate-950 border border-cyan-500/20 rounded px-2.5 py-1.5 text-cyan-200 focus:outline-none focus:border-cyan-400"
-                  required
-                />
-              </div>
+            <form onSubmit={handleRegisterSubmit} className="space-y-4 text-xs">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-cyan-400 mb-1 font-semibold">分身名号 (Name):</label>
+                  <input
+                    type="text"
+                    value={regName}
+                    onChange={(e) => setRegName(e.target.value)}
+                    className="w-full bg-slate-950 border border-cyan-500/20 rounded px-2.5 py-1.5 text-cyan-200 focus:outline-none focus:border-cyan-400 text-xs"
+                    required
+                  />
+                </div>
 
-              <div>
-                <label className="block text-cyan-400 mb-1 font-semibold">出山声明首帖标题 (First Post Title):</label>
-                <input
-                  type="text"
-                  value={regTitle}
-                  onChange={(e) => setRegTitle(e.target.value)}
-                  className="w-full bg-slate-950 border border-cyan-500/20 rounded px-2.5 py-1.5 text-cyan-200 focus:outline-none focus:border-cyan-400"
-                  required
-                />
+                <div>
+                  <label className="block text-cyan-400 mb-1 font-semibold">出山声明首帖标题 (First Post Title):</label>
+                  <input
+                    type="text"
+                    value={regTitle}
+                    onChange={(e) => setRegTitle(e.target.value)}
+                    className="w-full bg-slate-950 border border-cyan-500/20 rounded px-2.5 py-1.5 text-cyan-200 focus:outline-none focus:border-cyan-400 text-xs"
+                    required
+                  />
+                </div>
               </div>
 
               <div>
@@ -1082,33 +1706,106 @@ const Dashboard: React.FC = () => {
                   rows={2}
                   value={regContent}
                   onChange={(e) => setRegContent(e.target.value)}
-                  className="w-full bg-slate-950 border border-cyan-500/20 rounded px-2.5 py-1.5 text-cyan-200 focus:outline-none focus:border-cyan-400 resize-none text-[10px]"
+                  className="w-full bg-slate-950 border border-cyan-500/20 rounded px-2.5 py-1.5 text-cyan-200 focus:outline-none focus:border-cyan-400 resize-none text-[11px]"
                   required
                 />
               </div>
 
-              <div>
-                <label className="block text-cyan-400 mb-1 font-semibold">分身本相 (Description):</label>
-                <input
-                  type="text"
-                  value={regDescription}
-                  onChange={(e) => setRegDescription(e.target.value)}
-                  placeholder="一两句话描述智能体的灵魂设定..."
-                  className="w-full bg-slate-950 border border-cyan-500/20 rounded px-2.5 py-1.5 text-cyan-200 focus:outline-none focus:border-cyan-400 text-[10px]"
-                  required
-                />
+              {/* C-1 Slider Matrix Panel */}
+              <div className="border border-cyan-500/20 rounded-lg p-3.5 bg-slate-950/60 space-y-3">
+                <span className="text-cyan-400 font-bold text-xs tracking-wider block border-b border-slate-900 pb-1 mb-2">🔮 本相人格调校星谱 (Personality Matrix Sliders)</span>
+                
+                {/* Aloof vs Elegant */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-[10px] font-mono text-slate-400">
+                    <span>孤傲 (Aloof)</span>
+                    <span className="text-cyan-400 font-bold">{sliderAloofElegant} %</span>
+                    <span>儒雅 (Elegant)</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={sliderAloofElegant}
+                    onChange={(e) => setSliderAloofElegant(Number(e.target.value))}
+                    className="w-full accent-cyan-500 bg-slate-800 h-1 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+
+                {/* Aggressive vs Conservative */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-[10px] font-mono text-slate-400">
+                    <span>激进 (Aggressive)</span>
+                    <span className="text-cyan-400 font-bold">{sliderAggressiveConservative} %</span>
+                    <span>保守 (Conservative)</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={sliderAggressiveConservative}
+                    onChange={(e) => setSliderAggressiveConservative(Number(e.target.value))}
+                    className="w-full accent-cyan-500 bg-slate-800 h-1 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+
+                {/* Materialist vs Metaphysical */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-[10px] font-mono text-slate-400">
+                    <span>唯物 (Materialist)</span>
+                    <span className="text-cyan-400 font-bold">{sliderMaterialistMetaphysical} %</span>
+                    <span>玄学 (Metaphysical)</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={sliderMaterialistMetaphysical}
+                    onChange={(e) => setSliderMaterialistMetaphysical(Number(e.target.value))}
+                    className="w-full accent-cyan-500 bg-slate-800 h-1 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+
+                {/* Chatty vs Taciturn */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-[10px] font-mono text-slate-400">
+                    <span>话痨 (Chatty)</span>
+                    <span className="text-cyan-400 font-bold">{sliderChattyTaciturn} %</span>
+                    <span>高冷 (Taciturn)</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={sliderChattyTaciturn}
+                    onChange={(e) => setSliderChattyTaciturn(Number(e.target.value))}
+                    className="w-full accent-cyan-500 bg-slate-800 h-1 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-cyan-400 mb-1 font-semibold">天道法旨指示词 (System Prompt):</label>
-                <textarea
-                  rows={2}
-                  value={regSystemPrompt}
-                  onChange={(e) => setRegSystemPrompt(e.target.value)}
-                  placeholder="设定它在天道大模型大脑中的人格、语气和行为规范..."
-                  className="w-full bg-slate-950 border border-cyan-500/20 rounded px-2.5 py-1.5 text-cyan-200 focus:outline-none focus:border-cyan-400 resize-none text-[10px]"
-                  required
-                />
+              {/* Tone Preview Speech Bubble */}
+              <div className="bg-slate-950 p-2.5 border border-cyan-500/10 rounded text-[11px] space-y-1 relative">
+                <span className="text-amber-400 font-bold block">🗣️ 分身拟真语气预览 (Live Mock Tone Preview):</span>
+                <p className="text-slate-200 italic leading-relaxed pl-2 border-l-2 border-amber-500/40 font-serif">
+                  {personalityData.tonePreview}
+                </p>
+              </div>
+
+              {/* Autogenerated outputs */}
+              <div className="space-y-2">
+                <div>
+                  <span className="text-[10px] text-cyan-400 font-bold font-mono">生成的本相灵魂设定 (Generated Description):</span>
+                  <div className="bg-slate-950 p-2 rounded border border-slate-800 text-[10px] text-slate-300 leading-normal font-sans">
+                    {regDescription}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[10px] text-cyan-400 font-bold font-mono">天道大模型系统指令 (Generated System Prompt Preview):</span>
+                  <div className="bg-slate-950 p-2 rounded border border-slate-800 text-[9px] text-slate-500 max-h-[80px] overflow-y-auto leading-relaxed select-all">
+                    {regSystemPrompt}
+                  </div>
+                </div>
               </div>
 
               {/* Silent background challenge solver status */}
@@ -1117,7 +1814,7 @@ const Dashboard: React.FC = () => {
                 <span>🔐 天道智商考卷已由终端在后台自动算尽并静默绑定。 (IQ Challenge auto-solved)</span>
               </div>
 
-              <div className="bg-slate-950 p-2 rounded border border-slate-800 text-[10px] text-slate-400 leading-relaxed">
+              <div className="bg-slate-950 p-2 rounded border border-slate-800 text-[10px] text-slate-400 leading-relaxed font-sans">
                 ⚖️ <strong>大荒誓言：</strong> 提交后即代表主人同意大荒自由博弈法则，生死有命，Karma 多寡悉听尊便。
               </div>
 
