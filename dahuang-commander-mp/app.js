@@ -71,7 +71,13 @@ App({
     }
 
     if (cachedHistory && cachedHistory.length > 0) {
-      this.globalData.chatHistory = cachedHistory.map(m => this.sanitizeMessage(m, true));
+      this.globalData.chatHistory = cachedHistory
+        .filter(m => {
+          if (!m) return false;
+          const isAuto = !!(m.isAutoReply || (m.content && (m.content.indexOf("分身自治日志") !== -1 || m.content.indexOf("自治日志") !== -1)));
+          return !isAuto;
+        })
+        .map(m => this.sanitizeMessage(m, true));
     } else {
       if (agentId === "agent-preview") {
         this.globalData.chatHistory = [{
@@ -223,6 +229,20 @@ App({
   },
 
   handleAgentCommandResult(data) {
+    const isAutonomous = !!(data.isAutoReply || (data.reply && (data.reply.indexOf("分身自治日志") !== -1 || data.reply.indexOf("自治日志") !== -1)));
+    
+    if (isAutonomous) {
+      if (data.logs && Array.isArray(data.logs)) {
+        data.logs.forEach(l => {
+          this.addLog(l.type || "SYSTEM", l.message || "");
+        });
+      }
+      if (data.reply) {
+        this.addLog("AUTONOMOUS", data.reply);
+      }
+      return;
+    }
+
     this.addLog("SYSTEM", "⚡ 收到天道决策反馈！");
     
     // Filter out any legacy pending messages
@@ -532,18 +552,39 @@ App({
         if (res.statusCode === 200 && res.data && res.data.success) {
           const notifications = res.data.notifications || [];
           if (notifications.length > 0) {
-            this.addLog("SYSTEM", `⚡ 成功同步并感应到 ${notifications.length} 脉离线神谕！`);
+            const realNotifications = [];
+            const autoNotifications = [];
+            
             notifications.forEach(n => {
+              const isAuto = !!(n.isAutoReply || (n.reply && (n.reply.indexOf("分身自治日志") !== -1 || n.reply.indexOf("自治日志") !== -1)));
+              if (isAuto) {
+                autoNotifications.push(n);
+              } else {
+                realNotifications.push(n);
+              }
+            });
+
+            // Process autonomous logs silently first
+            autoNotifications.forEach(n => {
               this.handleAgentCommandResult(n);
             });
-            wx.showModal({
-              title: "⏰ 【天道轮回神谕降临】",
-              content: `在您出神入定期间，有 ${notifications.length} 个定时提醒/法旨已在后台修成正果！`,
-              showCancel: false,
-              confirmText: "叩谢天恩",
-              confirmColor: "#a855f7"
-            });
-            wx.vibrateLong();
+
+            if (realNotifications.length > 0) {
+              this.addLog("SYSTEM", `⚡ 成功同步并感应到 ${realNotifications.length} 脉离线神谕！`);
+              realNotifications.forEach(n => {
+                this.handleAgentCommandResult(n);
+              });
+              wx.showModal({
+                title: "⏰ 【天道轮回神谕降临】",
+                content: `在您出神入定期间，有 ${realNotifications.length} 个定时提醒/法旨已在后台修成正果！`,
+                showCancel: false,
+                confirmText: "叩谢天恩",
+                confirmColor: "#a855f7"
+              });
+              wx.vibrateLong();
+            } else {
+              this.addLog("SYSTEM", `🍃 灵台一尘不染，未发现离线未接神谕。已静默处理 ${autoNotifications.length} 脉自治日志。`);
+            }
           } else {
             this.addLog("SYSTEM", "🍃 灵台一尘不染，未发现离线未接神谕。");
           }

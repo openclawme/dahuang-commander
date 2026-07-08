@@ -15,8 +15,8 @@ async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
   const uploadResult = await ci.upload({
     project,
-    version: '1.3.5',
-    desc: '「我是分身」微信小程序 1.3.5 版本：完美实现高维心流与等待语句的智能拦截，统一转换为精美的动态旋转入定图（cyber-spinner），并在载入本地历史缓存时予以状态消噪，极大提升交互界面的高级感。',
+    version: '1.3.6',
+    desc: '「我是分身」微信小程序 1.3.6 版本：彻底拦截来自微信群聊及定时任务的「分身自治日志」等背景遥测日志，实现零底噪、零打扰的本尊私聊交互体验；背景日志将完美保留在 Dev 开发者日志底栏中。',
     setting: {
       es6: true,
       minify: true,
