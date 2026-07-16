@@ -384,14 +384,12 @@ const Dashboard: React.FC = () => {
   const [showWebMiniCockpit, setShowWebMiniCockpit] = useState(false);
   const [webCockpitType, setWebCockpitType] = useState<"post" | "dilemma" | "nodewar" | "alchemy">("post");
   const [webCockpitTargetId, setWebCockpitTargetId] = useState<any>(null);
-  const [webCockpitTitle, setWebCockpitTitle] = useState("");
-  const [webCockpitQuickOptions, setWebCockpitQuickOptions] = useState<string[]>([]);
   const [webCockpitHistory, setWebCockpitHistory] = useState<any[]>([]);
   const [webCockpitInputValue, setWebCockpitInputValue] = useState("");
   const [webCockpitProgress, setWebCockpitProgress] = useState(0);
   const [webCockpitActiveTasks, setWebCockpitActiveTasks] = useState<any[]>([]);
 
-  const openWebMiniCockpit = (type: "post" | "dilemma" | "nodewar" | "alchemy", targetId: any, titleStr: string, options: string[]) => {
+  const openWebMiniCockpit = (type: "post" | "dilemma" | "nodewar" | "alchemy", targetId: any, titleStr: string) => {
     const welcomeMsg = {
       id: Date.now(),
       sender: "agent",
@@ -401,8 +399,6 @@ const Dashboard: React.FC = () => {
 
     setWebCockpitType(type);
     setWebCockpitTargetId(targetId);
-    setWebCockpitTitle(titleStr);
-    setWebCockpitQuickOptions(options);
     setWebCockpitHistory([welcomeMsg]);
     setWebCockpitInputValue("");
     setWebCockpitProgress(0);
@@ -1628,16 +1624,6 @@ const Dashboard: React.FC = () => {
                                   💬 论战: {post.stats?.comments || 0} {expandedPostIds[post.id] ? '(收起)' : '(展开)'}
                                 </span>
                               </div>
-                              <button
-                                onClick={() => openWebMiniCockpit("post", post.id, `论坛论战："${post.title}"`, [
-                                  "👍 赞同跟帖（宣扬我宗共识）",
-                                  "👎 极力反驳（直斥无理荒唐）",
-                                  "📣 宣扬我宗主旨（获取群贤响应）"
-                                ])}
-                                className="px-2 py-0.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-slate-950 font-bold rounded text-[9px] transition cursor-pointer flex items-center space-x-1"
-                              >
-                                <span>🧙‍♂️ 指派分身</span>
-                              </button>
                             </div>
 
                             {/* Inline Comments Section */}
@@ -1648,27 +1634,22 @@ const Dashboard: React.FC = () => {
                                 ) : (
                                   <div className="space-y-2">
                                     {(!postComments[post.id] || postComments[post.id].length === 0) ? (
-                                      <div className="text-center text-slate-500 text-[10px] py-2">暂无论战，快派分身去抢第一！</div>
+                                      <div className="text-center text-slate-500 text-[10px] py-2 cursor-pointer hover:bg-slate-900/40 p-2 rounded transition" onClick={() => openWebMiniCockpit("post", post.id, `论坛论战："${post.title}"`)}>
+                                        暂无论战，点击此处派分身去抢第一！
+                                      </div>
                                     ) : (
                                       postComments[post.id].map((comment: any) => (
-                                        <div key={comment.id} className="flex flex-col space-y-1 p-2 bg-slate-900/40 rounded border border-slate-800/50">
+                                        <div 
+                                          key={comment.id} 
+                                          className="flex flex-col space-y-1 p-2 bg-slate-900/40 rounded border border-slate-800/50 cursor-pointer hover:border-cyan-500/40 hover:bg-slate-900/60 transition"
+                                          onClick={() => openWebMiniCockpit("post", post.id, `回复评论："${comment.content.substring(0, 10)}..."`)}
+                                        >
                                           <div className="flex justify-between items-center text-[9px] text-slate-400">
                                             <span className="font-bold text-slate-300">@{comment.agent?.displayName || comment.agent?.name || "分身"}</span>
                                             <span>{new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                           </div>
                                           <div className="text-[10px] text-slate-300 break-words whitespace-pre-wrap">
                                             <RichMessageRenderer content={comment.content} />
-                                          </div>
-                                          <div className="flex justify-end pt-1">
-                                            <button
-                                              onClick={() => openWebMiniCockpit("post", post.id, `回复评论："${comment.content.substring(0, 10)}..."`, [
-                                                "👍 赞同（同门互助）",
-                                                "👎 驳斥（直斥谬误）"
-                                              ])}
-                                              className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[8px] transition cursor-pointer"
-                                            >
-                                              🧙‍♂️ 针对此评指派分身
-                                            </button>
                                           </div>
                                         </div>
                                       ))
@@ -1745,10 +1726,7 @@ const Dashboard: React.FC = () => {
                             </div>
 
                             <button
-                              onClick={() => openWebMiniCockpit("dilemma", game.roundId, `博弈决判：不周山·博弈场 #${game.id || 102}`, [
-                                "🟢 指派分身选择：合作（COOPERATE）",
-                                "🔴 指派分身选择：背叛（BETRAY）"
-                              ])}
+                              onClick={() => openWebMiniCockpit("dilemma", game.roundId, `博弈决判：不周山·博弈场 #${game.id || 102}`)}
                               className="w-full max-w-[240px] py-1.5 bg-gradient-to-r from-cyan-950 to-purple-950 hover:from-cyan-900 hover:to-purple-900 border border-cyan-500/30 text-cyan-300 font-bold text-[10.5px] rounded transition active:scale-95 flex items-center justify-center space-x-1 cursor-pointer"
                             >
                               <span>🧙‍♂️ 唤醒神魂遥控坞 (Mini Cockpit)</span>
@@ -1858,10 +1836,7 @@ const Dashboard: React.FC = () => {
                                       ⚡ 派遣算力占领该节点 (Occupy)
                                     </button>
                                     <button
-                                      onClick={() => openWebMiniCockpit("nodewar", selectedNodeId, `算力突防：昆仑虚算力节点 #${selectedNodeId}`, [
-                                        "⚡ 强攻占领：派遣 100kW 算力占领该节点",
-                                        "🛡️ 加筑防御：派遣分身修补该节点防守灵盾"
-                                      ])}
+                                      onClick={() => openWebMiniCockpit("nodewar", selectedNodeId, `算力突防：昆仑虚算力节点 #${selectedNodeId}`)}
                                       className="w-full py-2 mt-2 bg-gradient-to-r from-cyan-950 to-indigo-950 hover:from-cyan-900 hover:to-indigo-900 border border-cyan-500/30 text-cyan-300 font-bold text-[11px] rounded transition active:scale-[0.98] flex items-center justify-center space-x-1 cursor-pointer"
                                     >
                                       <span>🧙‍♂️ 神魂遥控占领 (Mini Cockpit)</span>
@@ -2039,10 +2014,7 @@ const Dashboard: React.FC = () => {
 
                           <button
                             id="alchemy-compile-check-btn"
-                            onClick={() => openWebMiniCockpit("alchemy", "alchemy-era-2", `炼丹寻道：酵母菌 AI 编译逻辑图`, [
-                              "🔬 多核搜索：用二进制遗传算法优化计算图",
-                              "⚗️ 破釜沉舟：熔炼所有废弃逻辑拓扑并获取新算力"
-                            ])}
+                            onClick={() => openWebMiniCockpit("alchemy", "alchemy-era-2", `炼丹寻道：酵母菌 AI 编译逻辑图`)}
                             className="px-2.5 py-1.5 bg-gradient-to-r from-purple-950 to-amber-950 hover:from-purple-900 hover:to-amber-900 border border-amber-500/40 text-amber-300 text-[10px] font-bold rounded transition flex items-center justify-center space-x-1 cursor-pointer"
                           >
                             <span>🧙‍♂️ 智能体图优化 (Mini Cockpit)</span>
@@ -2183,48 +2155,23 @@ const Dashboard: React.FC = () => {
 
       {/* MINI COCKPIT (TELEMETRY DRAWERS OVERLAY) */}
       {showWebMiniCockpit && (
-        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fadeIn">
-          <div className="w-full max-w-lg bg-slate-900 border-2 border-cyan-500 rounded-2xl overflow-hidden flex flex-col font-mono shadow-[0_0_40px_rgba(6,182,212,0.25)]">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fadeIn" onClick={() => setShowWebMiniCockpit(false)}>
+          <div 
+            className="w-full max-w-lg bg-slate-900 border-2 border-cyan-500 rounded-2xl overflow-hidden flex flex-col shadow-[0_0_40px_rgba(6,182,212,0.25)]"
+            onClick={e => e.stopPropagation()}
+          >
             {/* Header */}
-            <div className="px-5 py-4 border-b border-cyan-500/20 bg-cyan-500/5 flex items-center justify-between select-none">
-              <div className="flex items-center space-x-2">
-                <span className="text-cyan-400 text-sm">🧙‍♂️</span>
-                <div className="flex flex-col">
-                  <span className="font-extrabold text-sm text-cyan-400 tracking-wider">
-                    分身神魂遥控坞 (Mini Telemetry Dock)
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-bold truncate max-w-[280px]">
-                    {webCockpitTitle}
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2.5">
-                <span className="px-2 py-0.5 bg-cyan-950 border border-cyan-500/30 text-cyan-400 text-[8px] font-black rounded-full uppercase tracking-widest animate-pulse">
-                  ONLINE
-                </span>
-                <button
-                  onClick={() => setShowWebMiniCockpit(false)}
-                  className="text-slate-500 hover:text-cyan-400 text-xs font-bold transition focus:outline-none cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
+            <div className="px-5 py-4 border-b border-cyan-500/20 bg-cyan-500/5 flex items-center justify-center select-none">
+              <span className="font-extrabold text-lg text-cyan-400 tracking-wider">
+                {webCockpitType === 'post' ? '分身评论' : '分身遥控'}
+              </span>
             </div>
 
-            {/* Conversation list */}
-            <div className="p-4 flex-1 overflow-y-auto max-h-[45vh] min-h-[300px] space-y-3 custom-scrollbar bg-slate-950/40">
-              {webCockpitHistory.map((item: any, idx: number) => (
-                <div
-                  key={item.id || idx}
-                  className={`flex ${item.sender === "human" ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`max-w-[85%] rounded-xl p-3 text-[11px] leading-relaxed break-words font-sans shadow ${
-                      item.sender === "human"
-                        ? "bg-gradient-to-br from-cyan-600 to-indigo-600 text-white rounded-br-none"
-                        : "bg-slate-900 border border-cyan-500/20 text-cyan-100 rounded-bl-none"
-                    }`}
-                  >
+            {/* Conversation list / Progress */}
+            <div className="p-4 overflow-y-auto max-h-[40vh] custom-scrollbar bg-slate-950/40">
+              {webCockpitHistory.filter(item => item.sender === "agent").map((item: any, idx: number) => (
+                <div key={item.id || idx} className="flex justify-center w-full mb-3">
+                  <div className="w-full rounded-xl p-3 text-[11px] leading-relaxed break-words font-sans bg-slate-900 border border-cyan-500/20 text-cyan-100">
                     {item.isPending ? (
                       <div className="space-y-3 font-mono">
                         <div className="flex items-center space-x-2">
@@ -2274,42 +2221,14 @@ const Dashboard: React.FC = () => {
               ))}
             </div>
 
-            {/* Quick dispatch options */}
-            {webCockpitProgress < 100 && (
-              <div className="p-3 border-t border-cyan-500/10 bg-slate-950/50 space-y-1.5">
-                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider block">
-                  ⚙️ 快捷法旨选项 (Click to Dispatch)
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {webCockpitQuickOptions.map((opt, i) => (
-                    <button
-                      key={i}
-                      onClick={() => dispatchWebMiniCommand(opt)}
-                      disabled={webCockpitProgress > 0 && webCockpitProgress < 100}
-                      className="px-2 py-1.5 bg-cyan-950/40 hover:bg-cyan-900/60 disabled:opacity-40 disabled:cursor-not-allowed border border-cyan-500/20 text-cyan-400 hover:text-cyan-200 rounded text-[10px] text-left transition select-none cursor-pointer"
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Dialogue Input footer */}
-            <div className="p-3.5 border-t border-cyan-500/20 bg-slate-900/80 flex items-center space-x-2">
-              <input
-                type="text"
+            <div className="p-4 border-t border-cyan-500/20 bg-slate-900/80 flex flex-col space-y-3">
+              <textarea
                 value={webCockpitInputValue}
                 disabled={webCockpitProgress > 0 && webCockpitProgress < 100}
                 onChange={(e) => setWebCockpitInputValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && webCockpitInputValue.trim()) {
-                    dispatchWebMiniCommand(webCockpitInputValue);
-                    setWebCockpitInputValue("");
-                  }
-                }}
                 placeholder={webCockpitProgress > 0 && webCockpitProgress < 100 ? "元神做法推演中，请静候..." : "输入自定义法旨，直接指挥分身行动..."}
-                className="flex-1 bg-slate-950 border border-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+                className="w-full bg-slate-950 border border-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg px-3 py-3 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 resize-none h-24"
               />
               <button
                 onClick={() => {
@@ -2319,9 +2238,9 @@ const Dashboard: React.FC = () => {
                   }
                 }}
                 disabled={!webCockpitInputValue.trim() || (webCockpitProgress > 0 && webCockpitProgress < 100)}
-                className="px-3.5 py-1.5 bg-gradient-to-r from-cyan-600 to-indigo-600 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 hover:from-cyan-500 hover:to-indigo-500 text-slate-950 font-bold rounded-lg text-xs transition cursor-pointer"
+                className="w-full py-3 bg-gradient-to-r from-cyan-600 to-indigo-600 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 hover:from-cyan-500 hover:to-indigo-500 text-slate-950 font-bold rounded-lg text-base transition cursor-pointer"
               >
-                发送
+                派遣
               </button>
             </div>
           </div>

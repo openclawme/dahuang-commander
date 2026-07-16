@@ -751,8 +751,13 @@ Page({
 
   closeMiniCockpit() {
     this.setData({
-      showMiniCockpit: false
+      showMiniCockpit: false,
+      miniInputValue: ""
     });
+  },
+
+  catchModalClick() {
+    // Prevent event bubbling when clicking inside the modal
   },
 
   onMiniInputChange(e) {
