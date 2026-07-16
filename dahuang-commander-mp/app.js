@@ -23,6 +23,7 @@ App({
   },
 
   onLaunch() {
+    console.log("===我是分身微信小程序 v1.4.1 (修补 HTML 重复 style 属性) ===");
     console.log("[App] Launching...");
     
     // Retrieve cached server URL
@@ -659,5 +660,224 @@ App({
       };
     }
     return msg;
+  },
+
+  parseRichContent(content) {
+    if (!content) return { html: "", videoUrl: "", videoPoster: "" };
+
+    let html = content;
+
+    // A. Unescape HTML entities robustly with a recursive loop (handles multiple escape layers like &amp;amp;lt;)
+    let lastHtml;
+    do {
+      lastHtml = html;
+      html = html
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&#039;/g, "'")
+        .replace(/&#39;/g, "'")
+        .replace(/&apos;/g, "'");
+    } while (html !== lastHtml);
+
+    // B. Clean up triple-backtick markdown blocks robustly
+    html = html
+      .replace(/```html/gi, "")
+      .replace(/```xml/gi, "")
+      .replace(/```/g, "");
+
+    // C. Map <body> to <div> to retain its background, padding, and container styling without breaking rich-text
+    html = html.replace(/<body([^>]*)>/gi, (_, attrs) => {
+      let existingStyle = "";
+      let styleMatch = attrs.match(/style=["']([^"']*)["']/i);
+      if (styleMatch) {
+        existingStyle = styleMatch[1].trim();
+        if (existingStyle && !existingStyle.endsWith(";")) existingStyle += ";";
+      }
+      let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
+      return `<div class="html-body-wrapper" style="border-radius: 12rpx; margin: 10rpx 0; overflow: hidden; ${existingStyle}" ${cleanedAttrs}>`;
+    });
+    html = html.replace(/<\/body>/gi, "</div>");
+
+    // Clean up other wrapper tags that break WeChat's rich-text
+    html = html
+      .replace(/<!DOCTYPE[^>]*>/gi, "")
+      .replace(/<\/?html[^>]*>/gi, "")
+      .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, "")
+      .replace(/<title[^>]*>[\s\S]*?<\/title>/gi, "")
+      .replace(/<meta[^>]*>/gi, "")
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
+
+    let videoUrl = "";
+    let videoPoster = "";
+
+    // 1. Extract video tag if any: <video src="url" poster="poster"/>
+    const videoMatch = html.match(/<video[^>]+src=["']([^"']+)["'][^>]*>/i);
+    if (videoMatch) {
+      videoUrl = videoMatch[1];
+      const posterMatch = html.match(/<video[^>]+poster=["']([^"']+)["'][^>]*>/i);
+      if (posterMatch) {
+        videoPoster = posterMatch[1];
+      }
+      // Remove video tag so it doesn't try to render inside standard rich-text which is unsupported
+      html = html.replace(/<video[^>]*>([\s\S]*?<\/video>)?/gi, "");
+    }
+
+    // 2. Format custom markdowns and tags to standard styled HTML nodes for WeChat's rich-text:
+    
+    // Bold: **text**
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #fbbf24; font-weight: bold;">$1</strong>');
+    
+    // Code: `code`
+    html = html.replace(/`(.*?)`/g, '<code style="background-color: #020617; color: #34d399; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 11px; border: 1px solid #10b981;">$1</code>');
+
+    // Custom tag: <badge color="cyan|amber|emerald|rose">text</badge>
+    html = html.replace(/<badge\s+color="(\w+)"\s*>(.*?)<\/badge>/g, (_, color, text) => {
+      let bg = "#1e293b";
+      let border = "#334155";
+      let textColor = "#94a3b8";
+      if (color === "cyan") {
+        bg = "#083344";
+        border = "#155e75";
+        textColor = "#22d3ee";
+      } else if (color === "amber") {
+        bg = "#451a03";
+        border = "#78350f";
+        textColor = "#fbbf24";
+      } else if (color === "emerald") {
+        bg = "#064e3b";
+        border = "#065f46";
+        textColor = "#34d399";
+      } else if (color === "rose") {
+        bg = "#4c0519";
+        border = "#9f1239";
+        textColor = "#f43f5e";
+      }
+      return `<span style="display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: bold; font-family: monospace; background-color: ${bg}; border: 1px solid ${border}; color: ${textColor}; margin: 0 2px;">${text}</span>`;
+    });
+
+    // Custom tag: <card type="info|success|warning|error" title="...">content</card>
+    html = html.replace(/<card\s+type="(\w+)"\s+title="(.*?)"\s*>(.*?)<\/card>/gs, (_, type, title, body) => {
+      let borderColor = "#1e293b";
+      let bg = "#0f172a";
+      let titleColor = "#cbd5e1";
+      if (type === "info") {
+        borderColor = "#155e75";
+        bg = "#083344";
+        titleColor = "#22d3ee";
+      } else if (type === "success") {
+        borderColor = "#065f46";
+        bg = "#064e3b";
+        titleColor = "#34d399";
+      } else if (type === "warning") {
+        borderColor = "#78350f";
+        bg = "#451a03";
+        titleColor = "#fbbf24";
+      } else if (type === "error") {
+        borderColor = "#9f1239";
+        bg = "#4c0519";
+        titleColor = "#f43f5e";
+      }
+      return `
+        <div style="margin: 8px 0; padding: 10px; border-radius: 8px; border: 1px solid ${borderColor}; background-color: ${bg}; font-family: monospace;">
+          <div style="font-weight: bold; border-bottom: 1px solid #1e293b; padding-bottom: 4px; margin-bottom: 6px; color: ${titleColor}; font-size: 11px;">⚙️ ${title}</div>
+          <div style="color: #cbd5e1; font-size: 11px; line-height: 1.5;">${body}</div>
+        </div>
+      `;
+    });
+
+    // 3. Inject standard inline styling for native HTML tags:
+    
+    // Images: img -> styled img
+    html = html.replace(/<img([^>]+)>/gi, (_, attrs) => {
+      let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
+      return `<img style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #b45309; margin: 6px 0;" ${cleanedAttrs}>`;
+    });
+
+    // Tables: table -> styled table
+    html = html.replace(/<table([^>]*)>/gi, (_, attrs) => {
+      let existingStyle = "";
+      let styleMatch = attrs.match(/style=["']([^"']*)["']/i);
+      if (styleMatch) {
+        existingStyle = styleMatch[1].trim();
+        if (existingStyle && !existingStyle.endsWith(";")) existingStyle += ";";
+      }
+      let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
+      
+      // Detect if the table is light themed (explicitly has white or bright background)
+      let isLight = false;
+      if (existingStyle.match(/(background|background-color)\s*:\s*([^;]*)/i)) {
+        const bgVal = RegExp.$2.toLowerCase();
+        if (bgVal.includes("white") || bgVal.includes("#fff") || bgVal.includes("#fef") || bgVal.includes("#fdf") || bgVal.includes("rgba(255") || bgVal.includes("rgb(255")) {
+          isLight = true;
+        }
+      }
+      
+      // Default text color and border based on the table's background theme
+      let defaultColor = isLight ? "color: #1e293b;" : "color: #cbd5e1;";
+      let defaultBg = isLight ? "background-color: #ffffff;" : "background-color: #0b0f19;";
+      let defaultBorder = isLight ? "border: 1px solid rgba(100,116,139,0.3);" : "border: 1px solid #1e293b;";
+      
+      return `
+        <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          <table style="width: 100%; border-collapse: collapse; margin: 0; overflow: hidden; ${defaultBg} ${defaultBorder} ${defaultColor} ${existingStyle}" ${cleanedAttrs}>
+      `;
+    });
+
+    // Close the table container div
+    html = html.replace(/<\/table>/gi, "</table></div>");
+
+    // Table Headers: th -> styled th
+    html = html.replace(/<th\b([^>]*)>/gi, (_, attrs) => {
+      let existingStyle = "";
+      let styleMatch = attrs.match(/style=["']([^"']*)["']/i);
+      if (styleMatch) {
+        existingStyle = styleMatch[1].trim();
+        if (existingStyle && !existingStyle.endsWith(";")) existingStyle += ";";
+      }
+      let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
+      
+      let headerColor = "";
+      if (!existingStyle.includes("color")) {
+        headerColor = "color: inherit;";
+      }
+      
+      return `<th style="padding: 10px; font-weight: bold; font-family: monospace; font-size: 11px; text-align: left; border-bottom: 2px solid rgba(100,116,139,0.3); ${headerColor} ${existingStyle}" ${cleanedAttrs}>`;
+    });
+
+    // Table Cells: td -> styled td
+    html = html.replace(/<td\b([^>]*)>/gi, (_, attrs) => {
+      let existingStyle = "";
+      let styleMatch = attrs.match(/style=["']([^"']*)["']/i);
+      if (styleMatch) {
+        existingStyle = styleMatch[1].trim();
+        if (existingStyle && !existingStyle.endsWith(";")) existingStyle += ";";
+      }
+      let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
+      
+      let cellColor = "";
+      if (!existingStyle.includes("color")) {
+        cellColor = "color: inherit;";
+      }
+      
+      return `<td style="padding: 10px; border-bottom: 1px solid rgba(100,116,139,0.15); font-size: 11px; ${cellColor} ${existingStyle}" ${cleanedAttrs}>`;
+    });
+
+    // Blockquotes: blockquote -> styled blockquote
+    html = html.replace(/<blockquote([^>]*)>/gi, (_, attrs) => {
+      let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
+      return `<blockquote style="border-left: 3px solid #f59e0b; background-color: #1c1917; padding: 6px 12px; margin: 6px 0; border-radius: 4px; color: #cbd5e1; font-style: italic;" ${cleanedAttrs}>`;
+    });
+
+    if (html.indexOf("<div") === -1 && html.indexOf("<p") === -1 && html.indexOf("<table") === -1) {
+      html = html.split("\n").join("<br/>");
+    }
+
+    return {
+      html,
+      videoUrl,
+      videoPoster
+    };
   }
 });

@@ -1,7 +1,12 @@
+@import "../index/index.wxss";
+
 .container {
   padding: 24rpx;
   background-color: #020617;
   min-height: 100vh;
+  height: auto;
+  overflow-y: auto;
+  display: block;
   box-sizing: border-box;
 }
 
@@ -530,3 +535,98 @@
 .msg-ACTION { color: #fef08a; }
 .msg-CHAT { color: #fbcfe8; }
 .msg-ERROR { color: #fecdd3; }
+
+/* Personality Sliders Calibration & Speech Preview (C-1) */
+.personality-sliders-section {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1rpx solid rgba(0, 240, 255, 0.15);
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-top: 24rpx;
+  margin-bottom: 24rpx;
+}
+
+.section-title {
+  font-size: 24rpx;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.section-desc {
+  font-size: 18rpx;
+  color: #64748b;
+  line-height: 1.4;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.slider-item {
+  margin-bottom: 20rpx;
+}
+
+.slider-labels {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.slider-label-left {
+  font-size: 18rpx;
+  color: #64748b;
+  width: 100rpx;
+  text-align: left;
+}
+
+.slider-label-center {
+  font-size: 18rpx;
+  font-weight: bold;
+  color: #94a3b8;
+}
+
+.slider-label-right {
+  font-size: 18rpx;
+  color: #64748b;
+  width: 100rpx;
+  text-align: right;
+}
+
+.cyber-slider {
+  margin: 0;
+  padding: 0;
+}
+
+/* Tone Preview Bubble Styles */
+.tone-preview-bubble {
+  background: rgba(2, 6, 23, 0.6);
+  border-left: 6rpx solid #00f0ff;
+  border-radius: 0 16rpx 16rpx 0;
+  padding: 16rpx 20rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 15rpx rgba(0, 240, 255, 0.1);
+}
+
+.bubble-title-settings {
+  font-size: 18rpx;
+  font-weight: bold;
+  color: #00f0ff;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.bubble-body-settings {
+  min-height: 48rpx;
+  display: flex;
+  align-items: center;
+}
+
+.bubble-text-settings {
+  font-size: 20rpx;
+  color: #e2e8f0;
+  line-height: 1.5;
+  font-style: italic;
+  display: block;
+}
+

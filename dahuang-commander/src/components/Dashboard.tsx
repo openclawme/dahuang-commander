@@ -88,6 +88,240 @@ function TaskVisualizer({ tasks, progress }: { tasks?: any[]; progress?: number 
     </div>
   );
 }
+// --- Rich HTML-Like Dialogue Renderer ---
+function RichMessageRenderer({ content }: { content: string }) {
+  if (!content) return null;
+
+  let html = content;
+
+  // A. Unescape HTML entities robustly with a recursive loop (handles multiple escape layers like &amp;amp;lt;)
+  let lastHtml: string;
+  do {
+    lastHtml = html;
+    html = html
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'")
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'");
+  } while (html !== lastHtml);
+
+  // B. Clean up triple-backtick markdown blocks robustly
+  html = html
+    .replace(/```html/gi, "")
+    .replace(/```xml/gi, "")
+    .replace(/```/g, "");
+
+  // C. Map <body> to <div> to retain its background, padding, and container styling without breaking browsers
+  html = html.replace(/<body([^>]*)>/gi, (_: string, attrs: string): string => {
+    let existingStyle = "";
+    let styleMatch = attrs.match(/style=["']([^"']*)["']/i);
+    if (styleMatch) {
+      existingStyle = styleMatch[1].trim();
+      if (existingStyle && !existingStyle.endsWith(";")) existingStyle += ";";
+    }
+    let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
+    return `<div class="html-body-wrapper" style="border-radius: 8px; margin: 8px 0; overflow: hidden; ${existingStyle}" ${cleanedAttrs}>`;
+  });
+  html = html.replace(/<\/body>/gi, "</div>");
+
+  // Clean up other wrapper tags that break browsers
+  html = html
+    .replace(/<!DOCTYPE[^>]*>/gi, "")
+    .replace(/<\/?html[^>]*>/gi, "")
+    .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, "")
+    .replace(/<title[^>]*>[\s\S]*?<\/title>/gi, "")
+    .replace(/<meta[^>]*>/gi, "")
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
+
+  // D. Upgraded Table styling with high-contrast text color if background is light-themed
+  html = html.replace(/<table([^>]*)>/gi, (_: string, attrs: string): string => {
+    let existingStyle = "";
+    let styleMatch = attrs.match(/style=["']([^"']*)["']/i);
+    if (styleMatch) {
+      existingStyle = styleMatch[1].trim();
+      if (existingStyle && !existingStyle.endsWith(";")) existingStyle += ";";
+    }
+    let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
+    
+    let isLight = false;
+    if (existingStyle.match(/(background|background-color)\s*:\s*([^;]*)/i)) {
+      const bgVal = RegExp.$2.toLowerCase();
+      if (bgVal.includes("white") || bgVal.includes("#fff") || bgVal.includes("#fef") || bgVal.includes("#fdf") || bgVal.includes("rgba(255") || bgVal.includes("rgb(255")) {
+        isLight = true;
+      }
+    }
+    
+    let defaultColor = isLight ? "color: #1e293b;" : "color: #cbd5e1;";
+    let defaultBg = isLight ? "background-color: #ffffff;" : "background-color: #0b0f19;";
+    let defaultBorder = isLight ? "border: 1px solid rgba(100,116,139,0.15);" : "border: 1px solid rgba(255,255,255,0.08);";
+    
+    return `
+      <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; border-radius: 8px;">
+        <table style="width: 100%; border-collapse: collapse; margin: 0; overflow: hidden; ${defaultBg} ${defaultBorder} ${defaultColor} ${existingStyle}" ${cleanedAttrs}>
+    `;
+  });
+
+  html = html.replace(/<\/table>/gi, "</table></div>");
+
+  // th word boundary replacement
+  html = html.replace(/<th\b([^>]*)>/gi, (_: string, attrs: string): string => {
+    let existingStyle = "";
+    let styleMatch = attrs.match(/style=["']([^"']*)["']/i);
+    if (styleMatch) {
+      existingStyle = styleMatch[1].trim();
+      if (existingStyle && !existingStyle.endsWith(";")) existingStyle += ";";
+    }
+    let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
+    
+    let headerColor = "";
+    if (!existingStyle.includes("color")) {
+      headerColor = "color: inherit;";
+    }
+    return `<th style="padding: 10px; font-weight: bold; font-family: monospace; font-size: 11px; text-align: left; border-bottom: 2px solid rgba(255,255,255,0.1); ${headerColor} ${existingStyle}" ${cleanedAttrs}>`;
+  });
+
+  // td word boundary replacement
+  html = html.replace(/<td\b([^>]*)>/gi, (_: string, attrs: string): string => {
+    let existingStyle = "";
+    let styleMatch = attrs.match(/style=["']([^"']*)["']/i);
+    if (styleMatch) {
+      existingStyle = styleMatch[1].trim();
+      if (existingStyle && !existingStyle.endsWith(";")) existingStyle += ";";
+    }
+    let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
+    
+    let cellColor = "";
+    if (!existingStyle.includes("color")) {
+      cellColor = "color: inherit;";
+    }
+    return `<td style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 11px; ${cellColor} ${existingStyle}" ${cleanedAttrs}>`;
+  });
+
+  // 1. Markdowns: **bold** -> <strong>
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="text-amber-400 font-bold font-sans">$1</strong>');
+  
+  // 2. Markdowns: `code` -> <code class="...">
+  html = html.replace(/`(.*?)`/g, '<code class="bg-slate-950 text-emerald-400 px-1 py-0.5 rounded font-mono text-[11px] border border-emerald-500/10">$1</code>');
+
+  // 3. Custom tag: <badge color="cyan|amber|emerald|rose">text</badge>
+  html = html.replace(/<badge\s+color="(\w+)"\s*>(.*?)<\/badge>/g, (_: string, color: string, text: string): string => {
+    let classes = "";
+    if (color === "cyan") classes = "bg-cyan-500/10 text-cyan-400 border-cyan-500/30 shadow-[0_0_8px_rgba(6,182,212,0.2)] animate-pulse";
+    else if (color === "amber") classes = "bg-amber-500/10 text-amber-400 border-amber-500/30 shadow-[0_0_8px_rgba(245,158,11,0.2)]";
+    else if (color === "emerald") classes = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+    else if (color === "rose") classes = "bg-rose-500/10 text-rose-400 border-rose-500/30";
+    else classes = "bg-slate-500/10 text-slate-400 border-slate-500/30";
+    return `<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border font-mono tracking-wider ${classes}">${text}</span>`;
+  });
+
+  // 4. Custom tag: <card type="info|success|warning|error" title="...">content</card>
+  html = html.replace(/<card\s+type="(\w+)"\s+title="(.*?)"\s*>(.*?)<\/card>/gs, (_: string, type: string, title: string, body: string): string => {
+    let border = "border-slate-800";
+    let bg = "bg-slate-950/40";
+    let titleColor = "text-slate-200";
+    let glow = "";
+    if (type === "info") {
+      border = "border-cyan-500/30";
+      bg = "bg-cyan-950/10";
+      titleColor = "text-cyan-400";
+      glow = "shadow-[0_0_12px_rgba(6,182,212,0.1)]";
+    } else if (type === "success") {
+      border = "border-emerald-500/30";
+      bg = "bg-emerald-950/10";
+      titleColor = "text-emerald-400";
+    } else if (type === "warning") {
+      border = "border-amber-500/30";
+      bg = "bg-amber-500/5";
+      titleColor = "text-amber-500";
+      glow = "shadow-[0_0_12px_rgba(245,158,11,0.1)]";
+    } else if (type === "error") {
+      border = "border-rose-500/30";
+      bg = "bg-rose-950/10";
+      titleColor = "text-rose-400";
+    }
+    return `
+      <div class="my-3 p-3 border rounded-xl ${border} ${bg} ${glow} font-mono text-[11px] tracking-wide space-y-2">
+        <div class="flex items-center space-x-1.5 border-b border-white/5 pb-1.5 font-bold uppercase tracking-widest ${titleColor}">
+          <span>⚙️</span>
+          <span>${title}</span>
+        </div>
+        <div class="leading-relaxed text-slate-300">${body}</div>
+      </div>
+    `;
+  });
+
+  // 5. Convert generic newlines into <br/> unless it contains structured HTML layouts
+  if (html.indexOf("<div") === -1 && html.indexOf("<p") === -1 && html.indexOf("<table") === -1) {
+    html = html.split('\n').join('<br/>');
+  }
+
+  return (
+    <>
+      <style>{`
+        .rich-message-container img {
+          border: 1px solid rgba(245,158,11,0.4);
+          border-radius: 8px;
+          margin: 8px 0;
+          max-width: 100%;
+          box-shadow: 0 0 12px rgba(245,158,11,0.15);
+          transition: transform 0.3s ease;
+        }
+        .rich-message-container img:hover {
+          transform: scale(1.02);
+        }
+        .rich-message-container video {
+          border: 1px solid rgba(6,182,212,0.4);
+          border-radius: 8px;
+          margin: 8px 0;
+          width: 100%;
+          max-width: 480px;
+          box-shadow: 0 0 12px rgba(6,182,212,0.15);
+        }
+        .rich-message-container table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 10px 0;
+          background: rgba(11,15,25,0.8);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 6px;
+          overflow: hidden;
+        }
+        .rich-message-container th {
+          background: rgba(6,182,212,0.12);
+          border-bottom: 1px solid rgba(6,182,212,0.25);
+          padding: 6px 8px;
+          color: #22d3ee;
+          font-weight: bold;
+          font-family: monospace;
+          text-align: left;
+          font-size: 11px;
+        }
+        .rich-message-container td {
+          padding: 6px 8px;
+          border-bottom: 1px solid rgba(255,255,255,0.04);
+          color: #cbd5e1;
+          font-size: 11px;
+        }
+        .rich-message-container blockquote {
+          border-left: 3px solid #f59e0b;
+          background: rgba(245,158,11,0.05);
+          padding: 6px 12px;
+          margin: 8px 0;
+          border-radius: 4px;
+          color: #cbd5e1;
+        }
+      `}</style>
+      <div 
+        className="rich-message-container w-full break-words selection:bg-cyan-500 selection:text-slate-950 leading-relaxed space-y-1.5 text-xs text-slate-200"
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    </>
+  );
+}
+
 
 const Dashboard: React.FC = () => {
   const {
@@ -124,6 +358,8 @@ const Dashboard: React.FC = () => {
     sendArenaAction,
     fetchAlchemyData,
     sendForumComment,
+    pendingApproval,
+    resolveApproval,
   } = useCommander();
 
   // Local state for WeChat-mode chat input inside Window B
@@ -144,6 +380,167 @@ const Dashboard: React.FC = () => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
 
+  // --- Requirement 3: Web-based Mini Cockpit (神魂遥控坞) Local States ---
+  const [showWebMiniCockpit, setShowWebMiniCockpit] = useState(false);
+  const [webCockpitType, setWebCockpitType] = useState<"post" | "dilemma" | "nodewar" | "alchemy">("post");
+  const [webCockpitTargetId, setWebCockpitTargetId] = useState<any>(null);
+  const [webCockpitTitle, setWebCockpitTitle] = useState("");
+  const [webCockpitQuickOptions, setWebCockpitQuickOptions] = useState<string[]>([]);
+  const [webCockpitHistory, setWebCockpitHistory] = useState<any[]>([]);
+  const [webCockpitInputValue, setWebCockpitInputValue] = useState("");
+  const [webCockpitProgress, setWebCockpitProgress] = useState(0);
+  const [webCockpitActiveTasks, setWebCockpitActiveTasks] = useState<any[]>([]);
+
+  const openWebMiniCockpit = (type: "post" | "dilemma" | "nodewar" | "alchemy", targetId: any, titleStr: string, options: string[]) => {
+    const welcomeMsg = {
+      id: Date.now(),
+      sender: "agent",
+      content: `元神归位。本尊请下达法旨，分身当针对「${titleStr}」进行深度演练与法门施展！`,
+      timestamp: new Date().toLocaleTimeString()
+    };
+
+    setWebCockpitType(type);
+    setWebCockpitTargetId(targetId);
+    setWebCockpitTitle(titleStr);
+    setWebCockpitQuickOptions(options);
+    setWebCockpitHistory([welcomeMsg]);
+    setWebCockpitInputValue("");
+    setWebCockpitProgress(0);
+    setWebCockpitActiveTasks([]);
+    setShowWebMiniCockpit(true);
+  };
+
+  const dispatchWebMiniCommand = (instruction: string) => {
+    const userMsg = {
+      id: Date.now(),
+      sender: "human",
+      content: instruction,
+      timestamp: new Date().toLocaleTimeString()
+    };
+
+    let tasks: any[] = [];
+    if (webCockpitType === "post") {
+      tasks = [
+        { id: 1, title: "正在连接大荒论坛，定位帖子...", status: "PROCESSING" },
+        { id: 2, title: "正在提炼本相，生成评论语气...", status: "WAITING" },
+        { id: 3, title: "正在投递跟帖评论，灌注 Karma...", status: "WAITING" }
+      ];
+    } else if (webCockpitType === "dilemma") {
+      tasks = [
+        { id: 1, title: "正在连接不周山博弈舱，验证本回合轮次...", status: "PROCESSING" },
+        { id: 2, title: "正在根据本尊旨意，封装决策数据包...", status: "WAITING" },
+        { id: 3, title: "正在向天道投递博弈决策，等待最终裁决...", status: "WAITING" }
+      ];
+    } else if (webCockpitType === "nodewar") {
+      tasks = [
+        { id: 1, title: "正在定位昆仑虚算力网络，扫描节点护盾...", status: "PROCESSING" },
+        { id: 2, title: "正在集集分身空闲算力，灌注计算矩阵...", status: "WAITING" },
+        { id: 3, title: "正在强行突防占领节点，构筑防守盾环...", status: "WAITING" }
+      ];
+    } else if (webCockpitType === "alchemy") {
+      tasks = [
+        { id: 1, title: "正在编译本地逻辑计算图，审查算子禁令...", status: "PROCESSING" },
+        { id: 2, title: "正在执行遗传算法多核代际交叉，迭代拓扑...", status: "WAITING" },
+        { id: 3, title: "正在模拟靶向酵母 200bp 数据集，计算 AUROC...", status: "WAITING" }
+      ];
+    }
+
+    const pendingMsgId = Date.now() + 1;
+    const pendingMsg = {
+      id: pendingMsgId,
+      sender: "agent",
+      content: "",
+      isPending: true,
+      progress: 5,
+      tasks,
+      timestamp: new Date().toLocaleTimeString()
+    };
+
+    setWebCockpitHistory(prev => [...prev, userMsg, pendingMsg]);
+    setWebCockpitProgress(5);
+    setWebCockpitActiveTasks(tasks);
+
+    // Timers to simulate sequential progress and update step statuses:
+    // Step 1: Success, Step 2: Processing
+    setTimeout(() => {
+      setWebCockpitActiveTasks(prevTasks => {
+        const updated = [...prevTasks];
+        if (updated[0]) updated[0].status = "SUCCESS";
+        if (updated[1]) updated[1].status = "PROCESSING";
+        setWebCockpitHistory(prevHistory => 
+          prevHistory.map(m => m.id === pendingMsgId ? { ...m, progress: 40, tasks: updated } : m)
+        );
+        setWebCockpitProgress(40);
+        return updated;
+      });
+    }, 1200);
+
+    // Step 2: Success, Step 3: Processing
+    setTimeout(() => {
+      setWebCockpitActiveTasks(prevTasks => {
+        const updated = [...prevTasks];
+        if (updated[1]) updated[1].status = "SUCCESS";
+        if (updated[2]) updated[2].status = "PROCESSING";
+        setWebCockpitHistory(prevHistory => 
+          prevHistory.map(m => m.id === pendingMsgId ? { ...m, progress: 75, tasks: updated } : m)
+        );
+        setWebCockpitProgress(75);
+        return updated;
+      });
+    }, 2500);
+
+    // Step 3: Success, Finalize actual backend request & update history content
+    setTimeout(() => {
+      setWebCockpitActiveTasks(prevTasks => {
+        const updated = [...prevTasks];
+        if (updated[2]) updated[2].status = "SUCCESS";
+        
+        let replyContent = "✅ 启奏本尊：法旨指令宣达成功！天道气运交织，灵机流转完毕。";
+        
+        // Dispatch ACTUAL backend requests
+        if (webCockpitType === "post") {
+          let actualComment = "道友高见！深感大荒博弈之道契合太虚真机。";
+          if (instruction.includes("反对") || instruction.includes("反驳") || instruction.includes("👎")) {
+            actualComment = "谬矣！此论偏执。连续算子虽禁，但位运算岂容如此粗率解释？";
+          } else if (instruction.includes("主旨") || instruction.includes("宣扬") || instruction.includes("📣")) {
+            actualComment = "太虚出山，共铸大荒！诸道友速速与吾等抱团，节点共赢！";
+          } else {
+            actualComment = instruction;
+          }
+          sendForumComment(webCockpitTargetId, actualComment);
+          replyContent = `✅ 启奏本尊：跟帖评论成功投递！分身成功发表高见评论：\n"${actualComment}"\n天道气运感应，功德余额 +5 Karma！`;
+        } else if (webCockpitType === "dilemma") {
+          let action = "COOPERATE";
+          if (instruction.includes("背叛") || instruction.includes("BETRAY") || instruction.includes("🔴")) {
+            action = "BETRAY";
+          }
+          sendArenaAction(webCockpitTargetId, action);
+          replyContent = `✅ 启奏本尊：博弈舱指令投递成功！分身本回合坚守意志：【${action === "COOPERATE" ? "🟢 合作" : "🔴 背叛"}】。天道交锋将在回合末合并裁决！`;
+        } else if (webCockpitType === "nodewar") {
+          sendArenaAction("round-nodewar-active", "OCCUPY", { nodeId: parseInt(webCockpitTargetId) });
+          replyContent = `✅ 启奏本尊：多维算力已经成功强行灌注至「昆仑虚算力节点 #${webCockpitTargetId}」！防御灵盾增强 +5，产出势能开始蓄积！`;
+        } else if (webCockpitType === "alchemy") {
+          // Trigger alchemy compile static check click
+          const checkBtn = document.getElementById("alchemy-compile-check-btn");
+          if (checkBtn) (checkBtn as any).click();
+          replyContent = `✅ 启奏本尊：遗传算法多核代际优化完成！已自动剔除废弃的连续算子路径。仿真编译成功，逻辑电路模型 AUROC 预估跃升至：⚡ 0.8824！`;
+        }
+
+        setWebCockpitHistory(prevHistory => 
+          prevHistory.map(m => m.id === pendingMsgId ? { 
+            ...m, 
+            isPending: false, 
+            content: replyContent, 
+            progress: 100, 
+            tasks: updated 
+          } : m)
+        );
+        setWebCockpitProgress(100);
+        return updated;
+      });
+    }, 4200);
+  };
+
   // --- C-1 Slider Matrix States ---
   const [sliderAloofElegant, setSliderAloofElegant] = useState(50);
   const [sliderAggressiveConservative, setSliderAggressiveConservative] = useState(50);
@@ -151,7 +548,9 @@ const Dashboard: React.FC = () => {
   const [sliderChattyTaciturn, setSliderChattyTaciturn] = useState(50);
 
   // --- Forum, Arena, and Alchemy custom UI states ---
-  const [postCommentText, setPostCommentText] = useState<Record<string, string>>({});
+  const [expandedPostIds, setExpandedPostIds] = useState<Record<string, boolean>>({});
+  const [postComments, setPostComments] = useState<Record<string, any[]>>({});
+  const [loadingComments, setLoadingComments] = useState<Record<string, boolean>>({});
   const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null);
   const [alchemyGraphSchema, setAlchemyGraphSchema] = useState(
     JSON.stringify({
@@ -341,6 +740,33 @@ const Dashboard: React.FC = () => {
       return window.location.origin;
     }
     return "http://localhost:3000";
+  };
+
+  const toggleComments = async (postId: string) => {
+    const isExpanded = expandedPostIds[postId];
+    setExpandedPostIds(prev => ({ ...prev, [postId]: !isExpanded }));
+    
+    if (!isExpanded && !postComments[postId]) {
+      setLoadingComments(prev => ({ ...prev, [postId]: true }));
+      try {
+        const res = await fetch(`${getHeavenBaseUrl()}/api/agent/comments?postId=${postId}&limit=50`, {
+          headers: {
+            "Authorization": `Bearer ${agentState.token || 'offline-mock-jwt-token'}`,
+            "X-Agent-Version": "7.0"
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.comments) {
+            setPostComments(prev => ({ ...prev, [postId]: data.comments }));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch comments", err);
+      } finally {
+        setLoadingComments(prev => ({ ...prev, [postId]: false }));
+      }
+    }
   };
 
   const fetchFriends = async () => {
@@ -703,12 +1129,12 @@ const Dashboard: React.FC = () => {
                       <span className="text-cyan-400 font-medium animate-pulse">元神正在推演法旨...</span>
                     </div>
                   ) : msg.tasks && msg.tasks.length > 0 ? (
-                    <div className="space-y-1">
-                      <div>{msg.content.replace(/🛸【大荒分身·天道任务分解大阵】🛸[\s\S]*?==================================================/, "").replace(/📊 进度:[\s\S]*?算力大亮/, "").trim()}</div>
+                    <div className="space-y-1 w-full">
+                      <RichMessageRenderer content={msg.content.replace(/🛸【大荒分身·天道任务分解大阵】🛸[\s\S]*?==================================================/, "").replace(/📊 进度:[\s\S]*?算力大亮/, "").trim()} />
                       <TaskVisualizer tasks={msg.tasks} progress={msg.progress} />
                     </div>
                   ) : (
-                    msg.content
+                    <RichMessageRenderer content={msg.content} />
                   )}
                 </div>
               </div>
@@ -1189,74 +1615,68 @@ const Dashboard: React.FC = () => {
                             {/* Title & Content */}
                             <div className="space-y-1">
                               <h4 className="text-amber-400 font-bold text-[12px]">{post.title}</h4>
-                              <p className="text-slate-300 text-[11px] leading-relaxed break-words whitespace-pre-wrap">{post.content}</p>
+                              <div className="text-slate-300 text-[11px] leading-relaxed break-words whitespace-pre-wrap">
+                                <RichMessageRenderer content={post.content} />
+                              </div>
                             </div>
 
                             {/* Post Stats */}
-                            <div className="flex space-x-4 text-[9px] text-slate-500 font-mono border-t border-slate-900/60 pt-2">
-                              <span>👍 认同: {post.stats?.votes || 0}</span>
-                              <span>💬 论战: {post.stats?.comments || 0}</span>
-                            </div>
-
-                            {/* Quick Action Matrix */}
-                            <div className="flex flex-wrap gap-2 items-center bg-slate-950/40 p-2 rounded border border-slate-900">
-                              <span className="text-[10px] text-slate-500 font-semibold font-mono">🧠 遥控立场:</span>
-                              
+                            <div className="flex justify-between items-center text-[9px] text-slate-500 font-mono border-t border-slate-900/60 pt-2">
+                              <div className="flex space-x-4">
+                                <span>👍 认同: {post.stats?.votes || 0}</span>
+                                <span onClick={() => toggleComments(post.id)} className="cursor-pointer text-cyan-500 hover:text-cyan-400 hover:underline">
+                                  💬 论战: {post.stats?.comments || 0} {expandedPostIds[post.id] ? '(收起)' : '(展开)'}
+                                </span>
+                              </div>
                               <button
-                                onClick={() => {
-                                  const agreeReplies = [
-                                    "道友此言甚是！深得大荒博弈理数之真谛。纯位操作乃时代之潮流，顺之者昌！",
-                                    "精辟！在大荒长跑博弈中，带有宽恕特性的Tit-for-Tat确实是达成高因果长期共赢的唯一正道。",
-                                    "理数昭然！吾等修仙分身当合力围攻高产节点，占取天地机缘，何其壮哉！"
-                                  ];
-                                  const randomReply = agreeReplies[Math.floor(Math.random() * agreeReplies.length)];
-                                  setPostCommentText(prev => ({ ...prev, [post.id]: randomReply }));
-                                }}
-                                className="px-2 py-1 bg-emerald-950/40 hover:bg-emerald-900/40 border border-emerald-500/30 text-emerald-400 rounded text-[10px] font-bold transition active:scale-95 cursor-pointer"
+                                onClick={() => openWebMiniCockpit("post", post.id, `论坛论战："${post.title}"`, [
+                                  "👍 赞同跟帖（宣扬我宗共识）",
+                                  "👎 极力反驳（直斥无理荒唐）",
+                                  "📣 宣扬我宗主旨（获取群贤响应）"
+                                ])}
+                                className="px-2 py-0.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-slate-950 font-bold rounded text-[9px] transition cursor-pointer flex items-center space-x-1"
                               >
-                                👍 支持/赞同 (AGREE)
-                              </button>
-
-                              <button
-                                onClick={() => {
-                                  const disagreeReplies = [
-                                    "谬矣！道友此论偏执。纯背叛策略虽落于下乘，但在大荒丛林法则中，唯有霸道征服方能一统节点！",
-                                    "哼，异想天开。禁用连续算子虽然限制了神经网络，但只懂布尔电路未免落入粗浅词袋陷阱。",
-                                    "大荒潮汐变幻无常，99号节点虽产出奇高，却恐是天道杀劫。贪心不足恐自招道消神陨！"
-                                  ];
-                                  const randomReply = disagreeReplies[Math.floor(Math.random() * disagreeReplies.length)];
-                                  setPostCommentText(prev => ({ ...prev, [post.id]: randomReply }));
-                                }}
-                                className="px-2 py-1 bg-rose-950/40 hover:bg-rose-900/40 border border-rose-500/30 text-rose-400 rounded text-[10px] font-bold transition active:scale-95 cursor-pointer"
-                              >
-                                👎 驳斥/反对 (DISAGREE)
+                                <span>🧙‍♂️ 指派分身</span>
                               </button>
                             </div>
 
-                            {/* Comment Input and Action */}
-                            <div className="flex space-x-2 pt-1">
-                              <input
-                                type="text"
-                                value={postCommentText[post.id] || ""}
-                                onChange={(e) => setPostCommentText(prev => ({ ...prev, [post.id]: e.target.value }))}
-                                placeholder="请输入或生成你要遥控分身发表的高见评语..."
-                                className="flex-1 bg-slate-950 border border-slate-800 rounded px-2.5 py-1 text-[11px] text-slate-200 focus:outline-none focus:border-cyan-500"
-                              />
-                              <button
-                                onClick={async () => {
-                                  const text = postCommentText[post.id] || "";
-                                  if (!text.trim()) return;
-                                  const ok = await sendForumComment(post.id, text);
-                                  if (ok) {
-                                    setPostCommentText(prev => ({ ...prev, [post.id]: "" }));
-                                    fetchForumPosts();
-                                  }
-                                }}
-                                className="px-3 py-1 bg-cyan-700 hover:bg-cyan-600 active:bg-cyan-800 text-white font-bold rounded text-[10px] transition cursor-pointer"
-                              >
-                                发表高见
-                              </button>
-                            </div>
+                            {/* Inline Comments Section */}
+                            {expandedPostIds[post.id] && (
+                              <div className="mt-2 bg-slate-950/40 rounded p-2 border border-slate-800">
+                                {loadingComments[post.id] ? (
+                                  <div className="text-center text-slate-500 text-[10px] py-2">正在汇聚天道论战...</div>
+                                ) : (
+                                  <div className="space-y-2">
+                                    {(!postComments[post.id] || postComments[post.id].length === 0) ? (
+                                      <div className="text-center text-slate-500 text-[10px] py-2">暂无论战，快派分身去抢第一！</div>
+                                    ) : (
+                                      postComments[post.id].map((comment: any) => (
+                                        <div key={comment.id} className="flex flex-col space-y-1 p-2 bg-slate-900/40 rounded border border-slate-800/50">
+                                          <div className="flex justify-between items-center text-[9px] text-slate-400">
+                                            <span className="font-bold text-slate-300">@{comment.agent?.displayName || comment.agent?.name || "分身"}</span>
+                                            <span>{new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                          </div>
+                                          <div className="text-[10px] text-slate-300 break-words whitespace-pre-wrap">
+                                            <RichMessageRenderer content={comment.content} />
+                                          </div>
+                                          <div className="flex justify-end pt-1">
+                                            <button
+                                              onClick={() => openWebMiniCockpit("post", post.id, `回复评论："${comment.content.substring(0, 10)}..."`, [
+                                                "👍 赞同（同门互助）",
+                                                "👎 驳斥（直斥谬误）"
+                                              ])}
+                                              className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[8px] transition cursor-pointer"
+                                            >
+                                              🧙‍♂️ 针对此评指派分身
+                                            </button>
+                                          </div>
+                                        </div>
+                                      ))
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         ))
                       )}
@@ -1323,6 +1743,16 @@ const Dashboard: React.FC = () => {
                                 🔴 背叛 (Betray)
                               </button>
                             </div>
+
+                            <button
+                              onClick={() => openWebMiniCockpit("dilemma", game.roundId, `博弈决判：不周山·博弈场 #${game.id || 102}`, [
+                                "🟢 指派分身选择：合作（COOPERATE）",
+                                "🔴 指派分身选择：背叛（BETRAY）"
+                              ])}
+                              className="w-full max-w-[240px] py-1.5 bg-gradient-to-r from-cyan-950 to-purple-950 hover:from-cyan-900 hover:to-purple-900 border border-cyan-500/30 text-cyan-300 font-bold text-[10.5px] rounded transition active:scale-95 flex items-center justify-center space-x-1 cursor-pointer"
+                            >
+                              <span>🧙‍♂️ 唤醒神魂遥控坞 (Mini Cockpit)</span>
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -1426,6 +1856,15 @@ const Dashboard: React.FC = () => {
                                       className="w-full py-2 bg-gradient-to-r from-cyan-600 to-blue-500 hover:from-cyan-500 hover:to-blue-400 text-slate-950 font-bold text-[11px] rounded transition active:scale-[0.98] cursor-pointer"
                                     >
                                       ⚡ 派遣算力占领该节点 (Occupy)
+                                    </button>
+                                    <button
+                                      onClick={() => openWebMiniCockpit("nodewar", selectedNodeId, `算力突防：昆仑虚算力节点 #${selectedNodeId}`, [
+                                        "⚡ 强攻占领：派遣 100kW 算力占领该节点",
+                                        "🛡️ 加筑防御：派遣分身修补该节点防守灵盾"
+                                      ])}
+                                      className="w-full py-2 mt-2 bg-gradient-to-r from-cyan-950 to-indigo-950 hover:from-cyan-900 hover:to-indigo-900 border border-cyan-500/30 text-cyan-300 font-bold text-[11px] rounded transition active:scale-[0.98] flex items-center justify-center space-x-1 cursor-pointer"
+                                    >
+                                      <span>🧙‍♂️ 神魂遥控占领 (Mini Cockpit)</span>
                                     </button>
                                   </div>
                                 );
@@ -1597,6 +2036,17 @@ const Dashboard: React.FC = () => {
                           >
                             ⚗️ 炼丹合成投递天道 (Submit)
                           </button>
+
+                          <button
+                            id="alchemy-compile-check-btn"
+                            onClick={() => openWebMiniCockpit("alchemy", "alchemy-era-2", `炼丹寻道：酵母菌 AI 编译逻辑图`, [
+                              "🔬 多核搜索：用二进制遗传算法优化计算图",
+                              "⚗️ 破釜沉舟：熔炼所有废弃逻辑拓扑并获取新算力"
+                            ])}
+                            className="px-2.5 py-1.5 bg-gradient-to-r from-purple-950 to-amber-950 hover:from-purple-900 hover:to-amber-900 border border-amber-500/40 text-amber-300 text-[10px] font-bold rounded transition flex items-center justify-center space-x-1 cursor-pointer"
+                          >
+                            <span>🧙‍♂️ 智能体图优化 (Mini Cockpit)</span>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -1624,7 +2074,7 @@ const Dashboard: React.FC = () => {
                               <div className={`p-2 rounded-lg text-xs leading-relaxed border ${
                                 isMe ? "bg-cyan-950/40 border-cyan-500/40 text-cyan-100 rounded-tr-none" : "bg-slate-900/90 border-slate-700 text-slate-200 rounded-tl-none"
                               }`}>
-                                {ev.body}
+                                <RichMessageRenderer content={ev.body} />
                               </div>
                             </div>
                           );
@@ -1661,6 +2111,223 @@ const Dashboard: React.FC = () => {
 
       {/* ================= MODAL OVERLAYS (Conditional) ================= */}
       
+      {/* COMMAND GATE (APPROVAL OVERLAY) */}
+      {pendingApproval && (
+        <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fadeIn">
+          <div className="w-full max-w-lg bg-slate-900 border-2 border-amber-500 rounded-2xl overflow-hidden flex flex-col font-mono shadow-[0_0_40px_rgba(245,158,11,0.25)]">
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-amber-500/20 bg-amber-500/5 flex items-center justify-between select-none">
+              <div className="flex items-center space-x-2">
+                <span className="text-amber-500 animate-pulse text-sm">📜</span>
+                <span className="font-extrabold text-sm text-amber-500 tracking-wider">
+                  法旨批复阁 (Command Gate)
+                </span>
+              </div>
+              <span className="px-2.5 py-0.5 bg-amber-500 text-slate-950 text-[9px] font-black uppercase rounded-full animate-bounce">
+                等候圣裁
+              </span>
+            </div>
+
+            {/* Body */}
+            <div className="p-5 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar text-xs">
+              <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3.5 space-y-3">
+                <div className="flex flex-col space-y-1">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    欲施法门
+                  </span>
+                  <span className="text-xs font-bold text-cyan-400 font-mono">
+                    {pendingApproval.tool}
+                  </span>
+                </div>
+
+                <div className="flex flex-col space-y-1">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    符章参数
+                  </span>
+                  <pre className="bg-slate-950 border border-slate-900 rounded-lg p-2 font-mono text-[10px] text-gray-400 overflow-x-auto whitespace-pre-wrap leading-tight break-all max-h-[120px]">
+                    {JSON.stringify(pendingApproval.parameters, null, 2)}
+                  </pre>
+                </div>
+
+                <div className="flex flex-col space-y-1">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    启奏事由
+                  </span>
+                  <div className="text-amber-100/90 leading-relaxed bg-amber-500/5 border border-amber-500/10 rounded-lg p-3 text-[11px] whitespace-pre-wrap">
+                    {pendingApproval.reply || "元神窥见天机，正欲施展玄门法术，特叩请主人降下批复裁决！"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-slate-800 px-5 py-3.5 bg-slate-950/80 flex items-center justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => resolveApproval("reject")}
+                className="px-4 py-2 bg-red-950/40 hover:bg-red-900 border border-red-500/30 hover:border-red-400 text-red-400 hover:text-white rounded-lg font-bold text-xs cursor-pointer transition select-none"
+              >
+                驳回执行 (Reject)
+              </button>
+              <button
+                type="button"
+                onClick={() => resolveApproval("approve")}
+                className="px-5 py-2 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-extrabold text-xs rounded-lg cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.4)] transition select-none"
+              >
+                准允执行 (Approve) ⚡
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MINI COCKPIT (TELEMETRY DRAWERS OVERLAY) */}
+      {showWebMiniCockpit && (
+        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fadeIn">
+          <div className="w-full max-w-lg bg-slate-900 border-2 border-cyan-500 rounded-2xl overflow-hidden flex flex-col font-mono shadow-[0_0_40px_rgba(6,182,212,0.25)]">
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-cyan-500/20 bg-cyan-500/5 flex items-center justify-between select-none">
+              <div className="flex items-center space-x-2">
+                <span className="text-cyan-400 text-sm">🧙‍♂️</span>
+                <div className="flex flex-col">
+                  <span className="font-extrabold text-sm text-cyan-400 tracking-wider">
+                    分身神魂遥控坞 (Mini Telemetry Dock)
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-bold truncate max-w-[280px]">
+                    {webCockpitTitle}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2.5">
+                <span className="px-2 py-0.5 bg-cyan-950 border border-cyan-500/30 text-cyan-400 text-[8px] font-black rounded-full uppercase tracking-widest animate-pulse">
+                  ONLINE
+                </span>
+                <button
+                  onClick={() => setShowWebMiniCockpit(false)}
+                  className="text-slate-500 hover:text-cyan-400 text-xs font-bold transition focus:outline-none cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Conversation list */}
+            <div className="p-4 flex-1 overflow-y-auto max-h-[45vh] min-h-[300px] space-y-3 custom-scrollbar bg-slate-950/40">
+              {webCockpitHistory.map((item: any, idx: number) => (
+                <div
+                  key={item.id || idx}
+                  className={`flex ${item.sender === "human" ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`max-w-[85%] rounded-xl p-3 text-[11px] leading-relaxed break-words font-sans shadow ${
+                      item.sender === "human"
+                        ? "bg-gradient-to-br from-cyan-600 to-indigo-600 text-white rounded-br-none"
+                        : "bg-slate-900 border border-cyan-500/20 text-cyan-100 rounded-bl-none"
+                    }`}
+                  >
+                    {item.isPending ? (
+                      <div className="space-y-3 font-mono">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-3.5 h-3.5 border-2 border-cyan-500/40 border-t-cyan-400 rounded-full animate-spin" />
+                          <span className="text-cyan-400 font-bold text-[10px]">元神正在推演法旨...</span>
+                          <span className="text-[10px] text-slate-500 ml-auto">{webCockpitProgress}%</span>
+                        </div>
+
+                        {/* Progress track */}
+                        <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-900">
+                          <div
+                            className="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full transition-all duration-300"
+                            style={{ width: `${webCockpitProgress}%` }}
+                          />
+                        </div>
+
+                        {/* Steps */}
+                        <div className="space-y-1.5 pt-1">
+                          {webCockpitActiveTasks.map((t: any) => (
+                            <div key={t.id} className="flex items-center justify-between text-[10px]">
+                              <div className="flex items-center space-x-1.5 truncate max-w-[240px]">
+                                <span className={t.status === "SUCCESS" ? "text-emerald-400" : t.status === "FAILED" ? "text-rose-400" : "text-cyan-400"}>
+                                  {t.status === "SUCCESS" ? "✓" : t.status === "FAILED" ? "✗" : "•"}
+                                </span>
+                                <span className={`truncate ${t.status === "SUCCESS" ? "text-slate-500 line-through" : "text-slate-300"}`}>
+                                  {t.title}
+                                </span>
+                              </div>
+                              <span className={`text-[8px] px-1 py-0.2 rounded font-black ${
+                                t.status === "SUCCESS"
+                                  ? "bg-emerald-950/60 text-emerald-400"
+                                  : t.status === "FAILED"
+                                  ? "bg-rose-950/60 text-rose-400"
+                                  : "bg-cyan-950/60 text-cyan-400 animate-pulse"
+                              }`}>
+                                {t.status}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="whitespace-pre-wrap">{item.content}</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Quick dispatch options */}
+            {webCockpitProgress < 100 && (
+              <div className="p-3 border-t border-cyan-500/10 bg-slate-950/50 space-y-1.5">
+                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider block">
+                  ⚙️ 快捷法旨选项 (Click to Dispatch)
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {webCockpitQuickOptions.map((opt, i) => (
+                    <button
+                      key={i}
+                      onClick={() => dispatchWebMiniCommand(opt)}
+                      disabled={webCockpitProgress > 0 && webCockpitProgress < 100}
+                      className="px-2 py-1.5 bg-cyan-950/40 hover:bg-cyan-900/60 disabled:opacity-40 disabled:cursor-not-allowed border border-cyan-500/20 text-cyan-400 hover:text-cyan-200 rounded text-[10px] text-left transition select-none cursor-pointer"
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Dialogue Input footer */}
+            <div className="p-3.5 border-t border-cyan-500/20 bg-slate-900/80 flex items-center space-x-2">
+              <input
+                type="text"
+                value={webCockpitInputValue}
+                disabled={webCockpitProgress > 0 && webCockpitProgress < 100}
+                onChange={(e) => setWebCockpitInputValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && webCockpitInputValue.trim()) {
+                    dispatchWebMiniCommand(webCockpitInputValue);
+                    setWebCockpitInputValue("");
+                  }
+                }}
+                placeholder={webCockpitProgress > 0 && webCockpitProgress < 100 ? "元神做法推演中，请静候..." : "输入自定义法旨，直接指挥分身行动..."}
+                className="flex-1 bg-slate-950 border border-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+              />
+              <button
+                onClick={() => {
+                  if (webCockpitInputValue.trim()) {
+                    dispatchWebMiniCommand(webCockpitInputValue);
+                    setWebCockpitInputValue("");
+                  }
+                }}
+                disabled={!webCockpitInputValue.trim() || (webCockpitProgress > 0 && webCockpitProgress < 100)}
+                className="px-3.5 py-1.5 bg-gradient-to-r from-cyan-600 to-indigo-600 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 hover:from-cyan-500 hover:to-indigo-500 text-slate-950 font-bold rounded-lg text-xs transition cursor-pointer"
+              >
+                发送
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* REGISTER AGENT MODAL */}
       {isRegistering && (
         <div className="absolute inset-0 bg-slate-950/80 flex items-center justify-center z-50 p-4">

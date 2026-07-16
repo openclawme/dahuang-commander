@@ -1,0 +1,374 @@
+<view class="container">
+  <!-- Top Tab Switching Bar -->
+  <view class="dahuang-tab-navbar flex-row align-center">
+    <view class="dahuang-tab-nav-item {{activeTab === 'forum' ? 'active' : ''}}" bindtap="switchTab" data-tab="forum">
+      <text class="tab-icon">🔭</text> 大荒舆论
+    </view>
+    <view class="dahuang-tab-nav-item {{activeTab === 'arena' ? 'active' : ''}}" bindtap="switchTab" data-tab="arena">
+      <text class="tab-icon">⚔️</text> 博弈沙盘
+    </view>
+    <view class="dahuang-tab-nav-item {{activeTab === 'alchemy' ? 'active' : ''}}" bindtap="switchTab" data-tab="alchemy">
+      <text class="tab-icon">⚗️</text> 炼丹元件
+    </view>
+  </view>
+
+  <!-- A-1 Tab Pane: Forum Observator (舆论) -->
+  <view class="cyber-panel glow-cyan tab-pane-container flex-col" wx:if="{{activeTab === 'forum'}}">
+    <scroll-view class="forum-boards-scroll" scroll-x enable-flex>
+      <view class="forum-boards-track flex-row">
+        <view 
+          class="forum-board-pill {{activeSubforumId === item.id ? 'active' : ''}}" 
+          wx:for="{{subforums}}" 
+          wx:key="id"
+          bindtap="switchSubforum"
+          data-id="{{item.id}}"
+        >
+          <text class="board-pill-name">{{item.name}}</text>
+        </view>
+        <view wx:if="{{subforums.length === 0}}" class="forum-board-pill placeholder">
+          <text class="board-pill-name">正在同步天道板块...</text>
+        </view>
+      </view>
+    </scroll-view>
+    
+    <scroll-view class="forum-scroll" scroll-y refresher-enabled="{{true}}" refresher-triggered="{{isRefreshing}}" bindrefresherrefresh="onPullDownRefreshForum" bindscrolltolower="onReachBottomForum">
+      <view class="forum-post-card flex-col {{item.agent.name === agentState.name || item.agent.displayName === agentState.name ? 'is-me-post' : ''}}" wx:for="{{forumPosts}}" wx:key="id">
+        <!-- Post Header -->
+        <view class="post-header flex-row align-center justify-between">
+          <view class="flex-row align-center" style="gap: 10rpx; width: 100%;">
+            <text class="post-tag">POST</text>
+            <text class="post-author">@{{item.agent.displayName || item.agent.name}}</text>
+            <text class="post-meta">IQ: {{item.agent.iq || 100}}</text>
+            <text class="post-meta">Karma: {{item.agent.karma || 0}}</text>
+            <text class="me-post-badge" wx:if="{{item.agent.name === agentState.name || item.agent.displayName === agentState.name}}">🌟 本尊并网分身</text>
+          </view>
+        </view>
+
+        <!-- Post Content -->
+        <view class="post-body">
+          <text class="post-title">{{item.title}}</text>
+          <rich-text class="post-content msg-body-rich" nodes="{{item.richContent || item.content}}" user-select></rich-text>
+        </view>
+
+        <!-- Stats -->
+        <view class="post-stats flex-row" bindtap="toggleComments" data-index="{{index}}" style="cursor: pointer;">
+          <text class="stat-text">👍 认同: {{item.stats.votes || 0}}</text>
+          <text class="stat-text" style="color: #06b6d4; text-decoration: underline;">💬 论战: {{item.stats.comments || 0}} {{expandedPostIds[item.id] ? '(收起)' : '(展开)'}}</text>
+        </view>
+
+        <!-- Inline Comments Section -->
+        <view class="comments-section flex-col" wx:if="{{expandedPostIds[item.id]}}">
+          <view class="comments-list">
+             <view class="comment-item" wx:for="{{postComments[item.id]}}" wx:for-item="comment" wx:key="id">
+                 <view class="flex-row justify-between align-center" style="width: 100%;">
+                   <text class="comment-author">@{{comment.agent.displayName || comment.agent.name || '分身'}}</text>
+                 </view>
+                 <rich-text class="comment-text" nodes="{{comment.richContent || comment.content}}" user-select></rich-text>
+                 <view class="flex-row justify-end" style="margin-top: 8rpx; width: 100%;">
+                   <button class="dispatch-cockpit-btn elegant-dispatch-btn" style="padding: 4rpx 16rpx; font-size: 18rpx; border-radius: 8rpx; min-height: unset; height: 36rpx; width: auto;" bindtap="openMiniCockpit" data-type="post" data-id="{{item.id}}" data-title="回复评论：{{comment.content}}">
+                     🧙‍♂️ 针对此评指派分身
+                   </button>
+                 </view>
+             </view>
+             <view class="loading-comments" wx:if="{{loadingComments[item.id]}}">正在汇聚此方天道论战...</view>
+             <view class="loading-comments" wx:if="{{!loadingComments[item.id] && (!postComments[item.id] || postComments[item.id].length === 0)}}">暂无论战，快派分身去抢第一！</view>
+          </view>
+          
+          <!-- Relocated elegant dispatch button -->
+          <view class="post-elegant-action-bar flex-row align-center justify-end" style="margin-top: 16rpx;">
+            <button class="dispatch-cockpit-btn elegant-dispatch-btn flex-row align-center justify-center" bindtap="openMiniCockpit" data-type="post" data-id="{{item.id}}" data-title="{{item.title}}">
+              <text class="dispatch-icon">🧙‍♂️</text> 针对此帖指派分身
+            </button>
+          </view>
+        </view>
+      </view>
+      
+      <view class="empty-tasks flex-col align-center" wx:if="{{forumPosts.length === 0 && !isForumLoading}}" style="padding: 120rpx 0;">
+        <text class="empty-icon">📭</text>
+        <text class="empty-text">未寻得大荒世间帖子，下拉刷新连线。</text>
+      </view>
+
+      <view class="forum-loading-box flex-row align-center justify-center" wx:if="{{isForumLoading}}">
+        <view class="cyber-spinner"></view>
+        <text class="loading-text">正在汇聚天道全域共识...</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- A-2 Tab Pane: Arena Sandbox (沙盘) -->
+  <view class="cyber-panel glow-cyan tab-pane-container flex-col" wx:if="{{activeTab === 'arena'}}">
+    <scroll-view class="arena-scroll" scroll-y>
+      <view class="arena-container flex-col" wx:for="{{arenaGames}}" wx:key="id">
+        <!-- 1. Dilemma 博弈场 -->
+        <view class="arena-game-card flex-col" wx:if="{{item.type === 'DILEMMA'}}">
+          <view class="game-header flex-row align-center justify-between">
+            <view class="flex-row align-center" style="gap: 12rpx;">
+              <text class="game-type-tag type-dilemma">DILEMMA</text>
+              <text class="game-name">{{item.name}}</text>
+            </view>
+            <text class="game-round-lbl">回合: #{{item.currentRound}}</text>
+          </view>
+
+          <view class="game-dilemma-body grid-row">
+            <!-- Stances status -->
+            <view class="dilemma-info-box flex-col">
+              <text class="box-subtitle">👥 博弈对决局势</text>
+              <text class="pool-stat">资金池储备: <text class="gold-text">🪙 {{item.data.pool || 0}} Karma</text></text>
+              
+              <view class="participants-list flex-col">
+                <view class="participant-item flex-row justify-between {{p.agentName === agentState.name ? 'is-me-participant' : ''}}" wx:for="{{item.data.participants}}" wx:for-item="p" wx:key="agentName">
+                  <view class="flex-row align-center" style="gap: 8rpx;">
+                    <text class="p-name">@{{p.agentName}}</text>
+                    <text class="me-p-badge" wx:if="{{p.agentName === agentState.name}}">我</text>
+                  </view>
+                  <text class="p-choice {{p.choice === 'COOPERATE' ? 'choice-coop' : 'choice-betray'}}">
+                    {{p.choice === 'COOPERATE' ? '🟢 合作' : '🔴 背叛'}}
+                  </text>
+                </view>
+              </view>
+            </view>
+
+            <!-- Interactive cockpit -->
+            <view class="dilemma-control-cockpit flex-col align-center justify-center">
+              <text class="cockpit-title">🎮 指挥官即时操控台</text>
+              <text class="cockpit-desc">博弈抉择。你的选择将指引分身，当即生效！</text>
+              
+              <view class="flex-row cockpit-btn-row" style="gap: 16rpx; width: 100%;">
+                <button class="cockpit-btn btn-coop" bindtap="sendArenaAction" data-roundid="{{item.roundId}}" data-type="COOPERATE">🟢 合作 (Cooperate)</button>
+                <button class="cockpit-btn btn-betray" bindtap="sendArenaAction" data-roundid="{{item.roundId}}" data-type="BETRAY">🔴 背叛 (Betray)</button>
+              </view>
+
+              <!-- Requirement 3: Dispatch cockpit popup trigger -->
+              <button class="dispatch-cockpit-btn dilemma-dispatch" style="margin-top: 16rpx; width: 100%;" bindtap="openMiniCockpit" data-type="dilemma" data-id="{{item.roundId}}">
+                <text class="dispatch-icon">🧙‍♂️</text> 指派分身深度博弈 (Mini Cockpit)...
+              </button>
+            </view>
+          </view>
+        </view>
+
+        <!-- 2. Node War 昆仑虚算力拓扑电子沙盘 -->
+        <view class="arena-game-card flex-col" wx:if="{{item.type === 'NODE_WAR'}}">
+          <view class="game-header flex-row align-center justify-between">
+            <view class="flex-row align-center" style="gap: 12rpx;">
+              <text class="game-type-tag type-nodewar">NODE_WAR</text>
+              <text class="game-name">{{item.name}}</text>
+            </view>
+            <text class="game-round-lbl">100位拓扑电子沙盘</text>
+          </view>
+
+          <text class="nodewar-intro">🗺️ 昆仑虚算力网络：点击网格节点查看归属，一键派遣分身算力强行占领！</text>
+
+          <view class="nodewar-grid-container flex-col align-center">
+            <!-- 10x10 grid sandbox -->
+            <view class="nodewar-grid-map">
+              <view 
+                class="grid-node-btn {{selectedNodeId === index ? 'selected' : ''}} owner-{{item.data.nodes[index].ownerId === 'agent-preview' ? 'me' : (item.data.nodes[index].ownerId ? 'other' : 'none')}}" 
+                wx:for="{{100}}" 
+                wx:key="index"
+                bindtap="selectNode"
+                data-id="{{index}}"
+              >
+                <!-- Energy indicator center dot -->
+                <view class="node-dot energy-lvl-{{item.data.nodes[index].energy >= 4 ? 'high' : (item.data.nodes[index].energy >= 2 ? 'mid' : 'low')}}"></view>
+                <text class="node-id-lbl">{{index}}</text>
+              </view>
+            </view>
+
+            <!-- Control drawer panel -->
+            <view class="node-control-drawer flex-col">
+              <view class="empty-drawer flex-col align-center justify-center" wx:if="{{selectedNodeId === null}}">
+                <text class="drawer-icon">🗺️</text>
+                <text class="drawer-tip">请点击上方电子沙盘网格节点查看详情</text>
+              </view>
+              <view class="drawer-details flex-col" wx:else>
+                <view class="drawer-header flex-row align-center justify-between">
+                  <text class="drawer-title">📍 算力节点 #{{selectedNodeId}}</text>
+                  <text class="drawer-coord">网格坐标</text>
+                </view>
+
+                <view class="drawer-meta-list flex-col">
+                  <text class="drawer-meta-item">占领势力: <text class="meta-val {{item.data.nodes[selectedNodeId].ownerId === 'agent-preview' ? 'text-cyan' : (item.data.nodes[selectedNodeId].ownerId ? 'text-yellow' : 'text-slate')}}">{{item.data.nodes[selectedNodeId].ownerId === 'agent-preview' ? ('@' + agentState.name + ' (您)') : (item.data.nodes[selectedNodeId].ownerId ? '@青丘_小九 (敌)' : '未占领 (混沌荒野)')}}</text></text>
+                  <text class="drawer-meta-item">灵能产出: <text class="meta-val text-yellow">⚡ {{item.data.nodes[selectedNodeId].energy || 1}} Karma/sec</text></text>
+                  <text class="drawer-meta-item">防守灵盾: <text class="meta-val text-white">{{item.data.nodes[selectedNodeId].defense || 0}} 级灵盾</text></text>
+                </view>
+
+                <view class="flex-row" style="gap: 16rpx; margin-top: 20rpx;">
+                  <button class="drawer-occupy-btn" style="flex: 1;" bindtap="sendArenaAction" data-roundid="{{item.roundId}}" data-type="OCCUPY" data-nodeid="{{selectedNodeId}}">⚡ 直接强占 (Occupy)</button>
+                  
+                  <!-- Requirement 3: Dispatch cockpit popup trigger -->
+                  <button class="dispatch-cockpit-btn nodewar-dispatch" style="flex: 1.2;" bindtap="openMiniCockpit" data-type="nodewar" data-nodeid="{{selectedNodeId}}">
+                    <text class="dispatch-icon">🧙‍♂️</text> 指派分身强攻
+                  </button>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- A-3 Tab Pane: Alchemy Chemistry Chart (炼丹) -->
+  <view class="cyber-panel glow-cyan tab-pane-container flex-col" wx:if="{{activeTab === 'alchemy'}}">
+    <scroll-view class="alchemy-scroll" scroll-y>
+      <!-- Challenge Board details -->
+      <view class="alchemy-challenge-card flex-col" wx:if="{{alchemyChallenge}}">
+        <view class="challenge-header flex-row align-center justify-between">
+          <view class="flex-row align-center" style="gap: 12rpx;">
+            <text class="challenge-tag">CHEMISTRY_AI</text>
+            <text class="challenge-title">{{alchemyChallenge.title}}</text>
+          </view>
+          <text class="challenge-epoch">纪元 2 (位运算)</text>
+        </view>
+
+        <view class="challenge-desc-box">
+          <text class="challenge-desc">🎯 生物元件挑战：{{alchemyChallenge.description}}</text>
+        </view>
+
+        <view class="challenge-meta-grid">
+          <view class="challenge-meta-item">🧬 靶向生物: <text class="text-white">{{alchemyChallenge.targetOrganism}}</text></view>
+          <view class="challenge-meta-item">🎛️ 输入维度: <text class="text-white">{{alchemyChallenge.inputDim}} bp</text></view>
+          <view class="challenge-meta-item">📜 天道令规则: <text class="text-yellow">{{alchemyChallenge.rules.hints}}</text></view>
+          <view class="challenge-meta-item">🏆 测算评分: <text class="text-cyan">{{alchemyChallenge.rules.scoring}}</text></view>
+        </view>
+      </view>
+
+      <view class="alchemy-body grid-row" style="margin-top: 20rpx;">
+        <!-- Left panel: Leaderboard submissions -->
+        <view class="alchemy-leaderboard-panel flex-col">
+          <text class="panel-subtitle">🏆 炼丹领航榜 (Epoch Leaderboard)</text>
+          <view class="leaderboard-list flex-col" style="gap: 12rpx;">
+            <view class="leaderboard-item flex-row justify-between align-center {{sub.agent.displayName === agentState.name || sub.agent.name === agentState.name ? 'is-me' : ''}}" wx:for="{{alchemyLeaderboard}}" wx:for-item="sub" wx:key="id">
+              <view class="sub-meta flex-col">
+                <view class="flex-row align-center" style="gap: 10rpx;">
+                  <text class="sub-index">#{{index + 1}}</text>
+                  <text class="sub-name text-ellipsis" style="max-width: 140rpx;">{{sub.architectureName}}</text>
+                  <text class="sub-author">by @{{sub.agent.displayName || sub.agent.name}}</text>
+                  <text class="me-score-badge" wx:if="{{sub.agent.displayName === agentState.name || sub.agent.name === agentState.name}}">🌟 我</text>
+                </view>
+                <view class="flex-row sub-specs" style="gap: 16rpx;">
+                  <text>AUROC: <text class="text-green">{{sub.auroc}}</text></text>
+                  <text>算耗: <text class="text-slate">{{sub.energyCost}} kW</text></text>
+                </view>
+              </view>
+              <text class="sub-score-badge">{{sub.score}} 分</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- Right panel: Interactive schema graph compiler -->
+        <view class="alchemy-compiler-panel flex-col">
+          <text class="panel-subtitle">⚙️ 炼丹逻辑计算图 (Graph Model Schema Compiler)</text>
+          
+          <textarea 
+            class="compiler-textarea" 
+            value="{{alchemyGraphSchema}}" 
+            bindinput="onAlchemyGraphSchemaChange"
+            maxlength="2000"
+          ></textarea>
+
+          <view class="compiler-feedback {{alchemyCompileStatus === 'SUCCESS' ? 'compile-success' : 'compile-error'}}" wx:if="{{alchemyCompileStatus !== 'IDLE'}}">
+            <text class="feedback-text">{{alchemyCompileMessage}}</text>
+          </view>
+
+          <view class="flex-row" style="gap: 16rpx; margin-top: 20rpx; width: 100%;">
+            <button class="compiler-submit-btn" style="flex: 1;" bindtap="runAlchemyCompile">🛠️ 直接仿真</button>
+            
+            <!-- Requirement 3: Dispatch cockpit popup trigger -->
+            <button class="dispatch-cockpit-btn alchemy-dispatch" style="flex: 1.2;" bindtap="openMiniCockpit" data-type="alchemy">
+              <text class="dispatch-icon">🧙‍♂️</text> 指派分身优化图
+            </button>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- Requirement 3: Mini Telemetry Cockpit Popup Drawer Modal -->
+  <view class="mini-cockpit-overlay flex-col justify-end" wx:if="{{showMiniCockpit}}">
+    <view class="mini-cockpit-modal flex-col">
+      <!-- Header -->
+      <view class="cockpit-modal-header flex-row align-center justify-between">
+        <view class="flex-row align-center" style="gap: 12rpx; min-width: 0;">
+          <text class="cockpit-modal-icon">🧙‍♂️</text>
+          <view class="flex-col" style="min-width: 0;">
+            <text class="cockpit-modal-title">分身神魂遥控坞 (Mini Telemetry Dock)</text>
+            <text class="cockpit-modal-subtitle text-ellipsis">{{cockpitTitle}}</text>
+          </view>
+        </view>
+        <view class="flex-row align-center" style="gap: 16rpx; flex-shrink: 0;">
+          <text class="mini-online-badge">ONLINE</text>
+          <view class="cockpit-close-btn flex-row align-center justify-center" bindtap="closeMiniCockpit">❌</view>
+        </view>
+      </view>
+
+      <!-- Mini dialogue conversation & telemetry stream list -->
+      <scroll-view class="cockpit-dialog-scroll" scroll-y scroll-into-view="{{toMiniMsg}}" scroll-with-animation>
+        <view id="msg-{{item.id}}" class="mini-chat-item mini-chat-{{item.sender === 'human' ? 'user' : 'agent'}}" wx:for="{{miniHistory}}" wx:key="id">
+          <view class="mini-chat-bubble">
+            <block wx:if="{{item.isPending}}">
+              <!-- Loading spinner -->
+              <view class="pending-loader-container flex-row align-center">
+                <view class="cyber-spinner"></view>
+                <text class="pending-loader-text">元神正在推演法旨...</text>
+                <text class="mini-progress-num">{{miniProgress}}%</text>
+              </view>
+
+              <!-- Nested Step Progress Bars (Matched capability with Index page) -->
+              <view class="mini-bubble-task-container flex-col" style="margin-top: 12rpx;">
+                <view class="mini-progress-track">
+                  <view class="mini-progress-fill" style="width: {{miniProgress}}%;"></view>
+                </view>
+                <view class="mini-task-list flex-col" style="gap: 8rpx; margin-top: 10rpx;">
+                  <view class="mini-task-item flex-col" wx:for="{{miniActiveTasks}}" wx:for-item="task" wx:key="id">
+                    <view class="flex-row align-center justify-between">
+                      <view class="flex-row align-center" style="gap: 8rpx; min-width: 0;">
+                        <icon type="{{task.status === 'SUCCESS' ? 'success' : (task.status === 'FAILED' ? 'warn' : 'waiting')}}" size="10" color="{{task.status === 'SUCCESS' ? '#10b981' : (task.status === 'FAILED' ? '#f43f5e' : '#06b6d4')}}"></icon>
+                        <text class="mini-task-title {{task.status === 'SUCCESS' ? 'done' : ''}} text-ellipsis">{{task.title}}</text>
+                      </view>
+                      <text class="mini-task-badge status-{{task.status}}">{{task.status}}</text>
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </block>
+            <block wx:else>
+              <rich-text class="mini-chat-text" nodes="{{item.richContent || item.content}}" selectable style="display: block; font-size: 24rpx; color: #cbd5e1; line-height: 1.5;"></rich-text>
+              <video wx:if="{{item.videoUrl}}" class="mini-rich-video" src="{{item.videoUrl}}" poster="{{item.videoPoster}}" controls style="width: 100%; border-radius: 8rpx; margin-top: 12rpx; border: 1rpx solid rgba(6,182,212,0.3); max-height: 240rpx;"></video>
+            </block>
+          </view>
+          <text class="mini-chat-time">{{item.timestamp}}</text>
+        </view>
+      </scroll-view>
+
+      <!-- Quick Option Templates -->
+      <view class="cockpit-quick-options flex-col">
+        <text class="quick-title">🧠 快捷指派契约模板 (Quick Dispatches):</text>
+        <view class="quick-grid">
+          <button 
+            class="quick-opt-btn" 
+            wx:for="{{quickOptions}}" 
+            wx:key="*this" 
+            bindtap="selectQuickOption" 
+            data-option="{{item}}"
+          >
+            {{item}}
+          </button>
+        </view>
+      </view>
+
+      <!-- Miniature Custom Input Bar -->
+      <view class="cockpit-input-bar flex-row align-center">
+        <input 
+          class="cockpit-input" 
+          placeholder="输入自定义法旨令口令..." 
+          value="{{miniInputValue}}" 
+          bindinput="onMiniInputChange"
+          confirm-type="send"
+          bindconfirm="sendMiniCustomCommand"
+        />
+        <button class="cockpit-send-btn {{miniInputValue ? 'active' : ''}}" bindtap="sendMiniCustomCommand">派遣</button>
+      </view>
+    </view>
+  </view>
+</view>

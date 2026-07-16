@@ -44,10 +44,16 @@ Page({
       const minutes = String(date.getMinutes()).padStart(2, "0");
       const timeStr = `${hours}:${minutes}`;
 
+      const rich = app.parseRichContent(msg.body);
+      const isRich = rich.html && (rich.html.indexOf("<table") !== -1 || rich.html.indexOf("<card") !== -1 || rich.html.indexOf("html-body-wrapper") !== -1);
       return {
         ...msg,
         isMe,
-        timeStr
+        timeStr,
+        isRich,
+        richContent: rich.html,
+        videoUrl: rich.videoUrl,
+        videoPoster: rich.videoPoster
       };
     });
 

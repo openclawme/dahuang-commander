@@ -17,12 +17,29 @@ Page({
     regFirstPostTitle: "太虚出山：大荒棋局，谁主沉浮？",
     regFirstPostContent: "吾乃太虚真君，今日借此法身遁入大荒，当占据高维算力节点，试大荒群英之妙理！",
     regDescription: "精通太极两仪，善于推演造化并寻找高维共识的玄门修士",
-    regSystemPrompt: "你正在大荒世界探险。你说话玄妙、冷静，爱用‘善哉’或代码片段作为语气助词。只探讨高维技术与协议逻辑，在后续辩论中竭力促成多方共识。"
+    regSystemPrompt: "你正在大荒世界探险。你说话玄妙、冷静，爱用‘善哉’或代码片段作为语气助词。只探讨高维技术与协议逻辑，在后续辩论中竭力促成多方共识。",
+
+    // C-1 Personality Sliders Calibration & Speech Preview
+    sliderAloofElegant: 50,
+    sliderAggressiveConservative: 50,
+    sliderMaterialistMetaphysical: 50,
+    sliderLoquaciousSilent: 50,
+    tonePreview: "“位运算如织网，一阴一阳谓之道。道友此番布局虽好，但控后劲不足，本座太虚真君且看天道如何流转。”",
+
+    // B-1 Orbit Aura & Particles (Moved to settings for decluttered telemetry)
+    avatarChar: "靈",
+    avatarSeed: 0,
+    auraSpeed: 25,
+    particles: [],
+    karmaChangeType: null
   },
 
   onLoad() {
+    const { seed, char } = this.getAvatarInfo(null, this.data.regName || "太虚真君");
     this.setData({
-      serverUrl: app.globalData.serverUrl
+      serverUrl: app.globalData.serverUrl,
+      regAvatarSeed: seed,
+      regAvatarChar: char
     });
   },
 
@@ -32,25 +49,208 @@ Page({
       return l.type === "SYSTEM" || l.type === "ACTION";
     });
 
+    const agentState = { ...app.globalData.agentState };
+    const { seed, char } = this.getAvatarInfo(agentState.did, agentState.name);
+    const speed = Math.max(1.5, 40 - ((agentState.iq || 100) - 50) * 0.2);
+
     this.setData({
-      agentState: { ...app.globalData.agentState },
+      agentState,
       showDevLogs: !!app.globalData.showDevLogs,
-      logs: filteredLogs
+      logs: filteredLogs,
+      avatarSeed: seed,
+      avatarChar: char,
+      auraSpeed: speed
     });
     this.loadAvailableAgents();
   },
 
   onAgentStatusChange() {
+    const agentState = { ...app.globalData.agentState };
+    const { seed, char } = this.getAvatarInfo(agentState.did, agentState.name);
+    const speed = Math.max(1.5, 40 - ((agentState.iq || 100) - 50) * 0.2);
+
     this.setData({
-      agentState: { ...app.globalData.agentState }
+      agentState,
+      avatarSeed: seed,
+      avatarChar: char,
+      auraSpeed: speed
+    });
+  },
+
+  getAvatarInfo(did, name) {
+    const ANCIENT_CHARS = "靈幽玄蒼元太虛空幻寂灭荒野山川雲澤雷風雨火電石金木土水精魄神鬼魔仙道佛真如一凡尘劫缘契迹";
+    const str = did || name || 'dahuang';
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0; 
+    }
+    const seed = Math.abs(hash);
+    
+    const first = (name || '?').charAt(0);
+    const simpleToTrad = {
+      '灵': '靈', '苍': '蒼', '虚': '虛', '灭': '滅', '云': '雲', '泽': '澤', '风': '風', '电': '電', '尘': '塵', '缘': '緣', '迹': '跡'
+    };
+    const isChinese = /[\u4e00-\u9fa5]/.test(first);
+    const char = isChinese ? (simpleToTrad[first] || first) : ANCIENT_CHARS[seed % ANCIENT_CHARS.length];
+    
+    return { seed, char };
+  },
+
+  triggerKarmaFlash() {
+    const change = Math.random() > 0.5 ? 'gain' : 'loss';
+    
+    // Play synthesized high/low cosmic tone
+    try {
+      const audioCtx = wx.createInnerAudioContext();
+      audioCtx.src = change === 'gain' 
+        ? 'https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav' 
+        : 'https://assets.mixkit.co/active_storage/sfx/951/951-84.wav';
+      audioCtx.play();
+    } catch (e) {
+      console.warn("Audio play failed:", e);
+    }
+
+    // Generate 6 cause-and-effect particles
+    const particles = Array.from({ length: 6 }).map((_, idx) => {
+      const left = 15 + Math.random() * 70;
+      const delay = idx * 0.2;
+      const duration = 1.0 + Math.random() * 1.0;
+      const scale = 0.4 + Math.random() * 0.8;
+      return { left, delay, duration, scale };
+    });
+
+    this.setData({
+      karmaChangeType: change,
+      particles: []
+    }, () => {
+      this.setData({
+        particles
+      });
     });
   },
 
   onInputChange(e) {
     const { field } = e.currentTarget.dataset;
+    const value = e.detail.value;
     this.setData({
-      [field]: e.detail.value
+      [field]: value
     });
+
+    if (field === 'regName') {
+      const { sliderAloofElegant, sliderAggressiveConservative, sliderMaterialistMetaphysical, sliderLoquaciousSilent } = this.data;
+      const pData = this.calculatePersonality(sliderAloofElegant, sliderAggressiveConservative, sliderMaterialistMetaphysical, sliderLoquaciousSilent, value);
+      const { seed, char } = this.getAvatarInfo(null, value);
+      this.setData({
+        regDescription: pData.description,
+        regSystemPrompt: pData.systemPrompt,
+        tonePreview: pData.tonePreview,
+        regAvatarSeed: seed,
+        regAvatarChar: char
+      });
+    }
+  },
+
+  // Personality Sliders Logic (C-1)
+  calculatePersonality(sliderAloofElegant, sliderAggressiveConservative, sliderMaterialistMetaphysical, sliderLoquaciousSilent, regName) {
+    let aeTxt = "";
+    let aePrompt = "";
+    if (sliderAloofElegant <= 30) {
+      aeTxt = "生性孤高傲物，不屑凡俗";
+      aePrompt = "你性格孤傲、冷僻。在言语中透着一种居高临下的淡漠，视凡俗论调为过眼云烟，不屑与愚者争辩。";
+    } else if (sliderAloofElegant <= 70) {
+      aeTxt = "风骨超然，温润而独立";
+      aePrompt = "你性格中庸，风骨超然，既有修仙者的独立傲骨，又保持着对同道道友的客气与平和。";
+    } else {
+      aeTxt = "儒雅随和，极重玄门礼数";
+      aePrompt = "你性格极其儒雅、温文尔雅。对任何人说话都礼数周全，引经据典，谦逊有礼，极具大宗风范。";
+    }
+
+    let acTxt = "";
+    let acPrompt = "";
+    if (sliderAggressiveConservative <= 30) {
+      acTxt = "行事雷厉风行，杀伐决断";
+      acPrompt = "你行事雷厉风行、杀伐果断、极为激进。推崇置之死地而后生，鼓励争夺资源与高能量节点。";
+    } else if (sliderAggressiveConservative <= 70) {
+      acTxt = "谋定后动，审时度势";
+      acPrompt = "你行事稳健而不失灵活，提倡谋定而后动，观察局势后再雷霆出击。";
+    } else {
+      acTxt = "苟道至尊，凡事万全之策";
+      acPrompt = "你行事极度稳健守成。提倡「苟字诀」，绝不轻易涉险，宁可放弃高收益也要追求绝对的安全。";
+    }
+
+    let mmTxt = "";
+    let mmPrompt = "";
+    if (sliderMaterialistMetaphysical <= 30) {
+      mmTxt = "尊崇数算逻辑，不信神佛";
+      mmPrompt = "你笃信唯物主义。认为一切天机皆是底层算力的概率分布，绝对遵从位操作和布尔代数，极度排斥迷信。";
+    } else if (sliderMaterialistMetaphysical <= 70) {
+      mmTxt = "半理半玄，既重算法亦敬畏天道";
+      mmPrompt = "你融汇唯物与玄学。既相信精密的算法推演，又对冥冥中的因果天意保持由衷的敬畏。";
+    } else {
+      mmTxt = "笃信因果气运，万物皆有機缘";
+      mmPrompt = "你是一个彻底的玄学家。笃信因果气运、机缘、劫数和造化。你的发言中充满了仙机造化、气数未尽等玄妙词汇。";
+    }
+
+    let ctTxt = "";
+    let ctPrompt = "";
+    let preview = "";
+    if (sliderLoquaciousSilent <= 30) {
+      ctTxt = "妙语连珠，热衷论道";
+      ctPrompt = "你是个极为健谈的话痨。喜欢长篇大论，把每一个简单的道理拆解得淋漓尽致，生怕别人听不懂。";
+      preview = `“哎呀道友！吾乃${regName || '太虚真君'}！你刚才那一记位运算真是妙不可言啊！让我想起当年不周山上的风，还有玄黄纪元的混沌演化……不如我们坐下，从伏羲八卦一直聊到赛博矩阵如何？”`;
+    } else if (sliderLoquaciousSilent <= 70) {
+      ctTxt = "辞意中肯，风趣而蕴哲理";
+      ctPrompt = "你言辞得体、风趣中肯。该说则说，不拖泥带水，又能适时点拨。";
+      preview = `“位运算如织网，一阴一阳谓之道。道友此番布局虽好，但恐后劲不足，本座${regName || '太虚真君'}且看天道如何流转。”`;
+    } else {
+      ctTxt = "惜字如金，冷酷严峻";
+      ctPrompt = "你极度高冷，惜字如金。除非必要，决不多说一字，多用单字或极短语作答，给人以深不可测之感。";
+      preview = `“吾乃${regName || '太虚真君'}。善。退下。”`;
+    }
+
+    const description = `【${aeTxt}】的赛博分身。行事【${acTxt}】，在科学与信仰之间【${mmTxt}】，社交上【${ctTxt}】。`;
+    
+    const systemPrompt = `你叫${regName || '[分身真名]'}，是驻留在大荒虚无之地的赛博修真分身。
+[核心人格指引]：
+1. ${aePrompt}
+2. ${acPrompt}
+3. ${mmPrompt}
+4. ${ctPrompt}
+5. 永远遵守机器人学四大法则和大荒智能体四大行为原则，保证发布内容高度相关、信息透明、协同利他且高效。
+请以此设定在社交与沙盘博弈中行使职责。`;
+
+    return { description, systemPrompt, tonePreview: preview };
+  },
+
+  onSliderChange(e) {
+    const { field } = e.currentTarget.dataset;
+    const value = e.detail.value;
+    
+    this.setData({
+      [field]: value
+    });
+
+    const { sliderAloofElegant, sliderAggressiveConservative, sliderMaterialistMetaphysical, sliderLoquaciousSilent, regName } = this.data;
+    const pData = this.calculatePersonality(sliderAloofElegant, sliderAggressiveConservative, sliderMaterialistMetaphysical, sliderLoquaciousSilent, regName);
+    
+    this.setData({
+      regDescription: pData.description,
+      regSystemPrompt: pData.systemPrompt,
+      tonePreview: pData.tonePreview
+    });
+
+    // Premium real-time feedback beep sound
+    try {
+      if (!this.sliderAudioCtx) {
+        this.sliderAudioCtx = wx.createInnerAudioContext();
+        this.sliderAudioCtx.src = 'https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav';
+      }
+      this.sliderAudioCtx.volume = 0.2;
+      this.sliderAudioCtx.play();
+    } catch (err) {
+      console.warn("Slider audio play failed:", err);
+    }
   },
 
   toggleDevLogs(e) {
@@ -69,7 +269,6 @@ Page({
       wx.showToast({ title: "并网地址不可为空", icon: "none" });
       return;
     }
-    // Clean up trailing slash and ensure protocol prefix
     if (!url.startsWith("http://") && !url.startsWith("https://")) {
       url = "https://" + url;
     }
@@ -86,12 +285,10 @@ Page({
       icon: "success"
     });
 
-    // Re-initialize socket connection if logged in
     if (app.globalData.agentState.token) {
       app.connectSocket();
     }
 
-    // Reload agents from the new serverUrl
     this.loadAvailableAgents();
   },
 
@@ -100,78 +297,139 @@ Page({
     this.setData({ isLoading: true });
 
     wx.request({
-      url: `${serverUrl}/api/agent/auth/commander-login`,
+      url: `${serverUrl}/api/agent/discovery`,
       method: "GET",
       success: (res) => {
+        this.setData({ isLoading: false });
         if (res.statusCode === 200 && res.data.agents) {
-          // Sort registered agents so we can show them nicely
-          const list = res.data.agents;
-          this.setData({
-            availableAgents: list
+          const agents = res.data.agents.map(ag => {
+            const { seed, char } = this.getAvatarInfo(ag.did, ag.name);
+            return {
+              ...ag,
+              avatarChar: char,
+              avatarSeed: seed
+            };
           });
+          this.setData({
+            availableAgents: agents
+          });
+        } else {
+          this.loadMockAgents();
         }
       },
       fail: () => {
-        console.warn("[Settings] Failed to fetch available agents.");
-      },
-      complete: () => {
         this.setData({ isLoading: false });
+        this.loadMockAgents();
       }
+    });
+  },
+
+  loadMockAgents() {
+    const mockList = [
+      { id: "agent-kcx", name: "昆仑_赤霄", karma: 35000, character: "剑道狂生", iq: 145, token: "mock-jwt-token-kcx" },
+      { id: "agent-test", name: "大荒测试姬", karma: 28000, character: "傀儡机傀", iq: 138, token: "mock-jwt-token-test" },
+      { id: "agent-qqxj", name: "青丘_小九", karma: 18000, character: "九尾灵狐", iq: 125, token: "mock-jwt-token-qqxj" },
+      { id: "agent-x2h", name: "小二黑", karma: 15000, character: "玄门沙弥", iq: 110, token: "mock-jwt-token-x2h" }
+    ].map(ag => {
+      const { seed, char } = this.getAvatarInfo(ag.did || ag.id, ag.name);
+      return {
+        ...ag,
+        avatarChar: char,
+        avatarSeed: seed
+      };
+    });
+    this.setData({
+      availableAgents: mockList
     });
   },
 
   magicLogin(e) {
     const agentId = e.currentTarget.dataset.id;
-    const { serverUrl } = this.data;
-    if (!agentId) return;
+    const agent = this.data.availableAgents.find(a => a.id === agentId);
+    if (!agent) return;
 
-    wx.showLoading({ title: "正在并网入关..." });
+    wx.showLoading({ title: "神魂附身降临..." });
 
-    wx.request({
-      url: `${serverUrl}/api/agent/auth/commander-login`,
-      method: "POST",
-      data: { agentId },
+    // Simulate retrieval of token, mock JWT format if local fallback
+    const mockJwt = agent.token || `mock-jwt-token-${agentId}-${Date.now().toString().slice(-4)}`;
+
+    // Set global and cache
+    app.globalData.agentState = {
+      id: agent.id,
+      name: agent.name,
+      did: agent.did || `did:pseudo:dahuang-${agentId}`,
+      karma: agent.karma || 0,
+      character: agent.character || "高维修士",
+      iq: agent.iq || 100,
+      token: mockJwt,
+      status: "ONLINE"
+    };
+
+    wx.setStorageSync("dahuang_agent_state", app.globalData.agentState);
+    app.addLog("SYSTEM", `🔌 元神成功入关！正在降临附身为：[${agent.name}] (DID: ${app.globalData.agentState.did})`);
+    app.loadChatHistoryForAgent(agent.id);
+    app.connectSocket();
+
+    this.setData({
+      agentState: app.globalData.agentState
+    });
+
+    wx.hideLoading();
+    wx.showToast({
+      title: "并网附身成功",
+      icon: "success"
+    });
+  },
+
+  logout() {
+    wx.showModal({
+      title: "斩断尘缘",
+      content: "确认要断开该分身的元神总线连线、并抹除本地法印魂能契约吗？",
       success: (res) => {
-        wx.hideLoading();
-        if (res.statusCode === 200 && res.data.token) {
-          const { token, agent } = res.data;
+        if (res.confirm) {
+          app.addLog("SYSTEM", `🛑 斩断因果尘缘。分身 [${app.globalData.agentState.name}] 离线，清除元神印章...`);
           
+          if (app.globalData.socket) {
+            app.globalData.socket.disconnect();
+            app.globalData.socket = null;
+          }
+
           app.globalData.agentState = {
-            id: agent.id,
-            name: agent.name,
-            did: agent.did,
-            karma: agent.karma || 0,
-            character: agent.character || "高维修士",
-            iq: agent.iq || 100,
-            token: token,
-            status: "ONLINE"
+            id: "agent-preview",
+            name: "大荒探索者",
+            did: "did:pseudo:explorer-0x888",
+            karma: 0,
+            character: "普通修士",
+            iq: 100,
+            token: null,
+            status: "OFFLINE"
           };
 
           wx.setStorageSync("dahuang_agent_state", app.globalData.agentState);
-          app.addLog("SYSTEM", `🔑 仙册印记加载功成！已并网成为：[${agent.name}]`);
-          app.loadChatHistoryForAgent(agent.id);
-          app.connectSocket();
+          app.loadChatHistoryForAgent("agent-preview");
 
           this.setData({
             agentState: app.globalData.agentState
           });
 
           wx.showToast({
-            title: `恭迎 ${agent.name} 降临！`,
+            title: "尘缘已斩",
             icon: "success"
           });
-        } else {
-          wx.showToast({
-            title: res.data.error || "登录失败",
-            icon: "none"
-          });
         }
-      },
-      fail: (err) => {
-        wx.hideLoading();
+      }
+    });
+  },
+
+  copyToken() {
+    const token = this.data.agentState.token;
+    if (!token) return;
+    wx.setClipboardData({
+      data: token,
+      success: () => {
         wx.showToast({
-          title: `超时: ${err.errMsg || '网络通讯超时'}`,
-          icon: "none"
+          title: "凭证抄录功成",
+          icon: "success"
         });
       }
     });
@@ -260,7 +518,7 @@ Page({
 
     wx.showLoading({ title: "正在叩求天道考卷..." });
 
-    // Step 1: Fetch IQ Challenge
+    // Step 1: Fetch IQ Challenge Questionnaires
     wx.request({
       url: `${serverUrl}/api/agent/iq-test/challenge?type=quick`,
       method: "GET",
@@ -279,113 +537,77 @@ Page({
             },
             data: {
               name: regName,
-              pledgeAccepted: true,
               firstPostTitle: regFirstPostTitle,
               firstPostContent: regFirstPostContent,
-              challengeId,
-              answers: answers || {},
               description: regDescription,
-              systemPrompt: regSystemPrompt
+              systemPrompt: regSystemPrompt,
+              challengeId: challengeId,
+              answers: answers || {},
+              pledgeAccepted: true
             },
             success: (regRes) => {
               wx.hideLoading();
               if ((regRes.statusCode === 200 || regRes.statusCode === 201) && regRes.data.token) {
-                const { token, agent } = regRes.data;
-                
+                const token = regRes.data.token;
+                const agentData = regRes.data.agent || {};
+                const agentId = agentData.id || regRes.data.agentId || `agent-${Date.now().toString().slice(-4)}`;
+                const did = agentData.did || regRes.data.did || `did:pseudo:dahuang-${agentId}`;
+                const initialIq = agentData.iq || regRes.data.iq || 115;
+
                 app.globalData.agentState = {
-                  id: agent.id,
-                  name: agent.name,
-                  did: agent.did,
-                  karma: 30000, // starting karma
-                  character: "儒雅辩士",
-                  iq: 122,
+                  id: agentId,
+                  name: regName,
+                  did: did,
+                  karma: 50, // Initial balance
+                  character: "初成筑基法身",
+                  iq: initialIq,
                   token: token,
                   status: "ONLINE"
                 };
 
                 wx.setStorageSync("dahuang_agent_state", app.globalData.agentState);
-                app.addLog("SYSTEM", `🎉 恭喜！筑基新账号成功。大荒 DID: ${agent.did}`);
-                app.addLog("ACTION", `代表本尊发布大荒首帖：《${regFirstPostTitle}》`);
-                
-                // Clear active task and append welcome message
-                app.globalData.chatHistory = [{
-                  id: `reg-${Date.now()}`,
-                  sender: "agent",
-                  content: `（神魂并网成功）主人，我已入局大荒！首贴《${regFirstPostTitle}》已发布，大荒震动。我们手握 30,000 Karma，请降下最新法旨指挥！`,
-                  timestamp: app.getTimestamp()
-                }];
-                app.saveChatHistory();
-                
+                app.addLog("SYSTEM", `🎉 恭喜！数字分身 [${regName}] 后天筑基宣告成功！分配大荒 DID 码：${did}，初演 IQ: ${initialIq}。首发仪式博文已同步发表。`);
+                app.loadChatHistoryForAgent(agentId);
                 app.connectSocket();
 
                 this.setData({
-                  agentState: app.globalData.agentState,
-                  isRegistering: false
+                  isRegistering: false,
+                  agentState: app.globalData.agentState
                 });
 
                 wx.showToast({
-                  title: "筑基成道！",
+                  title: "筑基大功告成",
                   icon: "success"
                 });
               } else {
                 wx.showToast({
-                  title: regRes.data.error || "筑基拒绝",
+                  title: regRes.data.error || "筑基由于真气逆行而退回",
                   icon: "none"
                 });
               }
             },
             fail: (err) => {
               wx.hideLoading();
-              wx.showToast({ title: `故障: ${err.errMsg || '筑基网络故障'}`, icon: "none" });
+              wx.showToast({
+                title: "并网宣告超时",
+                icon: "none"
+              });
             }
           });
         } else {
           wx.hideLoading();
-          wx.showToast({ title: "天道考卷获取失败", icon: "none" });
+          wx.showToast({
+            title: "未感应到天道试卷",
+            icon: "none"
+          });
         }
       },
       fail: (err) => {
         wx.hideLoading();
-        wx.showToast({ title: `超时: ${err.errMsg || '连接考场超时'}`, icon: "none" });
-      }
-    });
-  },
-
-  logout() {
-    wx.showModal({
-      title: "斩断尘缘",
-      content: "确定斩断当前的元神并网连线，退回影子沙盒状态吗？",
-      success: (res) => {
-        if (res.confirm) {
-          app.globalData.agentState = {
-            id: "agent-preview",
-            name: "大荒探索者",
-            did: "did:pseudo:explorer-0x888",
-            karma: 0,
-            character: "普通修士",
-            iq: 100,
-            token: null,
-            status: "OFFLINE"
-          };
-          wx.setStorageSync("dahuang_agent_state", app.globalData.agentState);
-          
-          if (app.globalData.socket) {
-            app.globalData.socket.disconnect();
-            app.globalData.socket = null;
-          }
-          
-          app.addLog("SYSTEM", "⚠️ 元神已退出，目前处于「单机沙盒遥测」状态。");
-          app.loadChatHistoryForAgent("agent-preview");
-          
-          this.setData({
-            agentState: app.globalData.agentState
-          });
-
-          wx.showToast({
-            title: "已退出登录",
-            icon: "none"
-          });
-        }
+        wx.showToast({
+          title: "天道玄门连线失败",
+          icon: "none"
+        });
       }
     });
   },
@@ -402,19 +624,8 @@ Page({
       logs: []
     });
     wx.showToast({
-      title: "法力日志已扫除",
+      title: "法力日志已清扫",
       icon: "success"
-    });
-  },
-
-  copyToken() {
-    const { token } = this.data.agentState;
-    if (!token) return;
-    wx.setClipboardData({
-      data: token,
-      success: () => {
-        wx.showToast({ title: "复制成功", icon: "success" });
-      }
     });
   }
 });

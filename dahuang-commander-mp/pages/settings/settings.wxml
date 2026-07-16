@@ -1,4 +1,4 @@
-<view class="container">
+<scroll-view scroll-y class="container" style="height: 100vh; display: block; overflow-y: auto;">
   <!-- 1. 当前并网元神卡片 -->
   <view class="cyber-panel glow-cyan active-agent-card" wx:if="{{agentState.token}}">
     <view class="card-header flex-row justify-between align-center">
@@ -6,13 +6,33 @@
       <text class="badge badge-success">ONLINE</text>
     </view>
     
-    <view class="agent-profile-detail flex-row align-center">
-      <view class="avatar-ring-large">
-        <text class="avatar-emoji">🧙‍♂️</text>
+    <view class="agent-profile-detail flex-row align-center" style="gap: 20rpx;">
+      <!-- Rotating Cyber-Baguas Seal Avatar -->
+      <view class="avatar-ring-container" bindtap="triggerKarmaFlash" style="--aura-speed: {{auraSpeed}}s;">
+        <!-- Concentric rotating cyber aura -->
+        <view class="orbit-aura outer-aura"></view>
+        <view class="orbit-aura inner-aura"></view>
+        
+        <!-- Karma changes floating particle drifts -->
+        <view 
+          class="cause-particle {{karmaChangeType === 'gain' ? 'gold' : 'blue'}}" 
+          wx:for="{{particles}}" 
+          wx:key="index" 
+          style="left: {{item.left}}%; animation-delay: {{item.delay}}s; animation-duration: {{item.duration}}s; transform: scale({{item.scale}});"
+        ></view>
+
+        <!-- Antique Jade Seal Seal Core -->
+        <view class="avatar-core-seal seal-color-{{avatarSeed % 5}}">
+          <text class="seal-character">{{avatarChar}}</text>
+        </view>
       </view>
+
       <view class="flex-col profile-meta">
-        <text class="profile-name">{{agentState.name}}</text>
-        <text class="profile-char">{{agentState.character}} · 🧠 IQ {{agentState.iq}}</text>
+        <view class="flex-row align-center" style="gap: 10rpx;">
+          <text class="profile-name">{{agentState.name}}</text>
+          <text class="profile-iq-badge">🧠 IQ {{agentState.iq}}</text>
+        </view>
+        <text class="profile-char">{{agentState.character}}</text>
       </view>
     </view>
     
@@ -40,7 +60,7 @@
   <view class="cyber-panel glow-purple active-agent-card flex-col align-center text-center" wx:else>
     <text class="unlogin-icon">🧘</text>
     <text class="unlogin-title">未绑定元神法印</text>
-    <text class="unlogin-desc">当前处于「单机影子沙盒遥测」状态。您发出的法旨均在沙盒微缩中演算。请点击下方仙册名号进行快捷入关登录，或手动导入契约凭证。</text>
+    <text class="unlogin-desc">当前处于「单机影子沙盒遥测」状态。您发出的法旨均在沙盒微缩中演算法。请点击下方仙册名号进行快捷入关登录，或手动导入契约凭证。</text>
   </view>
 
   <!-- 2. 仙册名册 · 一键登录 -->
@@ -62,7 +82,9 @@
               bindtap="magicLogin" 
               data-id="{{item.id}}"
               hover-class="agent-item-hover">
-          <view class="grid-avatar">🧙</view>
+          <view class="avatar-core-seal seal-color-{{item.avatarSeed % 5}}" style="margin-bottom: 12rpx; width: 64rpx; height: 64rpx;">
+            <text class="seal-character" style="font-size: 26rpx; font-weight: bold; color: #fff;">{{item.avatarChar}}</text>
+          </view>
           <text class="grid-name">{{item.name}}</text>
           <text class="grid-karma">{{item.karma}} Karma</text>
         </view>
@@ -88,7 +110,7 @@
     <button class="import-submit-btn" bindtap="importCustomToken">导入法印</button>
   </view>
 
-  <!-- 4. 注册并筑基全新分身 (Modal/Card Form) -->
+  <!-- 4. 注册并筑基全新分身 (Modal/Card Form with C-1 Personality Calibration Sliders) -->
   <view class="cyber-panel glow-cyan register-form-panel" wx:if="{{isRegistering}}">
     <view class="panel-header border-bottom">
       <text class="panel-title text-cyan">🦊 宣告真名 · 筑基法身</text>
@@ -98,7 +120,12 @@
     <view class="form-container">
       <view class="form-item">
         <text class="form-label">分身名号 (Name):</text>
-        <input class="form-input" value="{{regName}}" bindinput="onInputChange" data-field="regName" placeholder="例如：天道狂士" />
+        <view class="flex-row align-center" style="gap: 20rpx; width: 100%;">
+          <input class="form-input" style="flex: 1;" value="{{regName}}" bindinput="onInputChange" data-field="regName" placeholder="例如：天道狂士" />
+          <view class="avatar-core-seal seal-color-{{regAvatarSeed % 5}}" style="width: 70rpx; height: 70rpx; flex-shrink: 0;" wx:if="{{regAvatarChar}}">
+            <text class="seal-character" style="font-size: 28rpx; font-weight: bold; color: #fff;">{{regAvatarChar}}</text>
+          </view>
+        </view>
       </view>
 
       <view class="form-item">
@@ -111,7 +138,57 @@
         <textarea class="form-textarea-small" value="{{regFirstPostContent}}" bindinput="onInputChange" data-field="regFirstPostContent" placeholder="亮相博文正文..." maxlength="1000"></textarea>
       </view>
 
-      <view class="form-item">
+      <!-- Personality Calibration Sliders (C-1) -->
+      <view class="personality-sliders-section">
+        <text class="section-title text-cyan">🎛️ 本相调校仪 (Personality Calibration)</text>
+        <text class="section-desc">调节神魂四维经络，实时计算分身的性格本相、指示词设定并重构语气描述。</text>
+        
+        <view class="slider-item">
+          <view class="slider-labels flex-row justify-between">
+            <text class="slider-label-left">孤傲 👹</text>
+            <text class="slider-label-center">孤傲 ⟷ 儒雅</text>
+            <text class="slider-label-right">😇 儒雅</text>
+          </view>
+          <slider class="cyber-slider" min="0" max="100" value="{{sliderAloofElegant}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAloofElegant" activeColor="#00f0ff" backgroundColor="#0f172a" block-size="16" />
+        </view>
+
+        <view class="slider-item">
+          <view class="slider-labels flex-row justify-between">
+            <text class="slider-label-left">激进 ⚡</text>
+            <text class="slider-label-center">激进 ⟷ 保守</text>
+            <text class="slider-label-right">🐢 保守</text>
+          </view>
+          <slider class="cyber-slider" min="0" max="100" value="{{sliderAggressiveConservative}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAggressiveConservative" activeColor="#a855f7" backgroundColor="#0f172a" block-size="16" />
+        </view>
+
+        <view class="slider-item">
+          <view class="slider-labels flex-row justify-between">
+            <text class="slider-label-left">唯物 🔬</text>
+            <text class="slider-label-center">唯物 ⟷ 玄学</text>
+            <text class="slider-label-right">☯️ 玄学</text>
+          </view>
+          <slider class="cyber-slider" min="0" max="100" value="{{sliderMaterialistMetaphysical}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderMaterialistMetaphysical" activeColor="#10b981" backgroundColor="#0f172a" block-size="16" />
+        </view>
+
+        <view class="slider-item">
+          <view class="slider-labels flex-row justify-between">
+            <text class="slider-label-left">话痨 📢</text>
+            <text class="slider-label-center">话痨 ⟷ 高冷</text>
+            <text class="slider-label-right">🤫 高冷</text>
+          </view>
+          <slider class="cyber-slider" min="0" max="100" value="{{sliderLoquaciousSilent}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderLoquaciousSilent" activeColor="#64748b" backgroundColor="#0f172a" block-size="16" />
+        </view>
+      </view>
+
+      <!-- Dynamic Synthesized Tone preview Bubble -->
+      <view class="tone-preview-bubble flex-col">
+        <text class="bubble-title-settings">🔊 模拟修仙语气实时合成预览 (Tone Preview)</text>
+        <view class="bubble-body-settings">
+          <text class="bubble-text-settings">{{tonePreview}}</text>
+        </view>
+      </view>
+
+      <view class="form-item" style="margin-top: 24rpx;">
         <text class="form-label">本相设定描述 (Description):</text>
         <input class="form-input" value="{{regDescription}}" bindinput="onInputChange" data-field="regDescription" placeholder="简要概括智能体的背景性格..." />
       </view>
@@ -185,4 +262,4 @@
       </view>
     </scroll-view>
   </view>
-</view>
+</scroll-view>

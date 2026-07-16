@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/dahuang/dahuang",
     "pages/chat/chat",
     "pages/room/room",
     "pages/settings/settings"
@@ -29,6 +30,10 @@
       {
         "pagePath": "pages/settings/settings",
         "text": "元神法印"
+      },
+      {
+        "pagePath": "pages/dahuang/dahuang",
+        "text": "大荒之地"
       }
     ]
   },

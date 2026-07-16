@@ -1,0 +1,467 @@
+@import "../index/index.wxss";
+
+.container {
+  padding: 24rpx;
+  background-color: #020617;
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom Top Tab Bar Styles */
+.dahuang-tab-navbar {
+  display: flex;
+  flex-direction: row;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1rpx solid rgba(6, 182, 212, 0.2);
+  border-radius: 16rpx;
+  padding: 8rpx;
+  gap: 12rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.3);
+}
+
+.dahuang-tab-nav-item {
+  flex: 1;
+  font-size: 24rpx;
+  color: #64748b;
+  padding: 16rpx 0;
+  border-radius: 12rpx;
+  text-align: center;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+}
+
+.dahuang-tab-nav-item.active {
+  background: rgba(6, 182, 212, 0.15);
+  border: 1rpx solid rgba(6, 182, 212, 0.5);
+  color: #06b6d4;
+  text-shadow: 0 0 10rpx rgba(6, 182, 212, 0.6);
+  font-weight: bold;
+}
+
+.tab-icon {
+  font-size: 26rpx;
+}
+
+.tab-pane-container {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+/* Owner Highlighting (Requirement 2) */
+.is-me-post {
+  border: 1rpx solid rgba(6, 182, 212, 0.4) !important;
+  box-shadow: 0 0 20rpx rgba(6, 182, 212, 0.15) !important;
+  background: rgba(6, 182, 212, 0.03) !important;
+}
+
+.me-post-badge {
+  font-size: 20rpx;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1rpx solid rgba(245, 158, 11, 0.4);
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+  font-weight: bold;
+  margin-left: auto;
+}
+
+.me-p-badge {
+  font-size: 18rpx;
+  color: #06b6d4;
+  background: rgba(6, 182, 212, 0.15);
+  border: 1rpx solid rgba(6, 182, 212, 0.4);
+  padding: 1rpx 8rpx;
+  border-radius: 4rpx;
+  font-weight: bold;
+}
+
+.me-score-badge {
+  font-size: 18rpx;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1rpx solid rgba(16, 185, 129, 0.4);
+  padding: 2rpx 8rpx;
+  border-radius: 6rpx;
+  font-weight: bold;
+}
+
+.is-me-participant {
+  background: rgba(6, 182, 212, 0.08) !important;
+  border-left: 4rpx solid #06b6d4 !important;
+}
+
+/* Dispatch Capsule Action Buttons (Requirement 3) */
+.dispatch-cockpit-btn {
+  background: rgba(6, 182, 212, 0.08) !important;
+  border: 1rpx dashed rgba(6, 182, 212, 0.5) !important;
+  color: #06b6d4 !important;
+  font-size: 22rpx !important;
+  font-weight: bold !important;
+  border-radius: 12rpx !important;
+  padding: 14rpx 0 !important;
+  width: 100% !important;
+  transition: all 0.2s ease !important;
+  text-shadow: 0 0 8rpx rgba(6, 182, 212, 0.3) !important;
+  line-height: 1.5 !important;
+}
+
+.dispatch-cockpit-btn:active {
+  background: rgba(6, 182, 212, 0.2) !important;
+  transform: scale(0.98) !important;
+}
+
+.elegant-dispatch-btn {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%) !important;
+  border: 1rpx solid rgba(139, 92, 246, 0.5) !important;
+  color: #c4b5fd !important;
+  box-shadow: 0 4rpx 12rpx rgba(139, 92, 246, 0.2) !important;
+}
+
+.forum-web-btn {
+  font-size: 22rpx;
+  font-weight: bold;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1rpx solid rgba(56, 189, 248, 0.4);
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+  margin: 0;
+  line-height: 1.2;
+}
+.forum-web-btn:active {
+  background: rgba(56, 189, 248, 0.2);
+}
+
+.dispatch-icon {
+  margin-right: 8rpx;
+  font-size: 24rpx;
+}
+
+/* Mini Cockpit Drawer Popup Modal (Requirement 3) */
+.mini-cockpit-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(2, 6, 23, 0.85);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.mini-cockpit-modal {
+  background: #0b0f19;
+  border-top: 2rpx solid rgba(6, 182, 212, 0.5);
+  border-top-left-radius: 32rpx;
+  border-top-right-radius: 32rpx;
+  padding: 32rpx;
+  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -10rpx 40rpx rgba(6, 182, 212, 0.2);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 85vh;
+}
+
+.cockpit-modal-header {
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.cockpit-modal-icon {
+  font-size: 38rpx;
+}
+
+.cockpit-modal-title {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #f8fafc;
+}
+
+.cockpit-modal-subtitle {
+  font-size: 20rpx;
+  color: #94a3b8;
+  margin-top: 4rpx;
+}
+
+.mini-online-badge {
+  font-size: 16rpx;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1rpx solid rgba(16, 185, 129, 0.3);
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  font-weight: bold;
+  letter-spacing: 2rpx;
+}
+
+.cockpit-close-btn {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  color: #ef4444;
+  font-size: 18rpx;
+  cursor: pointer;
+}
+
+/* Dialogue List */
+.cockpit-dialog-scroll {
+  height: 480rpx;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.mini-chat-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16rpx;
+}
+
+.mini-chat-user {
+  align-items: flex-end;
+}
+
+.mini-chat-agent {
+  align-items: flex-start;
+}
+
+.mini-chat-bubble {
+  max-width: 85%;
+  padding: 14rpx 20rpx;
+  border-radius: 12rpx;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
+.mini-chat-user .mini-chat-bubble {
+  background: #06b6d4;
+  color: #020617;
+  font-weight: 500;
+  border-top-right-radius: 2rpx;
+}
+
+.mini-chat-agent .mini-chat-bubble {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border-top-left-radius: 2rpx;
+}
+
+.mini-chat-time {
+  font-size: 16rpx;
+  color: #475569;
+  margin-top: 6rpx;
+}
+
+/* Steps in bubble */
+.mini-bubble-task-container {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1rpx solid rgba(255, 255, 255, 0.05);
+  border-radius: 8rpx;
+  padding: 12rpx;
+}
+
+.mini-progress-track {
+  width: 100%;
+  height: 6rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3rpx;
+  overflow: hidden;
+}
+
+.mini-progress-fill {
+  height: 100%;
+  background: #06b6d4;
+  box-shadow: 0 0 10rpx #06b6d4;
+  transition: width 0.3s ease;
+}
+
+.mini-task-item {
+  font-size: 18rpx;
+}
+
+.mini-task-title {
+  color: #94a3b8;
+}
+
+.mini-task-title.done {
+  color: #475569;
+  text-decoration: line-through;
+}
+
+.mini-task-badge {
+  font-size: 14rpx;
+  font-weight: bold;
+  padding: 1rpx 6rpx;
+  border-radius: 4rpx;
+}
+
+.mini-task-badge.status-SUCCESS {
+  color: #10b981;
+}
+.mini-task-badge.status-PROCESSING {
+  color: #06b6d4;
+}
+.mini-task-badge.status-WAITING {
+  color: #64748b;
+}
+
+.mini-progress-num {
+  font-size: 18rpx;
+  font-weight: bold;
+  color: #06b6d4;
+  margin-left: auto;
+}
+
+/* Quick Dispatch Option Templates */
+.cockpit-quick-options {
+  margin-bottom: 20rpx;
+}
+
+.quick-title {
+  font-size: 20rpx;
+  font-weight: bold;
+  color: #64748b;
+  margin-bottom: 12rpx;
+}
+
+.quick-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.quick-opt-btn {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1rpx solid rgba(255, 255, 255, 0.06) !important;
+  color: #cbd5e1 !important;
+  font-size: 20rpx !important;
+  padding: 16rpx 20rpx !important;
+  border-radius: 10rpx !important;
+  text-align: left !important;
+  line-height: 1.3 !important;
+  width: 100% !important;
+}
+
+.quick-opt-btn:active {
+  background: rgba(6, 182, 212, 0.1) !important;
+  border-color: rgba(6, 182, 212, 0.4) !important;
+  color: #06b6d4 !important;
+}
+
+/* Custom Mini Input Bar */
+.cockpit-input-bar {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  border-radius: 12rpx;
+  padding: 8rpx 16rpx;
+  gap: 12rpx;
+}
+
+.cockpit-input {
+  flex: 1;
+  height: 60rpx;
+  font-size: 22rpx;
+  color: #f8fafc;
+}
+
+.cockpit-send-btn {
+  background: #334155 !important;
+  color: #94a3b8 !important;
+  font-size: 20rpx !important;
+  font-weight: bold !important;
+  padding: 12rpx 24rpx !important;
+  border-radius: 8rpx !important;
+  transition: all 0.2s ease !important;
+  line-height: 1.5 !important;
+}
+
+.cockpit-send-btn.active {
+  background: #06b6d4 !important;
+  color: #020617 !important;
+  box-shadow: 0 0 12rpx rgba(6, 182, 212, 0.4) !important;
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* Inline Comments Section */
+.comments-section {
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.08);
+  animation: fadeIn 0.3s ease;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.comment-item {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12rpx;
+  border-radius: 8rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.comment-author {
+  font-size: 20rpx;
+  font-weight: bold;
+  color: #94a3b8;
+  margin-bottom: 4rpx;
+}
+
+.comment-text {
+  font-size: 22rpx;
+  color: #e2e8f0;
+  line-height: 1.4;
+}
+
+.loading-comments {
+  font-size: 20rpx;
+  color: #64748b;
+  text-align: center;
+  padding: 10rpx 0;
+}
+
+.comment-input-area {
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+  align-items: center;
+}
+
+.comment-input-area .cyber-input {
+  flex: 1;
+  height: 56rpx;
+  font-size: 22rpx;
+  padding: 0 16rpx;
+}
+
+.comment-input-area .mini-btn {
+  padding: 0 20rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  font-size: 22rpx;
+  margin: 0;
+}

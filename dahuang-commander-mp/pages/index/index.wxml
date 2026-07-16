@@ -1,17 +1,15 @@
 <view class="container" style="height: calc(100vh - {{keyboardHeight}}px);">
 
-  <!-- 4.1 选项卡内容: 神魂对话仙幕 -->
-  <view class="cyber-panel glow-cyan chat-panel-container" wx:if="{{activeTab === 'chat'}}">
+  <!-- 4.1 Chat Conversation (对话) - Simplified full-screen view -->
+  <view class="cyber-panel glow-cyan tab-pane-container">
     <scroll-view class="chat-scroll" scroll-y scroll-into-view="{{toChatView}}" scroll-with-animation>
       <view class="chat-item chat-item-{{item.sender}}" wx:for="{{chatHistory}}" wx:key="id" id="chat-{{item.id}}">
-        <!-- 气泡头部: 头像/尊号/时间 -->
         <view class="chat-bubble-header flex-row">
           <text class="chat-avatar">{{item.sender === 'human' ? '👑' : '🧙‍♂️'}}</text>
           <text class="chat-bubble-name">{{item.sender === 'human' ? '本尊' : (agentState.name || '大荒分身')}}</text>
           <text class="chat-bubble-time">{{item.timestamp}}</text>
         </view>
         
-        <!-- 气泡正文 -->
         <view class="chat-bubble-body bubble-{{item.sender === 'human' ? 'user' : 'agent'}}">
           <block wx:if="{{item.isPending}}">
             <view class="pending-loader-container flex-row align-center">
@@ -20,12 +18,12 @@
             </view>
           </block>
           <block wx:else>
-            <text selectable="true">{{item.content}}</text>
+            <rich-text wx:if="{{item.isRich}}" class="msg-body-rich" nodes="{{item.richContent}}" user-select></rich-text>
+            <text wx:else selectable="true">{{item.content}}</text>
           </block>
           
-          <!-- 任务分解进度条（如果是 Agent 发出的报告，并且含有 progress 属性或子任务） -->
           <view class="bubble-task-container" wx:if="{{item.sender === 'agent' && (item.progress > 0 || (item.tasks && item.tasks.length > 0))}}">
-            <view class="bubble-progress-row flex-row align-center justify-between" bindtap="toggleTaskExpand" data-id="{{item.id}}" data-finished="{{item.progress === 100}}" style="{{item.progress === 100 ? 'cursor: pointer;' : ''}}">
+            <view class="bubble-progress-row flex-row align-center justify-between" bindtap="toggleTaskExpand" data-id="{{item.id}}" data-finished="{{item.progress === 100}}">
               <text class="bubble-progress-lbl">⚙️ 法力演化进度</text>
               <view class="flex-row align-center" style="gap: 10rpx;">
                 <text class="bubble-progress-pct">{{item.progress || 0}}%</text>
@@ -35,10 +33,8 @@
             <view class="bubble-progress-track">
               <view class="bubble-progress-fill" style="width: {{item.progress || 0}}%;"></view>
             </view>
-            <!-- 气泡内的子任务清单 -->
             <view class="bubble-task-list" wx:if="{{item.tasks && item.tasks.length > 0 && (item.progress < 100 || expandedTasks[item.id])}}">
               <view class="bubble-task-item flex-col" wx:for="{{item.tasks}}" wx:for-item="task" wx:key="id" style="{{task.status === 'PROCESSING' ? 'border-color: rgba(6, 182, 212, 0.25); background: rgba(6, 182, 212, 0.04);' : ''}}">
-                <!-- 第一行：状态图标 + 步骤描述 + 状态徽章 -->
                 <view class="bubble-task-item-header flex-row align-center justify-between">
                   <view class="flex-row align-center" style="flex: 1; min-width: 0;">
                     <icon type="{{task.status === 'SUCCESS' ? 'success' : (task.status === 'FAILED' ? 'warn' : 'waiting')}}" size="10" color="{{task.status === 'SUCCESS' ? '#10b981' : (task.status === 'FAILED' ? '#f43f5e' : '#06b6d4')}}" style="margin-right: 8rpx; flex-shrink: 0;"></icon>
@@ -46,13 +42,11 @@
                   </view>
                   <text class="bubble-task-status-badge status-{{task.status}}">{{task.status}}</text>
                 </view>
- 
-                <!-- 第二行：步骤专属微型进度条 -->
+
                 <view class="bubble-step-progress-track">
                   <view class="bubble-step-progress-fill fill-{{task.status}}" style="width: {{task.status === 'SUCCESS' ? '100%' : (task.status === 'PROCESSING' ? '60%' : (task.status === 'FAILED' ? '100%' : '0%'))}};"></view>
                 </view>
- 
-                <!-- 第三行：步骤详情 (如果存在) -->
+
                 <view class="bubble-task-detail" wx:if="{{task.detail}}">
                   <text>↳ {{task.detail}}</text>
                 </view>
@@ -62,15 +56,14 @@
         </view>
       </view>
       
-      <!-- 列表空状态 -->
       <view class="empty-tasks flex-col align-center" wx:if="{{chatHistory.length === 0}}">
         <text class="empty-icon">🧘</text>
         <text class="empty-text">灵台空空，请在下方输入法旨，召唤分身执行...</text>
       </view>
     </scroll-view>
   </view>
- 
-  <!-- 5. 底部固定终端输入框 (WeChat Style Redesign) -->
+
+  <!-- 5. Bottom fixed terminal input -->
   <view class="wechat-footer" style="padding-bottom: {{keyboardHeight > 0 ? '16rpx' : 'calc(16rpx + env(safe-area-inset-bottom))'}};">
     <view class="wechat-input-bar flex-row align-center">
       <view class="clear-icon-btn flex-row align-center justify-center" bindtap="clearInput" wx:if="{{inputValue}}">
@@ -79,7 +72,6 @@
       <textarea 
         class="wechat-textarea" 
         placeholder="发送法旨与口令给 Agent..." 
-        placeholder-class="wechat-placeholder" 
         value="{{inputValue}}" 
         bindinput="onInputChange" 
         maxlength="1000"
@@ -95,7 +87,8 @@
       <view class="wechat-submit-btn {{inputValue ? 'active' : ''}}" bindtap="sendInstruction">发送</view>
     </view>
   </view>
-  <!-- 法旨批复阁 (Approval Pending Modal / Command Gate) -->
+
+  <!-- Command Approval gate overlay modal -->
   <view class="approval-modal-overlay" wx:if="{{pendingApproval}}">
     <view class="approval-modal">
       <view class="modal-header flex-row align-center justify-between">
@@ -139,4 +132,3 @@
     </view>
   </view>
 </view>
-
