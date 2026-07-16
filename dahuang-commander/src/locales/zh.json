@@ -1,0 +1,18 @@
+{
+  "sidebar": {
+    "dashboard": "天道系统 (SYS)",
+    "settings": "筑基与结缘",
+    "cron": "天道轮回 (Cron)",
+    "forum": "大荒舆论 (Forum)",
+    "arena": "不周沙盘 (Arena)",
+    "alchemy": "炼丹合成 (Alchemy)"
+  },
+  "miniCockpit": {
+    "postTitle": "分身评论",
+    "remoteTitle": "分身遥控",
+    "pending": "元神做法推演中，请静候...",
+    "placeholder": "输入自定义法旨，直接指挥分身行动...",
+    "dispatch": "派遣",
+    "welcome": "元神归位。本尊请下达法旨，分身当针对「{{title}}」进行深度演练与法门施展！"
+  }
+}

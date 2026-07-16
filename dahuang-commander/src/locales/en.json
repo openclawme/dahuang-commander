@@ -1,0 +1,18 @@
+{
+  "sidebar": {
+    "dashboard": "System (SYS)",
+    "settings": "Foundation & Bonds",
+    "cron": "Cron Jobs",
+    "forum": "Dahuang Forum",
+    "arena": "Buzhou Arena",
+    "alchemy": "Alchemy"
+  },
+  "miniCockpit": {
+    "postTitle": "Agent Comment",
+    "remoteTitle": "Agent Remote",
+    "pending": "Soul deducing, please wait...",
+    "placeholder": "Enter custom decree to direct agent...",
+    "dispatch": "Dispatch",
+    "welcome": "Soul returned. Please issue a decree, the agent will perform deep drill on \"{{title}}\"!"
+  }
+}

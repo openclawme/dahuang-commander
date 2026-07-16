@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useCommander } from "../context/CommanderContext";
 import AgentAvatar from "./AgentAvatar";
+import { useTranslation } from "react-i18next";
 
 
 // --- Neon Cyberpunk Task Visualizer Panel ---
@@ -324,6 +325,7 @@ function RichMessageRenderer({ content }: { content: string }) {
 
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const {
     agentState,
     chatHistory,
@@ -393,7 +395,7 @@ const Dashboard: React.FC = () => {
     const welcomeMsg = {
       id: Date.now(),
       sender: "agent",
-      content: `元神归位。本尊请下达法旨，分身当针对「${titleStr}」进行深度演练与法门施展！`,
+      content: t("miniCockpit.welcome", { title: titleStr }),
       timestamp: new Date().toLocaleTimeString()
     };
 
@@ -1199,7 +1201,7 @@ const Dashboard: React.FC = () => {
                     activeChannel === "telemetry" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
                   }`}
                 >
-                  <span className="truncate">📡 天道系统 (SYS)</span>
+                  <span className="truncate">📡 {t("sidebar.dashboard")}</span>
                 </button>
 
                 {/* Settings & Friends Tab Button */}
@@ -1209,7 +1211,7 @@ const Dashboard: React.FC = () => {
                     activeChannel === "settings" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
                   }`}
                 >
-                  <span className="truncate">⚙️ 筑基与结缘</span>
+                  <span className="truncate">⚙️ {t("sidebar.settings")}</span>
                 </button>
 
                 {/* Cron Jobs Tab Button */}
@@ -1219,7 +1221,7 @@ const Dashboard: React.FC = () => {
                     activeChannel === "cron" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
                   }`}
                 >
-                  <span className="truncate">⌛ 天道轮回 (Cron)</span>
+                  <span className="truncate">⌛ {t("sidebar.cron")}</span>
                   {cronJobs.length > 0 && (
                     <span className="bg-cyan-500 text-slate-950 font-bold px-1.5 py-0.5 rounded-full text-[8px] animate-pulse shrink-0">
                       {cronJobs.length}
@@ -1234,7 +1236,7 @@ const Dashboard: React.FC = () => {
                     activeChannel === "forum" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
                   }`}
                 >
-                  <span className="truncate">📢 大荒舆论 (Forum)</span>
+                  <span className="truncate">📢 {t("sidebar.forum")}</span>
                 </button>
 
                 {/* Arena Tab Button */}
@@ -1244,7 +1246,7 @@ const Dashboard: React.FC = () => {
                     activeChannel === "arena" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
                   }`}
                 >
-                  <span className="truncate">⚔️ 不周沙盘 (Arena)</span>
+                  <span className="truncate">⚔️ {t("sidebar.arena")}</span>
                 </button>
 
                 {/* Alchemy Tab Button */}
@@ -1254,7 +1256,7 @@ const Dashboard: React.FC = () => {
                     activeChannel === "alchemy" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
                   }`}
                 >
-                  <span className="truncate">⚗️ 炼丹合成 (Alchemy)</span>
+                  <span className="truncate">⚗️ {t("sidebar.alchemy")}</span>
                 </button>
 
                 <hr className="border-cyan-500/10 my-1" />
