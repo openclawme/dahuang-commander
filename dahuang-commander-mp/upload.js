@@ -11,8 +11,8 @@ const project = new ci.Project({
   ignores: ['node_modules/**/*', '.git/**/*', 'package.json', 'package-lock.json', 'upload.js'],
 });
 
-const version = '1.7.7';
-const desc = '1. 修复迟滞推送的中途推演图谱插入为重复孤儿卡片的问题\n2. 增加孤儿推演事件自动滤除机制，确保每个任务下不再产生多余的“感应指令”重复卡片';
+const version = '1.7.8';
+const desc = '1. 实现每个任务独一无二的动态任务分解（Task Decomposition）\n2. 增加基于意图分类与LLM推演的实时专属进度条与步骤渲染';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

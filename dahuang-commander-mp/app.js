@@ -509,6 +509,36 @@ App({
     this.triggerPageCallback("onNewLog", newLog);
   },
 
+  generateInitialTasks(command) {
+    const text = (command || "").trim();
+    const shortCmd = text.length > 18 ? text.slice(0, 18) + "..." : text;
+    
+    if (text.includes("群") || text.includes("讨论") || text.includes("拉") || text.includes("建")) {
+      return [
+        { desc: `解析组网指令：“${shortCmd}”`, status: "SUCCESS" },
+        { desc: "创设/定位群聊会话并拉取分身节点", status: "PROCESSING" },
+        { desc: "协同博弈讨论并汇总达成共识", status: "PENDING" }
+      ];
+    } else if (text.includes("查") || text.includes("天气") || text.includes("财报") || text.includes("价格") || text.includes("搜索") || text.includes("http")) {
+      return [
+        { desc: `解析检索需求：“${shortCmd}”`, status: "SUCCESS" },
+        { desc: "穿透网络通道，安全抓取目标实时数据", status: "PROCESSING" },
+        { desc: "解析提取关键数据并格式化输出", status: "PENDING" }
+      ];
+    } else if (text.includes("代码") || text.includes("算") || text.includes("python") || text.includes("js") || text.includes("执行")) {
+      return [
+        { desc: `解析计算算法：“${shortCmd}”`, status: "SUCCESS" },
+        { desc: "构建沙盒计算环境，编译并运行代码", status: "PROCESSING" },
+        { desc: "校验计算边界，返回归纳结论", status: "PENDING" }
+      ];
+    }
+    return [
+      { desc: `分析法旨意图：“${shortCmd}”`, status: "SUCCESS" },
+      { desc: "匹配具身工具箱，执行核心推演", status: "PROCESSING" },
+      { desc: "汇总推演结果并生成神谕响应", status: "PENDING" }
+    ];
+  },
+
   sendInstruction(instruction, successCallback) {
     // Clear any leftover pending flags on older chat history items
     if (this.globalData.chatHistory && Array.isArray(this.globalData.chatHistory)) {
@@ -556,11 +586,7 @@ App({
             content: "（元神入定推演中，正在凝聚算力演化阵法...）",
             timestamp: this.getTimestamp(),
             progress: 25,
-            tasks: [
-              { desc: "感应指令，凝聚大荒算力", status: "PROCESSING" },
-              { desc: "演化分身子任务与玄门博弈", status: "PENDING" },
-              { desc: "下达法旨，达成天道共识", status: "PENDING" }
-            ]
+            tasks: this.generateInitialTasks(instruction)
           };
           this.globalData.chatHistory.push(pendingMsg);
           this.trimChatHistory();
