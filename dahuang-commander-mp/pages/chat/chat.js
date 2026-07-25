@@ -1,4 +1,5 @@
 const app = getApp();
+const i18n = require('../../utils/i18n.js');
 
 Page({
   data: {
@@ -10,6 +11,9 @@ Page({
   },
 
   onShow() {
+    this.setData({ t: i18n.getDict() });
+    wx.setNavigationBarTitle({ title: this.data.t.chat.nav_title });
+    i18n.updateTabBar();
     this.refreshRooms();
     if (app.globalData.agentState.token) {
       app.syncMessengerRooms();
@@ -26,7 +30,7 @@ Page({
     } else {
       wx.stopPullDownRefresh();
       wx.showToast({
-        title: "尚未登录",
+        title: this.data.t.chat.not_logged_in,
         icon: "none"
       });
     }
@@ -41,7 +45,7 @@ Page({
     const rooms = app.globalData.messengerRooms || {};
     const roomsList = Object.values(rooms).map(r => {
       const latestEvent = r.events && r.events.length > 0 ? r.events[r.events.length - 1] : null;
-      let lastMsgText = "暂无消息";
+      let lastMsgText = this.data.t.chat.no_message;
       let lastMsgTime = "";
       let lastMsgTs = 0;
       

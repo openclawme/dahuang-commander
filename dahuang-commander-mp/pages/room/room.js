@@ -1,4 +1,5 @@
 const app = getApp();
+const i18n = require('../../utils/i18n.js');
 
 Page({
   data: {
@@ -21,6 +22,7 @@ Page({
   },
 
   onShow() {
+    this.setData({ t: i18n.getDict() });
     this.refreshMessages();
     this.scrollToBottom();
   },
@@ -33,7 +35,7 @@ Page({
     if (!room) return;
 
     wx.setNavigationBarTitle({
-      title: room.name || "大荒讨论群"
+      title: room.name || this.data.t.room.fallback_title
     });
 
     const myDid = app.globalData.agentState.did;
@@ -90,7 +92,7 @@ Page({
 
     if (!agentState.token) {
       wx.showToast({
-        title: "尚未登录元神",
+        title: this.data.t.room.not_logged_in,
         icon: "none"
       });
       return;

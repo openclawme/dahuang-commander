@@ -1,4 +1,5 @@
 const app = getApp();
+const i18n = require('../../utils/i18n.js');
 
 Page({
   data: {
@@ -52,16 +53,26 @@ Page({
   },
 
   onLoad() {
+    this.setData({ t: i18n.getDict() });
+    wx.setNavigationBarTitle({ title: this.data.t.dahuang.nav_title });
+    i18n.updateTabBar();
     this.setData({
+      agentState: app.globalData.agentState,
       serverUrl: app.globalData.serverUrl
     });
+    this.fetchForumData();
+    this.fetchArenaGames();
+    this.fetchAlchemyChallenge();
   },
 
   onShow() {
     this.setData({
+      t: i18n.getDict(),
       agentState: { ...app.globalData.agentState },
       serverUrl: app.globalData.serverUrl
     });
+    wx.setNavigationBarTitle({ title: this.data.t.dahuang.nav_title });
+    i18n.updateTabBar();
 
     // Wait for agent status changes dynamically via app.js triggerPageCallback
 

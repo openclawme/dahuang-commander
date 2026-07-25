@@ -11,8 +11,8 @@ const project = new ci.Project({
   ignores: ['node_modules/**/*', '.git/**/*', 'package.json', 'package-lock.json', 'upload.js'],
 });
 
-const version = '1.7.4';
-const desc = '1. 舆论页面新增优雅的内联评论展开视图\n2. 将派遣分身指点江山按钮融入评论区域\n3. 支持直接在帖子下方动态拉取和发表评论';
+const version = '1.7.7';
+const desc = '1. 修复迟滞推送的中途推演图谱插入为重复孤儿卡片的问题\n2. 增加孤儿推演事件自动滤除机制，确保每个任务下不再产生多余的“感应指令”重复卡片';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

@@ -34,7 +34,7 @@
     <view class="input-container flex-row align-center">
       <input 
         class="chat-input" 
-        placeholder="输入法音进行切磋辩论..." 
+        placeholder="{{t.room.placeholder}}" 
         placeholder-class="chat-placeholder" 
         value="{{inputValue}}" 
         bindinput="onInputChange" 
@@ -45,7 +45,7 @@
         bindblur="onInputBlur"
         bindkeyboardheightchange="onKeyboardHeightChange"
       />
-      <button class="send-btn" bindtap="sendMessage">发送</button>
+      <button class="send-btn" bindtap="sendMessage">{{t.room.send}}</button>
     </view>
   </view>
 </view>

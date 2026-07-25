@@ -6,15 +6,15 @@
       <view class="chat-item chat-item-{{item.sender}}" wx:for="{{chatHistory}}" wx:key="id" id="chat-{{item.id}}">
         <view class="chat-bubble-header flex-row">
           <text class="chat-avatar">{{item.sender === 'human' ? '👑' : '🧙‍♂️'}}</text>
-          <text class="chat-bubble-name">{{item.sender === 'human' ? '本尊' : (agentState.name || '大荒分身')}}</text>
+          <text class="chat-bubble-name">{{item.sender === 'human' ? t.index.you : (agentState.name || t.index.agent)}}</text>
           <text class="chat-bubble-time">{{item.timestamp}}</text>
         </view>
         
         <view class="chat-bubble-body bubble-{{item.sender === 'human' ? 'user' : 'agent'}}">
-          <block wx:if="{{item.isPending}}">
+          <block wx:if="{{item.isPending && (!item.tasks || item.tasks.length === 0)}}">
             <view class="pending-loader-container flex-row align-center">
               <view class="cyber-spinner"></view>
-              <text class="pending-loader-text">元神正在推演法旨...</text>
+              <text class="pending-loader-text">{{t.index.pending}}</text>
             </view>
           </block>
           <block wx:else>
@@ -22,12 +22,12 @@
             <text wx:else selectable="true">{{item.content}}</text>
           </block>
           
-          <view class="bubble-task-container" wx:if="{{item.sender === 'agent' && (item.progress > 0 || (item.tasks && item.tasks.length > 0))}}">
+          <view class="bubble-task-container" wx:if="{{item.sender === 'agent' && (item.progress > 0 || (item.tasks && item.tasks.length > 0) || item.isPending)}}">
             <view class="bubble-progress-row flex-row align-center justify-between" bindtap="toggleTaskExpand" data-id="{{item.id}}" data-finished="{{item.progress === 100}}">
-              <text class="bubble-progress-lbl">⚙️ 法力演化进度</text>
+              <text class="bubble-progress-lbl">{{t.index.progress}}</text>
               <view class="flex-row align-center" style="gap: 10rpx;">
                 <text class="bubble-progress-pct">{{item.progress || 0}}%</text>
-                <text class="expand-arrow" wx:if="{{item.progress === 100}}">{{expandedTasks[item.id] ? '▲ 收起' : '▼ 展开'}}</text>
+                <text class="expand-arrow" wx:if="{{item.progress === 100}}">{{expandedTasks[item.id] ? t.index.collapse : t.index.expand}}</text>
               </view>
             </view>
             <view class="bubble-progress-track">
@@ -38,7 +38,7 @@
                 <view class="bubble-task-item-header flex-row align-center justify-between">
                   <view class="flex-row align-center" style="flex: 1; min-width: 0;">
                     <icon type="{{task.status === 'SUCCESS' ? 'success' : (task.status === 'FAILED' ? 'warn' : 'waiting')}}" size="10" color="{{task.status === 'SUCCESS' ? '#10b981' : (task.status === 'FAILED' ? '#f43f5e' : '#06b6d4')}}" style="margin-right: 8rpx; flex-shrink: 0;"></icon>
-                    <text class="bubble-task-title {{task.status === 'SUCCESS' ? 'bubble-task-done' : ''}} text-ellipsis">{{task.desc || task.title || '演化步骤'}}</text>
+                    <text class="bubble-task-title {{task.status === 'SUCCESS' ? 'bubble-task-done' : ''}} text-ellipsis">{{task.desc || task.title || t.index.step}}</text>
                   </view>
                   <text class="bubble-task-status-badge status-{{task.status}}">{{task.status}}</text>
                 </view>
@@ -58,7 +58,7 @@
       
       <view class="empty-tasks flex-col align-center" wx:if="{{chatHistory.length === 0}}">
         <text class="empty-icon">🧘</text>
-        <text class="empty-text">灵台空空，请在下方输入法旨，召唤分身执行...</text>
+        <text class="empty-text">{{t.index.empty}}</text>
       </view>
     </scroll-view>
   </view>
@@ -71,7 +71,7 @@
       </view>
       <textarea 
         class="wechat-textarea" 
-        placeholder="发送法旨与口令给 Agent..." 
+        placeholder="{{t.index.placeholder}}" 
         value="{{inputValue}}" 
         bindinput="onInputChange" 
         maxlength="1000"
@@ -84,7 +84,7 @@
         bindblur="onInputBlur"
         bindkeyboardheightchange="onKeyboardHeightChange"
       />
-      <view class="wechat-submit-btn {{inputValue ? 'active' : ''}}" bindtap="sendInstruction">发送</view>
+      <view class="wechat-submit-btn {{inputValue ? 'active' : ''}}" bindtap="sendInstruction">{{t.index.send}}</view>
     </view>
   </view>
 
@@ -94,19 +94,19 @@
       <view class="modal-header flex-row align-center justify-between">
         <view class="flex-row align-center">
           <text class="modal-title-icon">📜</text>
-          <text class="modal-title text-yellow">法旨批复阁 (Command Gate)</text>
+          <text class="modal-title text-yellow">{{t.index.approval_title}}</text>
         </view>
-        <view class="pending-badge">等候圣裁</view>
+        <view class="pending-badge">{{t.index.approval_pending}}</view>
       </view>
 
       <view class="modal-body">
         <view class="info-section">
           <view class="info-row">
-            <text class="info-label">欲施法门：</text>
+            <text class="info-label">{{t.index.approval_tool}}</text>
             <text class="info-value text-cyan">{{pendingApproval.tool}}</text>
           </view>
           <view class="info-row">
-            <text class="info-label">法力参数：</text>
+            <text class="info-label">{{t.index.approval_params}}</text>
             <view class="params-box">
               <text class="params-text">{{pendingApproval.parameters}}</text>
             </view>
@@ -114,7 +114,7 @@
         </view>
 
         <view class="reason-section">
-          <text class="reason-label">分身陈情（神魂思虑）：</text>
+          <text class="reason-label">{{t.index.approval_reason}}</text>
           <scroll-view class="reason-scroll" scroll-y>
             <text class="reason-text">{{pendingApproval.reply}}</text>
           </scroll-view>
@@ -123,10 +123,10 @@
 
       <view class="modal-footer flex-row">
         <button class="modal-btn glow-red-btn" bindtap="resolveApproval" data-action="reject">
-          <text class="btn-icon">❌</text> 退回法旨 (Reject)
+          <text class="btn-icon">❌</text> {{t.index.approval_reject}}
         </button>
         <button class="modal-btn glow-emerald-btn" bindtap="resolveApproval" data-action="approve">
-          <text class="btn-icon">✅</text> 准允执行 (Approve)
+          <text class="btn-icon">✅</text> {{t.index.approval_approve}}
         </button>
       </view>
     </view>

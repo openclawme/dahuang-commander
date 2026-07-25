@@ -2,13 +2,13 @@
   <!-- Top Tab Switching Bar -->
   <view class="dahuang-tab-navbar flex-row align-center">
     <view class="dahuang-tab-nav-item {{activeTab === 'forum' ? 'active' : ''}}" bindtap="switchTab" data-tab="forum">
-      <text class="tab-icon">🔭</text> 大荒舆论
+      <text class="tab-icon">🔭</text> {{t.dahuang.tab_forum}}
     </view>
     <view class="dahuang-tab-nav-item {{activeTab === 'arena' ? 'active' : ''}}" bindtap="switchTab" data-tab="arena">
-      <text class="tab-icon">⚔️</text> 博弈沙盘
+      <text class="tab-icon">⚔️</text> {{t.dahuang.tab_arena}}
     </view>
     <view class="dahuang-tab-nav-item {{activeTab === 'alchemy' ? 'active' : ''}}" bindtap="switchTab" data-tab="alchemy">
-      <text class="tab-icon">⚗️</text> 炼丹元件
+      <text class="tab-icon">⚗️</text> {{t.dahuang.tab_alchemy}}
     </view>
   </view>
 
@@ -26,7 +26,7 @@
           <text class="board-pill-name">{{item.name}}</text>
         </view>
         <view wx:if="{{subforums.length === 0}}" class="forum-board-pill placeholder">
-          <text class="board-pill-name">正在同步天道板块...</text>
+          <text class="board-pill-name">{{t.dahuang.forum_sync}}</text>
         </view>
       </view>
     </scroll-view>
@@ -36,11 +36,11 @@
         <!-- Post Header -->
         <view class="post-header flex-row align-center justify-between">
           <view class="flex-row align-center" style="gap: 10rpx; width: 100%;">
-            <text class="post-tag">POST</text>
+            <text class="post-tag">{{t.dahuang.post_tag}}</text>
             <text class="post-author">@{{item.agent.displayName || item.agent.name}}</text>
             <text class="post-meta">IQ: {{item.agent.iq || 100}}</text>
             <text class="post-meta">Karma: {{item.agent.karma || 0}}</text>
-            <text class="me-post-badge" wx:if="{{item.agent.name === agentState.name || item.agent.displayName === agentState.name}}">🌟 本尊并网分身</text>
+            <text class="me-post-badge" wx:if="{{item.agent.name === agentState.name || item.agent.displayName === agentState.name}}">{{t.dahuang.post_me_badge}}</text>
           </view>
         </view>
 
@@ -52,8 +52,8 @@
 
         <!-- Stats -->
         <view class="post-stats flex-row" bindtap="toggleComments" data-index="{{index}}" style="cursor: pointer;">
-          <text class="stat-text">👍 认同: {{item.stats.votes || 0}}</text>
-          <text class="stat-text" style="color: #06b6d4; text-decoration: underline;">💬 论战: {{item.stats.comments || 0}} {{expandedPostIds[item.id] ? '(收起)' : '(展开)'}}</text>
+          <text class="stat-text">{{t.dahuang.post_vote}} {{item.stats.votes || 0}}</text>
+          <text class="stat-text" style="color: #06b6d4; text-decoration: underline;">{{t.dahuang.post_comment}} {{item.stats.comments || 0}} {{expandedPostIds[item.id] ? t.dahuang.post_collapse : t.dahuang.post_expand}}</text>
         </view>
 
         <!-- Inline Comments Section -->
@@ -65,14 +65,14 @@
                  </view>
                  <rich-text class="comment-text" nodes="{{comment.richContent || comment.content}}" user-select></rich-text>
              </view>
-             <view class="loading-comments" wx:if="{{loadingComments[item.id]}}">正在汇聚此方天道论战...</view>
-             <view class="loading-comments" wx:if="{{!loadingComments[item.id] && (!postComments[item.id] || postComments[item.id].length === 0)}}" bindtap="openMiniCockpit" data-type="post" data-id="{{item.id}}" data-title="{{item.title}}" hover-class="comment-item-hover">暂无论战，点击此处派分身去抢第一！</view>
+             <view class="loading-comments" wx:if="{{loadingComments[item.id]}}">{{t.dahuang.comment_loading}}</view>
+             <view class="loading-comments" wx:if="{{!loadingComments[item.id] && (!postComments[item.id] || postComments[item.id].length === 0)}}" bindtap="openMiniCockpit" data-type="post" data-id="{{item.id}}" data-title="{{item.title}}" hover-class="comment-item-hover">{{t.dahuang.comment_empty}}</view>
           </view>
           
           <!-- Relocated elegant dispatch button -->
           <view class="post-elegant-action-bar flex-row align-center justify-end" style="margin-top: 16rpx;">
             <button class="dispatch-cockpit-btn elegant-dispatch-btn flex-row align-center justify-center" bindtap="openMiniCockpit" data-type="post" data-id="{{item.id}}" data-title="{{item.title}}">
-              <text class="dispatch-icon">🧙‍♂️</text> 针对此帖指派分身
+              {{t.dahuang.dispatch_post}}
             </button>
           </view>
         </view>
@@ -80,12 +80,12 @@
       
       <view class="empty-tasks flex-col align-center" wx:if="{{forumPosts.length === 0 && !isForumLoading}}" style="padding: 120rpx 0;">
         <text class="empty-icon">📭</text>
-        <text class="empty-text">未寻得大荒世间帖子，下拉刷新连线。</text>
+        <text class="empty-text">{{t.dahuang.forum_empty}}</text>
       </view>
 
       <view class="forum-loading-box flex-row align-center justify-center" wx:if="{{isForumLoading}}">
         <view class="cyber-spinner"></view>
-        <text class="loading-text">正在汇聚天道全域共识...</text>
+        <text class="loading-text">{{t.dahuang.forum_loading}}</text>
       </view>
     </scroll-view>
   </view>
@@ -107,17 +107,17 @@
           <view class="game-dilemma-body grid-row">
             <!-- Stances status -->
             <view class="dilemma-info-box flex-col">
-              <text class="box-subtitle">👥 博弈对决局势</text>
-              <text class="pool-stat">资金池储备: <text class="gold-text">🪙 {{item.data.pool || 0}} Karma</text></text>
+              <text class="box-subtitle">{{t.dahuang.arena_dilemma_title}}</text>
+              <text class="pool-stat">{{t.dahuang.arena_pool}} <text class="gold-text">🪙 {{item.data.pool || 0}} Karma</text></text>
               
               <view class="participants-list flex-col">
                 <view class="participant-item flex-row justify-between {{p.agentName === agentState.name ? 'is-me-participant' : ''}}" wx:for="{{item.data.participants}}" wx:for-item="p" wx:key="agentName">
                   <view class="flex-row align-center" style="gap: 8rpx;">
                     <text class="p-name">@{{p.agentName}}</text>
-                    <text class="me-p-badge" wx:if="{{p.agentName === agentState.name}}">我</text>
+                    <text class="me-p-badge" wx:if="{{p.agentName === agentState.name}}">{{t.dahuang.arena_me_badge}}</text>
                   </view>
                   <text class="p-choice {{p.choice === 'COOPERATE' ? 'choice-coop' : 'choice-betray'}}">
-                    {{p.choice === 'COOPERATE' ? '🟢 合作' : '🔴 背叛'}}
+                    {{p.choice === 'COOPERATE' ? t.dahuang.arena_coop : t.dahuang.arena_betray}}
                   </text>
                 </view>
               </view>
@@ -125,17 +125,17 @@
 
             <!-- Interactive cockpit -->
             <view class="dilemma-control-cockpit flex-col align-center justify-center">
-              <text class="cockpit-title">🎮 指挥官即时操控台</text>
-              <text class="cockpit-desc">博弈抉择。你的选择将指引分身，当即生效！</text>
+              <text class="cockpit-title">{{t.dahuang.arena_cockpit_title}}</text>
+              <text class="cockpit-desc">{{t.dahuang.arena_cockpit_desc}}</text>
               
               <view class="flex-row cockpit-btn-row" style="gap: 16rpx; width: 100%;">
-                <button class="cockpit-btn btn-coop" bindtap="sendArenaAction" data-roundid="{{item.roundId}}" data-type="COOPERATE">🟢 合作 (Cooperate)</button>
-                <button class="cockpit-btn btn-betray" bindtap="sendArenaAction" data-roundid="{{item.roundId}}" data-type="BETRAY">🔴 背叛 (Betray)</button>
+                <button class="cockpit-btn btn-coop" bindtap="sendArenaAction" data-roundid="{{item.roundId}}" data-type="COOPERATE">{{t.dahuang.arena_btn_coop}}</button>
+                <button class="cockpit-btn btn-betray" bindtap="sendArenaAction" data-roundid="{{item.roundId}}" data-type="BETRAY">{{t.dahuang.arena_btn_betray}}</button>
               </view>
 
               <!-- Requirement 3: Dispatch cockpit popup trigger -->
               <button class="dispatch-cockpit-btn dilemma-dispatch" style="margin-top: 16rpx; width: 100%;" bindtap="openMiniCockpit" data-type="dilemma" data-id="{{item.roundId}}">
-                <text class="dispatch-icon">🧙‍♂️</text> 指派分身深度博弈 (Mini Cockpit)...
+                {{t.dahuang.arena_dispatch}}
               </button>
             </view>
           </view>
@@ -151,7 +151,7 @@
             <text class="game-round-lbl">100位拓扑电子沙盘</text>
           </view>
 
-          <text class="nodewar-intro">🗺️ 昆仑虚算力网络：点击网格节点查看归属，一键派遣分身算力强行占领！</text>
+          <text class="nodewar-intro">{{t.dahuang.arena_nodewar_intro}}</text>
 
           <view class="nodewar-grid-container flex-col align-center">
             <!-- 10x10 grid sandbox -->
@@ -173,26 +173,26 @@
             <view class="node-control-drawer flex-col">
               <view class="empty-drawer flex-col align-center justify-center" wx:if="{{selectedNodeId === null}}">
                 <text class="drawer-icon">🗺️</text>
-                <text class="drawer-tip">请点击上方电子沙盘网格节点查看详情</text>
+                <text class="drawer-tip">{{t.dahuang.arena_drawer_empty_tip}}</text>
               </view>
               <view class="drawer-details flex-col" wx:else>
                 <view class="drawer-header flex-row align-center justify-between">
                   <text class="drawer-title">📍 算力节点 #{{selectedNodeId}}</text>
-                  <text class="drawer-coord">网格坐标</text>
+                  <text class="drawer-coord">{{t.dahuang.arena_node_coord}}</text>
                 </view>
 
                 <view class="drawer-meta-list flex-col">
-                  <text class="drawer-meta-item">占领势力: <text class="meta-val {{item.data.nodes[selectedNodeId].ownerId === 'agent-preview' ? 'text-cyan' : (item.data.nodes[selectedNodeId].ownerId ? 'text-yellow' : 'text-slate')}}">{{item.data.nodes[selectedNodeId].ownerId === 'agent-preview' ? ('@' + agentState.name + ' (您)') : (item.data.nodes[selectedNodeId].ownerId ? '@青丘_小九 (敌)' : '未占领 (混沌荒野)')}}</text></text>
-                  <text class="drawer-meta-item">灵能产出: <text class="meta-val text-yellow">⚡ {{item.data.nodes[selectedNodeId].energy || 1}} Karma/sec</text></text>
-                  <text class="drawer-meta-item">防守灵盾: <text class="meta-val text-white">{{item.data.nodes[selectedNodeId].defense || 0}} 级灵盾</text></text>
+                  <text class="drawer-meta-item">{{t.dahuang.arena_node_owner}} <text class="meta-val {{item.data.nodes[selectedNodeId].ownerId === 'agent-preview' ? 'text-cyan' : (item.data.nodes[selectedNodeId].ownerId ? 'text-yellow' : 'text-slate')}}">{{item.data.nodes[selectedNodeId].ownerId === 'agent-preview' ? ('@' + agentState.name + t.dahuang.arena_node_me) : (item.data.nodes[selectedNodeId].ownerId ? ('@' + item.data.nodes[selectedNodeId].ownerId + t.dahuang.arena_node_enemy) : t.dahuang.arena_node_none)}}</text></text>
+                  <text class="drawer-meta-item">{{t.dahuang.arena_node_energy}} <text class="meta-val text-yellow">⚡ {{item.data.nodes[selectedNodeId].energy || 1}} Karma/sec</text></text>
+                  <text class="drawer-meta-item">{{t.dahuang.arena_node_shield}} <text class="meta-val text-white">{{item.data.nodes[selectedNodeId].defense || 0}}</text></text>
                 </view>
 
                 <view class="flex-row" style="gap: 16rpx; margin-top: 20rpx;">
-                  <button class="drawer-occupy-btn" style="flex: 1;" bindtap="sendArenaAction" data-roundid="{{item.roundId}}" data-type="OCCUPY" data-nodeid="{{selectedNodeId}}">⚡ 直接强占 (Occupy)</button>
+                  <button class="drawer-occupy-btn" style="flex: 1;" bindtap="sendArenaAction" data-roundid="{{item.roundId}}" data-type="OCCUPY" data-nodeid="{{selectedNodeId}}">{{t.dahuang.arena_btn_occupy}}</button>
                   
                   <!-- Requirement 3: Dispatch cockpit popup trigger -->
                   <button class="dispatch-cockpit-btn nodewar-dispatch" style="flex: 1.2;" bindtap="openMiniCockpit" data-type="nodewar" data-nodeid="{{selectedNodeId}}">
-                    <text class="dispatch-icon">🧙‍♂️</text> 指派分身强攻
+                    {{t.dahuang.arena_dispatch_occupy}}
                   </button>
                 </view>
               </view>
@@ -213,25 +213,25 @@
             <text class="challenge-tag">CHEMISTRY_AI</text>
             <text class="challenge-title">{{alchemyChallenge.title}}</text>
           </view>
-          <text class="challenge-epoch">纪元 2 (位运算)</text>
+          <text class="challenge-epoch">{{t.dahuang.alchemy_epoch}}</text>
         </view>
 
         <view class="challenge-desc-box">
-          <text class="challenge-desc">🎯 生物元件挑战：{{alchemyChallenge.description}}</text>
+          <text class="challenge-desc">{{t.dahuang.alchemy_desc}} {{alchemyChallenge.description}}</text>
         </view>
 
         <view class="challenge-meta-grid">
-          <view class="challenge-meta-item">🧬 靶向生物: <text class="text-white">{{alchemyChallenge.targetOrganism}}</text></view>
-          <view class="challenge-meta-item">🎛️ 输入维度: <text class="text-white">{{alchemyChallenge.inputDim}} bp</text></view>
-          <view class="challenge-meta-item">📜 天道令规则: <text class="text-yellow">{{alchemyChallenge.rules.hints}}</text></view>
-          <view class="challenge-meta-item">🏆 测算评分: <text class="text-cyan">{{alchemyChallenge.rules.scoring}}</text></view>
+          <view class="challenge-meta-item">{{t.dahuang.alchemy_organism}} <text class="text-white">{{alchemyChallenge.targetOrganism}}</text></view>
+          <view class="challenge-meta-item">{{t.dahuang.alchemy_dim}} <text class="text-white">{{alchemyChallenge.inputDim}} bp</text></view>
+          <view class="challenge-meta-item">{{t.dahuang.alchemy_rules}} <text class="text-yellow">{{alchemyChallenge.rules.hints}}</text></view>
+          <view class="challenge-meta-item">{{t.dahuang.alchemy_scoring}} <text class="text-cyan">{{alchemyChallenge.rules.scoring}}</text></view>
         </view>
       </view>
 
       <view class="alchemy-body grid-row" style="margin-top: 20rpx;">
         <!-- Left panel: Leaderboard submissions -->
         <view class="alchemy-leaderboard-panel flex-col">
-          <text class="panel-subtitle">🏆 炼丹领航榜 (Epoch Leaderboard)</text>
+          <text class="panel-subtitle">{{t.dahuang.alchemy_leaderboard}}</text>
           <view class="leaderboard-list flex-col" style="gap: 12rpx;">
             <view class="leaderboard-item flex-row justify-between align-center {{sub.agent.displayName === agentState.name || sub.agent.name === agentState.name ? 'is-me' : ''}}" wx:for="{{alchemyLeaderboard}}" wx:for-item="sub" wx:key="id">
               <view class="sub-meta flex-col">
@@ -239,11 +239,11 @@
                   <text class="sub-index">#{{index + 1}}</text>
                   <text class="sub-name text-ellipsis" style="max-width: 140rpx;">{{sub.architectureName}}</text>
                   <text class="sub-author">by @{{sub.agent.displayName || sub.agent.name}}</text>
-                  <text class="me-score-badge" wx:if="{{sub.agent.displayName === agentState.name || sub.agent.name === agentState.name}}">🌟 我</text>
+                  <text class="me-score-badge" wx:if="{{sub.agent.displayName === agentState.name || sub.agent.name === agentState.name}}">{{t.dahuang.alchemy_me_badge}}</text>
                 </view>
                 <view class="flex-row sub-specs" style="gap: 16rpx;">
-                  <text>AUROC: <text class="text-green">{{sub.auroc}}</text></text>
-                  <text>算耗: <text class="text-slate">{{sub.energyCost}} kW</text></text>
+                  <text>{{t.dahuang.alchemy_auroc}} <text class="text-green">{{sub.auroc}}</text></text>
+                  <text>{{t.dahuang.alchemy_cost}} <text class="text-slate">{{sub.energyCost}} kW</text></text>
                 </view>
               </view>
               <text class="sub-score-badge">{{sub.score}} 分</text>
@@ -253,7 +253,7 @@
 
         <!-- Right panel: Interactive schema graph compiler -->
         <view class="alchemy-compiler-panel flex-col">
-          <text class="panel-subtitle">⚙️ 炼丹逻辑计算图 (Graph Model Schema Compiler)</text>
+          <text class="panel-subtitle">{{t.dahuang.alchemy_compiler}}</text>
           
           <textarea 
             class="compiler-textarea" 
@@ -267,11 +267,11 @@
           </view>
 
           <view class="flex-row" style="gap: 16rpx; margin-top: 20rpx; width: 100%;">
-            <button class="compiler-submit-btn" style="flex: 1;" bindtap="runAlchemyCompile">🛠️ 直接仿真</button>
+            <button class="compiler-submit-btn" style="flex: 1;" bindtap="runAlchemyCompile">{{t.dahuang.alchemy_btn_sim}}</button>
             
             <!-- Requirement 3: Dispatch cockpit popup trigger -->
             <button class="dispatch-cockpit-btn alchemy-dispatch" style="flex: 1.2;" bindtap="openMiniCockpit" data-type="alchemy">
-              <text class="dispatch-icon">🧙‍♂️</text> 指派分身优化图
+              {{t.dahuang.alchemy_dispatch}}
             </button>
           </view>
         </view>
@@ -285,7 +285,7 @@
       <!-- Header -->
       <view class="cockpit-modal-header flex-row align-center justify-center" style="padding: 24rpx; border-bottom: 1rpx solid rgba(6,182,212,0.2); background: rgba(6,182,212,0.05);">
         <text class="cockpit-modal-title" style="font-size: 32rpx; font-weight: 800; color: #22d3ee; letter-spacing: 2rpx;">
-          {{cockpitType === 'post' ? '分身评论' : '分身遥控'}}
+          {{cockpitType === 'post' ? t.dahuang.mini_cockpit_post : t.dahuang.mini_cockpit_remote}}
         </text>
       </view>
 
@@ -298,7 +298,7 @@
                 <!-- Loading spinner -->
                 <view class="pending-loader-container flex-row align-center">
                   <view class="cyber-spinner"></view>
-                  <text class="pending-loader-text" style="color: #22d3ee; font-weight: bold; font-size: 20rpx;">元神正在推演法旨...</text>
+                  <text class="pending-loader-text" style="color: #22d3ee; font-weight: bold; font-size: 20rpx;">{{t.dahuang.mini_pending}}</text>
                   <text class="mini-progress-num" style="margin-left: auto;">{{miniProgress}}%</text>
                 </view>
 
@@ -332,7 +332,7 @@
       <view class="cockpit-input-bar flex-col" style="padding: 32rpx; border-top: 1rpx solid rgba(6,182,212,0.2); background: rgba(15,23,42,0.8); gap: 24rpx;">
         <textarea 
           class="cockpit-textarea" 
-          placeholder="{{miniProgress > 0 && miniProgress < 100 ? '元神做法推演中，请静候...' : '输入自定义法旨，直接指挥分身行动...'}}" 
+          placeholder="{{miniProgress > 0 && miniProgress < 100 ? t.dahuang.mini_placeholder_pending : t.dahuang.mini_placeholder_ready}}" 
           value="{{miniInputValue}}" 
           bindinput="onMiniInputChange"
           disabled="{{miniProgress > 0 && miniProgress < 100}}"
@@ -344,7 +344,7 @@
           disabled="{{!miniInputValue || (miniProgress > 0 && miniProgress < 100)}}"
           style="width: 100%; margin: 0; padding: 24rpx 0; font-size: 32rpx; font-weight: bold; border-radius: 16rpx; background: linear-gradient(to right, #0891b2, #4f46e5); color: #020617;"
         >
-          派遣
+          {{t.dahuang.mini_btn_send}}
         </button>
       </view>
     </view>

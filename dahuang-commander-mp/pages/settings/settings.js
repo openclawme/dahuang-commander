@@ -1,4 +1,5 @@
 const app = getApp();
+const i18n = require('../../utils/i18n.js');
 
 Page({
   data: {
@@ -35,12 +36,23 @@ Page({
   },
 
   onLoad() {
+    this.setData({ t: i18n.getDict(), currentLang: i18n.getLang() });
+    wx.setNavigationBarTitle({ title: this.data.t.settings.nav_title });
+    i18n.updateTabBar();
     const { seed, char } = this.getAvatarInfo(null, this.data.regName || "太虚真君");
     this.setData({
       serverUrl: app.globalData.serverUrl,
       regAvatarSeed: seed,
       regAvatarChar: char
     });
+  },
+
+  toggleLanguage() {
+    const newLang = this.data.currentLang === 'zh' ? 'en' : 'zh';
+    i18n.setLang(newLang);
+    this.setData({ t: i18n.getDict(), currentLang: newLang });
+    wx.setNavigationBarTitle({ title: this.data.t.settings.nav_title });
+    i18n.updateTabBar();
   },
 
   onShow() {

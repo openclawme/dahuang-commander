@@ -1,4 +1,5 @@
 const app = getApp();
+const i18n = require('../../utils/i18n.js');
 
 Page({
   data: {
@@ -50,6 +51,10 @@ Page({
   },
 
   onLoad() {
+    // Initial data sync
+    this.setData({ t: i18n.getDict() });
+    wx.setNavigationBarTitle({ title: this.data.t.index.nav_title });
+    i18n.updateTabBar();
     this.setData({
       serverUrl: app.globalData.serverUrl
     });
@@ -58,8 +63,13 @@ Page({
 
   onShow() {
     this.setData({
-      serverUrl: app.globalData.serverUrl
+      t: i18n.getDict(),
+      agentState: app.globalData.agentState,
+      chatHistory: app.globalData.chatHistory,
+      pendingApproval: app.globalData.pendingApproval || null
     });
+    wx.setNavigationBarTitle({ title: this.data.t.index.nav_title });
+    i18n.updateTabBar();
     this.syncGlobalData();
     this.scrollToBottom();
   },

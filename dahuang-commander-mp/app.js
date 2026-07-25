@@ -23,6 +23,7 @@ App({
   },
 
   onLaunch() {
+    require("./utils/i18n.js").initLanguage();
     console.log("===我是分身微信小程序 v1.4.1 (修补 HTML 重复 style 属性) ===");
     console.log("[App] Launching...");
     
@@ -278,7 +279,7 @@ App({
     if (data.reply) {
       const sanitized = this.sanitizeMessage({ content: data.reply }, false);
       data.reply = sanitized.content;
-      if (sanitized.isPending) {
+      if (sanitized.isPending && data.progress !== 100 && data.isPending !== false) {
         data.isPending = true;
       }
     }
@@ -291,22 +292,31 @@ App({
       this.addLog("SYSTEM", `❌ 天道后台决策执行失败: ${data.message || data.error || "未知故障"}`);
       const content = `【天道反馈失败】禀报主人！元神在推演法旨时遭遇心魔劫数，功败垂成：【${data.message || data.error || "未知故障"}】。请您稍后重新做法，再次指引神魂。`;
       
+      const failMsg = {
+        id: msgId,
+        sender: "agent",
+        content: content,
+        timestamp: this.getTimestamp(),
+        progress: 0,
+        tasks: [],
+        isPending: false
+      };
+
       if (!isNew) {
-        this.globalData.chatHistory[index] = {
-          ...this.globalData.chatHistory[index],
-          content: content,
-          progress: 0,
-          tasks: []
-        };
+        this.globalData.chatHistory[index] = failMsg;
       } else {
-        this.globalData.chatHistory.push({
-          id: msgId,
-          sender: "agent",
-          content: content,
-          timestamp: this.getTimestamp(),
-          progress: 0,
-          tasks: []
-        });
+        let pendingIdx = -1;
+        for (let i = this.globalData.chatHistory.length - 1; i >= 0; i--) {
+          if (this.globalData.chatHistory[i].isPending) {
+            pendingIdx = i;
+            break;
+          }
+        }
+        if (pendingIdx !== -1) {
+          this.globalData.chatHistory[pendingIdx] = failMsg;
+        } else {
+          this.globalData.chatHistory.push(failMsg);
+        }
       }
       this.trimChatHistory();
       this.saveChatHistory();
@@ -328,6 +338,7 @@ App({
 
     // Handle 100% completion success mapping
     if (data.progress === 100) {
+      data.isPending = false;
       if (tasks.length === 0 && !isNew) {
         const currentTasks = this.globalData.chatHistory[index].tasks || [];
         tasks = currentTasks.map(t => {
@@ -354,7 +365,7 @@ App({
         if (data.reply) {
           msg.content = data.reply;
         }
-        msg.isPending = !!data.isPending;
+        msg.isPending = data.progress === 100 ? false : !!data.isPending;
         this.trimChatHistory();
         this.saveChatHistory();
         this.triggerPageCallback("onChatHistoryUpdate");
@@ -367,7 +378,7 @@ App({
             timestamp: this.getTimestamp(),
             progress: data.progress !== undefined ? data.progress : 100,
             tasks: tasks,
-            isPending: !!data.isPending
+            isPending: data.progress === 100 ? false : !!data.isPending
           };
           this.globalData.chatHistory.push(msgObj);
           this.trimChatHistory();
@@ -380,20 +391,43 @@ App({
 
     // Standard non-auto-reply update
     if (data.reply) {
+      const isPending = data.progress === 100 ? false : (data.isPending !== undefined ? !!data.isPending : false);
+      
+      let targetIndex = -1;
+      if (data.requestId) {
+        targetIndex = this.globalData.chatHistory.findIndex(m => m.id === data.requestId);
+      }
+
+      if (targetIndex === -1) {
+        for (let i = this.globalData.chatHistory.length - 1; i >= 0; i--) {
+          if (this.globalData.chatHistory[i].isPending) {
+            targetIndex = i;
+            break;
+          }
+        }
+      }
+
+      // If no matching message or active pending task exists, skip orphan intermediate updates
+      if (targetIndex === -1 && (isPending || (data.progress !== undefined && data.progress < 100))) {
+        this.addLog("SYSTEM", "🍃 滤除已完成法旨的迟滞中途推演图谱，锁定灵台安定。");
+        return;
+      }
+
+      const effectiveId = targetIndex !== -1 ? this.globalData.chatHistory[targetIndex].id : msgId;
       const msgObj = {
-        id: msgId,
+        id: effectiveId,
         sender: "agent",
         content: data.reply,
         timestamp: this.getTimestamp(),
-        progress: data.progress !== undefined ? data.progress : (isNew ? 0 : this.globalData.chatHistory[index].progress),
+        progress: data.progress !== undefined ? data.progress : (targetIndex !== -1 ? this.globalData.chatHistory[targetIndex].progress : 100),
         tasks: tasks,
-        isPending: !!data.isPending
+        isPending: isPending
       };
 
-      if (isNew) {
-        this.globalData.chatHistory.push(msgObj);
+      if (targetIndex !== -1) {
+        this.globalData.chatHistory[targetIndex] = msgObj;
       } else {
-        this.globalData.chatHistory[index] = msgObj;
+        this.globalData.chatHistory.push(msgObj);
       }
 
       this.trimChatHistory();
@@ -476,6 +510,15 @@ App({
   },
 
   sendInstruction(instruction, successCallback) {
+    // Clear any leftover pending flags on older chat history items
+    if (this.globalData.chatHistory && Array.isArray(this.globalData.chatHistory)) {
+      this.globalData.chatHistory.forEach(m => {
+        if (m.isPending) {
+          m.isPending = false;
+        }
+      });
+    }
+
     const humanMsg = {
       id: `human-${Date.now()}`,
       sender: "human",
@@ -510,10 +553,14 @@ App({
             id: reqId,
             sender: "agent",
             isPending: true,
-            content: "（元神入定推演中...）",
+            content: "（元神入定推演中，正在凝聚算力演化阵法...）",
             timestamp: this.getTimestamp(),
-            progress: 0,
-            tasks: []
+            progress: 25,
+            tasks: [
+              { desc: "感应指令，凝聚大荒算力", status: "PROCESSING" },
+              { desc: "演化分身子任务与玄门博弈", status: "PENDING" },
+              { desc: "下达法旨，达成天道共识", status: "PENDING" }
+            ]
           };
           this.globalData.chatHistory.push(pendingMsg);
           this.trimChatHistory();
