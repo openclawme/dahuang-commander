@@ -414,7 +414,7 @@ App({
       }
 
       const effectiveId = targetIndex !== -1 ? this.globalData.chatHistory[targetIndex].id : msgId;
-      const msgObj = {
+      const rawMsgObj = {
         id: effectiveId,
         sender: "agent",
         content: data.reply,
@@ -423,6 +423,7 @@ App({
         tasks: tasks,
         isPending: isPending
       };
+      const msgObj = this.sanitizeMessage(rawMsgObj);
 
       if (targetIndex !== -1) {
         this.globalData.chatHistory[targetIndex] = msgObj;
@@ -723,16 +724,24 @@ App({
 
   sanitizeMessage(msg, isHistory = false) {
     if (!msg || typeof msg.content !== "string") return msg;
-    const content = msg.content;
+    let content = msg.content;
     const isMatch = content.indexOf("打通高维心流") !== -1 || content.indexOf("元神入定中") !== -1 || content.indexOf("天道传书") !== -1;
     if (isMatch) {
-      return {
-        ...msg,
-        content: "（元神入定推演中...）",
-        isPending: !isHistory
-      };
+      content = "（元神入定推演中...）";
     }
-    return msg;
+
+    const { html, videoUrl, videoPoster } = this.parseRichContent(content);
+    const hasRichHtml = /<[a-z][\s\S]*>/i.test(content) || content.includes("**") || content.includes("`") || content.includes("<table") || content.includes("<div") || content.includes("<p") || content.includes("<badge") || content.includes("<card") || content.includes("<blockquote") || content.includes("<span");
+
+    return {
+      ...msg,
+      content,
+      isPending: isMatch ? !isHistory : msg.isPending,
+      isRich: hasRichHtml || Boolean(videoUrl),
+      richContent: html,
+      videoUrl,
+      videoPoster
+    };
   },
 
   parseRichContent(content) {

@@ -11,8 +11,8 @@ const project = new ci.Project({
   ignores: ['node_modules/**/*', '.git/**/*', 'package.json', 'package-lock.json', 'upload.js'],
 });
 
-const version = '1.7.8';
-const desc = '1. 实现每个任务独一无二的动态任务分解（Task Decomposition）\n2. 增加基于意图分类与LLM推演的实时专属进度条与步骤渲染';
+const version = '1.7.9';
+const desc = '1. 修复实时 WebSocket 消息渲染时缺少 isRich 标记导致 HTML 降级为纯文本的问题\n2. 增加自动多维 HTML/Markdown 节点解析与高颜值 Rich-Text 渲染机制';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
