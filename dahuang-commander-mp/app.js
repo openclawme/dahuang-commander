@@ -452,9 +452,23 @@ App({
         targetIndex = this.globalData.chatHistory.findIndex(m => m.id === data.requestId);
       }
 
+      if (targetIndex === -1 && data.command) {
+        const pureCmd = data.command.replace("【强制备选方案路径】:", "").replace("【强制备选方案路径】", "").trim();
+        if (pureCmd) {
+          for (let i = this.globalData.chatHistory.length - 1; i >= 0; i--) {
+            const m = this.globalData.chatHistory[i];
+            if ((m.command && m.command.includes(pureCmd)) || (m.content && m.content.includes(pureCmd))) {
+              targetIndex = i;
+              break;
+            }
+          }
+        }
+      }
+
       if (targetIndex === -1) {
         for (let i = this.globalData.chatHistory.length - 1; i >= 0; i--) {
-          if (this.globalData.chatHistory[i].isPending) {
+          const m = this.globalData.chatHistory[i];
+          if (m.isPending || m.hasFallback || m.autoFallbackTriggered) {
             targetIndex = i;
             break;
           }
@@ -467,15 +481,19 @@ App({
         return;
       }
 
-      const effectiveId = targetIndex !== -1 ? this.globalData.chatHistory[targetIndex].id : msgId;
+      const existingMsg = targetIndex !== -1 ? this.globalData.chatHistory[targetIndex] : {};
+      const effectiveId = existingMsg.id || msgId;
       const rawMsgObj = {
+        ...existingMsg,
         id: effectiveId,
         sender: "agent",
         content: data.reply,
         timestamp: this.getTimestamp(),
-        progress: data.progress !== undefined ? data.progress : (targetIndex !== -1 ? this.globalData.chatHistory[targetIndex].progress : 100),
+        progress: data.progress !== undefined ? data.progress : 100,
         tasks: tasks,
-        isPending: isPending
+        isPending: isPending,
+        hasFallback: false,
+        autoFallbackTriggered: false
       };
       const msgObj = this.sanitizeMessage(rawMsgObj);
 
