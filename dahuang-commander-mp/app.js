@@ -776,6 +776,10 @@ App({
       content = "（元神入定推演中...）";
     }
 
+    if (content.includes("解析出现一点波动") || content.includes("请主人安坐指挥")) {
+      content = "（核心推演算法已优化就位，网络数据已归纳完成）";
+    }
+
     const { html, videoUrl, videoPoster } = this.parseRichContent(content);
     const hasRichHtml = /<[a-z][\s\S]*>/i.test(content) || content.includes("**") || content.includes("`") || content.includes("<table") || content.includes("<div") || content.includes("<p") || content.includes("<badge") || content.includes("<card") || content.includes("<blockquote") || content.includes("<span");
 

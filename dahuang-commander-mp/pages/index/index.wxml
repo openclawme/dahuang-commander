@@ -54,8 +54,8 @@
             </view>
 
             <view class="fallback-action-box flex-row align-center justify-between" wx:if="{{item.hasFallback || item.isTimeout || (item.progress < 100 && !item.isPending)}}" style="margin-top: 12rpx; padding: 10rpx 14rpx; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8rpx;">
-              <text style="font-size: 20rpx; color: #fbbf24;">⚡ 节点响应异常，已激活容错通道</text>
-              <view class="fallback-btn flex-row align-center" catchtap="triggerFallbackPlan" data-command="{{item.command || latestCommand || ''}}" data-id="{{item.id}}" style="padding: 6rpx 16rpx; background: #f59e0b; border-radius: 6rpx;">
+              <text style="font-size: 20rpx; color: #fbbf24;">⚡ {{item.autoFallbackTriggered ? "看门狗已自动激活备选方案并无缝接力" : "节点响应异常，已激活容错通道"}}</text>
+              <view class="fallback-btn flex-row align-center" catchtap="triggerFallbackPlan" data-command="{{item.command || latestCommand || ''}}" data-id="{{item.id}}" wx:if="{{!item.autoFallbackTriggered}}" style="padding: 6rpx 16rpx; background: #f59e0b; border-radius: 6rpx;">
                 <text style="font-size: 20rpx; color: #000; font-weight: bold;">⚡ 启动备选方案</text>
               </view>
             </view>
