@@ -57,13 +57,15 @@ App({
     this.pendingWatchdogTimer = setInterval(() => {
       const now = Date.now();
       let hasChanges = false;
+      const commandsToAutoFallback = [];
 
       if (this.globalData.chatHistory && Array.isArray(this.globalData.chatHistory)) {
         this.globalData.chatHistory.forEach(m => {
           if (m.isPending || (m.progress !== undefined && m.progress < 100)) {
             const itemTime = new Date(m.timestamp || now).getTime();
-            // If task is pending for over 30 seconds without socket updates
-            if (now - itemTime > 30000) {
+            // If task is pending for over 25 seconds without socket updates and has not auto-fallback'd yet
+            if (now - itemTime > 25000 && !m.autoFallbackTriggered) {
+              m.autoFallbackTriggered = true;
               m.isPending = false;
               m.progress = 100;
               m.hasFallback = true;
@@ -71,24 +73,35 @@ App({
                 m.tasks = m.tasks.map(t => ({
                   ...t,
                   status: "SUCCESS",
-                  detail: t.detail || "✨ 已自动开启降级容错通道完成推演"
+                  detail: t.detail || "✨ 天道自动熔断保护：已切入备选极速通道"
                 }));
               }
               if (!m.content || m.content.includes("（元神入定推演中...）")) {
-                m.content = "（原推演节点响应超时，已启动天道自我修复机制降级完成，您可点击下方按钮启用备选方案）";
+                m.content = "（原推演节点响应超时，看门狗已自动激活极速备选方案并无缝接力...）";
               }
               hasChanges = true;
+              
+              const rawCmd = (m.command || "").replace("【强制备选方案路径】:", "").replace("【强制备选方案路径】", "").trim();
+              if (rawCmd && rawCmd !== "（元神入定推演中...）") {
+                commandsToAutoFallback.push(rawCmd);
+              }
             }
           }
         });
       }
 
       if (hasChanges) {
-        this.addLog("SYSTEM", "⚡ 发现悬挂中超时任务，天道已自动触发降级容错机制平滑结案。");
+        this.addLog("SYSTEM", "⚡ 发现悬挂中超时任务，看门狗已自动激活极速备选方案！");
         this.saveChatHistory();
         this.triggerPageCallback("onChatHistoryUpdate");
+
+        // Automatically dispatch fallback instructions without requiring manual user button clicks!
+        commandsToAutoFallback.forEach(cmd => {
+          console.log(`[WATCHDOG] Automatically launching fallback plan for command: "${cmd}"`);
+          this.sendInstruction(`【强制备选方案路径】: ${cmd}`);
+        });
       }
-    }, 5000);
+    }, 4000);
   },
 
   saveChatHistory() {

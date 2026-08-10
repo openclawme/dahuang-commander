@@ -11,8 +11,8 @@ const project = new ci.Project({
   ignores: ['node_modules/**/*', '.git/**/*', 'package.json', 'package-lock.json', 'upload.js'],
 });
 
-const version = '1.8.0';
-const desc = '1. 修复子步骤长时间 PENDING 悬挂卡死问题，增加 30 秒客户端看门狗自动降级熔断机制\n2. 增加“⚡ 启动备选方案”交互按键，支持一键切换极速直连解执通路';
+const version = '1.8.1';
+const desc = '1. 实现看门狗 100% 自动静默触发极速备选方案（无需人工手动点击按钮）\n2. 25秒超时无缝切入极速解执通路并实时推送备用结论';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
