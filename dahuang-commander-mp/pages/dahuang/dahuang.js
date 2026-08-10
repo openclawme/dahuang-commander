@@ -801,9 +801,6 @@ Page({
     });
   },
 
-
-  },
-
   updateMiniProgressBubble(msgId, progress, tasks) {
     const miniHistoryCopy = this.data.miniHistory.map(m => {
       if (m.id === msgId) {
