@@ -11,8 +11,8 @@ const project = new ci.Project({
   ignores: ['node_modules/**/*', '.git/**/*', 'package.json', 'package-lock.json', 'upload.js'],
 });
 
-const version = '1.7.9';
-const desc = '1. 修复实时 WebSocket 消息渲染时缺少 isRich 标记导致 HTML 降级为纯文本的问题\n2. 增加自动多维 HTML/Markdown 节点解析与高颜值 Rich-Text 渲染机制';
+const version = '1.8.0';
+const desc = '1. 修复子步骤长时间 PENDING 悬挂卡死问题，增加 30 秒客户端看门狗自动降级熔断机制\n2. 增加“⚡ 启动备选方案”交互按键，支持一键切换极速直连解执通路';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

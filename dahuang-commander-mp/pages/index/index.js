@@ -944,6 +944,16 @@ Page({
     });
   },
 
+  triggerFallbackPlan(e) {
+    const { command } = e.currentTarget.dataset;
+    const fallbackCmd = command || this.data.latestCommand || "执行目标离线容错方案";
+    wx.showToast({
+      title: "⚡ 激活备选极速方案",
+      icon: "none"
+    });
+    app.sendInstruction(`【强制备选方案路径】: ${fallbackCmd}`);
+  },
+
   reconnectSocket() {
     if (!this.data.agentState.token) {
       wx.showToast({
