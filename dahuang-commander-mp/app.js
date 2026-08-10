@@ -24,7 +24,7 @@ App({
 
   onLaunch() {
     require("./utils/i18n.js").initLanguage();
-    console.log("===我是分身微信小程序 v1.4.1 (修补 HTML 重复 style 属性) ===");
+    console.log("===我是分身微信小程序 v1.8.5 (看门狗静默自动接力 & 统一双重覆盖防护) ===");
     console.log("[App] Launching...");
     
     // Retrieve cached server URL
