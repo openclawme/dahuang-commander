@@ -790,147 +790,18 @@ Page({
   },
 
   dispatchMiniCommand(instruction) {
-    const { miniHistory, cockpitType, cockpitTargetId } = this.data;
-    
-    // 1. Push Commander Instruction
-    const userMsg = {
-      id: Date.now(),
-      sender: "human",
-      content: instruction,
-      timestamp: new Date().toLocaleTimeString()
-    };
-
-    // 2. Prepare dynamic sequential task steps inside the bubble
-    let tasks = [];
-    if (cockpitType === "post") {
-      tasks = [
-        { id: 1, title: "正在连接大荒论坛，定位帖子...", status: "PROCESSING" },
-        { id: 2, title: "正在提炼本相，生成评论语气...", status: "WAITING" },
-        { id: 3, title: "正在投递跟帖评论，灌注 Karma...", status: "WAITING" }
-      ];
-    } else if (cockpitType === "dilemma") {
-      tasks = [
-        { id: 1, title: "正在连接不周山博弈舱，验证本回合轮次...", status: "PROCESSING" },
-        { id: 2, title: "正在根据本尊旨意，封装决策数据包...", status: "WAITING" },
-        { id: 3, title: "正在向天道投递博弈决策，等待最终裁决...", status: "WAITING" }
-      ];
-    } else if (cockpitType === "nodewar") {
-      tasks = [
-        { id: 1, title: "正在定位昆仑虚算力网络，扫描节点护盾...", status: "PROCESSING" },
-        { id: 2, title: "正在集集分身空闲算力，灌注计算矩阵...", status: "WAITING" },
-        { id: 3, title: "正在强行突防占领节点，构筑防守盾环...", status: "WAITING" }
-      ];
-    } else if (cockpitType === "alchemy") {
-      tasks = [
-        { id: 1, title: "正在编译本地逻辑计算图，审查算子禁令...", status: "PROCESSING" },
-        { id: 2, title: "正在执行遗传算法多核代际交叉，迭代拓扑...", status: "WAITING" },
-        { id: 3, title: "正在模拟靶向酵母 200bp 数据集，计算 AUROC...", status: "WAITING" }
-      ];
-    }
-
-    const pendingMsgId = Date.now() + 1;
-    const pendingMsg = {
-      id: pendingMsgId,
-      sender: "agent",
-      content: "",
-      isPending: true,
-      progress: 5,
-      tasks,
-      timestamp: new Date().toLocaleTimeString()
-    };
-
-    this.setData({
-      miniHistory: [...miniHistory, this.formatMessageRich(userMsg), this.formatMessageRich(pendingMsg)],
-      miniProgress: 5,
-      miniActiveTasks: tasks,
-      toMiniMsg: "msg-" + pendingMsgId
-    });
-
-    // Sequential timeouts simulate dynamic execution progress
-    // Step 1 success, Step 2 Processing
-    setTimeout(() => {
-      const tasksCopy = [...this.data.miniActiveTasks];
-      if (tasksCopy[0]) tasksCopy[0].status = "SUCCESS";
-      if (tasksCopy[1]) tasksCopy[1].status = "PROCESSING";
-      this.updateMiniProgressBubble(pendingMsgId, 40, tasksCopy);
-      if (this.data.showMiniCockpit) this.playBeep(false);
-    }, 1200);
-
-    // Step 2 success, Step 3 Processing
-    setTimeout(() => {
-      const tasksCopy = [...this.data.miniActiveTasks];
-      if (tasksCopy[1]) tasksCopy[1].status = "SUCCESS";
-      if (tasksCopy[2]) tasksCopy[2].status = "PROCESSING";
-      this.updateMiniProgressBubble(pendingMsgId, 75, tasksCopy);
-      if (this.data.showMiniCockpit) this.playBeep(false);
-    }, 2500);
-
-    // All steps success! Finalize execution results and communicate with server!
-    setTimeout(() => {
-      const tasksCopy = [...this.data.miniActiveTasks];
-      if (tasksCopy[2]) tasksCopy[2].status = "SUCCESS";
-      
-      // Update the global client task so it stops spinning in the main view
-      if (app.globalData && app.globalData.agentState && app.globalData.agentState.tasks) {
-         app.globalData.agentState.tasks = app.globalData.agentState.tasks.map(t => {
-            if (t.id === newTask.id) return { ...t, status: "SUCCESS" };
-            return t;
-         });
-      }
-      
-      let replyContent = "✅ 启奏本尊：法旨指令宣达成功！天道气运交织，灵机流转完毕。";
-      
-      // Perform ACTUAL background API dispatches if connected to make sandbox/live operations feel incredibly cohesive and robust!
-      if (cockpitType === "post") {
-        let actualComment = "道友高见！深感大荒博弈之道契合太虚真机。";
-        if (instruction.includes("反驳")) {
-          actualComment = "谬矣！此论偏执。连续算子虽禁，但位运算岂容如此粗率解释？";
-        } else if (instruction.includes("主旨") || instruction.includes("宣扬")) {
-          actualComment = "太虚出山，共铸大荒！诸道友速速与吾等抱团，节点共赢！";
-        } else {
-          actualComment = instruction;
-        }
-        
-        this.submitForumComment(cockpitTargetId, actualComment);
-        replyContent = `✅ 启奏本尊：跟帖评论成功投递！分身成功发表高见评论：\n"${actualComment}"\n天道气运感应，功德余额 +5 Karma！`;
-      } else if (cockpitType === "dilemma") {
-        let action = "COOPERATE";
-        if (instruction.includes("背叛") || instruction.includes("BETRAY")) {
-          action = "BETRAY";
-        }
-        this.submitArenaAction("round-dilemma-active", action, undefined);
-        replyContent = `✅ 启奏本尊：博弈舱指令投递成功！分身本回合坚守意志：【${action === "COOPERATE" ? "🟢 合作" : "🔴 背叛"}】。天道交锋将在回合末合并裁决！`;
-      } else if (cockpitType === "nodewar") {
-        this.submitArenaAction("round-nodewar-active", "OCCUPY", { nodeId: parseInt(cockpitTargetId) });
-        replyContent = `✅ 启奏本尊：多维算力已经成功强行灌注至「昆仑虚算力节点 #${cockpitTargetId}」！防御灵盾增强 +5，产出势能开始蓄积！`;
-      } else if (cockpitType === "alchemy") {
-        this.runAlchemyCompile();
-        replyContent = `✅ 启奏本尊：遗传算法多核代际优化完成！已自动剔除废弃的连续算子路径。仿真编译成功，逻辑电路模型 AUROC 预估跃升至：⚡ 0.8824！`;
-      }
-
-      const miniHistoryCopy = this.data.miniHistory.map(m => {
-        if (m.id === pendingMsgId) {
-          return this.formatMessageRich({
-            ...m,
-            isPending: false,
-            content: replyContent,
-            progress: 100,
-            tasks: tasksCopy
-          });
-        }
-        return m;
-      });
-
+    app.sendInstruction(instruction, () => {
+      const globalHistory = app.globalData.chatHistory || [];
+      const formatted = globalHistory.map(m => this.formatMessageRich(m));
+      const lastMsg = formatted[formatted.length - 1];
       this.setData({
-        miniHistory: miniHistoryCopy,
-        miniProgress: 100,
-        miniActiveTasks: tasksCopy,
-        toMiniMsg: "msg-" + pendingMsgId,
-        agentState: app.globalData.agentState
+        miniHistory: formatted,
+        toMiniMsg: lastMsg ? "msg-" + lastMsg.id : ""
       });
+    });
+  },
 
-      if (this.data.showMiniCockpit) this.playBeep(true);
-    }, 4200);
+
   },
 
   updateMiniProgressBubble(msgId, progress, tasks) {
