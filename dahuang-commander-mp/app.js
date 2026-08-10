@@ -737,20 +737,12 @@ App({
             });
 
             if (realNotifications.length > 0) {
-              this.addLog("SYSTEM", `⚡ 成功同步并感应到 ${realNotifications.length} 脉离线神谕！`);
+              this.addLog("SYSTEM", `⚡ 离线期间有 ${realNotifications.length} 条定时提醒/后台神谕已自动同步至对话框！`);
               realNotifications.forEach(n => {
                 this.handleAgentCommandResult(n);
               });
-              wx.showModal({
-                title: "⏰ 【天道轮回神谕降临】",
-                content: `在您出神入定期间，有 ${realNotifications.length} 个定时提醒/法旨已在后台修成正果！`,
-                showCancel: false,
-                confirmText: "叩谢天恩",
-                confirmColor: "#a855f7"
-              });
-              wx.vibrateLong();
             } else {
-              this.addLog("SYSTEM", `🍃 灵台一尘不染，未发现离线未接神谕。已静默处理 ${autoNotifications.length} 脉自治日志。`);
+              this.addLog("SYSTEM", `🍃 未发现离线未接神谕。已静默处理 ${autoNotifications.length} 脉自治日志。`);
             }
           } else {
             this.addLog("SYSTEM", "🍃 灵台一尘不染，未发现离线未接神谕。");

@@ -11,8 +11,8 @@ const project = new ci.Project({
   ignores: ['node_modules/**/*', '.git/**/*', 'package.json', 'package-lock.json', 'upload.js'],
 });
 
-const version = '1.8.1';
-const desc = '1. 实现看门狗 100% 自动静默触发极速备选方案（无需人工手动点击按钮）\n2. 25秒超时无缝切入极速解执通路并实时推送备用结论';
+const version = '1.8.2';
+const desc = '1. 移除离线定时提醒的阻塞式弹窗，将所有离线神谕与提醒直接无缝注入对话框\n2. 优化静默同步体验';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
