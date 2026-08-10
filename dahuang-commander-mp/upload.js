@@ -11,8 +11,8 @@ const project = new ci.Project({
   ignores: ['node_modules/**/*', '.git/**/*', 'package.json', 'package-lock.json', 'upload.js'],
 });
 
-const version = '1.8.4';
-const desc = '1. 修复看门狗自动接力后回复结果未准确定位覆盖原气泡的问题\n2. 确保极速备用结论实时覆盖更新原中间态占位符';
+const version = '1.8.5';
+const desc = '1. 修复用户发送消息丢失/过滤被删问题，确保所有历史对话完好展现\n2. 修复单指令产生重复双气泡问题，统一响应逻辑并准确推送真结果';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

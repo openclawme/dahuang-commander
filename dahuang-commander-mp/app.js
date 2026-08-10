@@ -128,23 +128,7 @@ App({
 
     if (cachedHistory && cachedHistory.length > 0) {
       this.globalData.chatHistory = cachedHistory
-        .filter(m => {
-          const isAuto = !!(
-            m.isAutoReply || 
-            m.isAutoReply === "true" ||
-            (m.id && (m.id.startsWith("cron-") || m.id.startsWith("auto-") || m.id.startsWith("bg-"))) ||
-            (m.content && (
-              m.content.indexOf("分身自治") !== -1 ||
-              m.content.indexOf("自治提示") !== -1 ||
-              m.content.indexOf("自治日志") !== -1 ||
-              m.content.indexOf("自治") !== -1 ||
-              m.content.indexOf("代管") !== -1 ||
-              m.content.indexOf("群聊") !== -1 ||
-              m.content.indexOf("信使传音") !== -1
-            ))
-          );
-          return !isAuto;
-        })
+        .filter(m => m && (m.sender === "human" || m.sender === "agent"))
         .map(m => this.sanitizeMessage(m, true));
     } else {
       if (agentId === "agent-preview") {
@@ -298,18 +282,9 @@ App({
 
   handleAgentCommandResult(data) {
     const isAutonomous = !!(
-      data.isAutoReply || 
-      data.isAutoReply === "true" ||
-      (data.requestId && (data.requestId.startsWith("cron-") || data.requestId.startsWith("auto-") || data.requestId.startsWith("bg-"))) ||
-      (data.reply && (
-        data.reply.indexOf("分身自治") !== -1 ||
-        data.reply.indexOf("自治提示") !== -1 ||
-        data.reply.indexOf("自治日志") !== -1 ||
-        data.reply.indexOf("自治") !== -1 ||
-        data.reply.indexOf("代管") !== -1 ||
-        data.reply.indexOf("群聊") !== -1 ||
-        data.reply.indexOf("信使传音") !== -1
-      ))
+      (data.isAutoReply === true || data.isAutoReply === "true") &&
+      (!data.command || data.command.startsWith("【分身自治】")) &&
+      (data.requestId && (data.requestId.startsWith("cron-") || data.requestId.startsWith("auto-") || data.requestId.startsWith("bg-")))
     );
     
     if (isAutonomous) {
@@ -656,7 +631,8 @@ App({
             id: reqId,
             sender: "agent",
             isPending: true,
-            content: "（元神入定推演中，正在凝聚算力演化阵法...）",
+            command: instruction,
+            content: "（元神入定推演中...）",
             timestamp: this.getTimestamp(),
             progress: 25,
             tasks: this.generateInitialTasks(instruction)
@@ -669,26 +645,12 @@ App({
           if (successCallback) successCallback();
         } else if (res.statusCode === 200) {
           const data = res.data || {};
-          if (data.logs && Array.isArray(data.logs)) {
-            data.logs.forEach(l => {
-              this.addLog(l.type || "SYSTEM", l.message || "");
-            });
-          }
-          if (data.reply) {
-            const sanitized = this.sanitizeMessage({ content: data.reply }, false);
-            const replyMsg = {
-              id: `agent-reply-${Date.now()}`,
-              sender: "agent",
-              content: sanitized.content,
-              isPending: sanitized.isPending,
-              timestamp: this.getTimestamp()
-            };
-            this.globalData.chatHistory.push(replyMsg);
-            this.trimChatHistory();
-            this.saveChatHistory();
-            this.triggerPageCallback("onChatHistoryUpdate");
-            this.addLog("SYSTEM", "天道大模型心流决策反馈成功，法旨已完美奉行！");
-          }
+          this.handleAgentCommandResult({
+            ...data,
+            requestId: reqId,
+            command: instruction,
+            progress: 100
+          });
           if (successCallback) successCallback();
         } else {
           this.addLog("SYSTEM", `❌ 后台拒斥指令，状态码：${res.statusCode}`);
