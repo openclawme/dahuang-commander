@@ -24,7 +24,7 @@ App({
 
   onLaunch() {
     require("./utils/i18n.js").initLanguage();
-    console.log("===我是分身微信小程序 v1.8.9 (真实响应流透传 & 历史占位孤卡彻底清理版) ===");
+    console.log("===我是分身微信小程序 v1.9.0 (无条件清除占位 & 双通道绝对去重版) ===");
     console.log("[App] Launching...");
     
     // Retrieve cached server URL
@@ -142,7 +142,7 @@ App({
         .filter(m => {
           if (!m.content) return false;
           const text = m.content.trim();
-          if (!m.isPending && (text === "（元神入定推演中...）" || text === "（核心推演算法已优化就位，网络数据已归纳完成）")) {
+          if (text === "（元神入定推演中...）" || text === "（核心推演算法已优化就位，网络数据已归纳完成）") {
             return false;
           }
           return true;
@@ -670,7 +670,9 @@ App({
             progress: 25,
             tasks: this.generateInitialTasks(instruction)
           };
-          this.globalData.chatHistory.push(pendingMsg);
+          if (!this.globalData.chatHistory.some(m => m.id === reqId)) {
+            this.globalData.chatHistory.push(pendingMsg);
+          }
           this.trimChatHistory();
           this.saveChatHistory();
           this.triggerPageCallback("onChatHistoryUpdate");

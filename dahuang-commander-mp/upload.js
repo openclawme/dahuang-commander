@@ -11,8 +11,8 @@ const project = new ci.Project({
   ignores: ['node_modules/**/*', '.git/**/*', 'package.json', 'package-lock.json', 'upload.js'],
 });
 
-const version = '1.8.9';
-const desc = '1. 彻底清退 sanitizeMessage 文本硬替换逻辑，支持服务端真实响应完整展现\n2. 自动过滤清除本地 Storage 历史占位孤立卡片，对话框彻底打通重归清爽';
+const version = '1.9.0';
+const desc = '1. 无条件清理历史占位文案消息（无论 Pending 状态与否全量抹除）\n2. HTTP 与 Socket 双通道异步回传防重降噪，确保极端并发下零重复气泡';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
