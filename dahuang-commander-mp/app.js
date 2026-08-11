@@ -24,7 +24,7 @@ App({
 
   onLaunch() {
     require("./utils/i18n.js").initLanguage();
-    console.log("===我是分身微信小程序 v1.8.8 (单流推演 & 极简任务交互重构版) ===");
+    console.log("===我是分身微信小程序 v1.8.9 (真实响应流透传 & 历史占位孤卡彻底清理版) ===");
     console.log("[App] Launching...");
     
     // Retrieve cached server URL
@@ -139,7 +139,21 @@ App({
     if (cachedHistory && cachedHistory.length > 0) {
       this.globalData.chatHistory = cachedHistory
         .filter(m => m && (m.sender === "human" || m.sender === "agent"))
-        .map(m => this.sanitizeMessage(m, true));
+        .filter(m => {
+          if (!m.content) return false;
+          const text = m.content.trim();
+          if (!m.isPending && (text === "（元神入定推演中...）" || text === "（核心推演算法已优化就位，网络数据已归纳完成）")) {
+            return false;
+          }
+          return true;
+        })
+        .map(m => {
+          return this.sanitizeMessage({
+            ...m,
+            isPending: false,
+            progress: m.progress || 100
+          });
+        });
     } else {
       if (agentId === "agent-preview") {
         this.globalData.chatHistory = [{
@@ -598,14 +612,22 @@ App({
   },
 
   sendInstruction(instruction, successCallback) {
-    // Clear any leftover pending flags on older chat history items so past progress bars collapse!
+    // Clear leftover pending flags and filter out orphan placeholder messages
     if (this.globalData.chatHistory && Array.isArray(this.globalData.chatHistory)) {
-      this.globalData.chatHistory.forEach(m => {
-        if (m.isPending || (m.progress !== undefined && m.progress < 100)) {
-          m.isPending = false;
-          m.progress = 100;
-        }
-      });
+      this.globalData.chatHistory = this.globalData.chatHistory
+        .filter(m => {
+          if (!m.content) return false;
+          const text = m.content.trim();
+          if (text === "（元神入定推演中...）" || text === "（核心推演算法已优化就位，网络数据已归纳完成）") {
+            return false;
+          }
+          return true;
+        })
+        .map(m => ({
+          ...m,
+          isPending: false,
+          progress: 100
+        }));
     }
 
     const humanMsg = {
@@ -759,25 +781,15 @@ App({
     }
   },
 
-  sanitizeMessage(msg, isHistory = false) {
+  sanitizeMessage(msg) {
     if (!msg || typeof msg.content !== "string") return msg;
-    let content = msg.content;
-    const isMatch = content.indexOf("打通高维心流") !== -1 || content.indexOf("元神入定中") !== -1 || content.indexOf("天道传书") !== -1;
-    if (isMatch) {
-      content = "（元神入定推演中...）";
-    }
-
-    if (content.includes("解析出现一点波动") || content.includes("请主人安坐指挥")) {
-      content = "（核心推演算法已优化就位，网络数据已归纳完成）";
-    }
-
+    const content = msg.content;
     const { html, videoUrl, videoPoster } = this.parseRichContent(content);
     const hasRichHtml = /<[a-z][\s\S]*>/i.test(content) || content.includes("**") || content.includes("`") || content.includes("<table") || content.includes("<div") || content.includes("<p") || content.includes("<badge") || content.includes("<card") || content.includes("<blockquote") || content.includes("<span");
 
     return {
       ...msg,
       content,
-      isPending: isMatch ? !isHistory : msg.isPending,
       isRich: hasRichHtml || Boolean(videoUrl),
       richContent: html,
       videoUrl,
