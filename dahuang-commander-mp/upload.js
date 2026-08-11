@@ -11,8 +11,8 @@ const project = new ci.Project({
   ignores: ['node_modules/**/*', '.git/**/*', 'package.json', 'package-lock.json', 'upload.js'],
 });
 
-const version = '1.8.6';
-const desc = '1. 修复大荒遥测舱中用户指令气泡被 wx:if 过滤隐藏问题，支持用户亮青气泡完美呈现\n2. 废除 dahuang.js 孤立假定时器，统一由 app.js 全局消息总线归口驱动唯一气泡';
+const version = '1.8.7';
+const desc = '1. 引入微信本地 Storage 额度防护与定额自动熔断机制\n2. 全面完成全栈架构防线与安全加固的全面升级';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

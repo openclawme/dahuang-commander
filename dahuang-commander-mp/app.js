@@ -24,7 +24,7 @@ App({
 
   onLaunch() {
     require("./utils/i18n.js").initLanguage();
-    console.log("===我是分身微信小程序 v1.8.5 (看门狗静默自动接力 & 统一双重覆盖防护) ===");
+    console.log("===我是分身微信小程序 v1.8.7 (安全防护 & 统一架构重构版) ===");
     console.log("[App] Launching...");
     
     // Retrieve cached server URL
@@ -107,10 +107,20 @@ App({
   saveChatHistory() {
     const agentId = this.globalData.agentState.id || "agent-preview";
     const storageKey = `dahuang_chat_history_${agentId}`;
-    wx.setStorageSync(storageKey, this.globalData.chatHistory);
-    // Backward compatibility for legacy key on default preview agent
-    if (agentId === "agent-preview") {
-      wx.setStorageSync("dahuang_chat_history", this.globalData.chatHistory);
+    if (this.globalData.chatHistory && this.globalData.chatHistory.length > 50) {
+      this.globalData.chatHistory = this.globalData.chatHistory.slice(-50);
+    }
+    try {
+      wx.setStorageSync(storageKey, this.globalData.chatHistory);
+      if (agentId === "agent-preview") {
+        wx.setStorageSync("dahuang_chat_history", this.globalData.chatHistory);
+      }
+    } catch (e) {
+      console.warn("[App] Storage quota limit reached, trimming history...", e);
+      if (this.globalData.chatHistory && this.globalData.chatHistory.length > 20) {
+        this.globalData.chatHistory = this.globalData.chatHistory.slice(-20);
+        wx.setStorageSync(storageKey, this.globalData.chatHistory);
+      }
     }
   },
 
