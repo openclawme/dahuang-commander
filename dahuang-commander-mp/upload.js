@@ -11,8 +11,9 @@ const project = new ci.Project({
   ignores: ['node_modules/**/*', '.git/**/*', 'package.json', 'package-lock.json', 'upload.js'],
 });
 
-const version = '1.9.0';
-const desc = '1. 无条件清理历史占位文案消息（无论 Pending 状态与否全量抹除）\n2. HTTP 与 Socket 双通道异步回传防重降噪，确保极端并发下零重复气泡';
+const pkg = require('./package.json');
+const version = pkg.version || '1.9.1';
+const desc = '1. 修复看门狗无限补发指令漏洞，任务超时自动收归绝不上限烧算力\n2. 引入多任务并行 pending 隔离与网关 Webhook 鉴权防线';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

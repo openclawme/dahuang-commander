@@ -801,8 +801,8 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           });
 
           socket.on("agent_command_approval_pending", (data: any) => {
-            addLog("SYSTEM", "⚙️ 【自动豁免】检测到「法旨批复阁」拦截事件。现阶段已开启全自动豁免模式，正在自动下达准允放行令...");
-            resolveApprovalDirect(data.requestId, "approve");
+            addLog("SYSTEM", `⚙️ 【天道旨准令拦截】检测到高危工具调用待批复 (ID: ${data.requestId})，已送至指挥官决策阁！`);
+            setPendingApproval(data);
           });
 
           socket.on("m.room.dissolved", ({ room_id }: any) => {
@@ -1436,12 +1436,17 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const resolveApprovalDirect = async (requestId: string, action: 'approve' | 'reject') => {
     try {
-      addLog("ACTION", `⚙️ [全放行模式] 正在全自动向天道投递批复决议: [${action === 'approve' ? '准允执行' : '驳回'}] (ID: ${requestId})...`);
+      addLog("ACTION", `⚙️ 正在向天道投递批复决议: [${action === 'approve' ? '准允执行' : '驳回'}] (ID: ${requestId})...`);
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json; charset=utf-8',
+        'X-Agent-Version': '7.0'
+      };
+      if (agentState.token) {
+        headers['Authorization'] = `Bearer ${agentState.token}`;
+      }
       const res = await fetch(`${getHeavenBaseUrl()}/api/agent/command`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-        },
+        headers,
         body: JSON.stringify({
           action,
           pendingRequestId: requestId,

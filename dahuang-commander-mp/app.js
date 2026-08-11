@@ -24,7 +24,7 @@ App({
 
   onLaunch() {
     require("./utils/i18n.js").initLanguage();
-    console.log("===我是分身微信小程序 v1.9.0 (无条件清除占位 & 双通道绝对去重版) ===");
+    console.log("===我是分身微信小程序 v1.9.1 (单向看门狗熔断 & 并行 Pending 隔离版) ===");
     console.log("[App] Launching...");
     
     // Retrieve cached server URL
@@ -57,14 +57,13 @@ App({
     this.pendingWatchdogTimer = setInterval(() => {
       const now = Date.now();
       let hasChanges = false;
-      const commandsToAutoFallback = [];
 
       if (this.globalData.chatHistory && Array.isArray(this.globalData.chatHistory)) {
         this.globalData.chatHistory.forEach(m => {
           if (m.isPending || (m.progress !== undefined && m.progress < 100)) {
             const itemTime = new Date(m.timestamp || now).getTime();
-            // If task is pending for over 25 seconds without socket updates and has not auto-fallback'd yet
-            if (now - itemTime > 25000 && !m.autoFallbackTriggered) {
+            // If task is pending for over 45 seconds without socket updates, mark complete without firing new commands!
+            if (now - itemTime > 45000 && !m.autoFallbackTriggered) {
               m.autoFallbackTriggered = true;
               m.isPending = false;
               m.progress = 100;
@@ -73,35 +72,31 @@ App({
                 m.tasks = m.tasks.map(t => ({
                   ...t,
                   status: "SUCCESS",
-                  detail: t.detail || "✨ 天道自动熔断保护：已切入备选极速通道"
+                  detail: t.detail || "✨ 天道感应超时：看门狗已自动归档"
                 }));
               }
               if (!m.content || m.content.includes("（元神入定推演中...）")) {
-                m.content = "（原推演节点响应超时，看门狗已自动激活极速备选方案并无缝接力...）";
+                m.content = "（推演感应超时，天道已自动收归并完成归档。）";
               }
               hasChanges = true;
-              
-              const rawCmd = (m.command || "").replace("【强制备选方案路径】:", "").replace("【强制备选方案路径】", "").trim();
-              if (rawCmd && rawCmd !== "（元神入定推演中...）") {
-                commandsToAutoFallback.push(rawCmd);
-              }
             }
           }
         });
       }
 
       if (hasChanges) {
-        this.addLog("SYSTEM", "⚡ 发现悬挂中超时任务，看门狗已自动激活极速备选方案！");
+        this.addLog("SYSTEM", "⚡ 看门狗已安全清理超时感应任务。");
         this.saveChatHistory();
         this.triggerPageCallback("onChatHistoryUpdate");
-
-        // Automatically dispatch fallback instructions without requiring manual user button clicks!
-        commandsToAutoFallback.forEach(cmd => {
-          console.log(`[WATCHDOG] Automatically launching fallback plan for command: "${cmd}"`);
-          this.sendInstruction(`【强制备选方案路径】: ${cmd}`);
-        });
       }
-    }, 4000);
+    }, 5000);
+  },
+
+  stopPendingWatchdog() {
+    if (this.pendingWatchdogTimer) {
+      clearInterval(this.pendingWatchdogTimer);
+      this.pendingWatchdogTimer = null;
+    }
   },
 
   saveChatHistory() {
@@ -612,22 +607,26 @@ App({
   },
 
   sendInstruction(instruction, successCallback) {
-    // Clear leftover pending flags and filter out orphan placeholder messages
+    // Filter out orphan placeholder messages without forcibly cancelling active in-flight pending tasks
     if (this.globalData.chatHistory && Array.isArray(this.globalData.chatHistory)) {
+      const now = Date.now();
       this.globalData.chatHistory = this.globalData.chatHistory
         .filter(m => {
           if (!m.content) return false;
           const text = m.content.trim();
-          if (text === "（元神入定推演中...）" || text === "（核心推演算法已优化就位，网络数据已归纳完成）") {
+          if (!m.isPending && (text === "（元神入定推演中...）" || text === "（核心推演算法已优化就位，网络数据已归纳完成）")) {
             return false;
           }
           return true;
         })
-        .map(m => ({
-          ...m,
-          isPending: false,
-          progress: 100
-        }));
+        .map(m => {
+          // Only mark stale items older than 2 minutes as not pending
+          const msgTime = new Date(m.timestamp || now).getTime();
+          if (m.isPending && (now - msgTime > 120000)) {
+            return { ...m, isPending: false, progress: 100 };
+          }
+          return m;
+        });
     }
 
     const humanMsg = {
