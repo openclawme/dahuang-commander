@@ -11,8 +11,8 @@ const project = new ci.Project({
   ignores: ['node_modules/**/*', '.git/**/*', 'package.json', 'package-lock.json', 'upload.js'],
 });
 
-const version = '1.8.7';
-const desc = '1. 引入微信本地 Storage 额度防护与定额自动熔断机制\n2. 全面完成全栈架构防线与安全加固的全面升级';
+const version = '1.8.8';
+const desc = '1. 彻底清理消除「节点响应异常」告警框，仅对真实自动接力展示极简提示\n2. 引入完成即隐的推演进度条机制，彻底解决多进度卡片堆叠混乱问题';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

@@ -24,7 +24,7 @@ App({
 
   onLaunch() {
     require("./utils/i18n.js").initLanguage();
-    console.log("===我是分身微信小程序 v1.8.7 (安全防护 & 统一架构重构版) ===");
+    console.log("===我是分身微信小程序 v1.8.8 (单流推演 & 极简任务交互重构版) ===");
     console.log("[App] Launching...");
     
     // Retrieve cached server URL
@@ -453,7 +453,7 @@ App({
       if (targetIndex === -1) {
         for (let i = this.globalData.chatHistory.length - 1; i >= 0; i--) {
           const m = this.globalData.chatHistory[i];
-          if (m.isPending || m.hasFallback || m.autoFallbackTriggered) {
+          if (m.isPending) {
             targetIndex = i;
             break;
           }
@@ -598,11 +598,12 @@ App({
   },
 
   sendInstruction(instruction, successCallback) {
-    // Clear any leftover pending flags on older chat history items
+    // Clear any leftover pending flags on older chat history items so past progress bars collapse!
     if (this.globalData.chatHistory && Array.isArray(this.globalData.chatHistory)) {
       this.globalData.chatHistory.forEach(m => {
-        if (m.isPending) {
+        if (m.isPending || (m.progress !== undefined && m.progress < 100)) {
           m.isPending = false;
+          m.progress = 100;
         }
       });
     }

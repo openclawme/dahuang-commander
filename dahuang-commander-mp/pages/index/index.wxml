@@ -22,18 +22,17 @@
             <text wx:else selectable="true">{{item.content}}</text>
           </block>
           
-          <view class="bubble-task-container" wx:if="{{item.sender === 'agent' && (item.progress > 0 || (item.tasks && item.tasks.length > 0) || item.isPending)}}">
-            <view class="bubble-progress-row flex-row align-center justify-between" bindtap="toggleTaskExpand" data-id="{{item.id}}" data-finished="{{item.progress === 100}}">
+          <view class="bubble-task-container" wx:if="{{item.sender === 'agent' && (item.isPending || (item.progress > 0 && item.progress < 100))}}">
+            <view class="bubble-progress-row flex-row align-center justify-between">
               <text class="bubble-progress-lbl">{{t.index.progress}}</text>
               <view class="flex-row align-center" style="gap: 10rpx;">
                 <text class="bubble-progress-pct">{{item.progress || 0}}%</text>
-                <text class="expand-arrow" wx:if="{{item.progress === 100}}">{{expandedTasks[item.id] ? t.index.collapse : t.index.expand}}</text>
               </view>
             </view>
             <view class="bubble-progress-track">
               <view class="bubble-progress-fill" style="width: {{item.progress || 0}}%;"></view>
             </view>
-            <view class="bubble-task-list" wx:if="{{item.tasks && item.tasks.length > 0 && (item.progress < 100 || expandedTasks[item.id])}}">
+            <view class="bubble-task-list" wx:if="{{item.tasks && item.tasks.length > 0}}">
               <view class="bubble-task-item flex-col" wx:for="{{item.tasks}}" wx:for-item="task" wx:key="id" style="{{task.status === 'PROCESSING' ? 'border-color: rgba(6, 182, 212, 0.25); background: rgba(6, 182, 212, 0.04);' : ''}}">
                 <view class="bubble-task-item-header flex-row align-center justify-between">
                   <view class="flex-row align-center" style="flex: 1; min-width: 0;">
@@ -53,11 +52,8 @@
               </view>
             </view>
 
-            <view class="fallback-action-box flex-row align-center justify-between" wx:if="{{item.hasFallback || item.isTimeout || (item.progress < 100 && !item.isPending)}}" style="margin-top: 12rpx; padding: 10rpx 14rpx; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8rpx;">
-              <text style="font-size: 20rpx; color: #fbbf24;">⚡ {{item.autoFallbackTriggered ? "看门狗已自动激活备选方案并无缝接力" : "节点响应异常，已激活容错通道"}}</text>
-              <view class="fallback-btn flex-row align-center" catchtap="triggerFallbackPlan" data-command="{{item.command || latestCommand || ''}}" data-id="{{item.id}}" wx:if="{{!item.autoFallbackTriggered}}" style="padding: 6rpx 16rpx; background: #f59e0b; border-radius: 6rpx;">
-                <text style="font-size: 20rpx; color: #000; font-weight: bold;">⚡ 启动备选方案</text>
-              </view>
+            <view class="fallback-action-box flex-row align-center justify-between" wx:if="{{item.autoFallbackTriggered}}" style="margin-top: 12rpx; padding: 10rpx 14rpx; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8rpx;">
+              <text style="font-size: 20rpx; color: #fbbf24;">⚡ 看门狗已自动接力执行备选方案</text>
             </view>
           </view>
         </view>
