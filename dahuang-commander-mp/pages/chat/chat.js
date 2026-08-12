@@ -3,6 +3,7 @@ const i18n = require('../../utils/i18n.js');
 
 Page({
   data: {
+    t: i18n.getDict(),
     roomsList: []
   },
 

@@ -4,6 +4,7 @@ const { getHeaders } = require('../../utils/config.js');
 
 Page({
   data: {
+    t: i18n.getDict(),
     agentState: {},
     serverUrl: "",
     customToken: "",

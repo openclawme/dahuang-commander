@@ -22,6 +22,15 @@ view, scroll-view, text, input, button {
   margin-bottom: 24rpx;
 }
 
+.tab-pane-container {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
 .glow-cyan {
   box-shadow: 0 0 20rpx rgba(6, 182, 212, 0.25);
   border-color: rgba(6, 182, 212, 0.5);
