@@ -3,10 +3,8 @@
 .container {
   padding: 24rpx;
   background-color: #020617;
-  min-height: 100vh;
-  height: auto;
-  overflow-y: auto;
-  display: block;
+  height: 100%;
+  width: 100%;
   box-sizing: border-box;
 }
 

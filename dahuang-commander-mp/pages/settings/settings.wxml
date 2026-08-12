@@ -1,4 +1,4 @@
-<scroll-view scroll-y class="container" style="height: 100vh; display: block; overflow-y: auto;">
+<scroll-view scroll-y class="container">
   <!-- 1. 当前并网元神卡片 -->
   <view class="cyber-panel glow-cyan active-agent-card" wx:if="{{agentState.token}}">
     <view class="card-header flex-row justify-between align-center">
