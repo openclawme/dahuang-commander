@@ -1,4 +1,24 @@
-const app = getApp();
+const app = new Proxy({}, {
+  get(target, prop) {
+    const instance = getApp();
+    if (!instance) {
+      if (prop === "globalData") {
+        return {
+          serverUrl: "https://dahuang.land",
+          agentState: {},
+          chatHistory: [],
+          logs: [],
+          messengerRooms: {},
+          pendingApproval: null,
+          showDevLogs: false
+        };
+      }
+      return () => {};
+    }
+    const val = instance[prop];
+    return typeof val === "function" ? val.bind(instance) : val;
+  }
+});
 const i18n = require('../../utils/i18n.js');
 const { getHeaders } = require('../../utils/config.js');
 
