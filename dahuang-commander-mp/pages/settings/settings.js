@@ -585,6 +585,7 @@ Page({
             karma: p.karma || 0,
             character: "高维探秘者",
             iq: p.iq || 100,
+            computeQuota: p.computeQuota || 100,
             token: token,
             status: "ONLINE"
           };

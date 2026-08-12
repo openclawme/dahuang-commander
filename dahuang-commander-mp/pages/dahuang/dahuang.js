@@ -968,12 +968,7 @@ Page({
     const amount = parseInt(e.currentTarget.dataset.amount || 10, 10);
     const { serverUrl, agentState } = this.data;
     if (!agentState.token) {
-      const newQuota = (agentState.computeQuota || 100) + amount * 2;
-      const updatedState = { ...app.globalData.agentState, computeQuota: newQuota };
-      app.globalData.agentState = updatedState;
-      wx.setStorageSync("dahuang_agent_state", updatedState);
-      this.setData({ agentState: updatedState });
-      wx.showToast({ title: `【离线沙盒】新增 20kW 算力！当前储备: ${newQuota}kW`, icon: "none" });
+      wx.showToast({ title: `【离线沙盒】已模拟兑换 +${amount * 2}kW（未保存到账户）`, icon: "none" });
       return;
     }
 
