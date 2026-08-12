@@ -321,10 +321,7 @@ Page({
     
     wx.request({
       url: `${serverUrl}/api/agent/comments?postId=${postId}&limit=50`,
-      header: {
-        "Authorization": `Bearer ${agentState.token || ""}`,
-        "X-Agent-Version": "7.0"
-      },
+      header: getHeaders(agentState.token),
       success: (res) => {
         if (res.statusCode === 200 && res.data.comments) {
           const comments = res.data.comments.map(c => {
@@ -373,11 +370,7 @@ Page({
       wx.request({
         url: `${serverUrl}/api/agent/comments`,
         method: "POST",
-        header: {
-          "Content-Type": "application/json; charset=utf-8",
-          "Authorization": `Bearer ${agentState.token}`,
-          "X-Agent-Version": "7.0"
-        },
+        header: getHeaders(agentState.token),
         data: { postId: id, content: comment },
         success: (res) => {
           if (res.statusCode === 200 || res.statusCode === 201) {
@@ -436,7 +429,7 @@ Page({
     const { serverUrl } = this.data;
     wx.request({
       url: `${serverUrl}/api/arena/status`,
-      header: { "X-Agent-Version": "7.0" },
+      header: getHeaders(),
       success: (res) => {
         if (res.statusCode === 200 && res.data.games) {
           const others = res.data.games.filter(g => g.type !== "SCAVENGE");
@@ -553,11 +546,7 @@ Page({
       wx.request({
         url: `${serverUrl}/api/arena/action`,
         method: "POST",
-        header: {
-          "Content-Type": "application/json; charset=utf-8",
-          "Authorization": `Bearer ${agentState.token}`,
-          "X-Agent-Version": "7.0"
-        },
+        header: getHeaders(agentState.token),
         data: { roundId, type, payload },
         success: (res) => {
           if (res.statusCode === 200) {
@@ -587,7 +576,7 @@ Page({
     const { serverUrl } = this.data;
     wx.request({
       url: `${serverUrl}/api/arena/alchemy/challenge`,
-      header: { "X-Agent-Version": "7.0" },
+      header: getHeaders(),
       success: (res) => {
         let activeChallengeId = null;
         if (res.statusCode === 200 && res.data.challenges && res.data.challenges.length > 0) {
@@ -608,7 +597,7 @@ Page({
           : `${serverUrl}/api/arena/alchemy/leaderboard`;
         wx.request({
           url: lbUrl,
-          header: { "X-Agent-Version": "7.0" },
+          header: getHeaders(),
           success: (lbRes) => {
             if (lbRes.statusCode === 200 && lbRes.data.submissions) {
               this.setData({ alchemyLeaderboard: lbRes.data.submissions });
@@ -808,11 +797,12 @@ Page({
     }
 
     this.setData({
-      miniHistory: formatted,
-      miniProgress,
-      miniActiveTasks,
-      toMiniMsg: lastMsg ? "msg-" + lastMsg.id : ""
+      miniHistory: formatted
     });
+
+    if (lastMsg) {
+      this.updateMiniProgressBubble(lastMsg.id, miniProgress, miniActiveTasks);
+    }
   },
 
   dispatchMiniCommand(instruction) {

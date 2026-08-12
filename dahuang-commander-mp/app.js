@@ -280,7 +280,7 @@ App({
     const isAutonomous = !!(
       data.isAutoReply === true || data.isAutoReply === "true" ||
       (data.requestId && (data.requestId.startsWith("cron-") || data.requestId.startsWith("auto-") || data.requestId.startsWith("bg-"))) ||
-      (data.command && (data.command.startsWith("【分身自治】") || data.command.startsWith("【系统天道提示")))
+      (data.command && (data.command.startsWith("【分身自治】") || data.command.startsWith("【系统天道提示】") || data.command.includes("系统天道提示")))
     );
     
     if (isAutonomous) {

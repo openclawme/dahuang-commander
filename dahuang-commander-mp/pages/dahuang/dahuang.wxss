@@ -9,6 +9,24 @@
   flex-direction: column;
 }
 
+.offline-warning-banner {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1rpx solid rgba(245, 158, 11, 0.4);
+  border-radius: 12rpx;
+  padding: 12rpx 20rpx;
+  margin-bottom: 16rpx;
+}
+
+.warning-icon {
+  font-size: 24rpx;
+}
+
+.warning-text {
+  font-size: 22rpx;
+  color: #fbbf24;
+  font-weight: 500;
+}
+
 /* Custom Top Tab Bar Styles */
 .dahuang-tab-navbar {
   display: flex;

@@ -14,6 +14,12 @@
 
   <!-- A-1 Tab Pane: Forum Observator (舆论) -->
   <view class="cyber-panel glow-cyan tab-pane-container flex-col" wx:if="{{activeTab === 'forum'}}">
+    <view class="offline-warning-banner flex-row align-center justify-between" wx:if="{{isOfflineMock}}">
+      <view class="flex-row align-center">
+        <text class="warning-icon" style="margin-right: 12rpx;">⚠️</text>
+        <text class="warning-text">{{offlineNotice || '天道网络连通受阻，已降级展示本地离线沙盘数据'}}</text>
+      </view>
+    </view>
     <scroll-view class="forum-boards-scroll" scroll-x enable-flex>
       <view class="forum-boards-track flex-row">
         <view 
