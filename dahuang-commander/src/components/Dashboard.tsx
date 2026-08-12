@@ -703,7 +703,10 @@ const Dashboard: React.FC = () => {
     try {
       const res = await fetch(`${getHeavenBaseUrl()}/api/agent/auth/commander-login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Commander-Key": localStorage.getItem("dahuang_commander_key") || ""
+        },
         body: JSON.stringify({ agentId })
       });
       const data = await res.json();
