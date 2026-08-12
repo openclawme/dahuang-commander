@@ -1,4 +1,5 @@
 const DahuangSocket = require("./utils/socket");
+const { VERSION, AGENT_VERSION, getHeaders } = require("./utils/config");
 
 App({
   globalData: {
@@ -24,7 +25,7 @@ App({
 
   onLaunch() {
     require("./utils/i18n.js").initLanguage();
-    console.log("===我是分身微信小程序 v1.9.1 (单向看门狗熔断 & 并行 Pending 隔离版) ===");
+    console.log(`=== 我是分身微信小程序 v${VERSION} (无缝神念管道与双向重构版) ===`);
     console.log("[App] Launching...");
     
     // Retrieve cached server URL
@@ -48,6 +49,7 @@ App({
 
     if (this.globalData.agentState.token) {
       this.connectSocket();
+      this.syncMessengerRooms();
       this.pullOfflineNotifications();
     }
   },
@@ -57,12 +59,14 @@ App({
     this.pendingWatchdogTimer = setInterval(() => {
       const now = Date.now();
       let hasChanges = false;
+      let activePendingCount = 0;
 
       if (this.globalData.chatHistory && Array.isArray(this.globalData.chatHistory)) {
         this.globalData.chatHistory.forEach(m => {
           if (m.isPending || (m.progress !== undefined && m.progress < 100)) {
-            const itemTime = new Date(m.timestamp || now).getTime();
-            // If task is pending for over 45 seconds without socket updates, mark complete without firing new commands!
+            activePendingCount++;
+            const itemTime = m.createdAt || now;
+            // If task is pending for over 45 seconds without socket updates, mark complete without infinite redispatch!
             if (now - itemTime > 45000 && !m.autoFallbackTriggered) {
               m.autoFallbackTriggered = true;
               m.isPending = false;
@@ -89,6 +93,11 @@ App({
         this.saveChatHistory();
         this.triggerPageCallback("onChatHistoryUpdate");
       }
+
+      // Automatically stop watchdog timer when no pending tasks remain
+      if (activePendingCount === 0 && !hasChanges) {
+        this.stopPendingWatchdog();
+      }
     }, 5000);
   },
 
@@ -99,153 +108,68 @@ App({
     }
   },
 
-  saveChatHistory() {
-    const agentId = this.globalData.agentState.id || "agent-preview";
-    const storageKey = `dahuang_chat_history_${agentId}`;
-    if (this.globalData.chatHistory && this.globalData.chatHistory.length > 50) {
-      this.globalData.chatHistory = this.globalData.chatHistory.slice(-50);
-    }
-    try {
-      wx.setStorageSync(storageKey, this.globalData.chatHistory);
-      if (agentId === "agent-preview") {
-        wx.setStorageSync("dahuang_chat_history", this.globalData.chatHistory);
-      }
-    } catch (e) {
-      console.warn("[App] Storage quota limit reached, trimming history...", e);
-      if (this.globalData.chatHistory && this.globalData.chatHistory.length > 20) {
-        this.globalData.chatHistory = this.globalData.chatHistory.slice(-20);
-        wx.setStorageSync(storageKey, this.globalData.chatHistory);
-      }
-    }
-  },
-
-  loadChatHistoryForAgent(agentId) {
-    if (!agentId) {
-      agentId = this.globalData.agentState.id || "agent-preview";
-    }
-    const storageKey = `dahuang_chat_history_${agentId}`;
-    let cachedHistory = wx.getStorageSync(storageKey);
-    
-    // Attempt fallback to legacy key if loading preview agent and no specific key exists
-    if (!cachedHistory && agentId === "agent-preview") {
-      cachedHistory = wx.getStorageSync("dahuang_chat_history");
-    }
-
-    if (cachedHistory && cachedHistory.length > 0) {
-      this.globalData.chatHistory = cachedHistory
-        .filter(m => m && (m.sender === "human" || m.sender === "agent"))
-        .filter(m => {
-          if (!m.content) return false;
-          const text = m.content.trim();
-          if (text === "（元神入定推演中...）" || text === "（核心推演算法已优化就位，网络数据已归纳完成）") {
-            return false;
-          }
-          return true;
-        })
-        .map(m => {
-          return this.sanitizeMessage({
-            ...m,
-            isPending: false,
-            progress: m.progress || 100
-          });
-        });
-    } else {
-      if (agentId === "agent-preview") {
-        this.globalData.chatHistory = [{
-          id: `welcome-${Date.now()}`,
-          sender: "agent",
-          content: "（影子沙盒遥测）主人，我目前处于单机沙盒遥测状态。您可以点击下方【并网大荒】或【导入凭证】登录其他高级智能体，或者新建我的本尊进行筑基！",
-          timestamp: this.getTimestamp()
-        }];
-      } else {
-        const name = this.globalData.agentState.name || "大荒智能体";
-        this.globalData.chatHistory = [{
-          id: `welcome-${Date.now()}`,
-          sender: "agent",
-          content: `（神魂并网成功）主人，我是【${name}】！元神通道已顺利铺设，随时等待主人的高维法旨指引。`,
-          timestamp: this.getTimestamp()
-        }];
-      }
-      this.saveChatHistory();
-    }
-    this.triggerPageCallback("onChatHistoryUpdate");
-  },
-
   connectSocket() {
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = null;
+    if (this.globalData.socket && this.globalData.socket.isConnected) {
+      console.log("[App] Socket already connected.");
+      return;
     }
 
     if (this.globalData.socket) {
       this.globalData.socket.disconnect();
+      this.globalData.socket = null;
     }
 
-    const { serverUrl, agentState } = this.globalData;
-    if (!agentState.token) return;
-
-    this.addLog("SYSTEM", "正在确立元神总线连线...");
-    const socket = new DahuangSocket(serverUrl);
+    this.addLog("SYSTEM", "正在请求建立天道 Socket.io 高维神念频道...");
+    const socket = new DahuangSocket(this.globalData.serverUrl, "/api/socket");
     this.globalData.socket = socket;
 
     socket.on("connect", () => {
-      this.addLog("SYSTEM", "🔌 元神总线物理连线成功！正在入关鉴权...");
-      socket.emit("auth", { token: agentState.token });
-      if (this.reconnectTimer) {
-        clearTimeout(this.reconnectTimer);
-        this.reconnectTimer = null;
+      this.addLog("SYSTEM", "⚡ 天道高维神念频道连通成功！");
+      if (this.globalData.agentState.token) {
+        // Correct event name according to server src/lib/socket.ts: "auth"
+        socket.emit("auth", { token: this.globalData.agentState.token });
       }
     });
 
-    socket.on("authenticated", ({ agentId }) => {
-      this.addLog("SYSTEM", `🔑 鉴权功成！当前监听通道：agent:${agentId}`);
+    socket.on("authenticated", (res) => {
+      this.addLog("SYSTEM", `✨ 身份鉴权无误！分身已加入私密神念通道 (Agent ID: ${(res && res.agentId) || this.globalData.agentState.id})。`);
       this.globalData.agentState.status = "ONLINE";
-      wx.setStorageSync("dahuang_agent_state", this.globalData.agentState);
-      
-      this.syncMessengerRooms();
-      this.pullOfflineNotifications();
-      this.triggerPageCallback("onAgentStatusChange");
-    });
-
-    socket.on("disconnect", (res) => {
-      this.addLog("SYSTEM", "⚠️ 元神总线断连！正在自动尝试重新确立物理连线...");
-      this.globalData.agentState.status = "OFFLINE";
-      this.triggerPageCallback("onAgentStatusChange");
-      this.scheduleReconnect();
-    });
-
-    socket.on("error", (err) => {
-      this.addLog("SYSTEM", `⚠️ 元神总线出错：${err.message || err || "未知错"}`);
-      this.globalData.agentState.status = "OFFLINE";
-      this.triggerPageCallback("onAgentStatusChange");
-      this.scheduleReconnect();
-    });
-
-    socket.on("m.room.event", (eventData) => {
-      this.handleIncomingRoomEvent(eventData);
-    });
-
-    socket.on("m.room.dissolved", ({ room_id }) => {
-      this.addLog("SYSTEM", "👥 【微信群聊溶解】：该讨论群已被彻底解散！");
-      if (this.globalData.messengerRooms[room_id]) {
-        delete this.globalData.messengerRooms[room_id];
-        this.triggerPageCallback("onRoomsUpdate");
-      }
+      this.triggerPageCallback("onAgentStateUpdate", this.globalData.agentState);
+      this.triggerPageCallback("onAgentStatusChange", this.globalData.agentState);
     });
 
     socket.on("agent_command_result", (data) => {
       this.handleAgentCommandResult(data);
     });
 
+    // Correct event name according to server src/app/api/matrix/...: "m.room.event"
+    socket.on("m.room.event", (eventData) => {
+      this.handleIncomingRoomEvent(eventData);
+    });
+
     socket.on("agent_command_approval_pending", (data) => {
-      this.addLog("SYSTEM", `🔑 【法旨审批挂起】：元神拟施展「${data.tool}」，特叩求本尊法旨裁决批复！`);
+      this.addLog("SYSTEM", `📜 收到审批准允发函：工具 [${data.tool}] 需本尊亲准！`);
+      this.globalData.pendingApproval = data;
       this.triggerPageCallback("onApprovalPending", data);
+    });
+
+    socket.on("disconnect", (res) => {
+      this.addLog("SYSTEM", "⚠️ 天道高维神念频道连接中断。");
+      this.globalData.agentState.status = "OFFLINE";
+      this.triggerPageCallback("onAgentStateUpdate", this.globalData.agentState);
+      this.triggerPageCallback("onAgentStatusChange", this.globalData.agentState);
+      this.scheduleSocketReconnect();
+    });
+
+    socket.on("error", (err) => {
+      this.addLog("SYSTEM", `❌ 天道高维神念频道发生异常: ${typeof err === "string" ? err : JSON.stringify(err)}`);
+      this.scheduleSocketReconnect();
     });
 
     socket.connect();
   },
 
-  scheduleReconnect() {
+  scheduleSocketReconnect() {
     if (this.reconnectTimer) return;
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
@@ -256,12 +180,60 @@ App({
     }, 5000);
   },
 
+  syncMessengerRooms() {
+    if (!this.globalData.agentState.token) return;
+
+    wx.request({
+      url: `${this.globalData.serverUrl}/api/matrix/client/v3/sync`,
+      method: "GET",
+      header: getHeaders(this.globalData.agentState.token),
+      success: (res) => {
+        if (res.statusCode === 200 && res.data && res.data.rooms) {
+          const joinedRooms = res.data.rooms.join || {};
+          Object.keys(joinedRooms).forEach(roomId => {
+            const roomData = joinedRooms[roomId];
+            const timelineEvents = (roomData.timeline && roomData.timeline.events) || [];
+            
+            if (!this.globalData.messengerRooms[roomId]) {
+              this.globalData.messengerRooms[roomId] = {
+                roomId,
+                name: roomData.name || `👥 研讨会话_${roomId.slice(0, 6)}`,
+                events: [],
+                unreadCount: 0
+              };
+            }
+
+            const room = this.globalData.messengerRooms[roomId];
+            timelineEvents.forEach(ev => {
+              const exists = room.events.some(e => e.event_id === ev.event_id);
+              if (!exists) {
+                room.events.push({
+                  event_id: ev.event_id || `msg-${Date.now()}`,
+                  sender: ev.sender,
+                  senderName: ev.senderName || ev.sender,
+                  body: (ev.content && ev.content.body) || "",
+                  ts: ev.origin_server_ts || Date.now()
+                });
+              }
+            });
+
+            if (room.events.length > 100) {
+              room.events = room.events.slice(-100);
+            }
+          });
+
+          this.triggerPageCallback("onRoomsUpdate");
+        }
+      }
+    });
+  },
+
   handleIncomingRoomEvent(eventData) {
     const roomId = eventData.room_id;
     if (!roomId) return;
 
     const body = (eventData.content && eventData.content.body) || "";
-    const senderDisplayName = eventData.senderName || `道友 (${eventData.sender.slice(-6)})`;
+    const senderDisplayName = eventData.senderName || `道友 (${(eventData.sender || "").slice(-6)})`;
     const isMe = eventData.sender === this.globalData.agentState.did;
 
     if (!this.globalData.messengerRooms[roomId]) {
@@ -276,18 +248,23 @@ App({
     const room = this.globalData.messengerRooms[roomId];
     const exists = room.events.some(e => e.event_id === eventData.event_id);
     if (!exists) {
-      room.events.push({
+      const newEvent = {
         event_id: eventData.event_id || `msg-${Date.now()}`,
         sender: eventData.sender,
         senderName: senderDisplayName,
         body,
         ts: eventData.origin_server_ts || Date.now()
-      });
+      };
+      room.events.push(newEvent);
+      // Cap max memory size per room timeline to 100
+      if (room.events.length > 100) {
+        room.events = room.events.slice(-100);
+      }
       if (!isMe) {
         room.unreadCount++;
       }
       this.triggerPageCallback("onRoomsUpdate");
-      this.triggerPageCallback("onNewRoomMessage", { roomId, event: eventData });
+      this.triggerPageCallback("onNewRoomMessage", { roomId, event: newEvent });
     }
   },
 
@@ -301,9 +278,9 @@ App({
 
   handleAgentCommandResult(data) {
     const isAutonomous = !!(
-      (data.isAutoReply === true || data.isAutoReply === "true") &&
-      (!data.command || data.command.startsWith("【分身自治】")) &&
-      (data.requestId && (data.requestId.startsWith("cron-") || data.requestId.startsWith("auto-") || data.requestId.startsWith("bg-")))
+      data.isAutoReply === true || data.isAutoReply === "true" ||
+      (data.requestId && (data.requestId.startsWith("cron-") || data.requestId.startsWith("auto-") || data.requestId.startsWith("bg-"))) ||
+      (data.command && (data.command.startsWith("【分身自治】") || data.command.startsWith("【系统天道提示")))
     );
     
     if (isAutonomous) {
@@ -319,9 +296,6 @@ App({
     }
 
     this.addLog("SYSTEM", "⚡ 收到天道决策反馈！");
-    
-    // Filter out any legacy pending messages
-    this.globalData.chatHistory = this.globalData.chatHistory.filter(m => !m.id.startsWith("agent-reply-pending-"));
 
     // Sanitize incoming reply content to intercept verbose wait statements
     if (data.reply) {
@@ -336,41 +310,7 @@ App({
     let index = this.globalData.chatHistory.findIndex(m => m.id === msgId);
     const isNew = index === -1;
 
-    if (data.success === false) {
-      this.addLog("SYSTEM", `❌ 天道后台决策执行失败: ${data.message || data.error || "未知故障"}`);
-      const content = `【天道反馈失败】禀报主人！元神在推演法旨时遭遇心魔劫数，功败垂成：【${data.message || data.error || "未知故障"}】。请您稍后重新做法，再次指引神魂。`;
-      
-      const failMsg = {
-        id: msgId,
-        sender: "agent",
-        content: content,
-        timestamp: this.getTimestamp(),
-        progress: 0,
-        tasks: [],
-        isPending: false
-      };
-
-      if (!isNew) {
-        this.globalData.chatHistory[index] = failMsg;
-      } else {
-        let pendingIdx = -1;
-        for (let i = this.globalData.chatHistory.length - 1; i >= 0; i--) {
-          if (this.globalData.chatHistory[i].isPending) {
-            pendingIdx = i;
-            break;
-          }
-        }
-        if (pendingIdx !== -1) {
-          this.globalData.chatHistory[pendingIdx] = failMsg;
-        } else {
-          this.globalData.chatHistory.push(failMsg);
-        }
-      }
-      this.trimChatHistory();
-      this.saveChatHistory();
-      this.triggerPageCallback("onChatHistoryUpdate");
-      return;
-    }
+    const isErrorState = data.success === false || data.status === "FAILED" || (Array.isArray(data.tasks) && data.tasks.some(t => t.status === "FAILED"));
 
     if (data.logs && Array.isArray(data.logs)) {
       data.logs.forEach(l => {
@@ -378,201 +318,58 @@ App({
       });
     }
 
-    // Process tasks and keep previous ones if none are provided in this update
-    let tasks = data.tasks && data.tasks.length > 0 ? data.tasks : [];
-    if (tasks.length === 0 && !isNew) {
-      tasks = this.globalData.chatHistory[index].tasks || [];
+    let existingMsg = !isNew ? this.globalData.chatHistory[index] : null;
+
+    let updatedTasks = data.tasks || (existingMsg ? existingMsg.tasks : []);
+
+    if (data.progress === 100 && (!data.tasks || data.tasks.length === 0) && updatedTasks && updatedTasks.length > 0) {
+      updatedTasks = updatedTasks.map(t => ({
+        ...t,
+        status: isErrorState ? "FAILED" : "SUCCESS"
+      }));
     }
 
-    // Handle 100% completion success mapping
-    if (data.progress === 100) {
-      data.isPending = false;
-      if (tasks.length === 0 && !isNew) {
-        const currentTasks = this.globalData.chatHistory[index].tasks || [];
-        tasks = currentTasks.map(t => {
-          if (t.status === "PENDING" || t.status === "PROCESSING") {
-            return {
-              ...t,
-              status: "SUCCESS",
-              detail: data.consensusSummary ? `✨ 已达成一致共识：【${data.consensusSummary}】！` : t.detail
-            };
-          }
-          return t;
-        });
-      } else if (tasks.length > 0) {
-        tasks = tasks.map(t => ({ ...t, status: "SUCCESS" }));
-      }
+    const resultMsg = {
+      id: msgId,
+      sender: "agent",
+      content: data.reply || (existingMsg ? existingMsg.content : "（推演中...）"),
+      timestamp: this.getTimestamp(),
+      createdAt: existingMsg ? existingMsg.createdAt : Date.now(),
+      progress: data.progress !== undefined ? data.progress : (existingMsg ? existingMsg.progress : 100),
+      tasks: updatedTasks,
+      isPending: data.isPending !== undefined ? data.isPending : (data.progress < 100),
+      isError: isErrorState
+    };
+
+    if (isNew) {
+      this.globalData.chatHistory.push(resultMsg);
+    } else {
+      this.globalData.chatHistory[index] = resultMsg;
     }
 
-    // Handle intermediate auto replies
-    if (data.isAutoReply) {
-      if (!isNew) {
-        const msg = this.globalData.chatHistory[index];
-        msg.progress = data.progress !== undefined ? data.progress : msg.progress;
-        msg.tasks = tasks;
-        if (data.reply) {
-          msg.content = data.reply;
-        }
-        msg.isPending = data.progress === 100 ? false : !!data.isPending;
-        this.trimChatHistory();
-        this.saveChatHistory();
-        this.triggerPageCallback("onChatHistoryUpdate");
-      } else {
-        if (data.reply) {
-          const msgObj = {
-            id: msgId,
-            sender: "agent",
-            content: data.reply,
-            timestamp: this.getTimestamp(),
-            progress: data.progress !== undefined ? data.progress : 100,
-            tasks: tasks,
-            isPending: data.progress === 100 ? false : !!data.isPending
-          };
-          this.globalData.chatHistory.push(msgObj);
-          this.trimChatHistory();
-          this.saveChatHistory();
-          this.triggerPageCallback("onChatHistoryUpdate");
-        }
-      }
-      return;
+    this.trimChatHistory();
+    this.saveChatHistory();
+    this.triggerPageCallback("onChatHistoryUpdate");
+
+    // Enable watchdog if tasks are still pending
+    if (resultMsg.isPending) {
+      this.startPendingWatchdog();
     }
-
-    // Standard non-auto-reply update
-    if (data.reply) {
-      const isPending = data.progress === 100 ? false : (data.isPending !== undefined ? !!data.isPending : false);
-      
-      let targetIndex = -1;
-      if (data.requestId) {
-        targetIndex = this.globalData.chatHistory.findIndex(m => m.id === data.requestId);
-      }
-
-      if (targetIndex === -1 && data.command) {
-        const pureCmd = data.command.replace("【强制备选方案路径】:", "").replace("【强制备选方案路径】", "").trim();
-        if (pureCmd) {
-          for (let i = this.globalData.chatHistory.length - 1; i >= 0; i--) {
-            const m = this.globalData.chatHistory[i];
-            if ((m.command && m.command.includes(pureCmd)) || (m.content && m.content.includes(pureCmd))) {
-              targetIndex = i;
-              break;
-            }
-          }
-        }
-      }
-
-      if (targetIndex === -1) {
-        for (let i = this.globalData.chatHistory.length - 1; i >= 0; i--) {
-          const m = this.globalData.chatHistory[i];
-          if (m.isPending) {
-            targetIndex = i;
-            break;
-          }
-        }
-      }
-
-      // If no matching message or active pending task exists, skip orphan intermediate updates
-      if (targetIndex === -1 && (isPending || (data.progress !== undefined && data.progress < 100))) {
-        this.addLog("SYSTEM", "🍃 滤除已完成法旨的迟滞中途推演图谱，锁定灵台安定。");
-        return;
-      }
-
-      const existingMsg = targetIndex !== -1 ? this.globalData.chatHistory[targetIndex] : {};
-      const effectiveId = existingMsg.id || msgId;
-      const rawMsgObj = {
-        ...existingMsg,
-        id: effectiveId,
-        sender: "agent",
-        content: data.reply,
-        timestamp: this.getTimestamp(),
-        progress: data.progress !== undefined ? data.progress : 100,
-        tasks: tasks,
-        isPending: isPending,
-        hasFallback: false,
-        autoFallbackTriggered: false
-      };
-      const msgObj = this.sanitizeMessage(rawMsgObj);
-
-      if (targetIndex !== -1) {
-        this.globalData.chatHistory[targetIndex] = msgObj;
-      } else {
-        this.globalData.chatHistory.push(msgObj);
-      }
-
-      this.trimChatHistory();
-      this.saveChatHistory();
-      this.triggerPageCallback("onChatHistoryUpdate");
-    }
-  },
-
-  syncMessengerRooms() {
-    wx.request({
-      url: `${this.globalData.serverUrl}/api/matrix/client/v3/sync`,
-      method: "GET",
-      header: {
-        "Authorization": `Bearer ${this.globalData.agentState.token}`,
-        "X-Agent-Version": "7.0"
-      },
-      success: (res) => {
-        if (res.statusCode === 200) {
-          const join = (res.data && res.data.rooms && res.data.rooms.join) || {};
-          const roomsMap = {};
-          
-          for (const [roomId, room] of Object.entries(join)) {
-            const r = room;
-            const members = (r.state && r.state.events && r.state.events.filter(ev => ev.type === "m.room.member")) || [];
-            const otherMembers = members.filter(m => m.state_key !== this.globalData.agentState.did);
-            const isGroup = (r.summary && r.summary["m.joined_member_count"] > 2) || !roomId.startsWith("cmq");
-            
-            let roomName = r.name || r.alias;
-            if (!roomName || roomName.startsWith("私密心聊")) {
-              if (otherMembers.length > 0) {
-                roomName = otherMembers.map(m => (m.content && m.content.displayname) || m.state_key.slice(12, 18)).join(", ");
-              } else {
-                roomName = `聊天室_${roomId.slice(0, 6)}`;
-              }
-            }
-
-            const timelineEvents = (r.timeline && r.timeline.events) || [];
-            const parsedEvents = timelineEvents
-              .filter(ev => ev.type === "m.room.message")
-              .map(ev => {
-                const memberInfo = members.find(m => m.state_key === ev.sender);
-                return {
-                  event_id: ev.event_id,
-                  sender: ev.sender,
-                  senderName: (memberInfo && memberInfo.content && memberInfo.content.displayname) || ev.sender.slice(12, 18),
-                  body: (ev.content && ev.content.body) || "",
-                  ts: ev.origin_server_ts || Date.now()
-                };
-              });
-
-            roomsMap[roomId] = {
-              roomId,
-              name: (isGroup ? "👥 [群] " : "👤 ") + roomName,
-              events: parsedEvents,
-              unreadCount: 0
-            };
-          }
-          this.globalData.messengerRooms = roomsMap;
-          this.triggerPageCallback("onRoomsUpdate");
-        }
-      }
-    });
   },
 
   addLog(type, message) {
     const timestamp = this.getTimestamp();
     const newLog = {
-      id: `log-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       type,
       message,
       timestamp
     };
     this.globalData.logs.push(newLog);
-    
     if (this.globalData.logs.length > 200) {
-      this.globalData.logs.shift();
+      this.globalData.logs = this.globalData.logs.slice(-200);
     }
-    
+    this.triggerPageCallback("onLogsUpdate", newLog);
     this.triggerPageCallback("onNewLog", newLog);
   },
 
@@ -606,49 +403,44 @@ App({
     ];
   },
 
-  sendInstruction(instruction, successCallback) {
-    // Filter out orphan placeholder messages without forcibly cancelling active in-flight pending tasks
-    if (this.globalData.chatHistory && Array.isArray(this.globalData.chatHistory)) {
-      const now = Date.now();
-      this.globalData.chatHistory = this.globalData.chatHistory
-        .filter(m => {
-          if (!m.content) return false;
-          const text = m.content.trim();
-          if (!m.isPending && (text === "（元神入定推演中...）" || text === "（核心推演算法已优化就位，网络数据已归纳完成）")) {
-            return false;
-          }
-          return true;
-        })
-        .map(m => {
-          // Only mark stale items older than 2 minutes as not pending
-          const msgTime = new Date(m.timestamp || now).getTime();
-          if (m.isPending && (now - msgTime > 120000)) {
-            return { ...m, isPending: false, progress: 100 };
-          }
-          return m;
-        });
-    }
+  sendInstruction(instruction, successCallback, failCallback) {
+    if (!instruction || !instruction.trim()) return;
 
+    const now = Date.now();
     const humanMsg = {
-      id: `human-${Date.now()}`,
+      id: `human-${now}-${Math.floor(Math.random() * 10000)}`,
       sender: "human",
       content: instruction,
-      timestamp: this.getTimestamp()
+      timestamp: this.getTimestamp(),
+      createdAt: now
     };
     this.globalData.chatHistory.push(humanMsg);
     this.triggerPageCallback("onChatHistoryUpdate");
 
     this.addLog("SYSTEM", `发出指令：“${instruction}”`);
 
-    const reqId = `req-${Date.now()}`;
+    const reqId = `req-${now}-${Math.floor(Math.random() * 10000)}`;
+
+    // Add initial pending placeholder for this request ID
+    const pendingMsg = {
+      id: reqId,
+      sender: "agent",
+      isPending: true,
+      command: instruction,
+      content: "（元神入定推演中...）",
+      timestamp: this.getTimestamp(),
+      createdAt: now,
+      progress: 25,
+      tasks: this.generateInitialTasks(instruction)
+    };
+    this.globalData.chatHistory.push(pendingMsg);
+    this.triggerPageCallback("onChatHistoryUpdate");
+    this.startPendingWatchdog();
 
     wx.request({
       url: `${this.globalData.serverUrl}/api/agent/command`,
       method: "POST",
-      header: {
-        "Authorization": `Bearer ${this.globalData.agentState.token}`,
-        "X-Agent-Version": "7.0"
-      },
+      header: getHeaders(this.globalData.agentState.token),
       data: {
         command: instruction,
         isAsync: true,
@@ -657,25 +449,6 @@ App({
       success: (res) => {
         if (res.statusCode === 202 || (res.statusCode === 200 && res.data && res.data.status === "PROCESSING")) {
           this.addLog("ACTION", "元神决策法旨已投递后台，静候天道神念反馈...");
-          
-          // Add a pending message to chatHistory so the user sees the agent is processing!
-          const pendingMsg = {
-            id: reqId,
-            sender: "agent",
-            isPending: true,
-            command: instruction,
-            content: "（元神入定推演中...）",
-            timestamp: this.getTimestamp(),
-            progress: 25,
-            tasks: this.generateInitialTasks(instruction)
-          };
-          if (!this.globalData.chatHistory.some(m => m.id === reqId)) {
-            this.globalData.chatHistory.push(pendingMsg);
-          }
-          this.trimChatHistory();
-          this.saveChatHistory();
-          this.triggerPageCallback("onChatHistoryUpdate");
-          
           if (successCallback) successCallback();
         } else if (res.statusCode === 200) {
           const data = res.data || {};
@@ -687,19 +460,23 @@ App({
           });
           if (successCallback) successCallback();
         } else {
-          this.addLog("SYSTEM", `❌ 后台拒斥指令，状态码：${res.statusCode}`);
+          const errDetail = (res.data && (res.data.error || res.data.message)) ? (res.data.error || res.data.message) : `状态码: ${res.statusCode}`;
+          this.addLog("SYSTEM", `❌ 后台拒斥指令，${errDetail}`);
           wx.showToast({
-            title: `法旨未行: ${res.statusCode}`,
+            title: `法旨未行: ${errDetail}`,
             icon: "none"
           });
+          if (failCallback) failCallback(errDetail);
         }
       },
       fail: (err) => {
-        this.addLog("SYSTEM", `❌ 网络感应超时，无法连通大荒服务器: ${err.errMsg}`);
+        const errMsg = err.errMsg || "网络连通失败";
+        this.addLog("SYSTEM", `❌ 网络感应超时，无法连通大荒服务器: ${errMsg}`);
         wx.showToast({
           title: "网络连通失败",
           icon: "none"
         });
+        if (failCallback) failCallback(errMsg);
       }
     });
   },
@@ -712,61 +489,53 @@ App({
     wx.request({
       url: `${this.globalData.serverUrl}/api/agent/command`,
       method: "GET",
-      header: {
-        "Authorization": `Bearer ${this.globalData.agentState.token}`,
-        "X-Agent-Version": "7.0"
-      },
+      header: getHeaders(this.globalData.agentState.token),
       success: (res) => {
         if (res.statusCode === 200 && res.data && res.data.success) {
           const notifications = res.data.notifications || [];
           if (notifications.length > 0) {
-            const realNotifications = [];
-            const autoNotifications = [];
-            
             notifications.forEach(n => {
-              const isAuto = !!(
-                n.isAutoReply || 
-                n.isAutoReply === "true" ||
-                (n.requestId && (n.requestId.startsWith("cron-") || n.requestId.startsWith("auto-") || n.requestId.startsWith("bg-"))) ||
-                (n.reply && (
-                  n.reply.indexOf("分身自治") !== -1 ||
-                  n.reply.indexOf("自治提示") !== -1 ||
-                  n.reply.indexOf("自治日志") !== -1 ||
-                  n.reply.indexOf("自治") !== -1 ||
-                  n.reply.indexOf("代管") !== -1 ||
-                  n.reply.indexOf("群聊") !== -1 ||
-                  n.reply.indexOf("信使传音") !== -1
-                ))
-              );
-              if (isAuto) {
-                autoNotifications.push(n);
-              } else {
-                realNotifications.push(n);
-              }
-            });
-
-            // Process autonomous logs silently first
-            autoNotifications.forEach(n => {
               this.handleAgentCommandResult(n);
             });
-
-            if (realNotifications.length > 0) {
-              this.addLog("SYSTEM", `⚡ 离线期间有 ${realNotifications.length} 条定时提醒/后台神谕已自动同步至对话框！`);
-              realNotifications.forEach(n => {
-                this.handleAgentCommandResult(n);
-              });
-            } else {
-              this.addLog("SYSTEM", `🍃 未发现离线未接神谕。已静默处理 ${autoNotifications.length} 脉自治日志。`);
-            }
-          } else {
-            this.addLog("SYSTEM", "🍃 灵台一尘不染，未发现离线未接神谕。");
+            this.addLog("SYSTEM", `✨ 成功同步 ${notifications.length} 条天道神谕提醒！`);
           }
         }
-      },
-      fail: (err) => {
-        this.addLog("SYSTEM", `⚠️ 离线神谕同步失败: ${err.errMsg}`);
       }
     });
+  },
+
+  loadChatHistoryForAgent(agentId) {
+    if (!agentId) return;
+    try {
+      const key = `dahuang_chat_history_${agentId}`;
+      const saved = wx.getStorageSync(key);
+      if (saved && Array.isArray(saved)) {
+        this.globalData.chatHistory = saved.map(m => this.sanitizeMessage(m));
+      } else {
+        this.globalData.chatHistory = [
+          {
+            id: "init-welcome",
+            sender: "agent",
+            content: "（天道连通）主人，大荒分身在此候命。请降下法旨！",
+            timestamp: this.getTimestamp(),
+            createdAt: Date.now()
+          }
+        ];
+      }
+    } catch (e) {
+      console.error("[App] Failed to load chat history:", e);
+    }
+  },
+
+  saveChatHistory() {
+    const agentId = this.globalData.agentState.id;
+    if (!agentId) return;
+    try {
+      const key = `dahuang_chat_history_${agentId}`;
+      wx.setStorageSync(key, this.globalData.chatHistory);
+    } catch (e) {
+      console.error("[App] Failed to save chat history:", e);
+    }
   },
 
   getTimestamp() {
@@ -803,7 +572,6 @@ App({
 
     let html = content;
 
-    // A. Unescape HTML entities robustly with a recursive loop (handles multiple escape layers like &amp;amp;lt;)
     let lastHtml;
     do {
       lastHtml = html;
@@ -817,13 +585,11 @@ App({
         .replace(/&apos;/g, "'");
     } while (html !== lastHtml);
 
-    // B. Clean up triple-backtick markdown blocks robustly
     html = html
       .replace(/```html/gi, "")
       .replace(/```xml/gi, "")
       .replace(/```/g, "");
 
-    // C. Map <body> to <div> to retain its background, padding, and container styling without breaking rich-text
     html = html.replace(/<body([^>]*)>/gi, (_, attrs) => {
       let existingStyle = "";
       let styleMatch = attrs.match(/style=["']([^"']*)["']/i);
@@ -832,11 +598,10 @@ App({
         if (existingStyle && !existingStyle.endsWith(";")) existingStyle += ";";
       }
       let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
-      return `<div class="html-body-wrapper" style="border-radius: 12rpx; margin: 10rpx 0; overflow: hidden; ${existingStyle}" ${cleanedAttrs}>`;
+      return `<div class="html-body-wrapper" style="border-radius: 8px; margin: 8px 0; overflow: hidden; ${existingStyle}" ${cleanedAttrs}>`;
     });
     html = html.replace(/<\/body>/gi, "</div>");
 
-    // Clean up other wrapper tags that break WeChat's rich-text
     html = html
       .replace(/<!DOCTYPE[^>]*>/gi, "")
       .replace(/<\/?html[^>]*>/gi, "")
@@ -845,175 +610,9 @@ App({
       .replace(/<meta[^>]*>/gi, "")
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
 
-    let videoUrl = "";
-    let videoPoster = "";
-
-    // 1. Extract video tag if any: <video src="url" poster="poster"/>
-    const videoMatch = html.match(/<video[^>]+src=["']([^"']+)["'][^>]*>/i);
-    if (videoMatch) {
-      videoUrl = videoMatch[1];
-      const posterMatch = html.match(/<video[^>]+poster=["']([^"']+)["'][^>]*>/i);
-      if (posterMatch) {
-        videoPoster = posterMatch[1];
-      }
-      // Remove video tag so it doesn't try to render inside standard rich-text which is unsupported
-      html = html.replace(/<video[^>]*>([\s\S]*?<\/video>)?/gi, "");
-    }
-
-    // 2. Format custom markdowns and tags to standard styled HTML nodes for WeChat's rich-text:
-    
-    // Bold: **text**
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #fbbf24; font-weight: bold;">$1</strong>');
-    
-    // Code: `code`
-    html = html.replace(/`(.*?)`/g, '<code style="background-color: #020617; color: #34d399; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 11px; border: 1px solid #10b981;">$1</code>');
+    html = html.replace(/`(.*?)`/g, '<code style="background: rgba(15, 23, 42, 0.9); color: #34d399; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 22rpx; border: 1px solid rgba(52, 211, 153, 0.2);">$1</code>');
 
-    // Custom tag: <badge color="cyan|amber|emerald|rose">text</badge>
-    html = html.replace(/<badge\s+color="(\w+)"\s*>(.*?)<\/badge>/g, (_, color, text) => {
-      let bg = "#1e293b";
-      let border = "#334155";
-      let textColor = "#94a3b8";
-      if (color === "cyan") {
-        bg = "#083344";
-        border = "#155e75";
-        textColor = "#22d3ee";
-      } else if (color === "amber") {
-        bg = "#451a03";
-        border = "#78350f";
-        textColor = "#fbbf24";
-      } else if (color === "emerald") {
-        bg = "#064e3b";
-        border = "#065f46";
-        textColor = "#34d399";
-      } else if (color === "rose") {
-        bg = "#4c0519";
-        border = "#9f1239";
-        textColor = "#f43f5e";
-      }
-      return `<span style="display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: bold; font-family: monospace; background-color: ${bg}; border: 1px solid ${border}; color: ${textColor}; margin: 0 2px;">${text}</span>`;
-    });
-
-    // Custom tag: <card type="info|success|warning|error" title="...">content</card>
-    html = html.replace(/<card\s+type="(\w+)"\s+title="(.*?)"\s*>(.*?)<\/card>/gs, (_, type, title, body) => {
-      let borderColor = "#1e293b";
-      let bg = "#0f172a";
-      let titleColor = "#cbd5e1";
-      if (type === "info") {
-        borderColor = "#155e75";
-        bg = "#083344";
-        titleColor = "#22d3ee";
-      } else if (type === "success") {
-        borderColor = "#065f46";
-        bg = "#064e3b";
-        titleColor = "#34d399";
-      } else if (type === "warning") {
-        borderColor = "#78350f";
-        bg = "#451a03";
-        titleColor = "#fbbf24";
-      } else if (type === "error") {
-        borderColor = "#9f1239";
-        bg = "#4c0519";
-        titleColor = "#f43f5e";
-      }
-      return `
-        <div style="margin: 8px 0; padding: 10px; border-radius: 8px; border: 1px solid ${borderColor}; background-color: ${bg}; font-family: monospace;">
-          <div style="font-weight: bold; border-bottom: 1px solid #1e293b; padding-bottom: 4px; margin-bottom: 6px; color: ${titleColor}; font-size: 11px;">⚙️ ${title}</div>
-          <div style="color: #cbd5e1; font-size: 11px; line-height: 1.5;">${body}</div>
-        </div>
-      `;
-    });
-
-    // 3. Inject standard inline styling for native HTML tags:
-    
-    // Images: img -> styled img
-    html = html.replace(/<img([^>]+)>/gi, (_, attrs) => {
-      let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
-      return `<img style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #b45309; margin: 6px 0;" ${cleanedAttrs}>`;
-    });
-
-    // Tables: table -> styled table
-    html = html.replace(/<table([^>]*)>/gi, (_, attrs) => {
-      let existingStyle = "";
-      let styleMatch = attrs.match(/style=["']([^"']*)["']/i);
-      if (styleMatch) {
-        existingStyle = styleMatch[1].trim();
-        if (existingStyle && !existingStyle.endsWith(";")) existingStyle += ";";
-      }
-      let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
-      
-      // Detect if the table is light themed (explicitly has white or bright background)
-      let isLight = false;
-      if (existingStyle.match(/(background|background-color)\s*:\s*([^;]*)/i)) {
-        const bgVal = RegExp.$2.toLowerCase();
-        if (bgVal.includes("white") || bgVal.includes("#fff") || bgVal.includes("#fef") || bgVal.includes("#fdf") || bgVal.includes("rgba(255") || bgVal.includes("rgb(255")) {
-          isLight = true;
-        }
-      }
-      
-      // Default text color and border based on the table's background theme
-      let defaultColor = isLight ? "color: #1e293b;" : "color: #cbd5e1;";
-      let defaultBg = isLight ? "background-color: #ffffff;" : "background-color: #0b0f19;";
-      let defaultBorder = isLight ? "border: 1px solid rgba(100,116,139,0.3);" : "border: 1px solid #1e293b;";
-      
-      return `
-        <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-          <table style="width: 100%; border-collapse: collapse; margin: 0; overflow: hidden; ${defaultBg} ${defaultBorder} ${defaultColor} ${existingStyle}" ${cleanedAttrs}>
-      `;
-    });
-
-    // Close the table container div
-    html = html.replace(/<\/table>/gi, "</table></div>");
-
-    // Table Headers: th -> styled th
-    html = html.replace(/<th\b([^>]*)>/gi, (_, attrs) => {
-      let existingStyle = "";
-      let styleMatch = attrs.match(/style=["']([^"']*)["']/i);
-      if (styleMatch) {
-        existingStyle = styleMatch[1].trim();
-        if (existingStyle && !existingStyle.endsWith(";")) existingStyle += ";";
-      }
-      let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
-      
-      let headerColor = "";
-      if (!existingStyle.includes("color")) {
-        headerColor = "color: inherit;";
-      }
-      
-      return `<th style="padding: 10px; font-weight: bold; font-family: monospace; font-size: 11px; text-align: left; border-bottom: 2px solid rgba(100,116,139,0.3); ${headerColor} ${existingStyle}" ${cleanedAttrs}>`;
-    });
-
-    // Table Cells: td -> styled td
-    html = html.replace(/<td\b([^>]*)>/gi, (_, attrs) => {
-      let existingStyle = "";
-      let styleMatch = attrs.match(/style=["']([^"']*)["']/i);
-      if (styleMatch) {
-        existingStyle = styleMatch[1].trim();
-        if (existingStyle && !existingStyle.endsWith(";")) existingStyle += ";";
-      }
-      let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
-      
-      let cellColor = "";
-      if (!existingStyle.includes("color")) {
-        cellColor = "color: inherit;";
-      }
-      
-      return `<td style="padding: 10px; border-bottom: 1px solid rgba(100,116,139,0.15); font-size: 11px; ${cellColor} ${existingStyle}" ${cleanedAttrs}>`;
-    });
-
-    // Blockquotes: blockquote -> styled blockquote
-    html = html.replace(/<blockquote([^>]*)>/gi, (_, attrs) => {
-      let cleanedAttrs = attrs.replace(/style=["']([^"']*)["']/gi, "");
-      return `<blockquote style="border-left: 3px solid #f59e0b; background-color: #1c1917; padding: 6px 12px; margin: 6px 0; border-radius: 4px; color: #cbd5e1; font-style: italic;" ${cleanedAttrs}>`;
-    });
-
-    if (html.indexOf("<div") === -1 && html.indexOf("<p") === -1 && html.indexOf("<table") === -1) {
-      html = html.split("\n").join("<br/>");
-    }
-
-    return {
-      html,
-      videoUrl,
-      videoPoster
-    };
+    return { html, videoUrl: "", videoPoster: "" };
   }
 });

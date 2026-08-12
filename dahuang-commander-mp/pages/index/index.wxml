@@ -10,8 +10,12 @@
           <text class="chat-bubble-time">{{item.timestamp}}</text>
         </view>
         
-        <view class="chat-bubble-body bubble-{{item.sender === 'human' ? 'user' : 'agent'}}">
-          <block wx:if="{{item.isPending && (!item.tasks || item.tasks.length === 0)}}">
+        <view class="chat-bubble-body bubble-{{item.sender === 'human' ? 'user' : 'agent'}} {{item.isError ? 'bubble-error' : ''}}">
+          <view class="error-banner flex-row align-center" wx:if="{{item.isError}}" style="margin-bottom: 8rpx; color: #f43f5e; font-size: 22rpx; font-weight: bold;">
+            <icon type="warn" size="12" color="#f43f5e" style="margin-right: 8rpx;"></icon>
+            <text>⚠️ 天道推演中断 / 执行异常</text>
+          </view>
+          <block wx:if="{{item.isPending && (!item.tasks || item.tasks.length === 0) && (!item.content || item.content === '（元神入定推演中...）')}}">
             <view class="pending-loader-container flex-row align-center">
               <view class="cyber-spinner"></view>
               <text class="pending-loader-text">{{t.index.pending}}</text>
@@ -19,7 +23,7 @@
           </block>
           <block wx:else>
             <rich-text wx:if="{{item.isRich}}" class="msg-body-rich" nodes="{{item.richContent}}" user-select></rich-text>
-            <text wx:else selectable="true">{{item.content}}</text>
+            <text wx:elif="{{item.content && item.content !== '（元神入定推演中...）'}}" selectable="true">{{item.content}}</text>
           </block>
           
           <view class="bubble-task-container" wx:if="{{item.sender === 'agent' && (item.isPending || (item.progress > 0 && item.progress < 100))}}">

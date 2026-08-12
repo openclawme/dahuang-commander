@@ -1,5 +1,6 @@
 const app = getApp();
 const i18n = require('../../utils/i18n.js');
+const { getHeaders } = require('../../utils/config.js');
 
 Page({
   data: {
@@ -192,10 +193,7 @@ Page({
 
     wx.request({
       url: url,
-      header: {
-        "Authorization": `Bearer ${agentState.token || ""}`,
-        "X-Agent-Version": "7.0"
-      },
+      header: getHeaders(agentState.token),
       success: (res) => {
         if (res.statusCode === 200 && res.data.posts) {
           const newPosts = res.data.posts.map(p => {
@@ -214,7 +212,9 @@ Page({
             forumPage: pageToFetch,
             forumHasMore: hasMore,
             isRefreshing: false,
-            isForumLoading: false
+            isForumLoading: false,
+            isOfflineMock: false,
+            offlineNotice: ""
           });
           
           if (!append) {
@@ -268,7 +268,12 @@ Page({
         richContent: rich.html
       };
     });
-    this.setData({ forumPosts: posts, isForumLoading: false });
+    this.setData({
+      forumPosts: posts,
+      isForumLoading: false,
+      isOfflineMock: true,
+      offlineNotice: "⚠️ 天道网络连通受阻，已降级展示本地离线沙盘数据"
+    });
   },
 
   onReachBottomForum() {
@@ -789,15 +794,34 @@ Page({
     this.setData({ miniInputValue: "" });
   },
 
+  onChatHistoryUpdate() {
+    if (!this.data.showMiniCockpit) return;
+    const globalHistory = app.globalData.chatHistory || [];
+    const formatted = globalHistory.map(m => this.formatMessageRich(m));
+    const lastMsg = formatted[formatted.length - 1];
+    
+    let miniProgress = 0;
+    let miniActiveTasks = [];
+    if (lastMsg) {
+      miniProgress = lastMsg.progress || 0;
+      miniActiveTasks = lastMsg.tasks || [];
+    }
+
+    this.setData({
+      miniHistory: formatted,
+      miniProgress,
+      miniActiveTasks,
+      toMiniMsg: lastMsg ? "msg-" + lastMsg.id : ""
+    });
+  },
+
   dispatchMiniCommand(instruction) {
-    app.sendInstruction(instruction, () => {
-      const globalHistory = app.globalData.chatHistory || [];
-      const formatted = globalHistory.map(m => this.formatMessageRich(m));
-      const lastMsg = formatted[formatted.length - 1];
-      this.setData({
-        miniHistory: formatted,
-        toMiniMsg: lastMsg ? "msg-" + lastMsg.id : ""
-      });
+    let fullCommand = instruction;
+    if (this.data.cockpitTargetId) {
+      fullCommand = `【${this.data.cockpitType || "模块"} TargetID: ${this.data.cockpitTargetId}】${instruction}`;
+    }
+    app.sendInstruction(fullCommand, () => {
+      this.onChatHistoryUpdate();
     });
   },
 

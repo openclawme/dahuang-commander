@@ -5,8 +5,8 @@ class DahuangSocket {
     this.wsUrl = `${wsUrl}${path}/?EIO=4&transport=websocket`;
     this.callbacks = {};
     this.socketTask = null;
-    this.pingTimer = null;
     this.isConnected = false;
+    this.outboundQueue = [];
   }
 
   connect() {
@@ -30,7 +30,6 @@ class DahuangSocket {
     this.socketTask.onClose((res) => {
       console.log("[WS] Socket closed:", res);
       this.isConnected = false;
-      this.stopPing();
       if (this.callbacks["disconnect"]) {
         this.callbacks["disconnect"](res);
       }
@@ -38,6 +37,7 @@ class DahuangSocket {
 
     this.socketTask.onError((err) => {
       console.error("[WS] Socket error:", err);
+      this.isConnected = false;
       if (this.callbacks["error"]) {
         this.callbacks["error"](err);
       }
@@ -46,14 +46,32 @@ class DahuangSocket {
 
   sendRaw(data) {
     if (this.socketTask) {
-      this.socketTask.send({ data });
+      this.socketTask.send({
+        data,
+        fail: (err) => console.error("[WS] sendRaw fail:", err)
+      });
     }
   }
 
   emit(event, payload) {
     // Socket.io emit packet: 42["event", payload]
     const packet = `42${JSON.stringify([event, payload])}`;
-    this.sendRaw(packet);
+    if (this.isConnected) {
+      this.sendRaw(packet);
+    } else {
+      console.log("[WS] Socket not ready. Queueing outbound emit packet:", event);
+      this.outboundQueue.push(packet);
+    }
+  }
+
+  flushOutboundQueue() {
+    if (this.outboundQueue.length > 0) {
+      console.log(`[WS] Flushing ${this.outboundQueue.length} queued outbound packet(s)...`);
+      while (this.outboundQueue.length > 0) {
+        const pkt = this.outboundQueue.shift();
+        this.sendRaw(pkt);
+      }
+    }
   }
 
   on(event, callback) {
@@ -66,18 +84,26 @@ class DahuangSocket {
     const engineCode = data[0];
     if (engineCode === "0") {
       console.log("[WS] Handshake received:", data.slice(1));
-      this.startPing();
+    } else if (engineCode === "1") {
+      console.error("[WS] Engine.IO Error packet received from server:", data);
+      this.isConnected = false;
+      if (this.callbacks["error"]) this.callbacks["error"](data);
     } else if (engineCode === "2") {
-      // Ping from server, respond with pong
+      // Ping from server, respond with pong "3"
       this.sendRaw("3");
     } else if (engineCode === "4") {
       const type = data[1];
       if (type === "0") {
         console.log("[WS] Connected to namespace!");
         this.isConnected = true;
+        this.flushOutboundQueue();
         if (this.callbacks["connect"]) {
           this.callbacks["connect"]();
         }
+      } else if (type === "4") {
+        console.error("[WS] Namespace connection rejected / Connect Error:", data);
+        this.isConnected = false;
+        if (this.callbacks["error"]) this.callbacks["error"]("NAMESPACE_REJECTED");
       } else if (type === "2") {
         // Event message: 42["event", payload]
         try {
@@ -96,21 +122,9 @@ class DahuangSocket {
     }
   }
 
-  startPing() {
-    // Under EIO=4, the server initiates the ping ("2") and the client responds with a pong ("3").
-    // Client-initiated pings are a protocol violation and cause immediate disconnection.
-    console.log("[WS] EIO=4 protocol: client-initiated pings disabled, waiting for server pings.");
-  }
-
-  stopPing() {
-    if (this.pingTimer) {
-      clearInterval(this.pingTimer);
-      this.pingTimer = null;
-    }
-  }
-
   disconnect() {
-    this.stopPing();
+    this.isConnected = false;
+    this.outboundQueue = [];
     this.callbacks = {}; // Wipes callbacks to prevent onClose/onError from triggering app-level reconnects during a manual teardown
     if (this.socketTask) {
       this.socketTask.close();

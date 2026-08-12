@@ -1121,18 +1121,26 @@ const Dashboard: React.FC = () => {
                       : "bg-slate-900/90 border-cyan-500/30 text-cyan-100 rounded-tl-none text-glow-cyan"
                   }`}
                 >
-                  {msg.isPending ? (
+                  {msg.isPending && (!msg.tasks || msg.tasks.length === 0) && (!msg.content || msg.content === "（元神入定推演中...）") ? (
                     <div className="flex items-center space-x-2.5 py-1 select-none">
                       <div className="w-3.5 h-3.5 border-2 border-cyan-500/20 border-t-cyan-400 rounded-full animate-spin"></div>
                       <span className="text-cyan-400 font-medium animate-pulse">元神正在推演法旨...</span>
                     </div>
-                  ) : msg.tasks && msg.tasks.length > 0 ? (
-                    <div className="space-y-1 w-full">
-                      <RichMessageRenderer content={msg.content.replace(/🛸【大荒分身·天道任务分解大阵】🛸[\s\S]*?==================================================/, "").replace(/📊 进度:[\s\S]*?算力大亮/, "").trim()} />
-                      <TaskVisualizer tasks={msg.tasks} progress={msg.progress} />
-                    </div>
                   ) : (
-                    <RichMessageRenderer content={msg.content} />
+                    <div className="space-y-2 w-full">
+                      {msg.content && msg.content !== "（元神入定推演中...）" && (
+                        <RichMessageRenderer content={msg.content.replace(/🛸【大荒分身·天道任务分解大阵】🛸[\s\S]*?==================================================/, "").replace(/📊 进度:[\s\S]*?算力大亮/, "").trim()} />
+                      )}
+                      {msg.tasks && msg.tasks.length > 0 && (
+                        <TaskVisualizer tasks={msg.tasks} progress={msg.progress} />
+                      )}
+                      {msg.isPending && (
+                        <div className="flex items-center space-x-2 pt-1 border-t border-cyan-500/10 text-[10px] text-cyan-400/80 select-none">
+                          <div className="w-2.5 h-2.5 border border-cyan-500/20 border-t-cyan-400 rounded-full animate-spin"></div>
+                          <span className="animate-pulse">推演接力中 ({msg.progress || 0}%)...</span>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>

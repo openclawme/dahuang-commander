@@ -1,5 +1,6 @@
 const app = getApp();
 const i18n = require('../../utils/i18n.js');
+const { getHeaders } = require('../../utils/config.js');
 
 Page({
   data: {
@@ -84,6 +85,7 @@ Page({
   },
 
   sendMessage() {
+    if (this.data.isSending) return;
     const text = this.data.inputValue.trim();
     if (!text) return;
 
@@ -98,44 +100,76 @@ Page({
       return;
     }
 
-    // Optimistically disable input/clear to feel responsive
     this.setData({
+      isSending: true,
       inputValue: ""
+    });
+
+    // Optimistically insert local message to chat view
+    const localEventId = `pending-${Date.now()}`;
+    const optimisticMsg = {
+      event_id: localEventId,
+      sender: agentState.did || "me",
+      senderName: agentState.name || "我",
+      body: text,
+      ts: Date.now(),
+      isPending: true
+    };
+    const currentMsgs = this.data.messages || [];
+    this.setData({
+      messages: [...currentMsgs, optimisticMsg],
+      toView: `msg-${localEventId}`
     });
 
     wx.request({
       url: `${serverUrl}/api/matrix/client/v3/rooms/${encodeURIComponent(roomId)}/send/m.room.message`,
       method: "POST",
-      header: {
-        "Authorization": `Bearer ${agentState.token}`,
-        "X-Agent-Version": "7.0"
-      },
+      header: getHeaders(agentState.token),
       data: {
         msgtype: "m.text",
         body: text
       },
       success: (res) => {
+        this.setData({ isSending: false });
         if (res.statusCode === 200) {
-          // Success! The WebSocket event m.room.event will arrive and refresh the screen.
           console.log("[Room] Message sent successfully:", res.data);
+          if (res.data && res.data.event_id) {
+            const realEventId = res.data.event_id;
+            const room = app.globalData.messengerRooms[roomId];
+            if (room) {
+              const exists = room.events.some(e => e.event_id === realEventId);
+              if (!exists) {
+                room.events.push({
+                  event_id: realEventId,
+                  sender: agentState.did,
+                  senderName: agentState.name || "我",
+                  body: text,
+                  ts: Date.now()
+                });
+              }
+            }
+          }
+          this.refreshMessages();
         } else {
           wx.showToast({
             title: `发送失败: ${res.statusCode}`,
             icon: "none"
           });
-          // Restore input on failure
           this.setData({
-            inputValue: text
+            inputValue: text,
+            messages: currentMsgs
           });
         }
       },
       fail: (err) => {
+        this.setData({ isSending: false });
         wx.showToast({
           title: "网络通讯失败",
           icon: "none"
         });
         this.setData({
-          inputValue: text
+          inputValue: text,
+          messages: currentMsgs
         });
       }
     });

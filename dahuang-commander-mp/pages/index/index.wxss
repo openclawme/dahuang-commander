@@ -13,6 +13,12 @@
   margin-top: 10rpx;
 }
 
+.bubble-error {
+  border: 1px solid rgba(244, 63, 94, 0.6) !important;
+  background: rgba(244, 63, 94, 0.12) !important;
+  box-shadow: 0 0 15rpx rgba(244, 63, 94, 0.25) !important;
+}
+
 .avatar-ring {
   width: 90rpx;
   height: 90rpx;

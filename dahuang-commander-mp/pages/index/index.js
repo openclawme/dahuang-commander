@@ -1,5 +1,6 @@
 const app = getApp();
 const i18n = require('../../utils/i18n.js');
+const { getHeaders } = require('../../utils/config.js');
 
 Page({
   data: {
@@ -129,17 +130,9 @@ Page({
       particles: particles
     });
 
-    // Update active Karma state dynamically
-    const currentKarma = this.data.agentState.karma || 0;
-    const newKarma = change === 'gain' ? currentKarma + amount : Math.max(0, currentKarma - amount);
-    const updatedAgentState = { ...this.data.agentState, karma: newKarma };
-    
-    app.globalData.agentState = updatedAgentState;
-    this.setData({ agentState: updatedAgentState });
-
     app.addLog("SYSTEM", change === 'gain' 
-      ? `✨ 功德圆满！本命获得 +${amount} Karma 因果流。` 
-      : `⚠️ 气运震荡！本命流失 -${amount} Karma 因果流。`
+      ? `✨ 模拟演示：感知到 +${amount} Karma 能量波动。` 
+      : `⚠️ 模拟演示：感知到 -${amount} Karma 能量波动。`
     );
 
     setTimeout(() => {
@@ -678,6 +671,18 @@ Page({
     this.syncGlobalData();
   },
 
+  onAgentStateUpdate(data) {
+    this.syncGlobalData();
+  },
+
+  onAgentStatusChange(data) {
+    this.syncGlobalData();
+  },
+
+  onLogsUpdate(newLog) {
+    if (newLog) this.onNewLog(newLog);
+  },
+
   onNewLog(newLog) {
     if (!app.globalData.showDevLogs && newLog.type !== "SYSTEM" && newLog.type !== "ACTION") {
       return;
@@ -707,10 +712,7 @@ Page({
     wx.request({
       url: `${app.globalData.serverUrl}/api/agent/command`,
       method: "POST",
-      header: {
-        "Authorization": `Bearer ${app.globalData.agentState.token}`,
-        "Content-Type": "application/json; charset=utf-8"
-      },
+      header: getHeaders(app.globalData.agentState.token),
       data: {
         action: action,
         pendingRequestId: pending.requestId
@@ -873,11 +875,10 @@ Page({
           msg.progress = 100;
           if (msg.tasks && msg.tasks[2]) msg.tasks[2].status = "SUCCESS";
           
-          let responseText = `✅ [影子沙盒推演成功] 启奏本尊：您的指令“${text}”在微缩天道中运行通过！由于您目前处于单机影子遥测状态，本分身并未将法旨真气合并至远端，请绑定【元神法印】以行真实法力！`;
+          let responseText = `🏷️【离线沙盒演示】✅ [影子沙盒推演成功] 启奏本尊：您的指令“${text}”在微缩天道中运行通过！由于您目前处于单机影子遥测状态，本分身并未将法旨真气合并至远端，请绑定【元神法印】以行真实法力！`;
           if (text.indexOf("分身") !== -1 || text.indexOf("任务") !== -1 || text.indexOf("最新") !== -1) {
-            responseText = `✅ [沙盒神念解析成功] 启奏本尊：大荒测试分身目前精气神充足，IQ评级 138，累积 Karma 28,000。当前在不周山博弈场中积极拼杀，在昆仑虚占有 3 个算力节点。随时听候本尊法旨！`;
+            responseText = `🏷️【离线沙盒演示】✅ [沙盒神念解析成功] 启奏本尊：大荒测试分身目前精气神充足，IQ评级 138，累积 Karma 28,000。当前在不周山博弈场中积极拼杀，在昆仑虚占有 3 个算力节点。随时听候本尊法旨！`;
           }
-          
           msg.content = responseText;
           this.syncGlobalData();
           this.scrollToBottom();
@@ -893,11 +894,23 @@ Page({
       return;
     }
 
-    app.sendInstruction(text, () => {
-      this.setData({
-        inputValue: ""
-      });
+    const originalText = text;
+    this.setData({
+      inputValue: ""
     });
+
+    app.sendInstruction(
+      text,
+      () => {
+        // Success: Input remains cleared
+      },
+      (err) => {
+        // Restore input text on failure
+        this.setData({
+          inputValue: originalText
+        });
+      }
+    );
   },
 
   triggerQuickCommand(e) {

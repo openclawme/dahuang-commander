@@ -1183,7 +1183,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             setChatHistory((prev) => [
               ...prev,
               {
-                id: `agent-reply-pending-${Date.now()}`,
+                id: uniqueReqId,
                 sender: "agent",
                 isPending: true,
                 content: "（元神入定推演中...）",

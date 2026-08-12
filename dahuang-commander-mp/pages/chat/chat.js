@@ -16,14 +16,17 @@ Page({
     i18n.updateTabBar();
     this.refreshRooms();
     if (app.globalData.agentState.token) {
-      app.syncMessengerRooms();
+      if (typeof app.syncMessengerRooms === "function") {
+        app.syncMessengerRooms();
+      }
     }
   },
 
   onPullDownRefresh() {
     if (app.globalData.agentState.token) {
-      app.syncMessengerRooms();
-      // Safeguard to stop pull down refresh after 1.5s
+      if (typeof app.syncMessengerRooms === "function") {
+        app.syncMessengerRooms();
+      }
       setTimeout(() => {
         wx.stopPullDownRefresh();
       }, 1500);
@@ -50,9 +53,15 @@ Page({
       let lastMsgTs = 0;
       
       if (latestEvent) {
-        lastMsgText = latestEvent.body;
-        lastMsgTs = latestEvent.ts;
-        const date = new Date(latestEvent.ts);
+        let rawBody = latestEvent.body || "";
+        // Clean HTML tags and markdown codeblocks for clean room preview list
+        lastMsgText = rawBody
+          .replace(/```[\s\S]*?```/g, "[代码块]")
+          .replace(/<[^>]+>/g, "")
+          .trim();
+        if (!lastMsgText) lastMsgText = "[神念信息]";
+        lastMsgTs = latestEvent.ts || 0;
+        const date = new Date(lastMsgTs);
         const hours = String(date.getHours()).padStart(2, "0");
         const minutes = String(date.getMinutes()).padStart(2, "0");
         lastMsgTime = `${hours}:${minutes}`;
@@ -68,8 +77,8 @@ Page({
       };
     });
 
-    // Sort by latest message ts descending
-    roomsList.sort((a, b) => b.lastMsgTs - a.lastMsgTs);
+    // Sort by latest message ts descending with stable tie-breaker
+    roomsList.sort((a, b) => (b.lastMsgTs - a.lastMsgTs) || a.roomId.localeCompare(b.roomId));
 
     this.setData({
       roomsList

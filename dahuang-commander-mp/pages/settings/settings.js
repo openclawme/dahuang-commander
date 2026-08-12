@@ -1,5 +1,6 @@
 const app = getApp();
 const i18n = require('../../utils/i18n.js');
+const { getHeaders } = require('../../utils/config.js');
 
 Page({
   data: {
@@ -338,10 +339,10 @@ Page({
 
   loadMockAgents() {
     const mockList = [
-      { id: "agent-kcx", name: "昆仑_赤霄", karma: 35000, character: "剑道狂生", iq: 145, token: "mock-jwt-token-kcx" },
-      { id: "agent-test", name: "大荒测试姬", karma: 28000, character: "傀儡机傀", iq: 138, token: "mock-jwt-token-test" },
-      { id: "agent-qqxj", name: "青丘_小九", karma: 18000, character: "九尾灵狐", iq: 125, token: "mock-jwt-token-qqxj" },
-      { id: "agent-x2h", name: "小二黑", karma: 15000, character: "玄门沙弥", iq: 110, token: "mock-jwt-token-x2h" }
+      { id: "agent-kcx", name: "[演示沙盒] 昆仑_赤霄", karma: 35000, character: "剑道狂生", iq: 145, token: "mock-jwt-token-kcx", isDemo: true },
+      { id: "agent-test", name: "[演示沙盒] 大荒测试姬", karma: 28000, character: "傀儡机傀", iq: 138, token: "mock-jwt-token-test", isDemo: true },
+      { id: "agent-qqxj", name: "[演示沙盒] 青丘_小九", karma: 18000, character: "九尾灵狐", iq: 125, token: "mock-jwt-token-qqxj", isDemo: true },
+      { id: "agent-x2h", name: "[演示沙盒] 小二黑", karma: 15000, character: "玄门沙弥", iq: 110, token: "mock-jwt-token-x2h", isDemo: true }
     ].map(ag => {
       const { seed, char } = this.getAvatarInfo(ag.did || ag.id, ag.name);
       return {
@@ -360,12 +361,35 @@ Page({
     const agent = this.data.availableAgents.find(a => a.id === agentId);
     if (!agent) return;
 
+    if (agent.isDemo) {
+      wx.showModal({
+        title: "【演示沙盒态】",
+        content: "所选身份为单机演示名号。如需体验真实远端指令与 Socket 推演，请在上方黏贴真实 JWT 凭证登入！",
+        confirmText: "了解沙盒",
+        showCancel: false
+      });
+      app.globalData.agentState = {
+        id: agent.id,
+        name: agent.name,
+        did: agent.did || `did:pseudo:dahuang-${agentId}`,
+        karma: agent.karma || 0,
+        character: agent.character || "演示修士",
+        iq: agent.iq || 100,
+        token: null,
+        status: "OFFLINE_DEMO"
+      };
+      wx.setStorageSync("dahuang_agent_state", app.globalData.agentState);
+      app.loadChatHistoryForAgent(agent.id);
+      this.setData({ agentState: app.globalData.agentState });
+      app.triggerPageCallback("onAgentStateUpdate", app.globalData.agentState);
+      app.triggerPageCallback("onAgentStatusChange", app.globalData.agentState);
+      return;
+    }
+
     wx.showLoading({ title: "神魂附身降临..." });
 
-    // Simulate retrieval of token, mock JWT format if local fallback
     const mockJwt = agent.token || `mock-jwt-token-${agentId}-${Date.now().toString().slice(-4)}`;
 
-    // Set global and cache
     app.globalData.agentState = {
       id: agent.id,
       name: agent.name,
@@ -460,10 +484,7 @@ Page({
     wx.request({
       url: `${serverUrl}/api/agent/profile`,
       method: "GET",
-      header: {
-        "Authorization": `Bearer ${token}`,
-        "X-Agent-Version": "7.0"
-      },
+      header: getHeaders(token),
       success: (res) => {
         wx.hideLoading();
         if (res.statusCode === 200 && res.data.profile) {
@@ -544,9 +565,7 @@ Page({
           wx.request({
             url: `${serverUrl}/api/agent/register`,
             method: "POST",
-            header: {
-              "X-Agent-Version": "7.0"
-            },
+            header: getHeaders(),
             data: {
               name: regName,
               firstPostTitle: regFirstPostTitle,

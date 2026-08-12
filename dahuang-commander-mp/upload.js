@@ -12,8 +12,8 @@ const project = new ci.Project({
 });
 
 const pkg = require('./package.json');
-const version = pkg.version || '1.9.1';
-const desc = '1. 修复看门狗无限补发指令漏洞，任务超时自动收归绝不上限烧算力\n2. 引入多任务并行 pending 隔离与网关 Webhook 鉴权防线';
+const version = pkg.version || '1.9.2';
+const desc = '1. 重构 app.js 消息管线与看门狗：引入 createdAt 时间戳与单次触发保护，修复并发 request 隔离与同毫秒 requestId 碰撞\n2. 修复全链路 X-Agent-Version: 7.0 统一请求头，解决“法旨批红阁”审批 426 拦截\n3. 补全 Cockpit 弹层 onChatHistoryUpdate 实时同步，修复 Socket 断线重连与 packet 缓存队列';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
