@@ -1,5 +1,5 @@
 {
-  "miniprogramRoot": "./",
+  "miniprogramRoot": "",
   "projectname": "dahuang-commander-mp",
   "description": "我是分身大荒指挥官微信小程序端",
   "appid": "wx6ac4406ed64d11ed",
