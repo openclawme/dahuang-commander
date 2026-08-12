@@ -125,6 +125,7 @@ App({
 
     socket.on("connect", () => {
       this.addLog("SYSTEM", "⚡ 天道高维神念频道连通成功！");
+      this.reconnectAttempts = 0;
       if (this.globalData.agentState.token) {
         // Correct event name according to server src/lib/socket.ts: "auth"
         socket.emit("auth", { token: this.globalData.agentState.token });
@@ -171,13 +172,19 @@ App({
 
   scheduleSocketReconnect() {
     if (this.reconnectTimer) return;
+    this.reconnectAttempts = (this.reconnectAttempts || 0) + 1;
+    if (this.reconnectAttempts > 10) {
+      this.addLog("SYSTEM", "⚠️ 连续 10 次重连尝试失败，已暂停自动重连。请下拉刷新重试。");
+      return;
+    }
+    const delay = Math.min(30000, 3000 * Math.pow(1.5, this.reconnectAttempts - 1));
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
       if (this.globalData.agentState.token && this.globalData.agentState.status !== "ONLINE") {
-        this.addLog("SYSTEM", "🔄 正在自动尝试重新发起元神总线连接...");
+        this.addLog("SYSTEM", `🔄 [第 ${this.reconnectAttempts} 次] 尝试重新连接元神总线...`);
         this.connectSocket();
       }
-    }, 5000);
+    }, delay);
   },
 
   syncMessengerRooms() {
@@ -193,7 +200,16 @@ App({
           Object.keys(joinedRooms).forEach(roomId => {
             const roomData = joinedRooms[roomId];
             const timelineEvents = (roomData.timeline && roomData.timeline.events) || [];
-            
+            const stateEvents = (roomData.state && roomData.state.events) || [];
+
+            // Map member display names if present in state or timeline events
+            const memberNames = {};
+            [...stateEvents, ...timelineEvents].forEach(ev => {
+              if (ev && ev.type === "m.room.member" && ev.content && ev.content.displayname) {
+                memberNames[ev.state_key || ev.sender] = ev.content.displayname;
+              }
+            });
+
             if (!this.globalData.messengerRooms[roomId]) {
               this.globalData.messengerRooms[roomId] = {
                 roomId,
@@ -207,10 +223,12 @@ App({
             timelineEvents.forEach(ev => {
               const exists = room.events.some(e => e.event_id === ev.event_id);
               if (!exists) {
+                const isMe = ev.sender === this.globalData.agentState.did;
+                const senderDisplayName = memberNames[ev.sender] || (isMe ? "我" : `道友 (${(ev.sender || "").slice(-6)})`);
                 room.events.push({
                   event_id: ev.event_id || `msg-${Date.now()}`,
                   sender: ev.sender,
-                  senderName: ev.senderName || ev.sender,
+                  senderName: ev.senderName || senderDisplayName,
                   body: (ev.content && ev.content.body) || "",
                   ts: ev.origin_server_ts || Date.now()
                 });
@@ -462,6 +480,16 @@ App({
         } else {
           const errDetail = (res.data && (res.data.error || res.data.message)) ? (res.data.error || res.data.message) : `状态码: ${res.statusCode}`;
           this.addLog("SYSTEM", `❌ 后台拒斥指令，${errDetail}`);
+          this.handleAgentCommandResult({
+            success: false,
+            requestId: reqId,
+            command: instruction,
+            status: "FAILED",
+            isError: true,
+            reply: `❌ 法旨执行失败: ${errDetail}`,
+            progress: 100,
+            isPending: false
+          });
           wx.showToast({
             title: `法旨未行: ${errDetail}`,
             icon: "none"
@@ -472,6 +500,16 @@ App({
       fail: (err) => {
         const errMsg = err.errMsg || "网络连通失败";
         this.addLog("SYSTEM", `❌ 网络感应超时，无法连通大荒服务器: ${errMsg}`);
+        this.handleAgentCommandResult({
+          success: false,
+          requestId: reqId,
+          command: instruction,
+          status: "FAILED",
+          isError: true,
+          reply: `❌ 网络连通失败: ${errMsg}`,
+          progress: 100,
+          isPending: false
+        });
         wx.showToast({
           title: "网络连通失败",
           icon: "none"
@@ -541,6 +579,7 @@ App({
     const agentId = this.globalData.agentState.id;
     if (!agentId) return;
     try {
+      this.trimChatHistory();
       const key = `dahuang_chat_history_${agentId}`;
       wx.setStorageSync(key, this.globalData.chatHistory);
     } catch (e) {
