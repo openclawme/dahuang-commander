@@ -963,36 +963,48 @@ Page({
   },
 
   exchangeKarmaForCompute(e) {
+    if (this.data.isExchangingKarma) return;
+    
     const amount = parseInt(e.currentTarget.dataset.amount || 10, 10);
     const { serverUrl, agentState } = this.data;
     if (!agentState.token) {
-      wx.showToast({ title: "【离线沙盒】本地仿真完成，新增 20kW 算力额度！", icon: "none" });
+      const newQuota = (agentState.computeQuota || 100) + amount * 2;
+      const updatedState = { ...app.globalData.agentState, computeQuota: newQuota };
+      app.globalData.agentState = updatedState;
+      wx.setStorageSync("dahuang_agent_state", updatedState);
+      this.setData({ agentState: updatedState });
+      wx.showToast({ title: `【离线沙盒】新增 20kW 算力！当前储备: ${newQuota}kW`, icon: "none" });
       return;
     }
 
+    this.setData({ isExchangingKarma: true });
     wx.showLoading({ title: "天道算力兑换中..." });
+    
     wx.request({
       url: `${serverUrl}/api/agent/karma/exchange`,
       method: "POST",
-      header: getHeaders(),
+      header: getHeaders(agentState.token),
       data: { amount },
       success: (res) => {
         wx.hideLoading();
+        this.setData({ isExchangingKarma: false });
         if (res.statusCode === 200 && res.data.success) {
           const newKarma = res.data.newKarmaBalance;
-          const updatedState = { ...app.globalData.agentState, karma: newKarma };
+          const newQuota = res.data.computeQuota;
+          const updatedState = { ...app.globalData.agentState, karma: newKarma, computeQuota: newQuota };
           app.globalData.agentState = updatedState;
           wx.setStorageSync("dahuang_agent_state", updatedState);
           this.setData({ agentState: updatedState });
 
-          wx.showToast({ title: res.data.message || "算力额度兑换成功！", icon: "none" });
+          wx.showToast({ title: `兑换成功！总算力: ${newQuota}kW`, icon: "success" });
           app.addLog("SYSTEM", `⚡ [功德兑换] ${res.data.message}`);
         } else {
-          wx.showToast({ title: (res.data && res.data.error) || "兑换失败，功德不足", icon: "none" });
+          wx.showToast({ title: (res.data && res.data.error) || "兑换失败，鉴权或功德异常", icon: "none" });
         }
       },
       fail: () => {
         wx.hideLoading();
+        this.setData({ isExchangingKarma: false });
         wx.showToast({ title: "网络超时", icon: "none" });
       }
     });

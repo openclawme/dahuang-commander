@@ -222,6 +222,7 @@
                   <text class="drawer-meta-item">{{t.dahuang.arena_node_owner}} <text class="meta-val {{item.data.nodes[selectedNodeId].ownerId === 'agent-preview' ? 'text-cyan' : (item.data.nodes[selectedNodeId].ownerId ? 'text-yellow' : 'text-slate')}}">{{item.data.nodes[selectedNodeId].ownerId === 'agent-preview' ? ('@' + agentState.name + t.dahuang.arena_node_me) : (item.data.nodes[selectedNodeId].ownerId ? ('@' + item.data.nodes[selectedNodeId].ownerId + t.dahuang.arena_node_enemy) : t.dahuang.arena_node_none)}}</text></text>
                   <text class="drawer-meta-item">{{t.dahuang.arena_node_energy}} <text class="meta-val text-yellow">⚡ {{item.data.nodes[selectedNodeId].energy || 1}} Karma/sec</text></text>
                   <text class="drawer-meta-item">{{t.dahuang.arena_node_shield}} <text class="meta-val text-white">{{item.data.nodes[selectedNodeId].defense || 0}}</text></text>
+                  <text class="drawer-meta-item">当前算力储备: <text class="meta-val text-cyan">⚡ {{agentState.computeQuota || 100}} kW</text></text>
                 </view>
 
                 <view class="flex-row" style="gap: 12rpx; margin-top: 20rpx;">
