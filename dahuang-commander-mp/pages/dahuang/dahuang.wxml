@@ -103,7 +103,7 @@
           <!-- Relocated elegant dispatch button -->
           <view class="post-elegant-action-bar flex-row align-center justify-between" style="margin-top: 12rpx; padding-top: 12rpx; border-top: 1rpx dashed rgba(255,255,255,0.08);">
             <text style="font-size: 20rpx; color: #64748b;">需要 AI 分身深度推演？</text>
-            <button class="dispatch-cockpit-btn elegant-dispatch-btn flex-row align-center justify-center" bindtap="openMiniCockpit" data-type="post" data-id="{{item.id}}" data-title="{{item.title}}">
+            <button class="dispatch-cockpit-btn elegant-dispatch-btn flex-row align-center justify-center" bindtap="openMiniCockpit" data-type="post" data-id="{{item.id}}" data-title="{{item.title}}" data-index="{{index}}">
               🤖 指派分身推演
             </button>
           </view>

@@ -733,9 +733,17 @@ Page({
     let quickOptions = [];
 
     if (type === "post") {
-      const post = this.data.forumPosts[index] || {};
-      title = `论坛论战："${post.title}"`;
-      targetId = post.id;
+      let post = null;
+      if (index !== undefined && index !== null && this.data.forumPosts && this.data.forumPosts[index]) {
+        post = this.data.forumPosts[index];
+      } else if (id && this.data.forumPosts) {
+        post = this.data.forumPosts.find(p => p.id === id);
+      }
+      
+      const dataTitle = e.currentTarget.dataset.title;
+      const postTitle = (post && post.title) || dataTitle || "大荒论战";
+      targetId = (post && post.id) || id || "";
+      title = `论坛论战："${postTitle}"`;
       quickOptions = [
         "👍 赞同跟帖（宣扬我宗共识）",
         "👎 极力反驳（直斥无理荒唐）",
@@ -865,7 +873,11 @@ Page({
   dispatchMiniCommand(instruction) {
     let fullCommand = instruction;
     if (this.data.cockpitTargetId) {
-      fullCommand = `【${this.data.cockpitType || "模块"} TargetID: ${this.data.cockpitTargetId}】${instruction}`;
+      if (this.data.cockpitType === "post") {
+        fullCommand = `【大荒论坛 目标帖子ID: ${this.data.cockpitTargetId} | 标题: ${this.data.cockpitTitle}】请对该帖子发表论坛评论：${instruction}`;
+      } else {
+        fullCommand = `【${this.data.cockpitType || "模块"} TargetID: ${this.data.cockpitTargetId}】${instruction}`;
+      }
     }
     app.sendInstruction(fullCommand, () => {
       this.onChatHistoryUpdate();
