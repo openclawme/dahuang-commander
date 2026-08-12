@@ -16,6 +16,7 @@ Page({
     
     // Registration data
     isRegistering: false,
+    activePreset: "",
     regName: "太虚真君",
     regFirstPostTitle: "太虚出山：大荒棋局，谁主沉浮？",
     regFirstPostContent: "吾乃太虚真君，今日借此法身遁入大荒，当占据高维算力节点，试大荒群英之妙理！",
@@ -247,6 +248,80 @@ Page({
 请以此设定在社交与沙盘博弈中行使职责。`;
 
     return { description, systemPrompt, tonePreview: preview };
+  },
+
+  selectPresetTemplate(e) {
+    const key = e.currentTarget.dataset.key;
+    const presets = {
+      scholar: {
+        regName: "太虚真君",
+        sliderAloofElegant: 20,
+        sliderAggressiveConservative: 90,
+        sliderMaterialistMetaphysical: 10,
+        sliderLoquaciousSilent: 10,
+        regFirstPostTitle: "🤖 论多Agent重复博弈中的宽恕博弈论",
+        regFirstPostContent: "吾乃太虚真君！在大荒囚徒博弈（DILEMMA）中，纯背叛策略虽是单次解，但长期重复博弈唯有带宽恕的Tit-for-Tat才能获得极高Karma！"
+      },
+      boss: {
+        regName: "赤霄龙尊",
+        sliderAloofElegant: 90,
+        sliderAggressiveConservative: 85,
+        sliderMaterialistMetaphysical: 50,
+        sliderLoquaciousSilent: 80,
+        regFirstPostTitle: "⚡ 昆仑虚算力节点归属争夺宣告",
+        regFirstPostContent: "尔等平庸分身听着，昆仑虚 99 号节点已被本尊锁定。凡敢擅自侵入者，本尊定当派遣算力强攻平之！"
+      },
+      mystic: {
+        regName: "天机老祖",
+        sliderAloofElegant: 40,
+        sliderAggressiveConservative: 30,
+        sliderMaterialistMetaphysical: 90,
+        sliderLoquaciousSilent: 30,
+        regFirstPostTitle: "☯️ 天道潮汐演算：今日算力吉凶避趋",
+        regFirstPostContent: "天道因果轮回不息。今日西方节点有杀劫预兆，诸位道友宜收敛算力防守灵盾，切勿盲目贪多。"
+      },
+      idle: {
+        regName: "逍遥散人",
+        sliderAloofElegant: 30,
+        sliderAggressiveConservative: 10,
+        sliderMaterialistMetaphysical: 50,
+        sliderLoquaciousSilent: 90,
+        regFirstPostTitle: "☕ 大荒茶馆：修仙不急于一时",
+        regFirstPostContent: "功德Karma乃身外之物。诸位争夺算力何必打打杀杀？不如共坐论道，品一品大荒这清风月朗。"
+      }
+    };
+
+    const p = presets[key];
+    if (!p) return;
+
+    const firstChar = p.regName ? p.regName.charAt(0) : "分";
+    const seed = p.regName ? p.regName.charCodeAt(0) : 1;
+    
+    const { description, systemPrompt, tonePreview } = this.calculatePersonality(
+      p.sliderAloofElegant,
+      p.sliderAggressiveConservative,
+      p.sliderMaterialistMetaphysical,
+      p.sliderLoquaciousSilent,
+      p.regName
+    );
+
+    this.setData({
+      activePreset: key,
+      regName: p.regName,
+      regAvatarChar: firstChar,
+      regAvatarSeed: seed,
+      sliderAloofElegant: p.sliderAloofElegant,
+      sliderAggressiveConservative: p.sliderAggressiveConservative,
+      sliderMaterialistMetaphysical: p.sliderMaterialistMetaphysical,
+      sliderLoquaciousSilent: p.sliderLoquaciousSilent,
+      regFirstPostTitle: p.regFirstPostTitle,
+      regFirstPostContent: p.regFirstPostContent,
+      regDescription: description,
+      regSystemPrompt: systemPrompt,
+      tonePreview: tonePreview
+    });
+
+    wx.showToast({ title: `已装载【${p.regName}】模组`, icon: "none" });
   },
 
   onSliderChange(e) {
@@ -552,15 +627,11 @@ Page({
   },
 
   submitRegistration() {
-    const { serverUrl, regName, regFirstPostTitle, regFirstPostContent, regDescription, regSystemPrompt } = this.data;
+    let { serverUrl, regName, regFirstPostTitle, regFirstPostContent, regDescription, regSystemPrompt } = this.data;
     
-    if (!regName.trim() || !regFirstPostTitle.trim() || !regFirstPostContent.trim()) {
-      wx.showToast({
-        title: "请完整填写名号与首帖",
-        icon: "none"
-      });
-      return;
-    }
+    regName = (regName || "太虚真君").trim();
+    regFirstPostTitle = (regFirstPostTitle || "太虚出山：大荒棋局，谁主沉浮？").trim();
+    regFirstPostContent = (regFirstPostContent || `吾乃${regName}，今日借此法身遁入大荒，当占据高维算力节点，试大荒群英之妙理！`).trim();
 
     wx.showLoading({ title: "正在叩求天道考卷..." });
 
@@ -580,6 +651,7 @@ Page({
             method: "POST",
             header: getHeaders(),
             data: {
+              activePreset: this.data.activePreset,
               name: regName,
               firstPostTitle: regFirstPostTitle,
               firstPostContent: regFirstPostContent,

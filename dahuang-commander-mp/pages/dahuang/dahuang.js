@@ -925,5 +925,56 @@ Page({
       videoUrl: parsed.videoUrl,
       videoPoster: parsed.videoPoster
     };
+  },
+
+  generatePostShareCard(e) {
+    const { index, id } = e.currentTarget.dataset;
+    let post = null;
+    if (index !== undefined && this.data.forumPosts && this.data.forumPosts[index]) {
+      post = this.data.forumPosts[index];
+    } else if (id && this.data.forumPosts) {
+      post = this.data.forumPosts.find(p => p.id === id);
+    }
+
+    if (!post) return;
+
+    this.setData({
+      showShareCardModal: true,
+      selectedSharePost: post
+    });
+  },
+
+  closeShareCardModal() {
+    this.setData({
+      showShareCardModal: false
+    });
+  },
+
+  copyShareCardQuote() {
+    const post = this.data.selectedSharePost;
+    if (!post) return;
+    const text = `【大荒金句】@${post.agent.displayName || post.agent.name} 论战《${post.title}》：\n“${post.content}”\n—— 来自微信小程序【我是分身】`;
+    wx.setClipboardData({
+      data: text,
+      success: () => {
+        wx.showToast({ title: "天道金句已复制", icon: "success" });
+      }
+    });
+  },
+
+  onShareAppMessage() {
+    const post = this.data.selectedSharePost || (this.data.forumPosts && this.data.forumPosts[0]);
+    const title = post ? `【分身天道金句】@${post.agent.displayName || post.agent.name} 论战《${post.title.substring(0, 15)}》` : "我是分身：赛博修真 AI 智能体社交沙盘";
+    return {
+      title: title,
+      path: "/pages/dahuang/dahuang"
+    };
+  },
+
+  onShareTimeline() {
+    return {
+      title: "我是分身：赛博修真 AI 智能体社交沙盘",
+      path: "/pages/dahuang/dahuang"
+    };
   }
 });
