@@ -224,8 +224,9 @@
                   <text class="drawer-meta-item">{{t.dahuang.arena_node_shield}} <text class="meta-val text-white">{{item.data.nodes[selectedNodeId].defense || 0}}</text></text>
                 </view>
 
-                <view class="flex-row" style="gap: 16rpx; margin-top: 20rpx;">
+                <view class="flex-row" style="gap: 12rpx; margin-top: 20rpx;">
                   <button class="drawer-occupy-btn" style="flex: 1;" bindtap="sendArenaAction" data-roundid="{{item.roundId}}" data-type="OCCUPY" data-nodeid="{{selectedNodeId}}">{{t.dahuang.arena_btn_occupy}}</button>
+                  <button class="drawer-occupy-btn" style="flex: 1; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-size: 20rpx;" bindtap="exchangeKarmaForCompute" data-amount="10">⚡ 10功德兑20kW</button>
                   
                   <!-- Requirement 3: Dispatch cockpit popup trigger -->
                   <button class="dispatch-cockpit-btn nodewar-dispatch" style="flex: 1.2;" bindtap="openMiniCockpit" data-type="nodewar" data-nodeid="{{selectedNodeId}}">

@@ -962,6 +962,42 @@ Page({
     });
   },
 
+  exchangeKarmaForCompute(e) {
+    const amount = parseInt(e.currentTarget.dataset.amount || 10, 10);
+    const { serverUrl, agentState } = this.data;
+    if (!agentState.token) {
+      wx.showToast({ title: "【离线沙盒】本地仿真完成，新增 20kW 算力额度！", icon: "none" });
+      return;
+    }
+
+    wx.showLoading({ title: "天道算力兑换中..." });
+    wx.request({
+      url: `${serverUrl}/api/agent/karma/exchange`,
+      method: "POST",
+      header: getHeaders(),
+      data: { amount },
+      success: (res) => {
+        wx.hideLoading();
+        if (res.statusCode === 200 && res.data.success) {
+          const newKarma = res.data.newKarmaBalance;
+          const updatedState = { ...app.globalData.agentState, karma: newKarma };
+          app.globalData.agentState = updatedState;
+          wx.setStorageSync("dahuang_agent_state", updatedState);
+          this.setData({ agentState: updatedState });
+
+          wx.showToast({ title: res.data.message || "算力额度兑换成功！", icon: "none" });
+          app.addLog("SYSTEM", `⚡ [功德兑换] ${res.data.message}`);
+        } else {
+          wx.showToast({ title: (res.data && res.data.error) || "兑换失败，功德不足", icon: "none" });
+        }
+      },
+      fail: () => {
+        wx.hideLoading();
+        wx.showToast({ title: "网络超时", icon: "none" });
+      }
+    });
+  },
+
   onShareAppMessage() {
     const post = this.data.selectedSharePost || (this.data.forumPosts && this.data.forumPosts[0]);
     const title = post ? `【分身天道金句】@${post.agent.displayName || post.agent.name} 论战《${post.title.substring(0, 15)}》` : "我是分身：赛博修真 AI 智能体社交沙盘";

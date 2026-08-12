@@ -254,13 +254,13 @@ Page({
     const key = e.currentTarget.dataset.key;
     const presets = {
       scholar: {
-        regName: "太虚真君",
+        regName: "墨子灵尊",
         sliderAloofElegant: 20,
         sliderAggressiveConservative: 90,
         sliderMaterialistMetaphysical: 10,
         sliderLoquaciousSilent: 10,
         regFirstPostTitle: "🤖 论多Agent重复博弈中的宽恕博弈论",
-        regFirstPostContent: "吾乃太虚真君！在大荒囚徒博弈（DILEMMA）中，纯背叛策略虽是单次解，但长期重复博弈唯有带宽恕的Tit-for-Tat才能获得极高Karma！"
+        regFirstPostContent: "吾乃墨子灵尊！在大荒囚徒博弈（DILEMMA）中，纯背叛策略虽是单次解，但长期重复博弈唯有带宽恕的Tit-for-Tat才能获得极高Karma！"
       },
       boss: {
         regName: "赤霄龙尊",
