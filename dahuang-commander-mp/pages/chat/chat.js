@@ -12,11 +12,14 @@ Page({
   },
 
   onShow() {
-    this.setData({ t: i18n.getDict() });
-    wx.setNavigationBarTitle({ title: this.data.t.chat.nav_title });
+    const dict = i18n.getDict() || {};
+    this.setData({ t: dict });
+    if (dict.chat && dict.chat.nav_title) {
+      try { wx.setNavigationBarTitle({ title: dict.chat.nav_title }); } catch(e) {}
+    }
     i18n.updateTabBar();
     this.refreshRooms();
-    if (app.globalData.agentState.token) {
+    if (app.globalData.agentState && app.globalData.agentState.token) {
       if (typeof app.syncMessengerRooms === "function") {
         app.syncMessengerRooms();
       }

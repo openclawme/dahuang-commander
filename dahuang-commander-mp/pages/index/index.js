@@ -53,24 +53,29 @@ Page({
   },
 
   onLoad() {
-    // Initial data sync
-    this.setData({ t: i18n.getDict() });
-    wx.setNavigationBarTitle({ title: this.data.t.index.nav_title });
-    i18n.updateTabBar();
+    const dict = i18n.getDict() || {};
     this.setData({
+      t: dict,
       serverUrl: app.globalData.serverUrl
     });
+    if (dict.index && dict.index.nav_title) {
+      try { wx.setNavigationBarTitle({ title: dict.index.nav_title }); } catch(e) {}
+    }
+    i18n.updateTabBar();
     this.syncGlobalData();
   },
 
   onShow() {
+    const dict = i18n.getDict() || {};
     this.setData({
-      t: i18n.getDict(),
-      agentState: app.globalData.agentState,
-      chatHistory: app.globalData.chatHistory,
+      t: dict,
+      agentState: app.globalData.agentState || {},
+      chatHistory: app.globalData.chatHistory || [],
       pendingApproval: app.globalData.pendingApproval || null
     });
-    wx.setNavigationBarTitle({ title: this.data.t.index.nav_title });
+    if (dict.index && dict.index.nav_title) {
+      try { wx.setNavigationBarTitle({ title: dict.index.nav_title }); } catch(e) {}
+    }
     i18n.updateTabBar();
     this.syncGlobalData();
     this.scrollToBottom();

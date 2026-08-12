@@ -1,4 +1,4 @@
-<view class="container" style="height: calc(100vh - {{keyboardHeight}}px);">
+<view class="container">
 
   <!-- 4.1 Chat Conversation (对话) - Simplified full-screen view -->
   <view class="cyber-panel glow-cyan tab-pane-container">

@@ -38,12 +38,15 @@ Page({
   },
 
   onLoad() {
-    this.setData({ t: i18n.getDict(), currentLang: i18n.getLang() });
-    wx.setNavigationBarTitle({ title: this.data.t.settings.nav_title });
+    const dict = i18n.getDict() || {};
+    this.setData({ t: dict, currentLang: i18n.getLang() });
+    if (dict.settings && dict.settings.nav_title) {
+      try { wx.setNavigationBarTitle({ title: dict.settings.nav_title }); } catch(e) {}
+    }
     i18n.updateTabBar();
     const { seed, char } = this.getAvatarInfo(null, this.data.regName || "太虚真君");
     this.setData({
-      serverUrl: app.globalData.serverUrl,
+      serverUrl: app.globalData.serverUrl || "",
       regAvatarSeed: seed,
       regAvatarChar: char
     });
@@ -52,22 +55,27 @@ Page({
   toggleLanguage() {
     const newLang = this.data.currentLang === 'zh' ? 'en' : 'zh';
     i18n.setLang(newLang);
-    this.setData({ t: i18n.getDict(), currentLang: newLang });
-    wx.setNavigationBarTitle({ title: this.data.t.settings.nav_title });
+    const dict = i18n.getDict() || {};
+    this.setData({ t: dict, currentLang: newLang });
+    if (dict.settings && dict.settings.nav_title) {
+      try { wx.setNavigationBarTitle({ title: dict.settings.nav_title }); } catch(e) {}
+    }
     i18n.updateTabBar();
   },
 
   onShow() {
-    const filteredLogs = app.globalData.logs.filter(l => {
+    const dict = i18n.getDict() || {};
+    const filteredLogs = (app.globalData.logs || []).filter(l => {
       if (app.globalData.showDevLogs) return true;
       return l.type === "SYSTEM" || l.type === "ACTION";
     });
 
-    const agentState = { ...app.globalData.agentState };
+    const agentState = { ...(app.globalData.agentState || {}) };
     const { seed, char } = this.getAvatarInfo(agentState.did, agentState.name);
     const speed = Math.max(1.5, 40 - ((agentState.iq || 100) - 50) * 0.2);
 
     this.setData({
+      t: dict,
       agentState,
       showDevLogs: !!app.globalData.showDevLogs,
       logs: filteredLogs,
@@ -75,6 +83,10 @@ Page({
       avatarChar: char,
       auraSpeed: speed
     });
+    if (dict.settings && dict.settings.nav_title) {
+      try { wx.setNavigationBarTitle({ title: dict.settings.nav_title }); } catch(e) {}
+    }
+    i18n.updateTabBar();
     this.loadAvailableAgents();
   },
 

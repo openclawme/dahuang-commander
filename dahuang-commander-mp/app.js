@@ -510,8 +510,9 @@ App({
       const key = `dahuang_chat_history_${agentId}`;
       const saved = wx.getStorageSync(key);
       if (saved && Array.isArray(saved)) {
-        this.globalData.chatHistory = saved.map(m => this.sanitizeMessage(m));
-      } else {
+        this.globalData.chatHistory = saved.filter(Boolean).map(m => this.sanitizeMessage(m));
+      }
+      if (!this.globalData.chatHistory || this.globalData.chatHistory.length === 0) {
         this.globalData.chatHistory = [
           {
             id: "init-welcome",
@@ -524,6 +525,15 @@ App({
       }
     } catch (e) {
       console.error("[App] Failed to load chat history:", e);
+      this.globalData.chatHistory = [
+        {
+          id: "init-welcome",
+          sender: "agent",
+          content: "（天道连通）主人，大荒分身在此候命。请降下法旨！",
+          timestamp: this.getTimestamp(),
+          createdAt: Date.now()
+        }
+      ];
     }
   },
 
@@ -552,13 +562,27 @@ App({
   },
 
   sanitizeMessage(msg) {
-    if (!msg || typeof msg.content !== "string") return msg;
-    const content = msg.content;
+    if (!msg || typeof msg !== "object") {
+      return {
+        id: `msg-${Date.now()}`,
+        sender: "agent",
+        content: "（无效消息）",
+        timestamp: this.getTimestamp(),
+        createdAt: Date.now()
+      };
+    }
+    const safeMsg = { ...msg };
+    if (!safeMsg.id) safeMsg.id = `msg-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+    if (!safeMsg.sender) safeMsg.sender = "agent";
+    if (typeof safeMsg.content !== "string") {
+      safeMsg.content = safeMsg.content ? String(safeMsg.content) : "（内容为空）";
+    }
+    const content = safeMsg.content;
     const { html, videoUrl, videoPoster } = this.parseRichContent(content);
     const hasRichHtml = /<[a-z][\s\S]*>/i.test(content) || content.includes("**") || content.includes("`") || content.includes("<table") || content.includes("<div") || content.includes("<p") || content.includes("<badge") || content.includes("<card") || content.includes("<blockquote") || content.includes("<span");
 
     return {
-      ...msg,
+      ...safeMsg,
       content,
       isRich: hasRichHtml || Boolean(videoUrl),
       richContent: html,

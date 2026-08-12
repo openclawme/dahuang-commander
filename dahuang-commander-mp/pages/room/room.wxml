@@ -1,4 +1,4 @@
-<view class="container" style="height: calc(100vh - {{keyboardHeight}}px);">
+<view class="container">
   <!-- 消息滚动视窗 -->
   <scroll-view class="msg-scroll" scroll-y scroll-into-view="{{toView}}" scroll-with-animation>
     <view class="msg-list">

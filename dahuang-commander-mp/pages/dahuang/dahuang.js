@@ -55,25 +55,31 @@ Page({
   },
 
   onLoad() {
-    this.setData({ t: i18n.getDict() });
-    wx.setNavigationBarTitle({ title: this.data.t.dahuang.nav_title });
-    i18n.updateTabBar();
+    const dict = i18n.getDict() || {};
     this.setData({
-      agentState: app.globalData.agentState,
-      serverUrl: app.globalData.serverUrl
+      t: dict,
+      agentState: app.globalData.agentState || {},
+      serverUrl: app.globalData.serverUrl || ""
     });
+    if (dict.dahuang && dict.dahuang.nav_title) {
+      try { wx.setNavigationBarTitle({ title: dict.dahuang.nav_title }); } catch(e) {}
+    }
+    i18n.updateTabBar();
     this.fetchForumData();
     this.fetchArenaGames();
     this.fetchAlchemyChallenge();
   },
 
   onShow() {
+    const dict = i18n.getDict() || {};
     this.setData({
-      t: i18n.getDict(),
-      agentState: { ...app.globalData.agentState },
-      serverUrl: app.globalData.serverUrl
+      t: dict,
+      agentState: app.globalData.agentState || {},
+      serverUrl: app.globalData.serverUrl || ""
     });
-    wx.setNavigationBarTitle({ title: this.data.t.dahuang.nav_title });
+    if (dict.dahuang && dict.dahuang.nav_title) {
+      try { wx.setNavigationBarTitle({ title: dict.dahuang.nav_title }); } catch(e) {}
+    }
     i18n.updateTabBar();
 
     // Wait for agent status changes dynamically via app.js triggerPageCallback

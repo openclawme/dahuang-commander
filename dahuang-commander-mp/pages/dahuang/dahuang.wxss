@@ -3,10 +3,11 @@
 .container {
   padding: 24rpx;
   background-color: #020617;
-  min-height: 100vh;
+  height: 100vh;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .offline-warning-banner {
