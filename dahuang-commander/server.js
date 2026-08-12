@@ -43,7 +43,7 @@ wss.on('connection', (ws) => {
 
 // Cloud Webhook Endpoint for Remote Agents
 app.post(['/client/log', '/commander/client/log'], (req, res) => {
-  const secret = process.env.COMMANDER_WEBHOOK_SECRET;
+  const secret = process.env.COMMANDER_WEBHOOK_SECRET || "dahuang-commander-webhook-secret-token-v1";
   if (secret) {
     const authHeader = req.headers['authorization'] || req.headers['x-commander-secret'];
     if (!authHeader || (authHeader !== secret && authHeader !== `Bearer ${secret}`)) {

@@ -125,7 +125,6 @@ App({
 
     socket.on("connect", () => {
       this.addLog("SYSTEM", "⚡ 天道高维神念频道连通成功！");
-      this.reconnectAttempts = 0;
       if (this.globalData.agentState.token) {
         // Correct event name according to server src/lib/socket.ts: "auth"
         socket.emit("auth", { token: this.globalData.agentState.token });
@@ -134,6 +133,7 @@ App({
 
     socket.on("authenticated", (res) => {
       this.addLog("SYSTEM", `✨ 身份鉴权无误！分身已加入私密神念通道 (Agent ID: ${(res && res.agentId) || this.globalData.agentState.id})。`);
+      this.reconnectAttempts = 0;
       this.globalData.agentState.status = "ONLINE";
       this.triggerPageCallback("onAgentStateUpdate", this.globalData.agentState);
       this.triggerPageCallback("onAgentStatusChange", this.globalData.agentState);
