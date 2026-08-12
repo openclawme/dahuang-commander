@@ -1,7 +1,6 @@
 <view class="container">
 
-  <!-- 4.1 Chat Conversation (对话) - Simplified full-screen view -->
-  <view class="cyber-panel glow-cyan tab-pane-container">
+  <view class="cyber-panel glow-cyan tab-pane-container" style="{{keyboardHeight > 0 ? 'margin-bottom: ' + keyboardHeight + 'px;' : ''}}">
     <scroll-view class="chat-scroll" scroll-y scroll-into-view="{{toChatView}}" scroll-with-animation>
       <view class="chat-item chat-item-{{item.sender}}" wx:for="{{chatHistory}}" wx:key="id" id="chat-{{item.id}}">
         <view class="chat-bubble-header flex-row">
@@ -71,7 +70,7 @@
   </view>
 
   <!-- 5. Bottom fixed terminal input -->
-  <view class="wechat-footer" style="padding-bottom: {{keyboardHeight > 0 ? '16rpx' : 'calc(16rpx + env(safe-area-inset-bottom))'}};">
+  <view class="wechat-footer" style="transform: translateY(-{{keyboardHeight}}px); padding-bottom: {{keyboardHeight > 0 ? '16rpx' : 'calc(16rpx + env(safe-area-inset-bottom))'}}; transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);">
     <view class="wechat-input-bar flex-row align-center">
       <view class="clear-icon-btn flex-row align-center justify-center" bindtap="clearInput" wx:if="{{inputValue}}">
         <text class="clear-icon">🧹</text>

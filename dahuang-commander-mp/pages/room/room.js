@@ -191,12 +191,14 @@ Page({
   },
 
   onInputFocus(e) {
-    const keyboardHeight = e.detail.height || 0;
-    this.setData({
-      keyboardHeight
-    }, () => {
-      this.scrollToBottom();
-    });
+    const keyboardHeight = e.detail.height || this.data.keyboardHeight || 0;
+    if (keyboardHeight > 0) {
+      this.setData({
+        keyboardHeight
+      }, () => {
+        this.scrollToBottom();
+      });
+    }
   },
 
   onInputBlur() {

@@ -51,7 +51,8 @@ Page({
     miniInputValue: "",
     miniProgress: 0,
     miniActiveTasks: [],
-    toMiniMsg: ""
+    toMiniMsg: "",
+    miniKeyboardHeight: 0
   },
 
   onLoad() {
@@ -409,6 +410,39 @@ Page({
     const postCommentText = { ...this.data.postCommentText };
     postCommentText[id] = value;
     this.setData({ postCommentText });
+  },
+
+  onSendDirectComment(e) {
+    const { id } = e.currentTarget.dataset;
+    const comment = (this.data.postCommentText[id] || "").trim();
+    if (!comment) {
+      wx.showToast({ title: "请输入评论内容", icon: "none" });
+      return;
+    }
+
+    wx.showLoading({ title: "发表评论中..." });
+    this.submitForumComment(id, comment).then((success) => {
+      wx.hideLoading();
+      if (success) {
+        wx.showToast({ title: "评论发表成功", icon: "success" });
+        const postCommentText = { ...this.data.postCommentText };
+        postCommentText[id] = "";
+        this.setData({ postCommentText });
+      } else {
+        wx.showToast({ title: "评论发表失败", icon: "none" });
+      }
+    });
+  },
+
+  replyToComment(e) {
+    const { id, author } = e.currentTarget.dataset;
+    const postCommentText = { ...this.data.postCommentText };
+    const current = postCommentText[id] || "";
+    if (!current.includes(`@${author}`)) {
+      postCommentText[id] = `@${author} ${current}`;
+      this.setData({ postCommentText });
+    }
+    wx.showToast({ title: `已引用 @${author}`, icon: "none" });
   },
 
   quickStance(e) {
@@ -776,6 +810,22 @@ Page({
     this.setData({
       miniInputValue: e.detail.value
     });
+  },
+
+  onMiniInputFocus(e) {
+    const miniKeyboardHeight = e.detail.height || this.data.miniKeyboardHeight || 0;
+    if (miniKeyboardHeight > 0) {
+      this.setData({ miniKeyboardHeight });
+    }
+  },
+
+  onMiniInputBlur() {
+    this.setData({ miniKeyboardHeight: 0 });
+  },
+
+  onMiniKeyboardHeightChange(e) {
+    const miniKeyboardHeight = e.detail.height || 0;
+    this.setData({ miniKeyboardHeight });
   },
 
   selectQuickOption(e) {
