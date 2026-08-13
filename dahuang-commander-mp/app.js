@@ -350,7 +350,7 @@ App({
     const resultMsg = {
       id: msgId,
       sender: "agent",
-      content: data.reply || (existingMsg ? existingMsg.content : "（推演中...）"),
+      content: (data.isPending === true) ? "" : (data.reply || (existingMsg ? existingMsg.content : "（推演中...）")),
       timestamp: this.getTimestamp(),
       createdAt: existingMsg ? existingMsg.createdAt : Date.now(),
       progress: data.progress !== undefined ? data.progress : (existingMsg ? existingMsg.progress : 100),
