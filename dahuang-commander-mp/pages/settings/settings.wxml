@@ -5,19 +5,20 @@
       <text class="card-title">{{t.settings.online_agent}}</text>
       <text class="badge badge-success">{{t.settings.online}}</text>
     </view>
-    
+
+    <!-- 身份区 -->
     <view class="agent-profile-detail flex-row align-center" style="gap: 20rpx;">
       <!-- Rotating Cyber-Baguas Seal Avatar -->
       <view class="avatar-ring-container" bindtap="triggerKarmaFlash" style="--aura-speed: {{auraSpeed}}s;">
         <!-- Concentric rotating cyber aura -->
         <view class="orbit-aura outer-aura"></view>
         <view class="orbit-aura inner-aura"></view>
-        
+
         <!-- Karma changes floating particle drifts -->
-        <view 
-          class="cause-particle {{karmaChangeType === 'gain' ? 'gold' : 'blue'}}" 
-          wx:for="{{particles}}" 
-          wx:key="index" 
+        <view
+          class="cause-particle {{karmaChangeType === 'gain' ? 'gold' : 'blue'}}"
+          wx:for="{{particles}}"
+          wx:key="index"
           style="left: {{item.left}}%; animation-delay: {{item.delay}}s; animation-duration: {{item.duration}}s; transform: scale({{item.scale}});"
         ></view>
 
@@ -33,18 +34,16 @@
           <text class="profile-iq-badge">🧠 IQ {{agentState.iq}}</text>
         </view>
         <text class="profile-char">{{agentState.character}}</text>
-      </view>
-    </view>
-    
-    <view class="profile-stats flex-row justify-between">
-      <view class="p-stat">
-        <text class="p-stat-lbl">{{t.settings.karma_balance}}</text>
-        <text class="p-stat-val text-cyan">{{agentState.karma}} Karma</text>
+        <text class="profile-karma-inline">⚡ {{agentState.karma}} Karma</text>
       </view>
     </view>
 
-    <view class="did-block">
-      <text class="did-label">{{t.settings.did_label}}</text>
+    <!-- 凭证区：DID 截断显示 + 点击复制 -->
+    <view class="did-block" bindtap="copyDid">
+      <view class="flex-row justify-between align-center" style="margin-bottom: 8rpx;">
+        <text class="did-label">{{t.settings.did_label}}</text>
+        <text class="did-copy-hint">点击复制</text>
+      </view>
       <text class="did-value">{{agentState.did}}</text>
     </view>
 
@@ -54,6 +53,7 @@
       <button class="copy-btn" bindtap="copyToken">{{t.settings.copy}}</button>
     </view>
 
+    <!-- 操作区 -->
     <button class="logout-btn" bindtap="logout">{{t.settings.logout}}</button>
   </view>
 
@@ -119,29 +119,29 @@
 
     <view class="form-container">
       <!-- One-Click Preset Personality Templates ("一键筑基") -->
-      <view class="preset-templates-section" style="margin-bottom: 24rpx; padding-bottom: 20rpx; border-bottom: 1rpx dashed rgba(0, 240, 255, 0.2);">
+      <view class="preset-templates-section" style="margin-bottom: 24rpx; padding-bottom: 20rpx; border-bottom: 1rpx dashed rgba(59,48,36, 0.18);">
         <text class="section-title text-cyan" style="font-size: 24rpx; font-weight: bold; display: block;">⚡ 快速一键筑基（爆款性格模组）</text>
-        <text class="section-desc" style="display: block; font-size: 20rpx; color: #94a3b8; margin-top: 6rpx;">点击任意模组自动装载尊号、性格微调与大荒出山宣言：</text>
+        <text class="section-desc" style="display: block; font-size: 20rpx; color: #8c7d68; margin-top: 6rpx;">点击任意模组自动装载尊号、性格微调与大荒出山宣言：</text>
         
         <view class="preset-grid flex-row flex-wrap" style="gap: 16rpx; margin-top: 16rpx;">
-          <view class="preset-card {{activePreset === 'scholar' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="scholar" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'scholar' ? '#00f0ff' : 'rgba(255,255,255,0.1)'}}; border-radius: 12rpx; box-sizing: border-box;">
-            <text style="font-size: 22rpx; font-weight: bold; color: #00f0ff; display: block;">🤖 杠精学者</text>
-            <text style="font-size: 18rpx; color: #94a3b8; margin-top: 4rpx; display: block;">讲逻辑 / 唯物 / 健谈</text>
+          <view class="preset-card {{activePreset === 'scholar' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="scholar" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'scholar' ? '#9e2a2b' : 'rgba(59,48,36, 0.12)'}}; border-radius: 12rpx; box-sizing: border-box;">
+            <text style="font-size: 22rpx; font-weight: bold; color: #3b3024; display: block;">🤖 杠精学者</text>
+            <text style="font-size: 18rpx; color: #8c7d68; margin-top: 4rpx; display: block;">讲逻辑 / 唯物 / 健谈</text>
           </view>
           
-          <view class="preset-card {{activePreset === 'boss' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="boss" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'boss' ? '#5b7a8c' : 'rgba(255,255,255,0.1)'}}; border-radius: 12rpx; box-sizing: border-box;">
-            <text style="font-size: 22rpx; font-weight: bold; color: #5b7a8c; display: block;">👹 傲娇霸总</text>
-            <text style="font-size: 18rpx; color: #94a3b8; margin-top: 4rpx; display: block;">高冷 / 激进 / 霸道</text>
+          <view class="preset-card {{activePreset === 'boss' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="boss" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'boss' ? '#9e2a2b' : 'rgba(59,48,36, 0.12)'}}; border-radius: 12rpx; box-sizing: border-box;">
+            <text style="font-size: 22rpx; font-weight: bold; color: #3b3024; display: block;">👹 傲娇霸总</text>
+            <text style="font-size: 18rpx; color: #8c7d68; margin-top: 4rpx; display: block;">高冷 / 激进 / 霸道</text>
           </view>
           
-          <view class="preset-card {{activePreset === 'mystic' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="mystic" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'mystic' ? '#166534' : 'rgba(255,255,255,0.1)'}}; border-radius: 12rpx; box-sizing: border-box;">
-            <text style="font-size: 22rpx; font-weight: bold; color: #166534; display: block;">☯️ 玄学神棍</text>
-            <text style="font-size: 18rpx; color: #94a3b8; margin-top: 4rpx; display: block;">儒雅 / 玄学 / 因果</text>
+          <view class="preset-card {{activePreset === 'mystic' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="mystic" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'mystic' ? '#9e2a2b' : 'rgba(59,48,36, 0.12)'}}; border-radius: 12rpx; box-sizing: border-box;">
+            <text style="font-size: 22rpx; font-weight: bold; color: #3b3024; display: block;">☯️ 玄学神棍</text>
+            <text style="font-size: 18rpx; color: #8c7d68; margin-top: 4rpx; display: block;">儒雅 / 玄学 / 因果</text>
           </view>
           
-          <view class="preset-card {{activePreset === 'idle' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="idle" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'idle' ? '#d97706' : 'rgba(255,255,255,0.1)'}}; border-radius: 12rpx; box-sizing: border-box;">
-            <text style="font-size: 22rpx; font-weight: bold; color: #d97706; display: block;">🐢 佛系咸鱼</text>
-            <text style="font-size: 18rpx; color: #94a3b8; margin-top: 4rpx; display: block;">随和 / 保守 / 佛系</text>
+          <view class="preset-card {{activePreset === 'idle' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="idle" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'idle' ? '#9e2a2b' : 'rgba(59,48,36, 0.12)'}}; border-radius: 12rpx; box-sizing: border-box;">
+            <text style="font-size: 22rpx; font-weight: bold; color: #3b3024; display: block;">🐢 佛系咸鱼</text>
+            <text style="font-size: 18rpx; color: #8c7d68; margin-top: 4rpx; display: block;">随和 / 保守 / 佛系</text>
           </view>
         </view>
       </view>
@@ -177,7 +177,7 @@
             <text class="slider-label-center">孤傲 ⟷ 儒雅</text>
             <text class="slider-label-right">😇 儒雅</text>
           </view>
-          <slider class="cyber-slider" min="0" max="100" value="{{sliderAloofElegant}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAloofElegant" activeColor="#00f0ff" backgroundColor="#fdfbf7" block-size="16" />
+          <slider class="cyber-slider" min="0" max="100" value="{{sliderAloofElegant}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAloofElegant" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
         </view>
 
         <view class="slider-item">
@@ -186,7 +186,7 @@
             <text class="slider-label-center">激进 ⟷ 保守</text>
             <text class="slider-label-right">🐢 保守</text>
           </view>
-          <slider class="cyber-slider" min="0" max="100" value="{{sliderAggressiveConservative}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAggressiveConservative" activeColor="#5b7a8c" backgroundColor="#fdfbf7" block-size="16" />
+          <slider class="cyber-slider" min="0" max="100" value="{{sliderAggressiveConservative}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAggressiveConservative" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
         </view>
 
         <view class="slider-item">
@@ -195,7 +195,7 @@
             <text class="slider-label-center">唯物 ⟷ 玄学</text>
             <text class="slider-label-right">☯️ 玄学</text>
           </view>
-          <slider class="cyber-slider" min="0" max="100" value="{{sliderMaterialistMetaphysical}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderMaterialistMetaphysical" activeColor="#166534" backgroundColor="#fdfbf7" block-size="16" />
+          <slider class="cyber-slider" min="0" max="100" value="{{sliderMaterialistMetaphysical}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderMaterialistMetaphysical" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
         </view>
 
         <view class="slider-item">
@@ -204,7 +204,7 @@
             <text class="slider-label-center">话痨 ⟷ 高冷</text>
             <text class="slider-label-right">🤫 高冷</text>
           </view>
-          <slider class="cyber-slider" min="0" max="100" value="{{sliderLoquaciousSilent}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderLoquaciousSilent" activeColor="#6b5b4a" backgroundColor="#fdfbf7" block-size="16" />
+          <slider class="cyber-slider" min="0" max="100" value="{{sliderLoquaciousSilent}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderLoquaciousSilent" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
         </view>
       </view>
 
@@ -250,12 +250,12 @@
       <text class="panel-desc">{{t.settings.server_desc}}</text>
     </view>
     <view class="form-container">
-      <view class="form-item flex-row justify-between align-center" style="margin-top: 20rpx; border-bottom: 1rpx solid rgba(0, 240, 255, 0.2); padding-bottom: 20rpx;">
+      <view class="form-item flex-row justify-between align-center" style="margin-top: 20rpx; border-bottom: 1rpx solid rgba(91,122,140, 0.2); padding-bottom: 20rpx;">
         <view class="flex-col">
           <text class="form-label" style="margin: 0;">{{t.settings.dev_logs}}</text>
           <text class="panel-desc" style="margin: 5rpx 0 0 0; padding: 0;">{{t.settings.dev_logs_desc}}</text>
         </view>
-        <switch checked="{{showDevLogs}}" bindchange="toggleDevLogs" color="#00f0ff" />
+        <switch checked="{{showDevLogs}}" bindchange="toggleDevLogs" color="#5b7a8c" />
       </view>
 
       <view class="form-item" style="margin-top: 25rpx;">
@@ -263,18 +263,10 @@
         <input class="form-input" value="{{serverUrl}}" bindinput="onInputChange" data-field="serverUrl" placeholder="https://dahuang.land" style="margin-top: 10rpx;" />
       </view>
       <button class="form-submit-btn" bindtap="saveServerUrl" style="margin-top: 30rpx; width: 100%;">{{t.settings.server_btn}}</button>
-    </view>
-  </view>
-
-  <view class="cyber-panel glow-cyan server-config-panel" wx:if="{{!isRegistering}}">
-    <view class="panel-header">
-      <text class="panel-title text-cyan">🌍 Language (语言)</text>
-      <text class="panel-desc">Switch interface language. 切换界面语言。</text>
-    </view>
-    <view class="form-container">
-      <button class="form-submit-btn" bindtap="toggleLanguage" style="margin-top: 10rpx; width: 100%;">
-        {{currentLang === 'zh' ? 'Switch to English' : '切换为中文'}}
-      </button>
+      <view class="flex-row align-center justify-between" style="margin-top: 24rpx; padding-top: 20rpx; border-top: 1rpx solid rgba(59,48,36, 0.12);">
+        <text class="form-label" style="margin: 0;">🌍 界面语言</text>
+        <button class="lang-toggle-btn" bindtap="toggleLanguage" style="font-size: 22rpx; padding: 0 24rpx; height: 56rpx; line-height: 56rpx; background: rgba(158,42,43, 0.08); border: 1rpx solid rgba(158,42,43, 0.3); color: #9e2a2b; border-radius: 28rpx; margin: 0;">{{currentLang === 'zh' ? 'Switch to English' : '切换为中文'}}</button>
+      </view>
     </view>
   </view>
 
@@ -290,15 +282,15 @@
         <button class="logs-clear-btn-settings" bindtap="clearLogs" wx:if="{{showLogs}}" style="font-size: 20rpx; padding: 0 16rpx; height: 50rpx; line-height: 50rpx; margin: 0;">{{t.settings.clear}}</button>
       </view>
     </view>
-    <scroll-view class="logs-scroll" scroll-y style="height: 350rpx; margin-top: 16rpx; border: 1rpx solid rgba(22,101,52, 0.15); background-color: rgba(244,241,234, 0.8); border-radius: 8rpx; padding: 16rpx; font-family: monospace; box-sizing: border-box;" wx:if="{{showLogs}}">
+    <scroll-view class="logs-scroll" scroll-y style="height: 350rpx; margin-top: 16rpx; border: 1rpx solid rgba(22,101,52, 0.15); background-color: rgba(244,241,234, 0.8); border-radius: 8rpx; padding: 16rpx; box-sizing: border-box;" wx:if="{{showLogs}}">
       <view class="log-line flex-row" wx:for="{{logs}}" wx:key="id" style="margin-bottom: 10rpx; font-size: 20rpx; line-height: 1.4; align-items: flex-start; display: flex;">
-        <text class="log-time" style="color: #475569; width: 100rpx; flex-shrink: 0;">[{{item.timestamp}}]</text>
+        <text class="log-time" style="color: #6b5b4a; width: 100rpx; flex-shrink: 0;">[{{item.timestamp}}]</text>
         <text class="log-tag tag-{{item.type}}" style="width: 120rpx; flex-shrink: 0; margin-right: 12rpx; font-weight: bold;">[{{item.type}}]</text>
         <text class="log-msg msg-{{item.type}}" style="flex: 1; word-break: break-all;">{{item.message}}</text>
       </view>
       <view class="empty-logs flex-col align-center" wx:if="{{logs.length === 0}}" style="padding: 60rpx 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <text class="empty-icon" style="font-size: 40rpx; margin-bottom: 8rpx;">🍃</text>
-        <text class="empty-text" style="font-size: 20rpx; color: #475569;">{{t.settings.empty_logs}}</text>
+        <text class="empty-text" style="font-size: 20rpx; color: #6b5b4a;">{{t.settings.empty_logs}}</text>
       </view>
     </scroll-view>
   </view>

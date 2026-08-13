@@ -105,12 +105,12 @@
 
 .room-time {
   font-size: 20rpx;
-  color: #475569;
+  color: #6b5b4a;
 }
 
 .room-last-msg {
   font-size: 22rpx;
-  color: #94a3b8;
+  color: #8c7d68;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -132,7 +132,7 @@
 .empty-title {
   font-size: 32rpx;
   font-weight: bold;
-  color: #475569;
+  color: #6b5b4a;
   margin-bottom: 12rpx;
 }
 

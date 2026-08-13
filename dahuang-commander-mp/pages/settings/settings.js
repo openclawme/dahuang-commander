@@ -545,6 +545,17 @@ Page({
     });
   },
 
+  copyDid() {
+    const did = this.data.agentState.did;
+    if (!did) return;
+    wx.setClipboardData({
+      data: did,
+      success: () => {
+        wx.showToast({ title: "DID 已抄录", icon: "success" });
+      }
+    });
+  },
+
   copyToken() {
     const token = this.data.agentState.token;
     if (!token) return;

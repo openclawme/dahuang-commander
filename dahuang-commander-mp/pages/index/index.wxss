@@ -29,7 +29,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.3);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
   margin-right: 20rpx;
 }
 
@@ -82,10 +82,10 @@
 
 @keyframes pulse-green {
   0% {
-    box-shadow: 0 6rpx 18rpx -6rpx rgba(22,101,52, 0.2);
+    box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
   }
   100% {
-    box-shadow: 0 6rpx 18rpx -6rpx rgba(22,101,52, 0.6);
+    box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
   }
 }
 
@@ -206,7 +206,7 @@
 
 .task-detail {
   flex: 1;
-  color: #cbd5e1;
+  color: #a89982;
 }
 
 .task-done {
@@ -225,7 +225,7 @@
 
 .empty-text {
   font-size: 24rpx;
-  color: #475569;
+  color: #6b5b4a;
 }
 
 /* Logs Panel Styles */
@@ -268,7 +268,7 @@
 }
 
 .log-time {
-  color: #475569;
+  color: #6b5b4a;
   width: 120rpx;
   flex-shrink: 0;
 }
@@ -297,7 +297,7 @@
 }
 
 .msg-SYSTEM {
-  color: #94a3b8;
+  color: #8c7d68;
 }
 
 .msg-ACTION {
@@ -436,7 +436,7 @@
 }
 
 .terminal-placeholder {
-  color: #475569;
+  color: #6b5b4a;
   font-size: 24rpx;
 }
 
@@ -450,7 +450,7 @@
 
 .console-char-count {
   font-size: 20rpx;
-  color: #475569;
+  color: #6b5b4a;
 }
 
 .submit-btn-premium {
@@ -464,7 +464,7 @@
   line-height: 54rpx;
   margin: 0;
   border: none;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(91,122,140, 0.4);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -477,7 +477,7 @@
 }
 
 .submit-btn-premium:active {
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.6);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
   opacity: 0.9;
 }
 
@@ -501,7 +501,7 @@
   font-size: 24rpx;
   font-weight: bold;
   padding: 16rpx 0;
-  color: #475569;
+  color: #6b5b4a;
   position: relative;
   transition: all 0.2s ease;
 }
@@ -612,7 +612,7 @@
   border: 1rpx solid rgba(158,42,43, 0.25);
   color: #3b3024;
   border-top-right-radius: 2rpx;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.1);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 .bubble-agent {
@@ -620,7 +620,7 @@
   border: 1rpx solid rgba(91,122,140, 0.25);
   color: #1a1a1a;
   border-top-left-radius: 2rpx;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(91,122,140, 0.1);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 /* Nested Progress & Task styling inside chat bubble */
@@ -679,7 +679,7 @@
   flex-direction: column;
   gap: 8rpx;
   font-size: 20rpx;
-  color: #94a3b8;
+  color: #8c7d68;
   padding: 10rpx 14rpx;
   background: rgba(253,251,247, 0.4);
   border-radius: 8rpx;
@@ -701,7 +701,7 @@
 
 .bubble-task-done {
   text-decoration: line-through;
-  color: #475569 !important;
+  color: #6b5b4a !important;
 }
 
 .bubble-task-status-badge {
@@ -755,19 +755,19 @@
 
 .bubble-step-progress-fill.fill-SUCCESS {
   background: linear-gradient(90deg, #166534, #3b5e59);
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(22,101,52, 0.4);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 .bubble-step-progress-fill.fill-PROCESSING {
   background: linear-gradient(90deg, #9e2a2b, #b35c44);
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.6);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
   animation: progress-shimmer 2s infinite linear;
   background-size: 200% 100%;
 }
 
 .bubble-step-progress-fill.fill-FAILED {
   background: linear-gradient(90deg, #be123c, #be123c);
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(190,18,60, 0.4);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 .bubble-step-progress-fill.fill-PENDING {
@@ -784,8 +784,8 @@
 }
 
 @keyframes badge-pulse {
-  0% { box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.1); opacity: 0.8; }
-  100% { box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.4); opacity: 1; }
+  0% { box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25); opacity: 0.8; }
+  100% { box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25); opacity: 1; }
 }
 
 @keyframes progress-shimmer {
@@ -807,8 +807,8 @@
 }
 
 @keyframes glow-purple-pulse {
-  0% { box-shadow: 0 6rpx 18rpx -6rpx rgba(91,122,140, 0.05); }
-  100% { box-shadow: 0 6rpx 18rpx -6rpx rgba(91,122,140, 0.25); }
+  0% { box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25); }
+  100% { box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25); }
 }
 
 .compact-progress-item {
@@ -827,7 +827,7 @@
 
 .compact-progress-text {
   font-size: 18rpx;
-  color: #cbd5e1;
+  color: #a89982;
   font-weight: bold;
   white-space: nowrap;
   overflow: hidden;
@@ -922,8 +922,8 @@
 }
 
 @keyframes badge-shimmer {
-  0% { opacity: 0.85; box-shadow: 0 6rpx 18rpx -6rpx rgba(234, 179, 8, 0.4); }
-  100% { opacity: 1; box-shadow: 0 6rpx 18rpx -6rpx rgba(234, 179, 8, 0.8); }
+  0% { opacity: 0.85; box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25); }
+  100% { opacity: 1; box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25); }
 }
 
 .modal-body {
@@ -971,7 +971,7 @@
 
 .params-text {
   font-size: 20rpx;
-  color: #cbd5e1;
+  color: #a89982;
   word-break: break-all;
 }
 
@@ -1037,26 +1037,26 @@
   background: rgba(190,18,60, 0.1);
   border: 1rpx solid rgba(190,18,60, 0.4);
   color: #be123c;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(190,18,60, 0.1);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 .glow-red-btn:active {
   background: rgba(190,18,60, 0.25);
   border-color: #be123c;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(190,18,60, 0.4);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 .glow-emerald-btn {
   background: rgba(22,101,52, 0.1);
   border: 1rpx solid rgba(22,101,52, 0.4);
   color: #166534;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(22,101,52, 0.1);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 .glow-emerald-btn:active {
   background: rgba(22,101,52, 0.25);
   border-color: #166534;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(22,101,52, 0.4);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 /* ==========================================================================
@@ -1077,7 +1077,7 @@
 
 .glow-cyan-dot {
   background-color: #9e2a2b;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.22);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
   animation: header-dot-pulse 1.8s infinite alternate;
 }
 
@@ -1094,7 +1094,7 @@
 
 .page-header-subtitle {
   font-size: 18rpx;
-  color: #475569;
+  color: #6b5b4a;
 }
 
 .logs-toggle-badge {
@@ -1270,8 +1270,8 @@
 
 .logs-clear-btn {
   background: rgba(59, 48, 36, 0.06);
-  border: 1rpx solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
+  border: 1rpx solid rgba(59,48,36, 0.12);
+  color: #8c7d68;
   font-size: 18rpx;
   padding: 6rpx 16rpx;
   border-radius: 8rpx;
@@ -1400,7 +1400,7 @@
   border: 2rpx dashed #9e2a2b;
   opacity: 0.6;
   animation: spin-aura var(--aura-speed, 25s) linear infinite;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.2);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 .inner-aura {
@@ -1409,7 +1409,7 @@
   border: 2rpx dotted #5b7a8c;
   opacity: 0.5;
   animation: spin-aura calc(var(--aura-speed, 25s) * 0.7) linear infinite reverse;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(91,122,140, 0.15);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 .avatar-core-seal {
@@ -1426,31 +1426,31 @@
 .seal-color-0 {
   background: radial-gradient(circle, #7f1d1d 0%, #450a0a 100%);
   border: 2rpx solid #be123c;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(239, 68, 68, 0.6);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 .seal-color-1 {
   background: radial-gradient(circle, #1e3a8a 0%, #fdfbf7 100%);
   border: 2rpx solid #5b7a8c;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 130, 246, 0.6);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 .seal-color-2 {
   background: radial-gradient(circle, #064e3b 0%, #022c22 100%);
   border: 2rpx solid #166534;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(22,101,52, 0.6);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 .seal-color-3 {
   background: radial-gradient(circle, #78350f 0%, #451a03 100%);
   border: 2rpx solid #d97706;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(217,119,6, 0.6);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 .seal-color-4 {
   background: radial-gradient(circle, #1c1917 0%, #0c0a09 100%);
   border: 2rpx solid #78716c;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(120, 113, 108, 0.6);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 .seal-character {
@@ -1472,13 +1472,13 @@
 
 .cause-particle.gold {
   background: #d97706;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.22);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
   animation: particle-drift-up 1.5s ease-out infinite;
 }
 
 .cause-particle.blue {
   background: #9e2a2b;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.22);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
   animation: particle-drift-down 1.5s ease-out infinite;
 }
 
@@ -1602,7 +1602,7 @@
   display: inline-flex;
   align-items: center;
   background: rgba(244,241,234, 0.6);
-  border: 1rpx solid rgba(255, 255, 255, 0.1);
+  border: 1rpx solid rgba(59,48,36, 0.12);
   padding: 8rpx 20rpx;
   border-radius: 30rpx;
   transition: all 0.2s ease;
@@ -1612,13 +1612,13 @@
 .forum-board-pill.active {
   background: rgba(91,122,140, 0.2);
   border: 1rpx solid rgba(91,122,140, 0.6);
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(91,122,140, 0.3);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 .board-pill-name {
   font-size: 24rpx;
   font-weight: bold;
-  color: #94a3b8;
+  color: #8c7d68;
 }
 
 .forum-board-pill.active .board-pill-name {
@@ -1633,7 +1633,7 @@
 
 .loading-text {
   font-size: 22rpx;
-  color: #94a3b8;
+  color: #8c7d68;
 }
 
 .cyber-spinner {
@@ -1693,7 +1693,7 @@
 
 .post-content {
   font-size: 28rpx;
-  color: #94a3b8;
+  color: #8c7d68;
   line-height: 1.5;
   margin-top: 8rpx;
   display: block;
@@ -1708,7 +1708,7 @@
 
 .stat-text {
   font-size: 22rpx;
-  color: #475569;
+  color: #6b5b4a;
 }
 
 .post-stance-bar {
@@ -1834,7 +1834,7 @@
 .box-subtitle {
   font-size: 20rpx;
   font-weight: bold;
-  color: #94a3b8;
+  color: #8c7d68;
   margin-bottom: 8rpx;
   display: block;
 }
@@ -1862,7 +1862,7 @@
 }
 
 .p-name {
-  color: #94a3b8;
+  color: #8c7d68;
 }
 
 .p-choice {
@@ -1973,7 +1973,7 @@
 }
 
 .grid-node-btn.owner-none {
-  background: rgba(148, 163, 184, 0.04);
+  background: rgba(140,125,104, 0.04);
   border: 1rpx solid rgba(255, 255, 255, 0.01);
 }
 
@@ -2010,7 +2010,7 @@
 
 .node-id-lbl {
   font-size: 20rpx;
-  color: #475569;
+  color: #6b5b4a;
   font-weight: 500;
 }
 
@@ -2045,7 +2045,7 @@
 
 .drawer-tip {
   font-size: 20rpx;
-  color: #475569;
+  color: #6b5b4a;
 }
 
 .drawer-details {
@@ -2095,7 +2095,7 @@
   margin-top: 14rpx;
   width: 100%;
   line-height: 1.4;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.3);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(59, 48, 36, 0.25);
 }
 
 /* A-3: Alchemy Chemistry Schema Layout Styles */
@@ -2141,7 +2141,7 @@
 
 .challenge-desc {
   font-size: 20rpx;
-  color: #94a3b8;
+  color: #8c7d68;
   line-height: 1.4;
 }
 
@@ -2171,7 +2171,7 @@
 .panel-subtitle {
   font-size: 20rpx;
   font-weight: bold;
-  color: #94a3b8;
+  color: #8c7d68;
   margin-bottom: 12rpx;
   display: block;
 }
@@ -2215,7 +2215,7 @@
 
 .sub-specs {
   font-size: 20rpx;
-  color: #475569;
+  color: #6b5b4a;
   margin-top: 4rpx;
 }
 
