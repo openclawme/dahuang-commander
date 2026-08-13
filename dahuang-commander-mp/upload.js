@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '1. 修复「元神入定推演中」占位文案重复出现：群聊自动回复的推演状态不再误入聊天消息流；推演中的消息只显示任务进度与转圈，不再把占位文案当正文\n2. 群聊共识结论不再说空话：结案摘要必须包含具体方案/数据/分工等实质要素，超时兜底改为摘录群内最后一条实质发言，空泛口号会被判定为未达成并继续讨论';
+const desc = '1. 修复群聊结案后自主推演的 pending 占位仍写入日志面板的噪音：推演中的自主消息不再追加「元神入定推演中」日志';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

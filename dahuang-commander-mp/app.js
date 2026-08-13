@@ -307,7 +307,8 @@ App({
           this.addLog(l.type || "SYSTEM", l.message || "");
         });
       }
-      if (data.reply) {
+      // 自主推演的 pending 占位不再写入日志面板，避免"元神入定推演中"噪音
+      if (data.reply && !(data.isPending === true)) {
         this.addLog("AUTONOMOUS", data.reply);
       }
       return;
