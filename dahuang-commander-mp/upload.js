@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '1. 移除聊天区双层嵌套框：内层滚动区的边框/圆角/底色全部去除，只保留外层面板一个卡片框，视觉更干净\n2. 滚动区左右留白同步收紧至 10rpx，进一步释放横向空间';
+const desc = '1. 神念遥测页与群聊页统一为无框沉浸式聊天：移除聊天面板外框，消息流直接铺在纸面上\n2. 群聊页空间优化：滚动区留白减半，HTML 卡片占满头像外全部宽度（修复原百分比宽度与头像叠加溢出的布局 bug），删除气泡冲突的内联样式\n3. 群聊气泡内边距收紧、字号 26→28rpx，输入条改为圆角纸白样式';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

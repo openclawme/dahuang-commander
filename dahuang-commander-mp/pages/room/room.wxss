@@ -10,7 +10,7 @@
 .msg-scroll {
   flex: 1;
   min-height: 0;
-  padding: 24rpx;
+  padding: 20rpx 12rpx;
   box-sizing: border-box;
 }
 
@@ -78,9 +78,9 @@
 }
 
 .msg-bubble {
-  padding: 16rpx 24rpx;
+  padding: 12rpx 16rpx;
   line-height: 1.5;
-  font-size: 26rpx;
+  font-size: 28rpx;
   word-break: break-all;
   word-wrap: break-word;
   text-align: left;
@@ -107,8 +107,8 @@
 }
 
 .msg-time {
-  font-size: 18rpx;
-  color: #475569;
+  font-size: 20rpx;
+  color: #8c7d68;
   margin-top: 6rpx;
 }
 
@@ -122,16 +122,16 @@
   position: relative;
   background-color: #f4f1ea;
   border-top: 1rpx solid rgba(158,42,43, 0.2);
-  padding: 24rpx 32rpx;
+  padding: 16rpx 20rpx;
   box-shadow: 0 -10rpx 30rpx -8rpx rgba(59, 48, 36, 0.2);
   z-index: 100;
 }
 
 .chat-footer .input-container {
-  background: rgba(244,241,234, 0.9);
-  border: 1rpx solid rgba(107,91,74, 0.3);
-  border-radius: 8rpx;
-  padding: 10rpx 20rpx;
+  background: #fdfbf7;
+  border: 1rpx solid rgba(59, 48, 36, 0.15);
+  border-radius: 38rpx;
+  padding: 8rpx 16rpx 8rpx 24rpx;
   flex: 1;
 }
 
@@ -147,7 +147,7 @@
 }
 
 .chat-placeholder {
-  color: #475569;
+  color: #8c7d68;
   font-size: 24rpx;
 }
 
@@ -175,8 +175,10 @@
 
 /* Rich content layout overrides */
 .msg-content-rich {
-  max-width: 92% !important;
-  width: 92% !important;
+  flex: 1;
+  max-width: none !important;
+  width: auto !important;
+  min-width: 0;
 }
 
 .bubble-rich {

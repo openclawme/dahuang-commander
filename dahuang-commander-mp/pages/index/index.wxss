@@ -2301,5 +2301,8 @@
 
 /* 聊天面板：收紧左右留白，提高横向空间利用率 */
 .chat-panel {
-  padding: 20rpx 12rpx;
+  padding: 20rpx 4rpx;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
