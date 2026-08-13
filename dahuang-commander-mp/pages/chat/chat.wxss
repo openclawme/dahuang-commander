@@ -18,7 +18,6 @@
   font-size: 34rpx;
   font-weight: bold;
   color: #9e2a2b;
-  text-shadow: 0 0 10rpx rgba(158,42,43, 0.3);
 }
 
 .channel-desc {
@@ -46,7 +45,7 @@
 
 .glowing-border {
   border-color: rgba(158,42,43, 0.5);
-  box-shadow: 0 0 15rpx rgba(158,42,43, 0.2);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.2);
 }
 
 .item-hover {
@@ -87,7 +86,7 @@
   align-items: center;
   justify-content: center;
   border: 2rpx solid #f4f1ea;
-  box-shadow: 0 0 8rpx #be123c;
+  box-shadow: 0 6rpx 16rpx -6rpx rgba(59, 48, 36, 0.2);
 }
 
 .room-info {
