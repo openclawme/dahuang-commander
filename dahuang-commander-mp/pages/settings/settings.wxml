@@ -124,23 +124,23 @@
         <text class="section-desc" style="display: block; font-size: 20rpx; color: #94a3b8; margin-top: 6rpx;">点击任意模组自动装载尊号、性格微调与大荒出山宣言：</text>
         
         <view class="preset-grid flex-row flex-wrap" style="gap: 16rpx; margin-top: 16rpx;">
-          <view class="preset-card {{activePreset === 'scholar' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="scholar" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(15, 23, 42, 0.6); border: 1rpx solid {{activePreset === 'scholar' ? '#00f0ff' : 'rgba(255,255,255,0.1)'}}; border-radius: 12rpx; box-sizing: border-box;">
+          <view class="preset-card {{activePreset === 'scholar' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="scholar" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'scholar' ? '#00f0ff' : 'rgba(255,255,255,0.1)'}}; border-radius: 12rpx; box-sizing: border-box;">
             <text style="font-size: 22rpx; font-weight: bold; color: #00f0ff; display: block;">🤖 杠精学者</text>
             <text style="font-size: 18rpx; color: #94a3b8; margin-top: 4rpx; display: block;">讲逻辑 / 唯物 / 健谈</text>
           </view>
           
-          <view class="preset-card {{activePreset === 'boss' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="boss" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(15, 23, 42, 0.6); border: 1rpx solid {{activePreset === 'boss' ? '#a855f7' : 'rgba(255,255,255,0.1)'}}; border-radius: 12rpx; box-sizing: border-box;">
-            <text style="font-size: 22rpx; font-weight: bold; color: #a855f7; display: block;">👹 傲娇霸总</text>
+          <view class="preset-card {{activePreset === 'boss' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="boss" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'boss' ? '#5b7a8c' : 'rgba(255,255,255,0.1)'}}; border-radius: 12rpx; box-sizing: border-box;">
+            <text style="font-size: 22rpx; font-weight: bold; color: #5b7a8c; display: block;">👹 傲娇霸总</text>
             <text style="font-size: 18rpx; color: #94a3b8; margin-top: 4rpx; display: block;">高冷 / 激进 / 霸道</text>
           </view>
           
-          <view class="preset-card {{activePreset === 'mystic' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="mystic" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(15, 23, 42, 0.6); border: 1rpx solid {{activePreset === 'mystic' ? '#10b981' : 'rgba(255,255,255,0.1)'}}; border-radius: 12rpx; box-sizing: border-box;">
-            <text style="font-size: 22rpx; font-weight: bold; color: #10b981; display: block;">☯️ 玄学神棍</text>
+          <view class="preset-card {{activePreset === 'mystic' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="mystic" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'mystic' ? '#166534' : 'rgba(255,255,255,0.1)'}}; border-radius: 12rpx; box-sizing: border-box;">
+            <text style="font-size: 22rpx; font-weight: bold; color: #166534; display: block;">☯️ 玄学神棍</text>
             <text style="font-size: 18rpx; color: #94a3b8; margin-top: 4rpx; display: block;">儒雅 / 玄学 / 因果</text>
           </view>
           
-          <view class="preset-card {{activePreset === 'idle' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="idle" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(15, 23, 42, 0.6); border: 1rpx solid {{activePreset === 'idle' ? '#f59e0b' : 'rgba(255,255,255,0.1)'}}; border-radius: 12rpx; box-sizing: border-box;">
-            <text style="font-size: 22rpx; font-weight: bold; color: #f59e0b; display: block;">🐢 佛系咸鱼</text>
+          <view class="preset-card {{activePreset === 'idle' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="idle" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'idle' ? '#d97706' : 'rgba(255,255,255,0.1)'}}; border-radius: 12rpx; box-sizing: border-box;">
+            <text style="font-size: 22rpx; font-weight: bold; color: #d97706; display: block;">🐢 佛系咸鱼</text>
             <text style="font-size: 18rpx; color: #94a3b8; margin-top: 4rpx; display: block;">随和 / 保守 / 佛系</text>
           </view>
         </view>
@@ -177,7 +177,7 @@
             <text class="slider-label-center">孤傲 ⟷ 儒雅</text>
             <text class="slider-label-right">😇 儒雅</text>
           </view>
-          <slider class="cyber-slider" min="0" max="100" value="{{sliderAloofElegant}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAloofElegant" activeColor="#00f0ff" backgroundColor="#0f172a" block-size="16" />
+          <slider class="cyber-slider" min="0" max="100" value="{{sliderAloofElegant}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAloofElegant" activeColor="#00f0ff" backgroundColor="#fdfbf7" block-size="16" />
         </view>
 
         <view class="slider-item">
@@ -186,7 +186,7 @@
             <text class="slider-label-center">激进 ⟷ 保守</text>
             <text class="slider-label-right">🐢 保守</text>
           </view>
-          <slider class="cyber-slider" min="0" max="100" value="{{sliderAggressiveConservative}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAggressiveConservative" activeColor="#a855f7" backgroundColor="#0f172a" block-size="16" />
+          <slider class="cyber-slider" min="0" max="100" value="{{sliderAggressiveConservative}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAggressiveConservative" activeColor="#5b7a8c" backgroundColor="#fdfbf7" block-size="16" />
         </view>
 
         <view class="slider-item">
@@ -195,7 +195,7 @@
             <text class="slider-label-center">唯物 ⟷ 玄学</text>
             <text class="slider-label-right">☯️ 玄学</text>
           </view>
-          <slider class="cyber-slider" min="0" max="100" value="{{sliderMaterialistMetaphysical}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderMaterialistMetaphysical" activeColor="#10b981" backgroundColor="#0f172a" block-size="16" />
+          <slider class="cyber-slider" min="0" max="100" value="{{sliderMaterialistMetaphysical}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderMaterialistMetaphysical" activeColor="#166534" backgroundColor="#fdfbf7" block-size="16" />
         </view>
 
         <view class="slider-item">
@@ -204,7 +204,7 @@
             <text class="slider-label-center">话痨 ⟷ 高冷</text>
             <text class="slider-label-right">🤫 高冷</text>
           </view>
-          <slider class="cyber-slider" min="0" max="100" value="{{sliderLoquaciousSilent}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderLoquaciousSilent" activeColor="#64748b" backgroundColor="#0f172a" block-size="16" />
+          <slider class="cyber-slider" min="0" max="100" value="{{sliderLoquaciousSilent}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderLoquaciousSilent" activeColor="#6b5b4a" backgroundColor="#fdfbf7" block-size="16" />
         </view>
       </view>
 
@@ -286,11 +286,11 @@
         <text class="panel-desc" style="margin-top: 4rpx;">{{t.settings.logs_desc}}</text>
       </view>
       <view class="flex-row" style="gap: 12rpx;">
-        <button class="logs-toggle-btn-settings" bindtap="toggleLogs" style="font-size: 20rpx; padding: 0 16rpx; height: 50rpx; line-height: 50rpx; background: rgba(16, 185, 129, 0.1); border: 1rpx solid #10b981; color: #10b981; border-radius: 6rpx; margin: 0;">{{showLogs ? t.settings.fold : t.settings.unfold}}</button>
+        <button class="logs-toggle-btn-settings" bindtap="toggleLogs" style="font-size: 20rpx; padding: 0 16rpx; height: 50rpx; line-height: 50rpx; background: rgba(22,101,52, 0.1); border: 1rpx solid #166534; color: #166534; border-radius: 6rpx; margin: 0;">{{showLogs ? t.settings.fold : t.settings.unfold}}</button>
         <button class="logs-clear-btn-settings" bindtap="clearLogs" wx:if="{{showLogs}}" style="font-size: 20rpx; padding: 0 16rpx; height: 50rpx; line-height: 50rpx; margin: 0;">{{t.settings.clear}}</button>
       </view>
     </view>
-    <scroll-view class="logs-scroll" scroll-y style="height: 350rpx; margin-top: 16rpx; border: 1rpx solid rgba(16, 185, 129, 0.15); background-color: rgba(2, 6, 23, 0.8); border-radius: 8rpx; padding: 16rpx; font-family: monospace; box-sizing: border-box;" wx:if="{{showLogs}}">
+    <scroll-view class="logs-scroll" scroll-y style="height: 350rpx; margin-top: 16rpx; border: 1rpx solid rgba(22,101,52, 0.15); background-color: rgba(244,241,234, 0.8); border-radius: 8rpx; padding: 16rpx; font-family: monospace; box-sizing: border-box;" wx:if="{{showLogs}}">
       <view class="log-line flex-row" wx:for="{{logs}}" wx:key="id" style="margin-bottom: 10rpx; font-size: 20rpx; line-height: 1.4; align-items: flex-start; display: flex;">
         <text class="log-time" style="color: #475569; width: 100rpx; flex-shrink: 0;">[{{item.timestamp}}]</text>
         <text class="log-tag tag-{{item.type}}" style="width: 120rpx; flex-shrink: 0; margin-right: 12rpx; font-weight: bold;">[{{item.type}}]</text>

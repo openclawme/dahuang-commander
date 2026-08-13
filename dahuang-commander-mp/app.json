@@ -7,17 +7,17 @@
     "pages/settings/settings"
   ],
   "window": {
-    "backgroundTextStyle": "dark",
-    "navigationBarBackgroundColor": "#0b0f19",
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#f4f1ea",
     "navigationBarTitleText": "大荒分身 · 天道指挥官终端",
-    "navigationBarTextStyle": "white",
-    "backgroundColor": "#020617"
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f4f1ea"
   },
   "tabBar": {
-    "color": "#64748b",
-    "selectedColor": "#06b6d4",
-    "backgroundColor": "#0b0f19",
-    "borderStyle": "black",
+    "color": "#6b5b4a",
+    "selectedColor": "#9e2a2b",
+    "backgroundColor": "#f4f1ea",
+    "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/index/index",

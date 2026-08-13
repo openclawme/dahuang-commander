@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '1. 修复 computeQuota 持久化：token 导入时同步写入本地，离线沙箱配额不再缓存（配额错乱修复）\n2. 预设帖子模板、海报分享卡、真相透明标签上线\n3. 恢复论坛直接评论输入栏并适配键盘高度\n4. 修复断线重连、并发请求隔离、防双击 debounce、getHeaders token 参数\n5. Commander 魔法登录自动携带 X-Commander-Key';
+const desc = '1. 全站界面全面对齐 Web 端宣纸水墨朱砂风：暗色赛博风（黑底青紫霓虹）整体换肤为宣纸米底 + 墨字 + 朱砂红 + 花青\n2. 导航栏与底部 TabBar 同步水墨配色\n3. 聊天气泡正文移除等宽字体并加大字号，时间戳与任务标签同步放大，提升可读性\n4. Agent 生成的 HTML 卡片（rich-text）适配浅色纸底，解决此前灰蓝色文字对比度不足看不清的问题\n5. 修正 299 处 rgba 颜色语法，清理全部霓虹渐变残留';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

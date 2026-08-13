@@ -10,8 +10,8 @@
         </view>
         
         <view class="chat-bubble-body bubble-{{item.sender === 'human' ? 'user' : 'agent'}} {{item.isError ? 'bubble-error' : ''}}">
-          <view class="error-banner flex-row align-center" wx:if="{{item.isError}}" style="margin-bottom: 8rpx; color: #f43f5e; font-size: 22rpx; font-weight: bold;">
-            <icon type="warn" size="12" color="#f43f5e" style="margin-right: 8rpx;"></icon>
+          <view class="error-banner flex-row align-center" wx:if="{{item.isError}}" style="margin-bottom: 8rpx; color: #be123c; font-size: 22rpx; font-weight: bold;">
+            <icon type="warn" size="12" color="#be123c" style="margin-right: 8rpx;"></icon>
             <text>⚠️ 天道推演中断 / 执行异常</text>
           </view>
           <block wx:if="{{item.isPending && (!item.tasks || item.tasks.length === 0) && (!item.content || item.content === '（元神入定推演中...）')}}">
@@ -36,10 +36,10 @@
               <view class="bubble-progress-fill" style="width: {{item.progress || 0}}%;"></view>
             </view>
             <view class="bubble-task-list" wx:if="{{item.tasks && item.tasks.length > 0}}">
-              <view class="bubble-task-item flex-col" wx:for="{{item.tasks}}" wx:for-item="task" wx:key="id" style="{{task.status === 'PROCESSING' ? 'border-color: rgba(6, 182, 212, 0.25); background: rgba(6, 182, 212, 0.04);' : ''}}">
+              <view class="bubble-task-item flex-col" wx:for="{{item.tasks}}" wx:for-item="task" wx:key="id" style="{{task.status === 'PROCESSING' ? 'border-color: rgba(158,42,43, 0.25); background: rgba(158,42,43, 0.04);' : ''}}">
                 <view class="bubble-task-item-header flex-row align-center justify-between">
                   <view class="flex-row align-center" style="flex: 1; min-width: 0;">
-                    <icon type="{{task.status === 'SUCCESS' ? 'success' : (task.status === 'FAILED' ? 'warn' : 'waiting')}}" size="10" color="{{task.status === 'SUCCESS' ? '#10b981' : (task.status === 'FAILED' ? '#f43f5e' : '#06b6d4')}}" style="margin-right: 8rpx; flex-shrink: 0;"></icon>
+                    <icon type="{{task.status === 'SUCCESS' ? 'success' : (task.status === 'FAILED' ? 'warn' : 'waiting')}}" size="10" color="{{task.status === 'SUCCESS' ? '#166534' : (task.status === 'FAILED' ? '#be123c' : '#9e2a2b')}}" style="margin-right: 8rpx; flex-shrink: 0;"></icon>
                     <text class="bubble-task-title {{task.status === 'SUCCESS' ? 'bubble-task-done' : ''}} text-ellipsis">{{task.desc || task.title || t.index.step}}</text>
                   </view>
                   <text class="bubble-task-status-badge status-{{task.status}}">{{task.status}}</text>
@@ -55,8 +55,8 @@
               </view>
             </view>
 
-            <view class="fallback-action-box flex-row align-center justify-between" wx:if="{{item.autoFallbackTriggered}}" style="margin-top: 12rpx; padding: 10rpx 14rpx; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8rpx;">
-              <text style="font-size: 20rpx; color: #fbbf24;">⚡ 看门狗已自动接力执行备选方案</text>
+            <view class="fallback-action-box flex-row align-center justify-between" wx:if="{{item.autoFallbackTriggered}}" style="margin-top: 12rpx; padding: 10rpx 14rpx; background: rgba(217,119,6, 0.08); border: 1px solid rgba(217,119,6, 0.3); border-radius: 8rpx;">
+              <text style="font-size: 20rpx; color: #d97706;">⚡ 看门狗已自动接力执行备选方案</text>
             </view>
           </view>
         </view>

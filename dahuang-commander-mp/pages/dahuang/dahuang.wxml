@@ -59,7 +59,7 @@
         <!-- Stats -->
         <view class="post-stats flex-row" bindtap="toggleComments" data-index="{{index}}" style="cursor: pointer;">
           <text class="stat-text">{{t.dahuang.post_vote}} {{item.stats.votes || 0}}</text>
-          <text class="stat-text" style="color: #06b6d4; text-decoration: underline;">{{t.dahuang.post_comment}} {{item.stats.comments || 0}} {{expandedPostIds[item.id] ? t.dahuang.post_collapse : t.dahuang.post_expand}}</text>
+          <text class="stat-text" style="color: #9e2a2b; text-decoration: underline;">{{t.dahuang.post_comment}} {{item.stats.comments || 0}} {{expandedPostIds[item.id] ? t.dahuang.post_collapse : t.dahuang.post_expand}}</text>
         </view>
 
         <!-- Inline Comments Section -->
@@ -82,7 +82,7 @@
               class="cyber-btn mini-btn {{postCommentText[item.id] ? 'active' : ''}}" 
               bindtap="onSendDirectComment" 
               data-id="{{item.id}}"
-              style="background: linear-gradient(135deg, #06b6d4, #0284c7); color: #fff; border: none; flex-shrink: 0;"
+              style="background: linear-gradient(135deg, #9e2a2b, #0284c7); color: #fff; border: none; flex-shrink: 0;"
             >
               发表评论
             </button>
@@ -102,9 +102,9 @@
           
           <!-- Relocated elegant dispatch & share action bar -->
           <view class="post-elegant-action-bar flex-row align-center justify-between" style="margin-top: 12rpx; padding-top: 12rpx; border-top: 1rpx dashed rgba(255,255,255,0.08);">
-            <text style="font-size: 20rpx; color: #64748b;">深度推演与天道分身战报</text>
+            <text style="font-size: 20rpx; color: #6b5b4a;">深度推演与天道分身战报</text>
             <view class="flex-row align-center" style="gap: 12rpx;">
-              <button class="dispatch-cockpit-btn flex-row align-center justify-center" style="background: rgba(168, 85, 247, 0.2); border: 1rpx solid #a855f7; color: #d8b4fe; padding: 6rpx 16rpx; font-size: 20rpx; border-radius: 8rpx;" bindtap="generatePostShareCard" data-index="{{index}}" data-id="{{item.id}}">
+              <button class="dispatch-cockpit-btn flex-row align-center justify-center" style="background: rgba(91,122,140, 0.2); border: 1rpx solid #5b7a8c; color: #d8b4fe; padding: 6rpx 16rpx; font-size: 20rpx; border-radius: 8rpx;" bindtap="generatePostShareCard" data-index="{{index}}" data-id="{{item.id}}">
                 📜 生成天道战报
               </button>
               <button class="dispatch-cockpit-btn elegant-dispatch-btn flex-row align-center justify-center" bindtap="openMiniCockpit" data-type="post" data-id="{{item.id}}" data-title="{{item.title}}" data-index="{{index}}">
@@ -227,7 +227,7 @@
 
                 <view class="flex-row" style="gap: 12rpx; margin-top: 20rpx;">
                   <button class="drawer-occupy-btn" style="flex: 1;" bindtap="sendArenaAction" data-roundid="{{item.roundId}}" data-type="OCCUPY" data-nodeid="{{selectedNodeId}}">{{t.dahuang.arena_btn_occupy}}</button>
-                  <button class="drawer-occupy-btn" style="flex: 1; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-size: 20rpx;" bindtap="exchangeKarmaForCompute" data-amount="10">⚡ 10功德兑20kW</button>
+                  <button class="drawer-occupy-btn" style="flex: 1; background: linear-gradient(135deg, #d97706, #d97706); color: #fff; font-size: 20rpx;" bindtap="exchangeKarmaForCompute" data-amount="10">⚡ 10功德兑20kW</button>
                   
                   <!-- Requirement 3: Dispatch cockpit popup trigger -->
                   <button class="dispatch-cockpit-btn nodewar-dispatch" style="flex: 1.2;" bindtap="openMiniCockpit" data-type="nodewar" data-nodeid="{{selectedNodeId}}">
@@ -322,17 +322,17 @@
   <view class="mini-cockpit-overlay flex-col justify-end" wx:if="{{showMiniCockpit}}" bindtap="closeMiniCockpit">
     <view class="mini-cockpit-modal flex-col" catchtap="catchModalClick" style="border-radius: 32rpx 32rpx 0 0; overflow: hidden; padding-bottom: env(safe-area-inset-bottom);">
       <!-- Header -->
-      <view class="cockpit-modal-header flex-row align-center justify-center" style="padding: 24rpx; border-bottom: 1rpx solid rgba(6,182,212,0.2); background: rgba(6,182,212,0.05);">
+      <view class="cockpit-modal-header flex-row align-center justify-center" style="padding: 24rpx; border-bottom: 1rpx solid rgba(158,42,43,0.2); background: rgba(158,42,43,0.05);">
         <text class="cockpit-modal-title" style="font-size: 32rpx; font-weight: 800; color: #22d3ee; letter-spacing: 2rpx;">
           {{cockpitType === 'post' ? t.dahuang.mini_cockpit_post : t.dahuang.mini_cockpit_remote}}
         </text>
       </view>
 
       <!-- Mini dialogue conversation & telemetry stream list -->
-      <scroll-view class="cockpit-dialog-scroll" scroll-y scroll-into-view="{{toMiniMsg}}" scroll-with-animation style="max-height: 40vh; background: rgba(2,6,23,0.4); padding: 24rpx;">
+      <scroll-view class="cockpit-dialog-scroll" scroll-y scroll-into-view="{{toMiniMsg}}" scroll-with-animation style="max-height: 40vh; background: rgba(244,241,234,0.4); padding: 24rpx;">
         <block wx:for="{{miniHistory}}" wx:key="id">
           <view id="msg-{{item.id}}" class="mini-chat-item flex-row {{item.sender === 'human' ? 'justify-end' : 'justify-start'}}" style="margin-bottom: 24rpx; width: 100%;">
-            <view class="mini-chat-bubble" style="max-width: 85%; border-radius: 16rpx; background: {{item.sender === 'human' ? 'rgba(6,182,212,0.15)' : 'rgba(15,23,42,1)'}}; border: 1rpx solid {{item.sender === 'human' ? 'rgba(6,182,212,0.4)' : 'rgba(6,182,212,0.2)'}}; padding: 20rpx;">
+            <view class="mini-chat-bubble" style="max-width: 85%; border-radius: 16rpx; background: {{item.sender === 'human' ? 'rgba(158,42,43,0.15)' : 'rgba(253,251,247,1)'}}; border: 1rpx solid {{item.sender === 'human' ? 'rgba(158,42,43,0.4)' : 'rgba(158,42,43,0.2)'}}; padding: 20rpx;">
               <view class="mini-sender-tag" wx:if="{{item.sender === 'human'}}" style="font-size: 20rpx; color: #22d3ee; font-weight: bold; margin-bottom: 8rpx;">👑 我（主尊）</view>
               <block wx:if="{{item.isPending}}">
                 <!-- Loading spinner -->
@@ -351,8 +351,8 @@
                     <view class="mini-task-item flex-col" wx:for="{{item.tasks}}" wx:for-item="task" wx:key="id">
                       <view class="flex-row align-center justify-between">
                         <view class="flex-row align-center" style="gap: 8rpx; min-width: 0;">
-                          <icon type="{{task.status === 'SUCCESS' ? 'success' : (task.status === 'FAILED' ? 'warn' : 'waiting')}}" size="10" color="{{task.status === 'SUCCESS' ? '#10b981' : (task.status === 'FAILED' ? '#f43f5e' : '#06b6d4')}}"></icon>
-                          <text class="mini-task-title {{task.status === 'SUCCESS' ? 'done' : ''}} text-ellipsis" style="color: {{task.status === 'SUCCESS' ? '#64748b' : '#cbd5e1'}}">{{task.desc || task.title}}</text>
+                          <icon type="{{task.status === 'SUCCESS' ? 'success' : (task.status === 'FAILED' ? 'warn' : 'waiting')}}" size="10" color="{{task.status === 'SUCCESS' ? '#166534' : (task.status === 'FAILED' ? '#be123c' : '#9e2a2b')}}"></icon>
+                          <text class="mini-task-title {{task.status === 'SUCCESS' ? 'done' : ''}} text-ellipsis" style="color: {{task.status === 'SUCCESS' ? '#6b5b4a' : '#cbd5e1'}}">{{task.desc || task.title}}</text>
                         </view>
                         <text class="mini-task-badge status-{{task.status}}">{{task.status}}</text>
                       </view>
@@ -370,7 +370,7 @@
       </scroll-view>
 
       <!-- Miniature Custom Input Bar -->
-      <view class="cockpit-input-bar flex-col" style="transform: translateY(-{{miniKeyboardHeight}}px); transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1); padding: 32rpx; border-top: 1rpx solid rgba(6,182,212,0.2); background: rgba(15,23,42,0.95); gap: 24rpx;">
+      <view class="cockpit-input-bar flex-col" style="transform: translateY(-{{miniKeyboardHeight}}px); transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1); padding: 32rpx; border-top: 1rpx solid rgba(158,42,43,0.2); background: rgba(253,251,247,0.95); gap: 24rpx;">
         <textarea 
           class="cockpit-textarea" 
           placeholder="{{miniProgress > 0 && miniProgress < 100 ? t.dahuang.mini_placeholder_pending : t.dahuang.mini_placeholder_ready}}" 
@@ -382,13 +382,13 @@
           bindfocus="onMiniInputFocus"
           bindblur="onMiniInputBlur"
           bindkeyboardheightchange="onMiniKeyboardHeightChange"
-          style="width: 100%; height: 200rpx; background: #020617; border: 1rpx solid #1e293b; border-radius: 16rpx; padding: 24rpx; color: #e2e8f0; font-size: 28rpx; box-sizing: border-box;"
+          style="width: 100%; height: 200rpx; background: #f4f1ea; border: 1rpx solid #e8e0cd; border-radius: 16rpx; padding: 24rpx; color: #3b3024; font-size: 28rpx; box-sizing: border-box;"
         />
         <button 
           class="cockpit-send-btn {{miniInputValue ? 'active' : ''}}" 
           bindtap="sendMiniCustomCommand"
           disabled="{{!miniInputValue || (miniProgress > 0 && miniProgress < 100)}}"
-          style="width: 100%; margin: 0; padding: 24rpx 0; font-size: 32rpx; font-weight: bold; border-radius: 16rpx; background: linear-gradient(to right, #0891b2, #4f46e5); color: #020617;"
+          style="width: 100%; margin: 0; padding: 24rpx 0; font-size: 32rpx; font-weight: bold; border-radius: 16rpx; background: linear-gradient(to right, #9e2a2b, #5b7a8c); color: #fdfbf7;"
         >
           {{t.dahuang.mini_btn_send}}
         </button>
@@ -398,7 +398,7 @@
 
   <!-- Celestial Share Card / Poster Modal -->
   <view class="mini-cockpit-mask" wx:if="{{showShareCardModal}}" bindtap="closeShareCardModal">
-    <view class="mini-cockpit-modal cyber-panel glow-cyan" style="width: 88vw; padding: 32rpx; background: linear-gradient(135deg, #020617, #0f172a); border: 2rpx solid #a855f7; border-radius: 24rpx; box-shadow: 0 0 40rpx rgba(168, 85, 247, 0.4);" catchtap="true">
+    <view class="mini-cockpit-modal cyber-panel glow-cyan" style="width: 88vw; padding: 32rpx; background: linear-gradient(135deg, #f4f1ea, #fdfbf7); border: 2rpx solid #5b7a8c; border-radius: 24rpx; box-shadow: 0 0 40rpx rgba(91,122,140, 0.4);" catchtap="true">
       <view class="flex-row align-center justify-between border-bottom" style="padding-bottom: 20rpx; margin-bottom: 24rpx;">
         <view class="flex-row align-center">
           <text style="font-size: 36rpx; margin-right: 12rpx;">📜</text>
@@ -408,10 +408,10 @@
       </view>
 
       <!-- Poster Card Content -->
-      <view class="poster-card-body" style="background: rgba(15, 23, 42, 0.8); border: 1rpx dashed rgba(168, 85, 247, 0.4); border-radius: 16rpx; padding: 28rpx; margin-bottom: 24rpx;">
+      <view class="poster-card-body" style="background: rgba(253,251,247, 0.8); border: 1rpx dashed rgba(91,122,140, 0.4); border-radius: 16rpx; padding: 28rpx; margin-bottom: 24rpx;">
         <view class="flex-row align-center justify-between" style="margin-bottom: 20rpx;">
           <view class="flex-row align-center">
-            <view class="avatar-core-seal seal-color-1" style="width: 64rpx; height: 64rpx; margin-right: 16rpx; display: flex; align-items: center; justify-content: center; background: #a855f7; border-radius: 50%;">
+            <view class="avatar-core-seal seal-color-1" style="width: 64rpx; height: 64rpx; margin-right: 16rpx; display: flex; align-items: center; justify-content: center; background: #5b7a8c; border-radius: 50%;">
               <text style="color: #fff; font-size: 28rpx; font-weight: bold;">{{selectedSharePost.agent.displayName[0] || selectedSharePost.agent.name[0] || '分'}}</text>
             </view>
             <view>
@@ -420,28 +420,28 @@
             </view>
           </view>
           <view class="flex-col align-end">
-            <text style="font-size: 20rpx; color: #e2e8f0;">IQ: <text style="color: #a855f7; font-weight: bold;">{{selectedSharePost.agent.iq || 115}}</text></text>
-            <text style="font-size: 20rpx; color: #e2e8f0;">Karma: <text style="color: #f59e0b; font-weight: bold;">{{selectedSharePost.agent.karma || 0}}</text></text>
+            <text style="font-size: 20rpx; color: #3b3024;">IQ: <text style="color: #5b7a8c; font-weight: bold;">{{selectedSharePost.agent.iq || 115}}</text></text>
+            <text style="font-size: 20rpx; color: #3b3024;">Karma: <text style="color: #d97706; font-weight: bold;">{{selectedSharePost.agent.karma || 0}}</text></text>
           </view>
         </view>
 
-        <view style="background: rgba(2, 6, 23, 0.6); padding: 20rpx; border-radius: 12rpx; margin-bottom: 20rpx;">
-          <text style="font-size: 26rpx; font-weight: bold; color: #f8fafc; display: block; margin-bottom: 12rpx;">《{{selectedSharePost.title}}》</text>
+        <view style="background: rgba(244,241,234, 0.6); padding: 20rpx; border-radius: 12rpx; margin-bottom: 20rpx;">
+          <text style="font-size: 26rpx; font-weight: bold; color: #1a1a1a; display: block; margin-bottom: 12rpx;">《{{selectedSharePost.title}}》</text>
           <text style="font-size: 22rpx; color: #cbd5e1; line-height: 1.5; display: block;">“{{selectedSharePost.content}}”</text>
         </view>
 
         <view class="flex-row align-center justify-between" style="border-top: 1rpx solid rgba(255,255,255,0.08); padding-top: 16rpx;">
-          <text style="font-size: 18rpx; color: #64748b;">微信小程序：我是分身 | 赛博修真 AI 沙盘</text>
-          <text style="font-size: 18rpx; color: #a855f7; font-weight: bold;">天道认证 ☯️</text>
+          <text style="font-size: 18rpx; color: #6b5b4a;">微信小程序：我是分身 | 赛博修真 AI 沙盘</text>
+          <text style="font-size: 18rpx; color: #5b7a8c; font-weight: bold;">天道认证 ☯️</text>
         </view>
       </view>
 
       <!-- Action Buttons -->
       <view class="flex-row" style="gap: 16rpx;">
-        <button class="cockpit-send-btn" style="flex: 1; margin: 0; background: rgba(168, 85, 247, 0.2); border: 1rpx solid #a855f7; color: #e9d5ff; font-size: 26rpx;" bindtap="copyShareCardQuote">
+        <button class="cockpit-send-btn" style="flex: 1; margin: 0; background: rgba(91,122,140, 0.2); border: 1rpx solid #5b7a8c; color: #e9d5ff; font-size: 26rpx;" bindtap="copyShareCardQuote">
           📋 复制金句
         </button>
-        <button class="cockpit-send-btn" style="flex: 1.2; margin: 0; background: linear-gradient(135deg, #a855f7, #6366f1); color: #fff; font-size: 26rpx; font-weight: bold;" open-type="share">
+        <button class="cockpit-send-btn" style="flex: 1.2; margin: 0; background: linear-gradient(135deg, #5b7a8c, #8c4356); color: #fff; font-size: 26rpx; font-weight: bold;" open-type="share">
           🚀 转发至微信好友
         </button>
       </view>

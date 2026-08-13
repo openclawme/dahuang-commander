@@ -673,8 +673,8 @@ App({
       .replace(/<meta[^>]*>/gi, "")
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
 
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #fbbf24; font-weight: bold;">$1</strong>');
-    html = html.replace(/`(.*?)`/g, '<code style="background: rgba(15, 23, 42, 0.9); color: #34d399; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 22rpx; border: 1px solid rgba(52, 211, 153, 0.2);">$1</code>');
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #d97706; font-weight: bold;">$1</strong>');
+    html = html.replace(/`(.*?)`/g, '<code style="background: rgba(158,42,43, 0.06); color: #9e2a2b; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 22rpx; border: 1px solid rgba(158,42,43, 0.15);">$1</code>');
 
     return { html, videoUrl: "", videoPoster: "" };
   }

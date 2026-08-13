@@ -2,7 +2,7 @@
 
 .container {
   padding: 24rpx;
-  background-color: #020617;
+  background-color: #f4f1ea;
   height: 100%;
   width: 100%;
   box-sizing: border-box;
@@ -24,7 +24,7 @@
 .card-title {
   font-size: 28rpx;
   font-weight: bold;
-  color: #f8fafc;
+  color: #1a1a1a;
 }
 
 .agent-profile-detail {
@@ -36,12 +36,12 @@
   width: 110rpx;
   height: 110rpx;
   border-radius: 50%;
-  border: 4rpx solid #06b6d4;
-  background-color: rgba(6, 182, 212, 0.1);
+  border: 4rpx solid #9e2a2b;
+  background-color: rgba(158,42,43, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 15rpx rgba(6, 182, 212, 0.3);
+  box-shadow: 0 0 15rpx rgba(158,42,43, 0.3);
 }
 
 .avatar-emoji {
@@ -55,18 +55,18 @@
 .profile-name {
   font-size: 34rpx;
   font-weight: bold;
-  color: #f8fafc;
+  color: #1a1a1a;
 }
 
 .profile-char {
   font-size: 22rpx;
-  color: #64748b;
+  color: #6b5b4a;
   margin-top: 6rpx;
 }
 
 .profile-stats {
-  background: rgba(2, 6, 23, 0.6);
-  border: 1rpx solid rgba(100, 116, 139, 0.15);
+  background: rgba(244,241,234, 0.6);
+  border: 1rpx solid rgba(107,91,74, 0.15);
   border-radius: 8rpx;
   padding: 20rpx;
   margin-bottom: 24rpx;
@@ -81,14 +81,13 @@
 
 .p-stat-lbl {
   font-size: 20rpx;
-  color: #64748b;
+  color: #6b5b4a;
   margin-bottom: 6rpx;
 }
 
 .p-stat-val {
   font-size: 32rpx;
   font-weight: bold;
-  font-family: monospace;
 }
 
 .did-block {
@@ -103,14 +102,13 @@
 
 .did-value {
   font-size: 20rpx;
-  color: #06b6d4;
-  font-family: monospace;
+  color: #9e2a2b;
   word-break: break-all;
   margin-top: 6rpx;
 }
 
 .token-block {
-  background: rgba(2, 6, 23, 0.5);
+  background: rgba(244,241,234, 0.5);
   border: 1rpx solid rgba(255, 255, 255, 0.05);
   padding: 14rpx 20rpx;
   border-radius: 8rpx;
@@ -125,9 +123,9 @@
 }
 
 .copy-btn {
-  background: rgba(6, 182, 212, 0.1);
-  border: 1rpx solid #06b6d4;
-  color: #06b6d4;
+  background: rgba(158,42,43, 0.1);
+  border: 1rpx solid #9e2a2b;
+  color: #9e2a2b;
   font-size: 20rpx;
   font-weight: bold;
   padding: 0 16rpx;
@@ -142,13 +140,13 @@
 }
 
 .copy-btn:active {
-  background: rgba(6, 182, 212, 0.25);
+  background: rgba(158,42,43, 0.25);
 }
 
 .logout-btn {
-  background: rgba(244, 63, 94, 0.1);
-  border: 1rpx solid rgba(244, 63, 94, 0.4);
-  color: #f43f5e;
+  background: rgba(190,18,60, 0.1);
+  border: 1rpx solid rgba(190,18,60, 0.4);
+  color: #be123c;
   font-size: 24rpx;
   font-weight: bold;
   height: 80rpx;
@@ -163,7 +161,7 @@
 }
 
 .logout-btn:active {
-  background: rgba(244, 63, 94, 0.2);
+  background: rgba(190,18,60, 0.2);
 }
 
 /* Unlogged card styles */
@@ -175,13 +173,13 @@
 .unlogin-title {
   font-size: 32rpx;
   font-weight: bold;
-  color: #a855f7;
-  text-shadow: 0 0 10rpx rgba(168, 85, 247, 0.4);
+  color: #5b7a8c;
+  text-shadow: 0 0 10rpx rgba(91,122,140, 0.4);
 }
 
 .unlogin-desc {
   font-size: 22rpx;
-  color: #64748b;
+  color: #6b5b4a;
   margin-top: 12rpx;
   line-height: 1.6;
   padding: 0 16rpx;
@@ -190,7 +188,7 @@
 /* Agents Panel */
 .panel-desc {
   font-size: 20rpx;
-  color: #64748b;
+  color: #6b5b4a;
   margin-top: 6rpx;
   line-height: 1.4;
 }
@@ -218,16 +216,16 @@
 
 .agent-grid-item {
   width: calc(33.33% - 11rpx);
-  background: rgba(2, 6, 23, 0.5);
-  border: 1rpx solid rgba(168, 85, 247, 0.2);
+  background: rgba(244,241,234, 0.5);
+  border: 1rpx solid rgba(91,122,140, 0.2);
   border-radius: 8rpx;
   padding: 16rpx;
   transition: all 0.2s ease;
 }
 
 .agent-item-hover {
-  border-color: #a855f7;
-  background: rgba(168, 85, 247, 0.1);
+  border-color: #5b7a8c;
+  background: rgba(91,122,140, 0.1);
 }
 
 .grid-avatar {
@@ -238,7 +236,7 @@
 .grid-name {
   font-size: 22rpx;
   font-weight: bold;
-  color: #e2e8f0;
+  color: #3b3024;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
@@ -248,9 +246,8 @@
 
 .grid-karma {
   font-size: 16rpx;
-  color: #a855f7;
+  color: #5b7a8c;
   text-align: center;
-  font-family: monospace;
   margin-top: 4rpx;
 }
 
@@ -265,11 +262,11 @@
 
 .empty-text {
   font-size: 22rpx;
-  color: #334155;
+  color: #8c7d68;
 }
 
 .register-toggle-btn {
-  background: linear-gradient(135deg, #a855f7, #9333ea);
+  background: linear-gradient(135deg, #5b7a8c, #8c4356);
   color: #ffffff;
   font-size: 24rpx;
   font-weight: bold;
@@ -279,7 +276,7 @@
   border: none;
   width: 100%;
   margin-top: 24rpx;
-  box-shadow: 0 0 15rpx rgba(168, 85, 247, 0.4);
+  box-shadow: 0 0 15rpx rgba(91,122,140, 0.4);
 }
 
 .register-toggle-btn::after {
@@ -294,13 +291,12 @@
 .token-textarea {
   width: 100%;
   height: 120rpx;
-  background: rgba(2, 6, 23, 0.8);
-  border: 1rpx solid rgba(16, 185, 129, 0.3);
+  background: rgba(244,241,234, 0.8);
+  border: 1rpx solid rgba(22,101,52, 0.3);
   border-radius: 8rpx;
   padding: 16rpx;
   font-size: 22rpx;
-  color: #f8fafc;
-  font-family: monospace;
+  color: #1a1a1a;
   margin-top: 20rpx;
   box-sizing: border-box;
 }
@@ -311,8 +307,8 @@
 }
 
 .import-submit-btn {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: #020617;
+  background: linear-gradient(135deg, #166534, #3b5e59);
+  color: #f4f1ea;
   font-size: 24rpx;
   font-weight: bold;
   height: 70rpx;
@@ -321,7 +317,7 @@
   border: none;
   width: 100%;
   margin-top: 20rpx;
-  box-shadow: 0 0 12rpx rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 12rpx rgba(22,101,52, 0.3);
 }
 
 .import-submit-btn::after {
@@ -359,59 +355,59 @@
 .form-label {
   font-size: 22rpx;
   font-weight: bold;
-  color: #06b6d4;
+  color: #9e2a2b;
 }
 
 .form-input {
   height: 70rpx;
-  background: rgba(2, 6, 23, 0.8);
-  border: 1rpx solid rgba(6, 182, 212, 0.3);
+  background: rgba(244,241,234, 0.8);
+  border: 1rpx solid rgba(158,42,43, 0.3);
   border-radius: 6rpx;
   padding: 0 20rpx;
   font-size: 24rpx;
-  color: #f8fafc;
+  color: #1a1a1a;
   width: 100%;
   box-sizing: border-box;
 }
 
 .form-input:focus {
-  border-color: #06b6d4;
+  border-color: #9e2a2b;
 }
 
 .form-textarea-small {
   height: 100rpx;
-  background: rgba(2, 6, 23, 0.8);
-  border: 1rpx solid rgba(6, 182, 212, 0.3);
+  background: rgba(244,241,234, 0.8);
+  border: 1rpx solid rgba(158,42,43, 0.3);
   border-radius: 6rpx;
   padding: 16rpx 20rpx;
   font-size: 24rpx;
-  color: #f8fafc;
+  color: #1a1a1a;
   width: 100%;
   box-sizing: border-box;
 }
 
 .form-textarea {
   height: 160rpx;
-  background: rgba(2, 6, 23, 0.8);
-  border: 1rpx solid rgba(6, 182, 212, 0.3);
+  background: rgba(244,241,234, 0.8);
+  border: 1rpx solid rgba(158,42,43, 0.3);
   border-radius: 6rpx;
   padding: 16rpx 20rpx;
   font-size: 24rpx;
-  color: #f8fafc;
+  color: #1a1a1a;
   width: 100%;
   box-sizing: border-box;
 }
 
 .iq-challenge-badge {
-  background: rgba(6, 182, 212, 0.08);
-  border: 1rpx solid rgba(6, 182, 212, 0.3);
+  background: rgba(158,42,43, 0.08);
+  border: 1rpx solid rgba(158,42,43, 0.3);
   border-radius: 6rpx;
   padding: 14rpx 20rpx;
   margin-top: 10rpx;
 }
 
 .iq-badge-dot {
-  color: #06b6d4;
+  color: #9e2a2b;
   font-size: 24rpx;
   margin-right: 12rpx;
   animation: pulse-cyan 1.5s infinite alternate;
@@ -419,7 +415,7 @@
 
 .iq-badge-text {
   font-size: 18rpx;
-  color: #06b6d4;
+  color: #9e2a2b;
   font-weight: bold;
 }
 
@@ -429,7 +425,7 @@
   }
   100% {
     opacity: 1;
-    text-shadow: 0 0 10rpx #06b6d4;
+    text-shadow: 0 0 10rpx #9e2a2b;
   }
 }
 
@@ -482,8 +478,8 @@
 
 .form-submit-btn {
   flex: 1;
-  background: linear-gradient(135deg, #06b6d4, #0891b2);
-  color: #020617;
+  background: linear-gradient(135deg, #9e2a2b, #b35c44);
+  color: #f4f1ea;
   font-size: 24rpx;
   font-weight: bold;
   height: 80rpx;
@@ -492,7 +488,7 @@
   border: none;
   text-align: center;
   margin: 0;
-  box-shadow: 0 0 15rpx rgba(6, 182, 212, 0.4);
+  box-shadow: 0 0 15rpx rgba(158,42,43, 0.4);
 }
 
 .form-submit-btn::after {
@@ -505,9 +501,9 @@
 
 /* Telemetry Logs inside Settings */
 .logs-clear-btn-settings {
-  background: rgba(244, 63, 94, 0.1);
-  border: 1rpx solid rgba(244, 63, 94, 0.3);
-  color: #f43f5e;
+  background: rgba(190,18,60, 0.1);
+  border: 1rpx solid rgba(190,18,60, 0.3);
+  color: #be123c;
   font-size: 18rpx;
   padding: 6rpx 16rpx;
   border-radius: 8rpx;
@@ -520,14 +516,14 @@
 }
 
 .logs-clear-btn-settings:active {
-  background: rgba(244, 63, 94, 0.25);
-  border-color: #f43f5e;
+  background: rgba(190,18,60, 0.25);
+  border-color: #be123c;
 }
 
-.tag-SYSTEM { color: #64748b; }
+.tag-SYSTEM { color: #6b5b4a; }
 .tag-ACTION { color: #eab308; }
 .tag-CHAT { color: #d946ef; }
-.tag-ERROR { color: #f43f5e; }
+.tag-ERROR { color: #be123c; }
 
 .msg-SYSTEM { color: #94a3b8; }
 .msg-ACTION { color: #fef08a; }
@@ -536,7 +532,7 @@
 
 /* Personality Sliders Calibration & Speech Preview (C-1) */
 .personality-sliders-section {
-  background: rgba(15, 23, 42, 0.4);
+  background: rgba(253,251,247, 0.4);
   border: 1rpx solid rgba(0, 240, 255, 0.15);
   border-radius: 12rpx;
   padding: 20rpx;
@@ -553,7 +549,7 @@
 
 .section-desc {
   font-size: 18rpx;
-  color: #64748b;
+  color: #6b5b4a;
   line-height: 1.4;
   margin-bottom: 20rpx;
   display: block;
@@ -573,7 +569,7 @@
 
 .slider-label-left {
   font-size: 18rpx;
-  color: #64748b;
+  color: #6b5b4a;
   width: 100rpx;
   text-align: left;
 }
@@ -586,7 +582,7 @@
 
 .slider-label-right {
   font-size: 18rpx;
-  color: #64748b;
+  color: #6b5b4a;
   width: 100rpx;
   text-align: right;
 }
@@ -598,7 +594,7 @@
 
 /* Tone Preview Bubble Styles */
 .tone-preview-bubble {
-  background: rgba(2, 6, 23, 0.6);
+  background: rgba(244,241,234, 0.6);
   border-left: 6rpx solid #00f0ff;
   border-radius: 0 16rpx 16rpx 0;
   padding: 16rpx 20rpx;
@@ -622,7 +618,7 @@
 
 .bubble-text-settings {
   font-size: 20rpx;
-  color: #e2e8f0;
+  color: #3b3024;
   line-height: 1.5;
   font-style: italic;
   display: block;

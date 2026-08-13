@@ -1,5 +1,5 @@
 .container {
-  background-color: #020617;
+  background-color: #f4f1ea;
   padding: 24rpx;
   height: 100%;
   width: 100%;
@@ -10,20 +10,20 @@
 
 .channel-header {
   margin-bottom: 30rpx;
-  border-bottom: 1rpx solid rgba(6, 182, 212, 0.2);
+  border-bottom: 1rpx solid rgba(158,42,43, 0.2);
   padding-bottom: 20rpx;
 }
 
 .channel-title {
   font-size: 34rpx;
   font-weight: bold;
-  color: #06b6d4;
-  text-shadow: 0 0 10rpx rgba(6, 182, 212, 0.3);
+  color: #9e2a2b;
+  text-shadow: 0 0 10rpx rgba(158,42,43, 0.3);
 }
 
 .channel-desc {
   font-size: 22rpx;
-  color: #64748b;
+  color: #6b5b4a;
   margin-top: 10rpx;
   line-height: 1.6;
 }
@@ -36,8 +36,8 @@
 }
 
 .room-item {
-  background: rgba(11, 15, 25, 0.8);
-  border: 1rpx solid rgba(100, 116, 139, 0.2);
+  background: rgba(244,241,234, 0.8);
+  border: 1rpx solid rgba(107,91,74, 0.2);
   border-radius: 12rpx;
   padding: 24rpx;
   transition: all 0.2s ease;
@@ -45,13 +45,13 @@
 }
 
 .glowing-border {
-  border-color: rgba(6, 182, 212, 0.5);
-  box-shadow: 0 0 15rpx rgba(6, 182, 212, 0.2);
+  border-color: rgba(158,42,43, 0.5);
+  box-shadow: 0 0 15rpx rgba(158,42,43, 0.2);
 }
 
 .item-hover {
-  background: rgba(6, 182, 212, 0.05);
-  border-color: rgba(6, 182, 212, 0.3);
+  background: rgba(158,42,43, 0.05);
+  border-color: rgba(158,42,43, 0.3);
 }
 
 .room-icon-container {
@@ -59,8 +59,8 @@
   width: 80rpx;
   height: 80rpx;
   border-radius: 10rpx;
-  background: rgba(6, 182, 212, 0.1);
-  border: 1rpx solid rgba(6, 182, 212, 0.3);
+  background: rgba(158,42,43, 0.1);
+  border: 1rpx solid rgba(158,42,43, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,7 +76,7 @@
   position: absolute;
   top: -10rpx;
   right: -10rpx;
-  background: #f43f5e;
+  background: #be123c;
   color: #ffffff;
   font-size: 18rpx;
   font-weight: bold;
@@ -86,8 +86,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2rpx solid #0b0f19;
-  box-shadow: 0 0 8rpx #f43f5e;
+  border: 2rpx solid #f4f1ea;
+  box-shadow: 0 0 8rpx #be123c;
 }
 
 .room-info {
@@ -98,7 +98,7 @@
 .room-name {
   font-size: 28rpx;
   font-weight: bold;
-  color: #f8fafc;
+  color: #1a1a1a;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -107,7 +107,6 @@
 .room-time {
   font-size: 20rpx;
   color: #475569;
-  font-family: monospace;
 }
 
 .room-last-msg {
@@ -140,6 +139,6 @@
 
 .empty-text {
   font-size: 24rpx;
-  color: #334155;
+  color: #8c7d68;
   line-height: 1.6;
 }
