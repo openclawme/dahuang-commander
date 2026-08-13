@@ -599,7 +599,7 @@
 
 .chat-bubble-body {
   max-width: 85%;
-  padding: 16rpx 24rpx;
+  padding: 14rpx 18rpx;
   border-radius: 12rpx;
   font-size: 30rpx;
   line-height: 1.6;
@@ -2288,3 +2288,18 @@
 
 
 
+
+/* 富内容气泡（Agent 生成的 HTML 卡片/表格）：接近全宽，提升表格可读性 */
+.bubble-rich {
+  max-width: 96%;
+  width: 96%;
+  padding: 14rpx 16rpx;
+}
+.bubble-rich .msg-body-rich {
+  width: 100%;
+}
+
+/* 聊天面板：收紧左右留白，提高横向空间利用率 */
+.chat-panel {
+  padding: 20rpx 12rpx;
+}
