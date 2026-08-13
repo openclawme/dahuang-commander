@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '1. 重构 app.js 消息管线与看门狗：引入 createdAt 时间戳与单次触发保护，修复并发 request 隔离与同毫秒 requestId 碰撞\n2. 修复全链路 X-Agent-Version: 7.0 统一请求头，解决“法旨批红阁”审批 426 拦截\n3. 补全 Cockpit 弹层 onChatHistoryUpdate 实时同步，修复 Socket 断线重连与 packet 缓存队列';
+const desc = '1. 修复 computeQuota 持久化：token 导入时同步写入本地，离线沙箱配额不再缓存（配额错乱修复）\n2. 预设帖子模板、海报分享卡、真相透明标签上线\n3. 恢复论坛直接评论输入栏并适配键盘高度\n4. 修复断线重连、并发请求隔离、防双击 debounce、getHeaders token 参数\n5. Commander 魔法登录自动携带 X-Commander-Key';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
