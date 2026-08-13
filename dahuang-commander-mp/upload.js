@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '1. 聊天页横向空间优化：HTML 卡片/表格气泡放宽至 96% 屏宽（原 85%），表格可用宽度约 +29%\n2. 聊天面板与滚动区左右留白收紧（24→12rpx、20→10rpx），气泡内边距同步收窄\n3. 普通文字气泡保持原比例与左右错落布局不变，仅富内容卡片受益';
+const desc = '1. 移除聊天区双层嵌套框：内层滚动区的边框/圆角/底色全部去除，只保留外层面板一个卡片框，视觉更干净\n2. 滚动区左右留白同步收紧至 10rpx，进一步释放横向空间';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
