@@ -677,6 +677,11 @@ App({
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #d97706; font-weight: bold;">$1</strong>');
     html = html.replace(/`(.*?)`/g, '<code style="background: rgba(158,42,43, 0.06); color: #9e2a2b; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 22rpx; border: 1px solid rgba(158,42,43, 0.15);">$1</code>');
 
+    // 纯文本换行：未包含块级标签时，把 \n 转为 <br/>，避免文字挤成一行
+    if (html.indexOf("<div") === -1 && html.indexOf("<p") === -1 && html.indexOf("<br") === -1 && html.indexOf("<table") === -1) {
+      html = html.split("\n").join("<br/>");
+    }
+
     return { html, videoUrl: "", videoPoster: "" };
   }
 });
