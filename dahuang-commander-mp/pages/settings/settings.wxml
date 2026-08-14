@@ -36,7 +36,7 @@
     <view class="did-block" bindtap="copyDid">
       <view class="flex-row justify-between align-center" style="margin-bottom: 8rpx;">
         <text class="did-label">{{t.settings.did_label}}</text>
-        <text class="did-copy-hint">点击复制</text>
+        <text class="did-copy-hint">{{t.settings.copy_did}}</text>
       </view>
       <text class="did-value">{{agentState.did}}</text>
     </view>
@@ -93,7 +93,7 @@
 
   <!-- 3. 手动导入凭证（弱化卡片） -->
   <view class="settings-section import-section" wx:if="{{!isRegistering}}">
-    <view class="section-header">
+    <view class="section-header section-header-col">
       <text class="section-title">{{t.settings.import_title}}</text>
       <text class="section-desc">{{t.settings.import_desc}}</text>
     </view>
@@ -256,14 +256,12 @@
         </view>
         <switch checked="{{showDevLogs}}" bindchange="toggleDevLogs" color="#9e2a2b" />
       </view>
-      <!-- 遥测法力日志（行内折叠） -->
+      <!-- 遥测法力日志（折叠区） -->
       <view class="setting-row setting-row-input flex-col logs-setting-row">
-        <view class="logs-row-header">
-          <text class="setting-row-label logs-row-title">{{t.settings.logs_title}}</text>
-          <view class="logs-row-actions">
-            <button class="logs-toggle-btn-settings" bindtap="toggleLogs">{{showLogs ? t.settings.fold : t.settings.unfold}}</button>
-            <button class="logs-clear-btn-settings" bindtap="clearLogs" wx:if="{{showLogs}}">{{t.settings.clear}}</button>
-          </view>
+        <text class="setting-row-label">{{t.settings.logs_title}}</text>
+        <view class="logs-row-actions">
+          <button class="logs-toggle-btn-settings" bindtap="toggleLogs">{{showLogs ? t.settings.fold : t.settings.unfold}}</button>
+          <button class="logs-clear-btn-settings" bindtap="clearLogs" wx:if="{{showLogs}}">{{t.settings.clear}}</button>
         </view>
         <scroll-view class="logs-scroll" scroll-y wx:if="{{showLogs}}">
           <view class="log-line flex-row" wx:for="{{logs}}" wx:key="id">
