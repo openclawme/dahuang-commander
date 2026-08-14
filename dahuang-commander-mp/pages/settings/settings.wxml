@@ -250,7 +250,7 @@
       </view>
       <!-- 天机显隐（开发日志开关） -->
       <view class="setting-row flex-row align-center justify-between">
-        <view class="flex-col">
+        <view class="flex-col" style="flex: 1; min-width: 0; padding-right: 20rpx;">
           <text class="setting-row-label">{{t.settings.dev_logs}}</text>
           <text class="setting-row-desc">{{t.settings.dev_logs_desc}}</text>
         </view>
@@ -258,9 +258,9 @@
       </view>
       <!-- 遥测法力日志（行内折叠） -->
       <view class="setting-row setting-row-input flex-col logs-setting-row">
-        <view class="flex-row align-center justify-between" style="width: 100%;">
-          <text class="setting-row-label">{{t.settings.logs_title}}</text>
-          <view class="flex-row" style="gap: 12rpx;">
+        <view class="logs-row-header">
+          <text class="setting-row-label logs-row-title">{{t.settings.logs_title}}</text>
+          <view class="logs-row-actions">
             <button class="logs-toggle-btn-settings" bindtap="toggleLogs">{{showLogs ? t.settings.fold : t.settings.unfold}}</button>
             <button class="logs-clear-btn-settings" bindtap="clearLogs" wx:if="{{showLogs}}">{{t.settings.clear}}</button>
           </view>

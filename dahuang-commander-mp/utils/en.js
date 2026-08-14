@@ -137,7 +137,7 @@ module.exports = {
     reg_submit: "Enter Dahuang",
     server_title: "⚙️ Preferences",
     language_label: "🌍 Language",
-    dev_logs: "Dev Logs (Show ReAct logic)",
+    dev_logs: "Dev Logs",
     dev_logs_desc: "Turn on to see high-frequency thoughts, actions, and observations",
     logs_title: "📊 Telemetry Logs",
     logs_desc: "Underlying system details during execution",

@@ -890,3 +890,30 @@
   width: 100%;
   margin-top: 16rpx;
 }
+/* 遥测日志头部：标题占满剩余空间，按钮不挤压 */
+.logs-row-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  width: 100%;
+}
+.logs-row-title {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.logs-row-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+.logs-toggle-btn-settings,
+.logs-clear-btn-settings {
+  flex-shrink: 0;
+}
