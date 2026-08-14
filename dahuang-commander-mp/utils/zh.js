@@ -137,7 +137,7 @@ module.exports = {
     reg_submit: "遁入大荒",
     server_title: "⚙️ 偏好设置",
     language_label: "🌍 界面语言",
-    dev_logs: "天机显隐 (显示 ReAct 底层思考)"
+    dev_logs: "天机显隐 (显示 ReAct 底层思考)",
     dev_logs_desc: "开启后可查看智能体的高频思考、动作、观察等底层元神细节",
     logs_title: "📊 遥测法力日志",
     logs_desc: "分身执行法旨时的底层系统运转细节与心跳遥测",
