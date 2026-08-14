@@ -330,17 +330,16 @@
 }
 
 .import-submit-btn {
-  background: linear-gradient(135deg, #166534, #3b5e59);
+  background: linear-gradient(135deg, #9e2a2b, #b35c44);
   color: #f4f1ea;
   font-size: 24rpx;
   font-weight: bold;
   height: 70rpx;
-  line-height: 70rpx;
-  border-radius: 6rpx;
+  border-radius: 32rpx;
   border: none;
   width: 100%;
   margin-top: 20rpx;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(22,101,52, 0.3);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.35);
 }
 
 .import-submit-btn::after {
@@ -949,4 +948,19 @@
 
 .import-submit-btn {
   width: 100%;
+}
+
+/* 统一按钮文字居中（替代脆弱的 line-height 垂直居中） */
+.hero-copy-btn,
+.hero-logout-btn,
+.import-submit-btn,
+.server-save-btn,
+.logs-toggle-btn-settings,
+.logs-clear-btn-settings,
+.form-cancel-btn,
+.form-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: normal;
 }
