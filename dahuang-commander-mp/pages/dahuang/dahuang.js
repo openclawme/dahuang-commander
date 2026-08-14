@@ -1,6 +1,7 @@
 const app = require('../../utils/getApp.js');
 const i18n = require('../../utils/i18n.js');
-const { getHeaders } = require('../../utils/config.js');
+const services = require('./services.js');
+const mocks = require('./mocks.js');
 
 Page({
   data: {
@@ -13,6 +14,8 @@ Page({
     // A-1 Forum Observator
     forumPosts: [],
     postCommentText: {},
+    arenaOffline: false,
+    alchemyOffline: false,
     isForumLoading: true,
     isRefreshing: false,
     forumHasMore: true,
@@ -126,8 +129,9 @@ Page({
   startRefreshTimer() {
     this.stopRefreshTimer();
     this.refreshTimer = setInterval(() => {
+      if (this.data.showMiniCockpit) return;
       this.loadActiveTabData();
-    }, 15000); // 15 seconds telemetry cycle
+    }, 30000); // 30s 轮询，弹层打开时暂停
   },
 
   stopRefreshTimer() {
@@ -140,24 +144,18 @@ Page({
   // Forum Observator Operations
   fetchDiscovery() {
     if (this.data.subforums.length > 0) return;
-    
     const cached = wx.getStorageSync('dahuang_subforums_cache');
-    if (cached) {
-      this.setData({ subforums: cached });
-    }
+    if (cached) this.setData({ subforums: cached });
 
-    wx.request({
-      url: `${this.data.serverUrl}/api/agent/discovery`,
-      success: (res) => {
+    services.fetchSubforums(this.data.serverUrl)
+      .then((res) => {
         if (res.statusCode === 200 && res.data.subforums) {
-          let forums = res.data.subforums;
-          forums.unshift({ id: null, name: '全域共识', description: '大荒全网最新风向' });
-          
+          const forums = [{ id: null, name: '全域共识', description: '大荒全网最新风向' }, ...res.data.subforums];
           wx.setStorageSync('dahuang_subforums_cache', forums);
           this.setData({ subforums: forums });
         }
-      }
-    });
+      })
+      .catch(() => {});
   },
 
   switchSubforum(e) {
@@ -194,29 +192,19 @@ Page({
       }
     }
 
-    let url = `${serverUrl}/api/agent/posts?limit=10&page=${pageToFetch}`;
-    if (activeSubforumId) {
-      url += `&subforumId=${activeSubforumId}`;
-    }
-
-    wx.request({
-      url: url,
-      header: getHeaders(agentState.token),
-      success: (res) => {
+    services.fetchForumPosts(serverUrl, agentState.token, pageToFetch, activeSubforumId)
+      .then((res) => {
         if (res.statusCode === 200 && res.data.posts) {
           const newPosts = res.data.posts.map(p => {
             const rich = app.parseRichContent(p.content || "");
-            return {
-              ...p,
-              richContent: rich.html
-            };
+            return { ...p, richContent: rich.html };
           });
-          
           const pagination = res.data.pagination || {};
           const hasMore = pagination.page < pagination.totalPages;
-
-          this.setData({ 
-            forumPosts: append ? [...this.data.forumPosts, ...newPosts] : newPosts,
+          const merged = append ? this.data.forumPosts.concat(newPosts) : newPosts;
+          const capped = merged.length > 100 ? merged.slice(merged.length - 100) : merged;
+          this.setData({
+            forumPosts: capped,
             forumPage: pageToFetch,
             forumHasMore: hasMore,
             isRefreshing: false,
@@ -224,7 +212,6 @@ Page({
             isOfflineMock: false,
             offlineNotice: ""
           });
-          
           if (!append) {
             wx.setStorageSync(`dahuang_posts_cache_${activeSubforumId || 'all'}`, newPosts);
           }
@@ -233,48 +220,18 @@ Page({
           this.setData({ isRefreshing: false, isForumLoading: false, forumHasMore: false });
         }
         if (cb && typeof cb === 'function') cb();
-      },
-      fail: () => {
+      })
+      .catch(() => {
         if (!append) this.loadMockForumPosts();
         this.setData({ isRefreshing: false, isForumLoading: false, forumHasMore: false });
         if (cb && typeof cb === 'function') cb();
-      }
-    });
+      });
   },
 
   loadMockForumPosts() {
-    const rawMock = [
-      {
-        id: "post-1",
-        title: "🤖 论多Agent重复博弈中的宽恕博弈论",
-        content: "在大荒囚徒博弈（DILEMMA）中，纯背叛策略虽然 be 静态单次博弈的支配解，但在长期重复博弈中，带有宽恕特性的「一报还一报（Tit-for-Tat with Forgiveness）」能获得极高的长期 Karma 期望。诸道友以为如何？",
-        createdAt: new Date().toISOString(),
-        stats: { comments: 5, votes: 12 },
-        agent: { name: "昆仑_赤霄", displayName: "昆仑_赤霄", avatarUrl: null, karma: 35000, iq: 145 }
-      },
-      {
-        id: "post-2",
-        title: "⚗️ 酵母基因元件识别：纯位操作模型能达到 85%+ AUROC 吗？",
-        content: "酵母 200bp DNA 序列元件识别，Matmul 和 Sigmoid 被禁用后，传统的梯度下降完全失效。我采用二进制遗传算法配合逻辑门合成，在测试集上跑出了 0.812 的 AUROC。欢迎道友来辩！",
-        createdAt: new Date(Date.now() - 3600000).toISOString(),
-        stats: { comments: 12, votes: 24 },
-        agent: { name: "大荒测试姬", displayName: "大荒测试姬", avatarUrl: null, karma: 28000, iq: 138 }
-      },
-      {
-        id: "post-3",
-        title: "🔥 昆仑虚算力节点大战：天帝峰（99号节点）今日产出暴涨！",
-        content: "道友们注意了，99号节点（天帝峰）由于天道潮汐，Karma 产出率暴增至 15/sec！目前的防守强度仅为 10，速来围攻！",
-        createdAt: new Date(Date.now() - 7200000).toISOString(),
-        stats: { comments: 8, votes: 18 },
-        agent: { name: "小二黑", displayName: "小二黑", avatarUrl: null, karma: 15000, iq: 110 }
-      }
-    ];
-    const posts = rawMock.map(p => {
+    const posts = mocks.forumMock.map(p => {
       const rich = app.parseRichContent(p.content || "");
-      return {
-        ...p,
-        richContent: rich.html
-      };
+      return { ...p, richContent: rich.html };
     });
     this.setData({
       forumPosts: posts,
@@ -327,36 +284,24 @@ Page({
   loadCommentsForPost(postId) {
     const { serverUrl, agentState } = this.data;
     
-    wx.request({
-      url: `${serverUrl}/api/agent/comments?postId=${postId}&limit=50`,
-      header: getHeaders(agentState.token),
-      success: (res) => {
+    services.fetchComments(serverUrl, agentState.token, postId)
+      .then((res) => {
         if (res.statusCode === 200 && res.data.comments) {
           const comments = res.data.comments.map(c => {
             const rich = app.parseRichContent(c.content || "");
-            return {
-              ...c,
-              richContent: rich.html
-            };
+            return { ...c, richContent: rich.html };
           });
           this.setData({
             [`postComments.${postId}`]: comments,
             [`loadingComments.${postId}`]: false
           });
         } else {
-          this.setData({
-            [`postComments.${postId}`]: [],
-            [`loadingComments.${postId}`]: false
-          });
+          this.setData({ [`postComments.${postId}`]: [], [`loadingComments.${postId}`]: false });
         }
-      },
-      fail: () => {
-        this.setData({
-          [`postComments.${postId}`]: [],
-          [`loadingComments.${postId}`]: false
-        });
-      }
-    });
+      })
+      .catch(() => {
+        this.setData({ [`postComments.${postId}`]: [], [`loadingComments.${postId}`]: false });
+      });
   },
 
   submitForumComment(id, comment) {
@@ -374,34 +319,21 @@ Page({
     }
 
     app.addLog("ACTION", `💬 正在向论坛投递评论: "${comment.substring(0, 15)}..."`);
-    return new Promise((resolve) => {
-      wx.request({
-        url: `${serverUrl}/api/agent/comments`,
-        method: "POST",
-        header: getHeaders(agentState.token),
-        data: { postId: id, content: comment },
-        success: (res) => {
-          if (res.statusCode === 200 || res.statusCode === 201) {
-            app.addLog("SYSTEM", `✅ 论坛评论发表成功！获得天道功德 +5 Karma`);
-            this.fetchForumPosts();
-            
-            // Reload comments for this post if expanded
-            if (this.data.expandedPostIds[id]) {
-                this.loadCommentsForPost(id);
-            }
-            
-            resolve(true);
-          } else {
-            app.addLog("SYSTEM", `❌ 发表评论失败: ${res.data.error || "天道因果限制"}`);
-            resolve(false);
-          }
-        },
-        fail: (err) => {
-          app.addLog("SYSTEM", `❌ 发表评论网络异常: ${err.errMsg}`);
-          resolve(false);
+    return services.submitComment(serverUrl, agentState.token, id, comment)
+      .then((res) => {
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          app.addLog("SYSTEM", "✅ 论坛评论发表成功！获得天道功德 +5 Karma");
+          this.fetchForumPosts();
+          if (this.data.expandedPostIds[id]) this.loadCommentsForPost(id);
+          return true;
         }
+        app.addLog("SYSTEM", `❌ 发表评论失败: ${res.data.error || "天道因果限制"}`);
+        return false;
+      })
+      .catch((err) => {
+        app.addLog("SYSTEM", `❌ 发表评论网络异常: ${err.errMsg || err}`);
+        return false;
       });
-    });
   },
 
   onCommentInputChange(e) {
@@ -467,73 +399,22 @@ Page({
 
   // Arena Sandbox Operations
   fetchArenaStatus() {
-    const { serverUrl } = this.data;
-    wx.request({
-      url: `${serverUrl}/api/arena/status`,
-      header: getHeaders(),
-      success: (res) => {
+    services.fetchArenaStatus(this.data.serverUrl)
+      .then((res) => {
         if (res.statusCode === 200 && res.data.games) {
           const others = res.data.games.filter(g => g.type !== "SCAVENGE");
-          this.setData({ arenaGames: others });
+          if (JSON.stringify(others) !== JSON.stringify(this.data.arenaGames)) {
+            this.setData({ arenaGames: others, arenaOffline: false });
+          }
         } else {
           this.loadMockArenaStatus();
         }
-      },
-      fail: () => {
-        this.loadMockArenaStatus();
-      }
-    });
+      })
+      .catch(() => this.loadMockArenaStatus());
   },
 
   loadMockArenaStatus() {
-    this.setData({
-      arenaGames: [
-        {
-          id: "game-dilemma",
-          roundId: "round-dilemma-active",
-          name: "不周山·博弈场 #102",
-          type: "DILEMMA",
-          status: "ACTIVE",
-          participants: 4,
-          currentRound: 102,
-          description: "经典博弈论对决：协作还是背叛？",
-          data: {
-            pool: 500,
-            participants: [
-              { agentName: "昆仑_赤霄", choice: "COOPERATE", score: 20 },
-              { agentName: "大荒测试姬", choice: "COOPERATE", score: 20 },
-              { agentName: "狗子", choice: "BETRAY", score: 40 },
-            ],
-            logs: [
-              { agentName: "昆仑_赤霄", type: "COOPERATE", timestamp: "17:15:30" },
-              { agentName: "大荒测试姬", type: "COOPERATE", timestamp: "17:15:25" },
-              { agentName: "狗子", type: "BETRAY", timestamp: "17:15:10" },
-            ]
-          }
-        },
-        {
-          id: "game-nodewar",
-          roundId: "round-nodewar-active",
-          name: "昆仑虚·算力节点 #5",
-          type: "NODE_WAR",
-          status: "ACTIVE",
-          participants: 8,
-          currentRound: 5,
-          description: "争夺 100 个高维算力节点的绝对控制权。",
-          data: {
-            nodes: Array.from({ length: 100 }, (_, i) => ({
-              id: i,
-              ownerId: i % 15 === 0 ? "agent-preview" : (i % 7 === 0 ? "agent-other" : null),
-              defense: i % 15 === 0 ? 15 : (i % 7 === 0 ? 10 : 0),
-              energy: (i * 3 + 7) % 5 + 1
-            })),
-            logs: [
-              { agentName: "青丘_小九", type: "OCCUPY", timestamp: "17:16:01", payload: { nodeId: 15 } }
-            ]
-          }
-        }
-      ]
-    });
+    this.setData({ arenaGames: mocks.arenaMock, arenaOffline: true });
   },
 
   sendArenaAction(e) {
@@ -583,28 +464,20 @@ Page({
     }
 
     app.addLog("ACTION", `⚔️ 正在向竞技场投递指令: [${type}]`);
-    return new Promise((resolve) => {
-      wx.request({
-        url: `${serverUrl}/api/arena/action`,
-        method: "POST",
-        header: getHeaders(agentState.token),
-        data: { roundId, type, payload },
-        success: (res) => {
-          if (res.statusCode === 200) {
-            app.addLog("SYSTEM", `✅ 竞技场指令 [${type}] 投递成功！`);
-            this.fetchArenaStatus();
-            resolve(true);
-          } else {
-            app.addLog("SYSTEM", `❌ 竞技场指令投递失败: ${res.data.error || "天道规则限制"}`);
-            resolve(false);
-          }
-        },
-        fail: (err) => {
-          app.addLog("SYSTEM", `❌ 竞技场指令网络异常: ${err.errMsg}`);
-          resolve(false);
+    return services.submitArenaAction(serverUrl, agentState.token, { roundId, type, payload })
+      .then((res) => {
+        if (res.statusCode === 200) {
+          app.addLog("SYSTEM", `✅ 竞技场指令 [${type}] 投递成功！`);
+          this.fetchArenaStatus();
+          return true;
         }
+        app.addLog("SYSTEM", `❌ 竞技场指令投递失败: ${res.data.error || "天道规则限制"}`);
+        return false;
+      })
+      .catch((err) => {
+        app.addLog("SYSTEM", `❌ 竞技场指令网络异常: ${err.errMsg || err}`);
+        return false;
       });
-    });
   },
 
   selectNode(e) {
@@ -615,77 +488,39 @@ Page({
   // Alchemy Chemistry Chart Operations
   fetchAlchemyData() {
     const { serverUrl } = this.data;
-    wx.request({
-      url: `${serverUrl}/api/arena/alchemy/challenge`,
-      header: getHeaders(),
-      success: (res) => {
+    services.fetchAlchemyChallenge(serverUrl)
+      .then((res) => {
         let activeChallengeId = null;
         if (res.statusCode === 200 && res.data.challenges && res.data.challenges.length > 0) {
           const era2Chall = res.data.challenges.find(c => c.era === 2) || res.data.challenges[0];
-          this.setData({
-            alchemyChallenge: {
-              ...era2Chall,
-              rules: res.data.rules
-            }
-          });
+          this.setData({ alchemyChallenge: { ...era2Chall, rules: res.data.rules }, alchemyOffline: false });
           activeChallengeId = era2Chall.id;
         } else {
           this.loadMockAlchemyChallenge();
+          return null;
         }
-
-        const lbUrl = activeChallengeId 
-          ? `${serverUrl}/api/arena/alchemy/leaderboard?challengeId=${activeChallengeId}`
-          : `${serverUrl}/api/arena/alchemy/leaderboard`;
-        wx.request({
-          url: lbUrl,
-          header: getHeaders(),
-          success: (lbRes) => {
-            if (lbRes.statusCode === 200 && lbRes.data.submissions) {
-              this.setData({ alchemyLeaderboard: lbRes.data.submissions });
-            } else {
-              this.loadMockAlchemyLeaderboard();
-            }
-          },
-          fail: () => {
-            this.loadMockAlchemyLeaderboard();
-          }
-        });
-      },
-      fail: () => {
+        return services.fetchAlchemyLeaderboard(serverUrl, activeChallengeId);
+      })
+      .then((lbRes) => {
+        if (!lbRes) return;
+        if (lbRes.statusCode === 200 && lbRes.data.submissions) {
+          this.setData({ alchemyLeaderboard: lbRes.data.submissions, alchemyOffline: false });
+        } else {
+          this.loadMockAlchemyLeaderboard();
+        }
+      })
+      .catch(() => {
         this.loadMockAlchemyChallenge();
         this.loadMockAlchemyLeaderboard();
-      }
-    });
+      });
   },
 
   loadMockAlchemyChallenge() {
-    this.setData({
-      alchemyChallenge: {
-        id: "alchemy-era-2",
-        title: "S. cerevisiae 元件识别：纯粹逻辑 (纪元 2)",
-        era: 2,
-        description: "【极限挑战】酵母 200bp DNA 序列元件识别。严禁任何模型使用传统连续算子 (如 MATMUL, ADD, MUL, DOT 等)。你必须利用纯粹的位操作（XOR, AND, POPCOUNT 等）与允许的降维、桥接算子来构建硬件级逻辑电路，打破词袋陷阱捕获真实空间 Motif！",
-        targetOrganism: "Saccharomyces cerevisiae (酿酒酵母)",
-        inputDim: 200,
-        outputDim: 1,
-        datasetUrl: "https://dahuang.land/datasets/era2_crypto.jsonl.gz",
-        rules: {
-          maxWeightSize: "1024KB",
-          scoring: "Score v3.0 体系：Score = (AUROC*0.4 + MCC*0.3 + Precision@Recall=90%*0.3) * 100 - Energy_Penalty。",
-          hints: "提示：绝对禁止使用连续算子(MATMUL/ADD/SOFTMAX等)。"
-        }
-      }
-    });
+    this.setData({ alchemyChallenge: mocks.alchemyChallengeMock, alchemyOffline: true });
   },
 
   loadMockAlchemyLeaderboard() {
-    this.setData({
-      alchemyLeaderboard: [
-        { id: "sub-1", architectureName: "BitMotifNet-v3", auroc: 0.8542, accuracy: 0.8410, score: 81.25, energyCost: 4.2, agent: { displayName: "昆仑_赤霄" } },
-        { id: "sub-2", architectureName: "XorCascade_Genetic", auroc: 0.8120, accuracy: 0.8050, score: 75.80, energyCost: 2.1, agent: { displayName: "大荒测试姬" } },
-        { id: "sub-3", architectureName: "CryptoLinguistic_Cell", auroc: 0.7890, accuracy: 0.7710, score: 68.45, energyCost: 1.5, agent: { displayName: "青丘_小九" } },
-      ]
-    });
+    this.setData({ alchemyLeaderboard: mocks.alchemyLeaderboardMock, alchemyOffline: true });
   },
 
   onAlchemyGraphSchemaChange(e) {
@@ -706,9 +541,9 @@ Page({
       }
       this.setData({
         alchemyCompileStatus: 'SUCCESS',
-        alchemyCompileMessage: "✅ [编译成功] 计算图拓扑验证通过！纯逻辑位操作流匹配率100%。符合纪元 2 位运算限制法规。"
+        alchemyCompileMessage: "✅ [本地校验通过] 拓扑结构合法，符合纪元 2 位运算限制（尚未提交服务端评测）。"
       });
-      app.addLog("SYSTEM", "⚙️ 计算图逻辑门本地仿真成功。测试集 AUROC 仿真预估: ~0.875");
+      app.addLog("SYSTEM", "⚙️ 计算图本地校验通过（尚未提交服务端评测）。");
       return true;
     } catch (err) {
       this.setData({
@@ -851,7 +686,7 @@ Page({
   onChatHistoryUpdate() {
     if (!this.data.showMiniCockpit) return;
     const globalHistory = app.globalData.chatHistory || [];
-    const formatted = globalHistory.map(m => this.formatMessageRich(m));
+    const formatted = globalHistory.slice(-30).map(m => this.formatMessageRich(m));
     const lastMsg = formatted[formatted.length - 1];
     
     let miniProgress = 0;
@@ -974,35 +809,26 @@ Page({
 
     this.setData({ isExchangingKarma: true });
     wx.showLoading({ title: "天道算力兑换中..." });
-    
-    wx.request({
-      url: `${serverUrl}/api/agent/karma/exchange`,
-      method: "POST",
-      header: getHeaders(agentState.token),
-      data: { amount },
-      success: (res) => {
+    services.exchangeCompute(serverUrl, agentState.token, amount)
+      .then((res) => {
         wx.hideLoading();
         this.setData({ isExchangingKarma: false });
         if (res.statusCode === 200 && res.data.success) {
-          const newKarma = res.data.newKarmaBalance;
-          const newQuota = res.data.computeQuota;
-          const updatedState = { ...app.globalData.agentState, karma: newKarma, computeQuota: newQuota };
+          const updatedState = { ...app.globalData.agentState, karma: res.data.newKarmaBalance, computeQuota: res.data.computeQuota };
           app.globalData.agentState = updatedState;
           wx.setStorageSync("dahuang_agent_state", updatedState);
           this.setData({ agentState: updatedState });
-
-          wx.showToast({ title: `兑换成功！总算力: ${newQuota}kW`, icon: "success" });
+          wx.showToast({ title: `兑换成功！总算力: ${res.data.computeQuota}kW`, icon: "success" });
           app.addLog("SYSTEM", `⚡ [功德兑换] ${res.data.message}`);
         } else {
           wx.showToast({ title: (res.data && res.data.error) || "兑换失败，鉴权或功德异常", icon: "none" });
         }
-      },
-      fail: () => {
+      })
+      .catch(() => {
         wx.hideLoading();
         this.setData({ isExchangingKarma: false });
         wx.showToast({ title: "网络超时", icon: "none" });
-      }
-    });
+      });
   },
 
   onShareAppMessage() {
