@@ -364,41 +364,6 @@ Page({
     app.addLog("SYSTEM", value ? "🔮 开启「天机泄露模式」：展示高维 ReAct 完整调试日志..." : "🧘 开启「返璞归真模式」：已折叠底层高频思考细节。");
   },
 
-  saveServerUrl() {
-    let url = this.data.serverUrl.trim();
-    if (!url) {
-      wx.showToast({ title: "并网地址不可为空", icon: "none" });
-      return;
-    }
-    if (!url.startsWith("http://") && !url.startsWith("https://")) {
-      url = "https://" + url;
-    }
-    if (url.endsWith("/")) {
-      url = url.slice(0, -1);
-    }
-
-    this.setData({ serverUrl: url });
-    app.globalData.serverUrl = url;
-    wx.setStorageSync("dahuang_server_url", url);
-
-    wx.showToast({
-      title: "天道总线已重置",
-      icon: "success"
-    });
-
-    if (app.globalData.agentState.token) {
-      app.connectSocket();
-    }
-
-    this.loadAvailableAgents();
-  },
-
-  formatKarma(k) {
-    const n = Number(k) || 0;
-    if (n >= 100000000) return (n / 100000000).toFixed(1).replace(/\.0$/, "") + "亿";
-    if (n >= 10000) return (n / 10000).toFixed(1).replace(/\.0$/, "") + "万";
-    return String(n);
-  },
 
   loadAvailableAgents() {
     const { serverUrl } = this.data;

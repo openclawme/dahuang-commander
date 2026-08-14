@@ -882,3 +882,11 @@
   justify-content: center;
   line-height: normal;
 }
+/* 合并后的遥测日志折叠区 */
+.logs-setting-row {
+  width: 100%;
+}
+.logs-setting-row .logs-scroll {
+  width: 100%;
+  margin-top: 16rpx;
+}

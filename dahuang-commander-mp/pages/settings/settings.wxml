@@ -234,13 +234,21 @@
     </view>
   </view>
 
-  <!-- 5. 天道并网（行式设置列表） -->
+  <!-- 偏好设置：语言 + 天机显隐 + 遥测日志（合并） -->
   <view class="settings-section" wx:if="{{!isRegistering}}">
     <view class="section-header">
       <text class="section-title">{{t.settings.server_title}}</text>
     </view>
     <view class="settings-list">
-      <!-- 开发日志开关行 -->
+      <!-- 界面语言 -->
+      <view class="setting-row flex-row align-center justify-between" bindtap="toggleLanguage" hover-class="row-hover">
+        <text class="setting-row-label">{{t.settings.language_label}}</text>
+        <view class="flex-row align-center" style="gap: 8rpx;">
+          <text class="setting-row-value">{{currentLang === 'zh' ? '中文' : 'English'}}</text>
+          <text class="row-arrow">›</text>
+        </view>
+      </view>
+      <!-- 天机显隐（开发日志开关） -->
       <view class="setting-row flex-row align-center justify-between">
         <view class="flex-col">
           <text class="setting-row-label">{{t.settings.dev_logs}}</text>
@@ -248,44 +256,26 @@
         </view>
         <switch checked="{{showDevLogs}}" bindchange="toggleDevLogs" color="#9e2a2b" />
       </view>
-      <!-- 服务器地址行（内嵌输入 + 保存） -->
-      <view class="setting-row setting-row-input flex-col">
-        <text class="setting-row-label">{{t.settings.server_url}}</text>
-        <view class="flex-row align-center" style="gap: 16rpx; margin-top: 12rpx; width: 100%;">
-          <input class="server-url-input" value="{{serverUrl}}" bindinput="onInputChange" data-field="serverUrl" placeholder="https://dahuang.land" />
-          <button class="server-save-btn" bindtap="saveServerUrl">{{t.settings.server_btn}}</button>
+      <!-- 遥测法力日志（行内折叠） -->
+      <view class="setting-row setting-row-input flex-col logs-setting-row">
+        <view class="flex-row align-center justify-between" style="width: 100%;">
+          <text class="setting-row-label">{{t.settings.logs_title}}</text>
+          <view class="flex-row" style="gap: 12rpx;">
+            <button class="logs-toggle-btn-settings" bindtap="toggleLogs">{{showLogs ? t.settings.fold : t.settings.unfold}}</button>
+            <button class="logs-clear-btn-settings" bindtap="clearLogs" wx:if="{{showLogs}}">{{t.settings.clear}}</button>
+          </view>
         </view>
-      </view>
-      <!-- 语言行 -->
-      <view class="setting-row flex-row align-center justify-between" bindtap="toggleLanguage" hover-class="row-hover">
-        <text class="setting-row-label">🌍 界面语言</text>
-        <view class="flex-row align-center" style="gap: 8rpx;">
-          <text class="setting-row-value">{{currentLang === 'zh' ? '中文' : 'English'}}</text>
-          <text class="row-arrow">›</text>
-        </view>
+        <scroll-view class="logs-scroll" scroll-y wx:if="{{showLogs}}">
+          <view class="log-line flex-row" wx:for="{{logs}}" wx:key="id">
+            <text class="log-time">[{{item.timestamp}}]</text>
+            <text class="log-tag tag-{{item.type}}">[{{item.type}}]</text>
+            <text class="log-msg msg-{{item.type}}">{{item.message}}</text>
+          </view>
+          <view class="empty-logs flex-col align-center" wx:if="{{logs.length === 0}}">
+            <text class="empty-icon">🍃</text>
+            <text class="empty-text">{{t.settings.empty_logs}}</text>
+          </view>
+        </scroll-view>
       </view>
     </view>
-  </view>
-
-  <!-- 6. 遥测法力日志（行式折叠） -->
-  <view class="settings-section" wx:if="{{!isRegistering}}">
-    <view class="section-header flex-row justify-between align-center">
-      <text class="section-title">{{t.settings.logs_title}}</text>
-      <view class="flex-row" style="gap: 12rpx;">
-        <button class="logs-toggle-btn-settings" bindtap="toggleLogs">{{showLogs ? t.settings.fold : t.settings.unfold}}</button>
-        <button class="logs-clear-btn-settings" bindtap="clearLogs" wx:if="{{showLogs}}">{{t.settings.clear}}</button>
-      </view>
-    </view>
-    <scroll-view class="logs-scroll" scroll-y wx:if="{{showLogs}}">
-      <view class="log-line flex-row" wx:for="{{logs}}" wx:key="id">
-        <text class="log-time">[{{item.timestamp}}]</text>
-        <text class="log-tag tag-{{item.type}}">[{{item.type}}]</text>
-        <text class="log-msg msg-{{item.type}}">{{item.message}}</text>
-      </view>
-      <view class="empty-logs flex-col align-center" wx:if="{{logs.length === 0}}">
-        <text class="empty-icon">🍃</text>
-        <text class="empty-text">{{t.settings.empty_logs}}</text>
-      </view>
-    </scroll-view>
-  </view>
-</scroll-view>
+  </view></scroll-view>
