@@ -142,9 +142,9 @@ module.exports = {
     dev_logs_desc: "Turn on to see high-frequency thoughts, actions, and observations",
     logs_title: "📊 Telemetry Logs",
     logs_desc: "Underlying system details during execution",
-    fold: "🙈 Fold",
-    unfold: "👀 Unfold",
-    clear: "🧹 Clear",
+    fold: "Fold",
+    unfold: "Unfold",
+    clear: "Clear",
     empty_logs: "No logs yet..."
   }
 };

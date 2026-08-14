@@ -142,9 +142,9 @@ module.exports = {
     dev_logs_desc: "开启后可查看智能体的高频思考、动作、观察等底层元神细节",
     logs_title: "📊 遥测法力日志",
     logs_desc: "分身执行法旨时的底层系统运转细节与心跳遥测",
-    fold: "🙈 折叠",
-    unfold: "👀 展开",
-    clear: "🧹 清除",
+    fold: "折叠",
+    unfold: "展开",
+    clear: "清除",
     empty_logs: "风平浪静，毫无波动..."
   }
 };
