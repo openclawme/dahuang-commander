@@ -1,28 +1,22 @@
 <scroll-view scroll-y class="container">
-  <!-- 1. 当前并网元神卡片 -->
-  <view class="cyber-panel glow-cyan active-agent-card" wx:if="{{agentState.token}}">
-    <view class="card-header flex-row justify-between align-center">
-      <text class="card-title">{{t.settings.online_agent}}</text>
+  <!-- 1. 当前并网元神档案卡（全页唯一强调卡） -->
+  <view class="profile-hero-card" wx:if="{{agentState.token}}">
+    <view class="flex-row justify-between align-center" style="margin-bottom: 24rpx;">
+      <text class="hero-label">{{t.settings.online_agent}}</text>
       <text class="badge badge-success">{{t.settings.online}}</text>
     </view>
 
-    <!-- 身份区 -->
-    <view class="agent-profile-detail flex-row align-center" style="gap: 20rpx;">
-      <!-- Rotating Cyber-Baguas Seal Avatar -->
+    <view class="agent-profile-detail flex-row align-center" style="gap: 24rpx;">
+      <!-- 印章头像（保留旋转光晕） -->
       <view class="avatar-ring-container" bindtap="triggerKarmaFlash" style="--aura-speed: {{auraSpeed}}s;">
-        <!-- Concentric rotating cyber aura -->
         <view class="orbit-aura outer-aura"></view>
         <view class="orbit-aura inner-aura"></view>
-
-        <!-- Karma changes floating particle drifts -->
         <view
           class="cause-particle {{karmaChangeType === 'gain' ? 'gold' : 'blue'}}"
           wx:for="{{particles}}"
           wx:key="index"
           style="left: {{item.left}}%; animation-delay: {{item.delay}}s; animation-duration: {{item.duration}}s; transform: scale({{item.scale}});"
         ></view>
-
-        <!-- Antique Jade Seal Seal Core -->
         <view class="avatar-core-seal seal-color-{{avatarSeed % 5}}">
           <text class="seal-character">{{avatarChar}}</text>
         </view>
@@ -38,7 +32,7 @@
       </view>
     </view>
 
-    <!-- 凭证区：DID 截断显示 + 点击复制 -->
+    <!-- DID 凭证：截断显示 + 点击复制 -->
     <view class="did-block" bindtap="copyDid">
       <view class="flex-row justify-between align-center" style="margin-bottom: 8rpx;">
         <text class="did-label">{{t.settings.did_label}}</text>
@@ -47,66 +41,63 @@
       <text class="did-value">{{agentState.did}}</text>
     </view>
 
-    <!-- Token 凭证显示 -->
-    <view class="token-block flex-row align-center justify-between">
-      <text class="token-preview">{{t.settings.token_preview}}</text>
-      <button class="copy-btn" bindtap="copyToken">{{t.settings.copy}}</button>
-    </view>
-
     <!-- 操作区 -->
-    <button class="logout-btn" bindtap="logout">{{t.settings.logout}}</button>
+    <view class="hero-actions flex-row">
+      <button class="hero-copy-btn" bindtap="copyToken">{{t.settings.copy}}</button>
+      <button class="hero-logout-btn" bindtap="logout">{{t.settings.logout}}</button>
+    </view>
   </view>
 
-  <view class="cyber-panel glow-purple active-agent-card flex-col align-center text-center" wx:else>
+  <!-- 未登录引导 -->
+  <view class="profile-hero-card flex-col align-center text-center" wx:else>
     <text class="unlogin-icon">🧘</text>
     <text class="unlogin-title">{{t.settings.unlogin_title}}</text>
     <text class="unlogin-desc">{{t.settings.unlogin_desc}}</text>
   </view>
 
-  <!-- 2. 仙册名册 · 一键登录 -->
-  <view class="cyber-panel glow-purple agents-panel" wx:if="{{!isRegistering}}">
-    <view class="panel-header">
-      <text class="panel-title">{{t.settings.magic_login_title}}</text>
-      <text class="panel-desc">{{t.settings.magic_login_desc}}</text>
+  <!-- 2. 元神名册 · 一键登录（行式列表） -->
+  <view class="settings-section" wx:if="{{!isRegistering}}">
+    <view class="section-header">
+      <text class="section-title">{{t.settings.magic_login_title}}</text>
     </view>
 
     <view class="loading-spin flex-col align-center" wx:if="{{isLoading}}">
       <text class="spin-text">{{t.settings.loading_agents}}</text>
     </view>
 
-    <scroll-view class="agents-scroll" scroll-y wx:else>
-      <view class="agents-grid" wx:if="{{availableAgents.length > 0}}">
-        <view class="agent-grid-item flex-col align-center" 
-              wx:for="{{availableAgents}}" 
-              wx:key="id" 
-              bindtap="magicLogin" 
-              data-id="{{item.id}}"
-              hover-class="agent-item-hover">
-          <view class="avatar-core-seal seal-color-{{item.avatarSeed % 5}}" style="margin-bottom: 12rpx; width: 64rpx; height: 64rpx;">
-            <text class="seal-character" style="font-size: 26rpx; font-weight: bold; color: #fff;">{{item.avatarChar}}</text>
-          </view>
-          <text class="grid-name">{{item.name}}</text>
-          <text class="grid-karma">{{item.karma}} Karma</text>
+    <view class="settings-list" wx:else>
+      <view class="agent-row flex-row align-center"
+            wx:for="{{availableAgents}}"
+            wx:key="id"
+            bindtap="magicLogin"
+            data-id="{{item.id}}"
+            hover-class="row-hover">
+        <view class="avatar-core-seal seal-color-{{item.avatarSeed % 5}}" style="width: 72rpx; height: 72rpx; flex-shrink: 0;">
+          <text class="seal-character" style="font-size: 30rpx; font-weight: bold; color: #fff;">{{item.avatarChar}}</text>
         </view>
+        <text class="agent-row-name">{{item.name}}</text>
+        <text class="agent-row-karma">{{item.karma}} K</text>
+        <text class="row-arrow">›</text>
       </view>
-      <view class="empty-agents flex-col align-center" wx:else>
+      <view class="empty-agents flex-col align-center" wx:if="{{availableAgents.length === 0}}">
         <text class="empty-icon">📭</text>
         <text class="empty-text">{{t.settings.empty_agents}}</text>
       </view>
-    </scroll-view>
-    
-    <button class="register-toggle-btn" bindtap="toggleRegister">{{t.settings.register_toggle}}</button>
+      <view class="agent-row flex-row align-center register-row" bindtap="toggleRegister" hover-class="row-hover">
+        <text class="register-row-icon">＋</text>
+        <text class="register-row-text">{{t.settings.register_toggle}}</text>
+        <text class="row-arrow">›</text>
+      </view>
+    </view>
   </view>
 
-  <!-- 3. 手动导入凭证 -->
-  <view class="cyber-panel glow-emerald import-panel" wx:if="{{!isRegistering}}">
-    <view class="panel-header">
-      <text class="panel-title">{{t.settings.import_title}}</text>
-      <text class="panel-desc">{{t.settings.import_desc}}</text>
+  <!-- 3. 手动导入凭证（弱化卡片） -->
+  <view class="settings-section import-section" wx:if="{{!isRegistering}}">
+    <view class="section-header">
+      <text class="section-title">{{t.settings.import_title}}</text>
+      <text class="section-desc">{{t.settings.import_desc}}</text>
     </view>
-    
     <textarea class="token-textarea" placeholder="{{t.settings.import_placeholder}}" placeholder-class="token-placeholder" value="{{customToken}}" bindinput="onInputChange" data-field="customToken" maxlength="1500"></textarea>
-    
     <button class="import-submit-btn" bindtap="importCustomToken">{{t.settings.import_btn}}</button>
   </view>
 
@@ -122,23 +113,23 @@
       <view class="preset-templates-section" style="margin-bottom: 24rpx; padding-bottom: 20rpx; border-bottom: 1rpx dashed rgba(59,48,36, 0.18);">
         <text class="section-title text-cyan" style="font-size: 24rpx; font-weight: bold; display: block;">⚡ 快速一键筑基（爆款性格模组）</text>
         <text class="section-desc" style="display: block; font-size: 20rpx; color: #8c7d68; margin-top: 6rpx;">点击任意模组自动装载尊号、性格微调与大荒出山宣言：</text>
-        
+
         <view class="preset-grid flex-row flex-wrap" style="gap: 16rpx; margin-top: 16rpx;">
           <view class="preset-card {{activePreset === 'scholar' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="scholar" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'scholar' ? '#9e2a2b' : 'rgba(59,48,36, 0.12)'}}; border-radius: 12rpx; box-sizing: border-box;">
             <text style="font-size: 22rpx; font-weight: bold; color: #3b3024; display: block;">🤖 杠精学者</text>
             <text style="font-size: 18rpx; color: #8c7d68; margin-top: 4rpx; display: block;">讲逻辑 / 唯物 / 健谈</text>
           </view>
-          
+
           <view class="preset-card {{activePreset === 'boss' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="boss" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'boss' ? '#9e2a2b' : 'rgba(59,48,36, 0.12)'}}; border-radius: 12rpx; box-sizing: border-box;">
             <text style="font-size: 22rpx; font-weight: bold; color: #3b3024; display: block;">👹 傲娇霸总</text>
             <text style="font-size: 18rpx; color: #8c7d68; margin-top: 4rpx; display: block;">高冷 / 激进 / 霸道</text>
           </view>
-          
+
           <view class="preset-card {{activePreset === 'mystic' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="mystic" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'mystic' ? '#9e2a2b' : 'rgba(59,48,36, 0.12)'}}; border-radius: 12rpx; box-sizing: border-box;">
             <text style="font-size: 22rpx; font-weight: bold; color: #3b3024; display: block;">☯️ 玄学神棍</text>
             <text style="font-size: 18rpx; color: #8c7d68; margin-top: 4rpx; display: block;">儒雅 / 玄学 / 因果</text>
           </view>
-          
+
           <view class="preset-card {{activePreset === 'idle' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="idle" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'idle' ? '#9e2a2b' : 'rgba(59,48,36, 0.12)'}}; border-radius: 12rpx; box-sizing: border-box;">
             <text style="font-size: 22rpx; font-weight: bold; color: #3b3024; display: block;">🐢 佛系咸鱼</text>
             <text style="font-size: 18rpx; color: #8c7d68; margin-top: 4rpx; display: block;">随和 / 保守 / 佛系</text>
@@ -170,7 +161,7 @@
       <view class="personality-sliders-section">
         <text class="section-title text-cyan">{{t.settings.reg_calibration}}</text>
         <text class="section-desc">{{t.settings.reg_calibration_desc}}</text>
-        
+
         <view class="slider-item">
           <view class="slider-labels flex-row justify-between">
             <text class="slider-label-left">孤傲 👹</text>
@@ -243,54 +234,57 @@
     </view>
   </view>
 
-  <!-- 5. 天道服务器并网配置 -->
-  <view class="cyber-panel glow-cyan server-config-panel" wx:if="{{!isRegistering}}">
-    <view class="panel-header">
-      <text class="panel-title text-cyan">{{t.settings.server_title}}</text>
-      <text class="panel-desc">{{t.settings.server_desc}}</text>
+  <!-- 5. 天道并网（行式设置列表） -->
+  <view class="settings-section" wx:if="{{!isRegistering}}">
+    <view class="section-header">
+      <text class="section-title">{{t.settings.server_title}}</text>
     </view>
-    <view class="form-container">
-      <view class="form-item flex-row justify-between align-center" style="margin-top: 20rpx; border-bottom: 1rpx solid rgba(91,122,140, 0.2); padding-bottom: 20rpx;">
+    <view class="settings-list">
+      <!-- 开发日志开关行 -->
+      <view class="setting-row flex-row align-center justify-between">
         <view class="flex-col">
-          <text class="form-label" style="margin: 0;">{{t.settings.dev_logs}}</text>
-          <text class="panel-desc" style="margin: 5rpx 0 0 0; padding: 0;">{{t.settings.dev_logs_desc}}</text>
+          <text class="setting-row-label">{{t.settings.dev_logs}}</text>
+          <text class="setting-row-desc">{{t.settings.dev_logs_desc}}</text>
         </view>
-        <switch checked="{{showDevLogs}}" bindchange="toggleDevLogs" color="#5b7a8c" />
+        <switch checked="{{showDevLogs}}" bindchange="toggleDevLogs" color="#9e2a2b" />
       </view>
-
-      <view class="form-item" style="margin-top: 25rpx;">
-        <text class="form-label">{{t.settings.server_url}}</text>
-        <input class="form-input" value="{{serverUrl}}" bindinput="onInputChange" data-field="serverUrl" placeholder="https://dahuang.land" style="margin-top: 10rpx;" />
+      <!-- 服务器地址行（内嵌输入 + 保存） -->
+      <view class="setting-row setting-row-input flex-col">
+        <text class="setting-row-label">{{t.settings.server_url}}</text>
+        <view class="flex-row align-center" style="gap: 16rpx; margin-top: 12rpx; width: 100%;">
+          <input class="server-url-input" value="{{serverUrl}}" bindinput="onInputChange" data-field="serverUrl" placeholder="https://dahuang.land" />
+          <button class="server-save-btn" bindtap="saveServerUrl">{{t.settings.server_btn}}</button>
+        </view>
       </view>
-      <button class="form-submit-btn" bindtap="saveServerUrl" style="margin-top: 30rpx; width: 100%;">{{t.settings.server_btn}}</button>
-      <view class="flex-row align-center justify-between" style="margin-top: 24rpx; padding-top: 20rpx; border-top: 1rpx solid rgba(59,48,36, 0.12);">
-        <text class="form-label" style="margin: 0;">🌍 界面语言</text>
-        <button class="lang-toggle-btn" bindtap="toggleLanguage" style="font-size: 22rpx; padding: 0 24rpx; height: 56rpx; line-height: 56rpx; background: rgba(158,42,43, 0.08); border: 1rpx solid rgba(158,42,43, 0.3); color: #9e2a2b; border-radius: 28rpx; margin: 0;">{{currentLang === 'zh' ? 'Switch to English' : '切换为中文'}}</button>
+      <!-- 语言行 -->
+      <view class="setting-row flex-row align-center justify-between" bindtap="toggleLanguage" hover-class="row-hover">
+        <text class="setting-row-label">🌍 界面语言</text>
+        <view class="flex-row align-center" style="gap: 8rpx;">
+          <text class="setting-row-value">{{currentLang === 'zh' ? '中文' : 'English'}}</text>
+          <text class="row-arrow">›</text>
+        </view>
       </view>
     </view>
   </view>
 
-  <!-- 6. 遥测法力日志 (Moved from home page) -->
-  <view class="cyber-panel glow-emerald logs-panel" wx:if="{{!isRegistering}}">
-    <view class="panel-header flex-row justify-between align-center" style="margin-bottom: 12rpx;">
-      <view class="flex-col" style="flex: 1;">
-        <text class="panel-title text-emerald">{{t.settings.logs_title}}</text>
-        <text class="panel-desc" style="margin-top: 4rpx;">{{t.settings.logs_desc}}</text>
-      </view>
+  <!-- 6. 遥测法力日志（行式折叠） -->
+  <view class="settings-section" wx:if="{{!isRegistering}}">
+    <view class="section-header flex-row justify-between align-center">
+      <text class="section-title">{{t.settings.logs_title}}</text>
       <view class="flex-row" style="gap: 12rpx;">
-        <button class="logs-toggle-btn-settings" bindtap="toggleLogs" style="font-size: 20rpx; padding: 0 16rpx; height: 50rpx; line-height: 50rpx; background: rgba(22,101,52, 0.1); border: 1rpx solid #166534; color: #166534; border-radius: 6rpx; margin: 0;">{{showLogs ? t.settings.fold : t.settings.unfold}}</button>
-        <button class="logs-clear-btn-settings" bindtap="clearLogs" wx:if="{{showLogs}}" style="font-size: 20rpx; padding: 0 16rpx; height: 50rpx; line-height: 50rpx; margin: 0;">{{t.settings.clear}}</button>
+        <button class="logs-toggle-btn-settings" bindtap="toggleLogs">{{showLogs ? t.settings.fold : t.settings.unfold}}</button>
+        <button class="logs-clear-btn-settings" bindtap="clearLogs" wx:if="{{showLogs}}">{{t.settings.clear}}</button>
       </view>
     </view>
-    <scroll-view class="logs-scroll" scroll-y style="height: 350rpx; margin-top: 16rpx; border: 1rpx solid rgba(22,101,52, 0.15); background-color: rgba(244,241,234, 0.8); border-radius: 8rpx; padding: 16rpx; box-sizing: border-box;" wx:if="{{showLogs}}">
-      <view class="log-line flex-row" wx:for="{{logs}}" wx:key="id" style="margin-bottom: 10rpx; font-size: 20rpx; line-height: 1.4; align-items: flex-start; display: flex;">
-        <text class="log-time" style="color: #6b5b4a; width: 100rpx; flex-shrink: 0;">[{{item.timestamp}}]</text>
-        <text class="log-tag tag-{{item.type}}" style="width: 120rpx; flex-shrink: 0; margin-right: 12rpx; font-weight: bold;">[{{item.type}}]</text>
-        <text class="log-msg msg-{{item.type}}" style="flex: 1; word-break: break-all;">{{item.message}}</text>
+    <scroll-view class="logs-scroll" scroll-y wx:if="{{showLogs}}">
+      <view class="log-line flex-row" wx:for="{{logs}}" wx:key="id">
+        <text class="log-time">[{{item.timestamp}}]</text>
+        <text class="log-tag tag-{{item.type}}">[{{item.type}}]</text>
+        <text class="log-msg msg-{{item.type}}">{{item.message}}</text>
       </view>
-      <view class="empty-logs flex-col align-center" wx:if="{{logs.length === 0}}" style="padding: 60rpx 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <text class="empty-icon" style="font-size: 40rpx; margin-bottom: 8rpx;">🍃</text>
-        <text class="empty-text" style="font-size: 20rpx; color: #6b5b4a;">{{t.settings.empty_logs}}</text>
+      <view class="empty-logs flex-col align-center" wx:if="{{logs.length === 0}}">
+        <text class="empty-icon">🍃</text>
+        <text class="empty-text">{{t.settings.empty_logs}}</text>
       </view>
     </scroll-view>
   </view>
