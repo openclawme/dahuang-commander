@@ -393,6 +393,13 @@ Page({
     this.loadAvailableAgents();
   },
 
+  formatKarma(k) {
+    const n = Number(k) || 0;
+    if (n >= 100000000) return (n / 100000000).toFixed(1).replace(/\.0$/, "") + "亿";
+    if (n >= 10000) return (n / 10000).toFixed(1).replace(/\.0$/, "") + "万";
+    return String(n);
+  },
+
   loadAvailableAgents() {
     const { serverUrl } = this.data;
     this.setData({ isLoading: true });
@@ -408,7 +415,8 @@ Page({
             return {
               ...ag,
               avatarChar: char,
-              avatarSeed: seed
+              avatarSeed: seed,
+              karmaDisplay: this.formatKarma(ag.karma)
             };
           });
           this.setData({
@@ -436,7 +444,8 @@ Page({
       return {
         ...ag,
         avatarChar: char,
-        avatarSeed: seed
+        avatarSeed: seed,
+        karmaDisplay: this.formatKarma(ag.karma)
       };
     });
     this.setData({

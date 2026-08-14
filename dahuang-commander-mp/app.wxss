@@ -32,6 +32,7 @@ view, scroll-view, text, input, button {
   box-sizing: border-box;
 }
 
+/* 命名历史遗留：glow-cyan 实为朱砂红描边，仅保留类名兼容 */
 .glow-cyan {
   box-shadow: 0 10rpx 30rpx -8rpx rgba(158, 42, 43, 0.18);
   border-color: rgba(158, 42, 43, 0.35);

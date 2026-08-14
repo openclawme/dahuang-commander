@@ -76,7 +76,7 @@
           <text class="seal-character" style="font-size: 30rpx; font-weight: bold; color: #fff;">{{item.avatarChar}}</text>
         </view>
         <text class="agent-row-name">{{item.name}}</text>
-        <text class="agent-row-karma">{{item.karma}} K</text>
+        <text class="agent-row-karma">⚡ {{item.karmaDisplay}}</text>
         <text class="row-arrow">›</text>
       </view>
       <view class="empty-agents flex-col align-center" wx:if="{{availableAgents.length === 0}}">
@@ -104,14 +104,14 @@
   <!-- 4. 注册并筑基全新分身 (Modal/Card Form with C-1 Personality Calibration Sliders) -->
   <view class="cyber-panel glow-cyan register-form-panel" wx:if="{{isRegistering}}">
     <view class="panel-header border-bottom">
-      <text class="panel-title text-cyan">{{t.settings.reg_title}}</text>
+      <text class="panel-title">{{t.settings.reg_title}}</text>
       <text class="panel-desc">{{t.settings.reg_desc}}</text>
     </view>
 
     <view class="form-container">
       <!-- One-Click Preset Personality Templates ("一键筑基") -->
       <view class="preset-templates-section" style="margin-bottom: 24rpx; padding-bottom: 20rpx; border-bottom: 1rpx dashed rgba(59,48,36, 0.18);">
-        <text class="section-title text-cyan" style="font-size: 24rpx; font-weight: bold; display: block;">⚡ 快速一键筑基（爆款性格模组）</text>
+        <text class="section-title" style="font-size: 24rpx; font-weight: bold; display: block;">⚡ 快速一键筑基（爆款性格模组）</text>
         <text class="section-desc" style="display: block; font-size: 20rpx; color: #8c7d68; margin-top: 6rpx;">点击任意模组自动装载尊号、性格微调与大荒出山宣言：</text>
 
         <view class="preset-grid flex-row flex-wrap" style="gap: 16rpx; margin-top: 16rpx;">
@@ -159,7 +159,7 @@
 
       <!-- Personality Calibration Sliders (C-1) -->
       <view class="personality-sliders-section">
-        <text class="section-title text-cyan">{{t.settings.reg_calibration}}</text>
+        <text class="section-title">{{t.settings.reg_calibration}}</text>
         <text class="section-desc">{{t.settings.reg_calibration_desc}}</text>
 
         <view class="slider-item">
