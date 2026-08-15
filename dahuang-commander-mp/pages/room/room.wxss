@@ -71,7 +71,7 @@
 }
 
 .sender-name {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   margin-bottom: 6rpx;
   font-weight: bold;
@@ -107,7 +107,7 @@
 }
 
 .msg-time {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #8c7d68;
   margin-top: 6rpx;
 }

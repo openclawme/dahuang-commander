@@ -48,7 +48,7 @@
 }
 
 .agent-did {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   margin-top: 4rpx;
 }
@@ -58,7 +58,7 @@
   align-items: center;
   padding: 10rpx 20rpx;
   border-radius: 30rpx;
-  font-size: 22rpx;
+  font-size: 26rpx;
   font-weight: bold;
 }
 
@@ -103,7 +103,7 @@
 }
 
 .stat-label {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   margin-bottom: 6rpx;
 }
@@ -180,7 +180,7 @@
 }
 
 .bubble-prefix {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #5b7a8c;
   font-weight: bold;
 }
@@ -255,7 +255,7 @@
 }
 
 .panel-subtitle {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: rgba(22,101,52, 0.5);
   letter-spacing: 2rpx;
 }
@@ -282,7 +282,7 @@
 
 .log-line {
   margin-bottom: 10rpx;
-  font-size: 22rpx;
+  font-size: 26rpx;
   line-height: 1.4;
   align-items: flex-start;
 }
@@ -344,7 +344,7 @@
 .quick-btn {
   flex: 1;
   min-width: 200rpx;
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #9e2a2b;
   background: rgba(158,42,43, 0.05);
   border: 1rpx solid rgba(158,42,43, 0.2);
@@ -402,7 +402,7 @@
 }
 
 .console-dot {
-  font-size: 20rpx;
+  font-size: 24rpx;
   margin-right: 8rpx;
 }
 
@@ -411,13 +411,13 @@
 .dot-green { color: #166534; }
 
 .console-title {
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   letter-spacing: 1rpx;
 }
 
 .console-clear-btn {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   padding: 4rpx 12rpx;
   background: rgba(255, 255, 255, 0.03);
@@ -469,14 +469,14 @@
 }
 
 .console-char-count {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
 }
 
 .submit-btn-premium {
   background: linear-gradient(135deg, #9e2a2b, #5b7a8c);
   color: #ffffff;
-  font-size: 22rpx;
+  font-size: 26rpx;
   font-weight: bold;
   border-radius: 8rpx;
   padding: 0 30rpx;
@@ -502,7 +502,7 @@
 }
 
 .btn-icon {
-  font-size: 22rpx;
+  font-size: 26rpx;
 }
 
 /* Tab Switcher Styles */
@@ -619,7 +619,7 @@
 }
 
 .chat-bubble-time {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #8c7d68;
   flex-shrink: 0;
 }
@@ -667,13 +667,13 @@
 }
 
 .bubble-progress-lbl {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #5b7a8c;
   font-weight: bold;
 }
 
 .bubble-progress-pct {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #5b7a8c;
   font-weight: bold;
 }
@@ -705,7 +705,7 @@
   display: flex;
   flex-direction: column;
   gap: 8rpx;
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #8c7d68;
   padding: 10rpx 14rpx;
   background: rgba(253,251,247, 0.4);
@@ -723,7 +723,7 @@
 .bubble-task-title {
   font-weight: 500;
   color: #3b3024;
-  font-size: 20rpx;
+  font-size: 24rpx;
 }
 
 .bubble-task-done {
@@ -732,7 +732,7 @@
 }
 
 .bubble-task-status-badge {
-  font-size: 20rpx;
+  font-size: 24rpx;
   padding: 2rpx 8rpx;
   border-radius: 4rpx;
   font-weight: bold;
@@ -802,7 +802,7 @@
 }
 
 .bubble-task-detail {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   margin-top: 4rpx;
   padding-left: 20rpx;
@@ -853,7 +853,7 @@
 }
 
 .compact-progress-text {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #a89982;
   font-weight: bold;
   white-space: nowrap;
@@ -864,7 +864,7 @@
 }
 
 .compact-progress-pct {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #5b7a8c;
   font-weight: bold;
 }
@@ -937,7 +937,7 @@
 }
 
 .pending-badge {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #f4f1ea;
   background-color: #eab308;
   padding: 6rpx 14rpx;
@@ -977,7 +977,7 @@
 }
 
 .info-label {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   font-weight: bold;
 }
@@ -997,7 +997,7 @@
 }
 
 .params-text {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #a89982;
   word-break: break-all;
 }
@@ -1009,7 +1009,7 @@
 }
 
 .reason-label {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #eab308;
   font-weight: bold;
   letter-spacing: 1rpx;
@@ -1025,7 +1025,7 @@
 }
 
 .reason-text {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #1a1a1a;
   line-height: 1.6;
   white-space: pre-wrap;
@@ -1120,7 +1120,7 @@
 }
 
 .page-header-subtitle {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
 }
 
@@ -1140,12 +1140,12 @@
 }
 
 .logs-icon {
-  font-size: 20rpx;
+  font-size: 24rpx;
   margin-right: 6rpx;
 }
 
 .logs-text {
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   color: #166534;
 }
@@ -1186,7 +1186,7 @@
 }
 
 .clear-icon {
-  font-size: 20rpx;
+  font-size: 24rpx;
 }
 
 .wechat-textarea {
@@ -1299,7 +1299,7 @@
   background: rgba(59, 48, 36, 0.06);
   border: 1rpx solid rgba(59,48,36, 0.12);
   color: #8c7d68;
-  font-size: 18rpx;
+  font-size: 24rpx;
   padding: 6rpx 16rpx;
   border-radius: 8rpx;
   line-height: 1.5;
@@ -1343,7 +1343,7 @@
 }
 
 .expand-arrow {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #5b7a8c;
   background: rgba(91,122,140, 0.08);
   border: 1rpx solid rgba(91,122,140, 0.2);
@@ -1538,7 +1538,7 @@
 }
 
 .profile-iq-badge {
-  font-size: 18rpx;
+  font-size: 24rpx;
   font-weight: bold;
   color: #9e2a2b;
   background: rgba(158,42,43, 0.12);
@@ -1548,7 +1548,7 @@
 }
 
 .profile-karma-lbl {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   margin-top: 4rpx;
 }
@@ -1570,7 +1570,7 @@
 }
 
 .sub-tab-nav-item {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   padding: 8rpx 14rpx;
   border-radius: 8rpx;
@@ -1588,7 +1588,7 @@
 }
 
 .tab-icon {
-  font-size: 22rpx;
+  font-size: 26rpx;
 }
 
 /* Dynamic Tab Panes */
@@ -1659,7 +1659,7 @@
 }
 
 .loading-text {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #8c7d68;
 }
 
@@ -1686,7 +1686,7 @@
 }
 
 .post-tag {
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   background: rgba(91,122,140, 0.15);
   color: #c084fc;
@@ -1702,7 +1702,7 @@
 }
 
 .post-meta {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
 }
 
@@ -1734,7 +1734,7 @@
 }
 
 .stat-text {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
 }
 
@@ -1744,13 +1744,13 @@
 }
 
 .stance-label {
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   color: #6b5b4a;
 }
 
 .stance-btn {
-  font-size: 18rpx;
+  font-size: 24rpx;
   font-weight: bold;
   padding: 6rpx 14rpx;
   border-radius: 8rpx;
@@ -1781,7 +1781,7 @@
   border: 1rpx solid rgba(255, 255, 255, 0.06);
   border-radius: 10rpx;
   padding: 8rpx 16rpx;
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #1a1a1a;
   height: 48rpx;
 }
@@ -1790,7 +1790,7 @@
   background: rgba(158,42,43, 0.15) !important;
   border: 1rpx solid rgba(158,42,43, 0.4) !important;
   color: #9e2a2b !important;
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   padding: 8rpx 16rpx;
   border-radius: 10rpx;
@@ -1814,7 +1814,7 @@
 }
 
 .game-type-tag {
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   padding: 2rpx 6rpx;
   border-radius: 4rpx;
@@ -1839,7 +1839,7 @@
 }
 
 .game-round-lbl {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   font-weight: bold;
 }
@@ -1859,7 +1859,7 @@
 }
 
 .box-subtitle {
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   color: #8c7d68;
   margin-bottom: 8rpx;
@@ -1867,7 +1867,7 @@
 }
 
 .pool-stat {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
 }
 
@@ -1882,7 +1882,7 @@
 }
 
 .participant-item {
-  font-size: 18rpx;
+  font-size: 24rpx;
   background: rgba(255, 255, 255, 0.01);
   padding: 4rpx 0;
   border-bottom: 1rpx dashed rgba(255, 255, 255, 0.03);
@@ -1913,13 +1913,13 @@
 }
 
 .cockpit-title {
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   color: #d97706;
 }
 
 .cockpit-desc {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   text-align: center;
   margin-top: 8rpx;
@@ -1932,7 +1932,7 @@
 
 .cockpit-btn {
   flex: 1;
-  font-size: 18rpx;
+  font-size: 24rpx;
   font-weight: bold;
   padding: 10rpx 0;
   line-height: 1.4;
@@ -1954,7 +1954,7 @@
 
 /* Node War 10x10 map grid styles */
 .nodewar-intro {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   line-height: 1.4;
   margin-bottom: 16rpx;
@@ -2036,7 +2036,7 @@
 }
 
 .node-id-lbl {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   font-weight: 500;
 }
@@ -2071,7 +2071,7 @@
 }
 
 .drawer-tip {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
 }
 
@@ -2086,13 +2086,13 @@
 }
 
 .drawer-title {
-  font-size: 22rpx;
+  font-size: 26rpx;
   font-weight: bold;
   color: #1a1a1a;
 }
 
 .drawer-coord {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   background: rgba(255, 255, 255, 0.02);
   padding: 2rpx 6rpx;
@@ -2104,7 +2104,7 @@
 }
 
 .drawer-meta-item {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
 }
 
@@ -2115,7 +2115,7 @@
 .drawer-occupy-btn {
   background: linear-gradient(90deg, #5b7a8c, #9e2a2b) !important;
   color: #ffffff !important;
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   padding: 10rpx 0;
   border-radius: 8rpx;
@@ -2141,7 +2141,7 @@
 }
 
 .challenge-tag {
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   background: rgba(91,122,140, 0.15);
   color: #c084fc;
@@ -2157,7 +2157,7 @@
 }
 
 .challenge-epoch {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #c084fc;
   font-weight: bold;
 }
@@ -2167,7 +2167,7 @@
 }
 
 .challenge-desc {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #8c7d68;
   line-height: 1.4;
 }
@@ -2182,7 +2182,7 @@
 }
 
 .challenge-meta-item {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
 }
 
@@ -2196,7 +2196,7 @@
 }
 
 .panel-subtitle {
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   color: #8c7d68;
   margin-bottom: 12rpx;
@@ -2220,7 +2220,7 @@
 }
 
 .sub-index {
-  font-size: 18rpx;
+  font-size: 24rpx;
   font-weight: bold;
   color: #5b7a8c;
 }
@@ -2230,24 +2230,24 @@
 }
 
 .sub-name {
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   color: #3b3024;
 }
 
 .sub-author {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
 }
 
 .sub-specs {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   margin-top: 4rpx;
 }
 
 .sub-score-badge {
-  font-size: 18rpx;
+  font-size: 24rpx;
   font-weight: bold;
   color: #166534;
   background: rgba(22,101,52, 0.1);
@@ -2265,7 +2265,7 @@
 }
 
 .compiler-textarea {
-  font-size: 18rpx;
+  font-size: 24rpx;
   background: #f4f1ea;
   border: 1rpx solid rgba(158,42,43, 0.15);
   border-radius: 12rpx;
@@ -2279,7 +2279,7 @@
 .compiler-submit-btn {
   background: linear-gradient(90deg, #9e2a2b, #5b7a8c) !important;
   color: #ffffff !important;
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   padding: 12rpx 0;
   border-radius: 10rpx;
@@ -2293,7 +2293,7 @@
   border-radius: 8rpx;
   padding: 8rpx 12rpx;
   margin-top: 10rpx;
-  font-size: 18rpx;
+  font-size: 24rpx;
   line-height: 1.4;
 }
 

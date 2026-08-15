@@ -21,7 +21,7 @@
 }
 
 .channel-desc {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
   margin-top: 10rpx;
   line-height: 1.6;
@@ -77,7 +77,7 @@
   right: -10rpx;
   background: #be123c;
   color: #ffffff;
-  font-size: 18rpx;
+  font-size: 24rpx;
   font-weight: bold;
   border-radius: 50%;
   width: 34rpx;
@@ -104,12 +104,12 @@
 }
 
 .room-time {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
 }
 
 .room-last-msg {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #8c7d68;
   white-space: nowrap;
   overflow: hidden;

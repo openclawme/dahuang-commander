@@ -10,7 +10,7 @@
         </view>
         
         <view class="chat-bubble-body bubble-{{item.sender === 'human' ? 'user' : 'agent'}} {{item.isRich ? 'bubble-rich' : ''}} {{item.isError ? 'bubble-error' : ''}}">
-          <view class="error-banner flex-row align-center" wx:if="{{item.isError}}" style="margin-bottom: 8rpx; color: #be123c; font-size: 22rpx; font-weight: bold;">
+          <view class="error-banner flex-row align-center" wx:if="{{item.isError}}" style="margin-bottom: 8rpx; color: #be123c; font-size: 26rpx; font-weight: bold;">
             <icon type="warn" size="12" color="#be123c" style="margin-right: 8rpx;"></icon>
             <text>⚠️ 天道推演中断 / 执行异常</text>
           </view>
@@ -56,7 +56,7 @@
             </view>
 
             <view class="fallback-action-box flex-row align-center justify-between" wx:if="{{item.autoFallbackTriggered}}" style="margin-top: 12rpx; padding: 10rpx 14rpx; background: rgba(217,119,6, 0.08); border: 1px solid rgba(217,119,6, 0.3); border-radius: 8rpx;">
-              <text style="font-size: 20rpx; color: #d97706;">⚡ 看门狗已自动接力执行备选方案</text>
+              <text style="font-size: 24rpx; color: #d97706;">⚡ 看门狗已自动接力执行备选方案</text>
             </view>
           </view>
         </view>

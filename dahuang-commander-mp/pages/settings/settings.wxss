@@ -64,7 +64,7 @@
 }
 
 .profile-char {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
   margin-top: 6rpx;
 }
@@ -85,7 +85,7 @@
 }
 
 .p-stat-lbl {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   margin-bottom: 6rpx;
 }
@@ -110,19 +110,19 @@
 }
 
 .did-label {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   font-weight: bold;
 }
 
 .did-copy-hint {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #8c7d68;
 }
 
 .did-value {
   display: block;
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #9e2a2b;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -147,7 +147,7 @@
 }
 
 .token-preview {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   flex: 1;
 }
@@ -156,7 +156,7 @@
   background: rgba(158,42,43, 0.1);
   border: 1rpx solid #9e2a2b;
   color: #9e2a2b;
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   padding: 0 16rpx;
   height: 48rpx;
@@ -207,7 +207,7 @@
 }
 
 .unlogin-desc {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
   margin-top: 12rpx;
   line-height: 1.6;
@@ -216,7 +216,7 @@
 
 /* Agents Panel */
 .panel-desc {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   margin-top: 6rpx;
   line-height: 1.4;
@@ -241,7 +241,7 @@
 }
 
 .empty-text {
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #8c7d68;
 }
 
@@ -253,7 +253,7 @@
   border: 1rpx solid rgba(59,48,36, 0.15);
   border-radius: 8rpx;
   padding: 16rpx;
-  font-size: 22rpx;
+  font-size: 26rpx;
   color: #1a1a1a;
   margin-top: 20rpx;
   box-sizing: border-box;
@@ -261,7 +261,7 @@
 
 .token-placeholder {
   color: #6b5b4a;
-  font-size: 22rpx;
+  font-size: 26rpx;
 }
 
 .import-submit-btn {
@@ -310,7 +310,7 @@
 }
 
 .form-label {
-  font-size: 22rpx;
+  font-size: 26rpx;
   font-weight: bold;
   color: #9e2a2b;
 }
@@ -371,7 +371,7 @@
 }
 
 .iq-badge-text {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #9e2a2b;
   font-weight: bold;
 }
@@ -395,13 +395,13 @@
 }
 
 .pledge-title {
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: bold;
   color: #a89982;
 }
 
 .pledge-text {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
 }
 
@@ -460,7 +460,7 @@
   background: rgba(190,18,60, 0.1);
   border: 1rpx solid rgba(190,18,60, 0.3);
   color: #be123c;
-  font-size: 18rpx;
+  font-size: 24rpx;
   padding: 6rpx 16rpx;
   border-radius: 8rpx;
   line-height: 1.5;
@@ -509,20 +509,20 @@
 }
 
 .slider-label-left {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   width: 100rpx;
   text-align: left;
 }
 
 .slider-label-center {
-  font-size: 18rpx;
+  font-size: 24rpx;
   font-weight: bold;
   color: #8c7d68;
 }
 
 .slider-label-right {
-  font-size: 18rpx;
+  font-size: 24rpx;
   color: #6b5b4a;
   width: 100rpx;
   text-align: right;
@@ -544,7 +544,7 @@
 }
 
 .bubble-title-settings {
-  font-size: 18rpx;
+  font-size: 24rpx;
   font-weight: bold;
   color: #5b7a8c;
   margin-bottom: 8rpx;
@@ -558,7 +558,7 @@
 }
 
 .bubble-text-settings {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #3b3024;
   line-height: 1.5;
   font-style: italic;
@@ -650,7 +650,7 @@
 }
 
 .section-desc {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #8c7d68;
   line-height: 1.4;
   margin-top: 6rpx;
@@ -691,7 +691,7 @@
 }
 
 .agent-row-karma {
-  font-size: 22rpx;
+  font-size: 26rpx;
   font-weight: bold;
   color: #b8844f;
   flex-shrink: 0;
@@ -747,7 +747,7 @@
 }
 
 .setting-row-desc {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #8c7d68;
   margin-top: 4rpx;
 }
@@ -792,7 +792,7 @@
 
 /* 日志区块 */
 .logs-toggle-btn-settings {
-  font-size: 22rpx;
+  font-size: 26rpx;
   padding: 0 24rpx;
   height: 56rpx;
   line-height: 56rpx;
@@ -806,7 +806,7 @@
 .logs-toggle-btn-settings::after { border: none; }
 
 .logs-clear-btn-settings {
-  font-size: 22rpx;
+  font-size: 26rpx;
   padding: 0 24rpx;
   height: 56rpx;
   line-height: 56rpx;
@@ -833,7 +833,7 @@
   flex-direction: row;
   align-items: flex-start;
   margin-bottom: 12rpx;
-  font-size: 20rpx;
+  font-size: 24rpx;
   line-height: 1.5;
 }
 
@@ -848,7 +848,7 @@
   flex-shrink: 0;
   margin-right: 12rpx;
   font-weight: bold;
-  font-size: 18rpx;
+  font-size: 24rpx;
 }
 
 .log-msg {

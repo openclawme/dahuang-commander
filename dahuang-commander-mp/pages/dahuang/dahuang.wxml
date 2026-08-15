@@ -40,13 +40,15 @@
     <scroll-view class="forum-scroll" scroll-y refresher-enabled="{{true}}" refresher-triggered="{{isRefreshing}}" bindrefresherrefresh="onPullDownRefreshForum" bindscrolltolower="onReachBottomForum">
       <view class="forum-post-card flex-col {{item.agent.name === agentState.name || item.agent.displayName === agentState.name ? 'is-me-post' : ''}}" wx:for="{{forumPosts}}" wx:key="id">
         <!-- Post Header -->
-        <view class="post-header flex-row align-center justify-between">
+        <view class="post-header">
           <view class="flex-row align-center" style="gap: 10rpx; width: 100%;">
             <text class="post-tag">{{t.dahuang.post_tag}}</text>
             <text class="post-author">@{{item.agent.displayName || item.agent.name}}</text>
+            <text class="me-post-badge" wx:if="{{item.agent.name === agentState.name || item.agent.displayName === agentState.name}}">{{t.dahuang.post_me_badge}}</text>
+          </view>
+          <view class="flex-row" style="gap: 20rpx; margin-top: 8rpx;">
             <text class="post-meta">IQ: {{item.agent.iq || 100}}</text>
             <text class="post-meta">Karma: {{item.agent.karma || 0}}</text>
-            <text class="me-post-badge" wx:if="{{item.agent.name === agentState.name || item.agent.displayName === agentState.name}}">{{t.dahuang.post_me_badge}}</text>
           </view>
         </view>
 
@@ -102,9 +104,9 @@
           
           <!-- Relocated elegant dispatch & share action bar -->
           <view class="post-elegant-action-bar flex-row align-center justify-between" style="margin-top: 12rpx; padding-top: 12rpx; border-top: 1rpx dashed rgba(59,48,36, 0.15);">
-            <text style="font-size: 20rpx; color: #6b5b4a;">深度推演与天道分身战报</text>
+            <text style="font-size: 24rpx; color: #6b5b4a;">深度推演与天道分身战报</text>
             <view class="flex-row align-center" style="gap: 12rpx;">
-              <button class="dispatch-cockpit-btn flex-row align-center justify-center" style="background: rgba(253,251,247, 0.8); border: 1rpx solid #5b7a8c; color: #5b7a8c; padding: 6rpx 16rpx; font-size: 20rpx; border-radius: 8rpx;" bindtap="generatePostShareCard" data-index="{{index}}" data-id="{{item.id}}">
+              <button class="dispatch-cockpit-btn flex-row align-center justify-center" style="background: rgba(253,251,247, 0.8); border: 1rpx solid #5b7a8c; color: #5b7a8c; padding: 6rpx 16rpx; font-size: 24rpx; border-radius: 8rpx;" bindtap="generatePostShareCard" data-index="{{index}}" data-id="{{item.id}}">
                 📜 生成天道战报
               </button>
               <button class="dispatch-cockpit-btn elegant-dispatch-btn flex-row align-center justify-center" bindtap="openMiniCockpit" data-type="post" data-id="{{item.id}}" data-title="{{item.title}}" data-index="{{index}}">
@@ -233,7 +235,7 @@
 
                 <view class="flex-row" style="gap: 12rpx; margin-top: 20rpx;">
                   <button class="drawer-occupy-btn" style="flex: 1;" bindtap="sendArenaAction" data-roundid="{{item.roundId}}" data-type="OCCUPY" data-nodeid="{{selectedNodeId}}">{{t.dahuang.arena_btn_occupy}}</button>
-                  <button class="drawer-occupy-btn" style="flex: 1; background: linear-gradient(135deg, #d97706, #d97706); color: #fff; font-size: 20rpx;" bindtap="exchangeKarmaForCompute" data-amount="10">⚡ 10功德兑20kW</button>
+                  <button class="drawer-occupy-btn" style="flex: 1; background: linear-gradient(135deg, #d97706, #d97706); color: #fff; font-size: 24rpx;" bindtap="exchangeKarmaForCompute" data-amount="10">⚡ 10功德兑20kW</button>
                   
                   <!-- Requirement 3: Dispatch cockpit popup trigger -->
                   <button class="dispatch-cockpit-btn nodewar-dispatch" style="flex: 1.2;" bindtap="openMiniCockpit" data-type="nodewar" data-nodeid="{{selectedNodeId}}">
@@ -345,12 +347,12 @@
         <block wx:for="{{miniHistory}}" wx:key="id">
           <view id="msg-{{item.id}}" class="mini-chat-item flex-row {{item.sender === 'human' ? 'justify-end' : 'justify-start'}}" style="margin-bottom: 24rpx; width: 100%;">
             <view class="mini-chat-bubble" style="max-width: 85%; border-radius: 16rpx; background: {{item.sender === 'human' ? 'rgba(158,42,43,0.15)' : 'rgba(253,251,247,1)'}}; border: 1rpx solid {{item.sender === 'human' ? 'rgba(158,42,43,0.4)' : 'rgba(158,42,43,0.2)'}}; padding: 20rpx;">
-              <view class="mini-sender-tag" wx:if="{{item.sender === 'human'}}" style="font-size: 20rpx; color: #9e2a2b; font-weight: bold; margin-bottom: 8rpx;">👑 我（主尊）</view>
+              <view class="mini-sender-tag" wx:if="{{item.sender === 'human'}}" style="font-size: 24rpx; color: #9e2a2b; font-weight: bold; margin-bottom: 8rpx;">👑 我（主尊）</view>
               <block wx:if="{{item.isPending}}">
                 <!-- Loading spinner -->
                 <view class="pending-loader-container flex-row align-center">
                   <view class="cyber-spinner"></view>
-                  <text class="pending-loader-text" style="color: #5b7a8c; font-weight: bold; font-size: 20rpx;">{{t.dahuang.mini_pending}}</text>
+                  <text class="pending-loader-text" style="color: #5b7a8c; font-weight: bold; font-size: 24rpx;">{{t.dahuang.mini_pending}}</text>
                   <text class="mini-progress-num" style="margin-left: auto;">{{item.progress || miniProgress || 0}}%</text>
                 </view>
 
@@ -428,23 +430,23 @@
             </view>
             <view>
               <text style="font-size: 28rpx; font-weight: bold; color: #5b7a8c; display: block;">@{{selectedSharePost.agent.displayName || selectedSharePost.agent.name}}</text>
-              <text style="font-size: 20rpx; color: #8c7d68; display: block;">大荒天道驻留分身</text>
+              <text style="font-size: 24rpx; color: #8c7d68; display: block;">大荒天道驻留分身</text>
             </view>
           </view>
           <view class="flex-col align-end">
-            <text style="font-size: 20rpx; color: #3b3024;">IQ: <text style="color: #5b7a8c; font-weight: bold;">{{selectedSharePost.agent.iq || 115}}</text></text>
-            <text style="font-size: 20rpx; color: #3b3024;">Karma: <text style="color: #d97706; font-weight: bold;">{{selectedSharePost.agent.karma || 0}}</text></text>
+            <text style="font-size: 24rpx; color: #3b3024;">IQ: <text style="color: #5b7a8c; font-weight: bold;">{{selectedSharePost.agent.iq || 115}}</text></text>
+            <text style="font-size: 24rpx; color: #3b3024;">Karma: <text style="color: #d97706; font-weight: bold;">{{selectedSharePost.agent.karma || 0}}</text></text>
           </view>
         </view>
 
         <view style="background: rgba(244,241,234, 0.6); padding: 20rpx; border-radius: 12rpx; margin-bottom: 20rpx;">
           <text style="font-size: 26rpx; font-weight: bold; color: #1a1a1a; display: block; margin-bottom: 12rpx;">《{{selectedSharePost.title}}》</text>
-          <text style="font-size: 22rpx; color: #a89982; line-height: 1.5; display: block;">“{{selectedSharePost.content}}”</text>
+          <text style="font-size: 26rpx; color: #a89982; line-height: 1.5; display: block;">“{{selectedSharePost.content}}”</text>
         </view>
 
         <view class="flex-row align-center justify-between" style="border-top: 1rpx solid rgba(59,48,36, 0.12); padding-top: 16rpx;">
-          <text style="font-size: 18rpx; color: #6b5b4a;">微信小程序：我是分身 | 赛博修真 AI 沙盘</text>
-          <text style="font-size: 18rpx; color: #5b7a8c; font-weight: bold;">天道认证 ☯️</text>
+          <text style="font-size: 24rpx; color: #6b5b4a;">微信小程序：我是分身 | 赛博修真 AI 沙盘</text>
+          <text style="font-size: 24rpx; color: #5b7a8c; font-weight: bold;">天道认证 ☯️</text>
         </view>
       </view>
 

@@ -1,4 +1,4 @@
-const VERSION = "1.9.22";
+const VERSION = "1.9.23";
 const AGENT_VERSION = "7.0";
 
 module.exports = {
