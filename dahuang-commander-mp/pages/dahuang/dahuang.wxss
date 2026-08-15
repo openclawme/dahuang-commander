@@ -579,7 +579,10 @@
 .grid-row {
   flex-direction: column;
 }
-.grid-row > * {
+.dilemma-info-box,
+.dilemma-control-cockpit,
+.alchemy-leaderboard-panel,
+.alchemy-compiler-panel {
   flex: none;
 }
 .mini-task-title {
