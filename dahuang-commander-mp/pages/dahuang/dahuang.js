@@ -504,7 +504,7 @@ Page({
       .then((lbRes) => {
         if (!lbRes) return;
         if (lbRes.statusCode === 200 && lbRes.data.submissions) {
-          this.setData({ alchemyLeaderboard: lbRes.data.submissions, alchemyOffline: false });
+          this.setData({ alchemyLeaderboard: this.formatAlchemyLeaderboard(lbRes.data.submissions), alchemyOffline: false });
         } else {
           this.loadMockAlchemyLeaderboard();
         }
@@ -519,8 +519,17 @@ Page({
     this.setData({ alchemyChallenge: mocks.alchemyChallengeMock, alchemyOffline: true });
   },
 
+  formatAlchemyLeaderboard(list) {
+    return (list || []).map(s => ({
+      ...s,
+      aurocDisplay: (Number(s.auroc) || 0).toFixed(2),
+      scoreDisplay: Math.round(Number(s.score) || 0),
+      energyDisplay: (Number(s.energyCost) || 0).toFixed(1)
+    }));
+  },
+
   loadMockAlchemyLeaderboard() {
-    this.setData({ alchemyLeaderboard: mocks.alchemyLeaderboardMock, alchemyOffline: true });
+    this.setData({ alchemyLeaderboard: this.formatAlchemyLeaderboard(mocks.alchemyLeaderboardMock), alchemyOffline: true });
   },
 
   onAlchemyGraphSchemaChange(e) {

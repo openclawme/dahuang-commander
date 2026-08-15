@@ -598,3 +598,23 @@
 .sub-specs {
   flex-wrap: wrap;
 }
+/* 炼丹页：元信息纵向排列，榜单两行清晰化 */
+.challenge-meta-grid {
+  grid-template-columns: 1fr;
+}
+.challenge-meta-item {
+  padding: 4rpx 0;
+  line-height: 1.6;
+}
+.leaderboard-item {
+  flex-direction: column;
+  gap: 8rpx;
+  padding: 14rpx 0;
+}
+.sub-author {
+  flex: none;
+  max-width: 50%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

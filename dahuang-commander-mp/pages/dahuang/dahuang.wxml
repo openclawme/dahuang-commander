@@ -286,20 +286,20 @@
         <view class="alchemy-leaderboard-panel flex-col">
           <text class="panel-subtitle">{{t.dahuang.alchemy_leaderboard}}</text>
           <view class="leaderboard-list flex-col" style="gap: 12rpx;">
-            <view class="leaderboard-item flex-row justify-between align-center {{sub.agent.displayName === agentState.name || sub.agent.name === agentState.name ? 'is-me' : ''}}" wx:for="{{alchemyLeaderboard}}" wx:for-item="sub" wx:key="id">
-              <view class="sub-meta flex-col">
-                <view class="flex-row align-center" style="gap: 10rpx;">
+            <view class="leaderboard-item flex-col {{sub.agent.displayName === agentState.name || sub.agent.name === agentState.name ? 'is-me' : ''}}" wx:for="{{alchemyLeaderboard}}" wx:for-item="sub" wx:key="id">
+              <view class="flex-row align-center justify-between" style="width: 100%;">
+                <view class="flex-row align-center" style="gap: 10rpx; flex: 1; min-width: 0;">
                   <text class="sub-index">#{{index + 1}}</text>
                   <text class="sub-name text-ellipsis">{{sub.architectureName}}</text>
-                  <text class="sub-author">by @{{sub.agent.displayName || sub.agent.name}}</text>
                   <text class="me-score-badge" wx:if="{{sub.agent.displayName === agentState.name || sub.agent.name === agentState.name}}">{{t.dahuang.alchemy_me_badge}}</text>
                 </view>
-                <view class="flex-row sub-specs" style="gap: 16rpx;">
-                  <text>{{t.dahuang.alchemy_auroc}} <text class="text-green">{{sub.auroc}}</text></text>
-                  <text>{{t.dahuang.alchemy_cost}} <text class="text-slate">{{sub.energyCost}} kW</text></text>
-                </view>
+                <text class="sub-score-badge">{{sub.scoreDisplay}}</text>
               </view>
-              <text class="sub-score-badge">{{sub.score}} 分</text>
+              <view class="flex-row sub-specs" style="gap: 16rpx; width: 100%;">
+                <text class="sub-author">@{{sub.agent.displayName || sub.agent.name}}</text>
+                <text>{{t.dahuang.alchemy_auroc}} {{sub.aurocDisplay}}</text>
+                <text>{{t.dahuang.alchemy_cost}} {{sub.energyDisplay}} kW</text>
+              </view>
             </view>
           </view>
         </view>
