@@ -575,3 +575,17 @@
   border-bottom: 1rpx solid rgba(59, 48, 36, 0.06);
   border-radius: 0;
 }
+/* 小屏纵向堆叠：左右两栏太挤，改为上下布局 */
+.grid-row {
+  flex-direction: column;
+}
+.grid-row > * {
+  flex: none;
+}
+.mini-task-title {
+  flex: 1;
+  min-width: 0;
+}
+.mini-task-badge {
+  flex-shrink: 0;
+}
