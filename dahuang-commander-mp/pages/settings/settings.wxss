@@ -85,7 +85,7 @@
 }
 
 .p-stat-lbl {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
   margin-bottom: 6rpx;
 }
@@ -110,13 +110,13 @@
 }
 
 .did-label {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
   font-weight: bold;
 }
 
 .did-copy-hint {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #8c7d68;
 }
 
@@ -132,7 +132,7 @@
 
 .profile-karma-inline {
   margin-top: 10rpx;
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: bold;
   color: #b8844f;
 }
@@ -147,7 +147,7 @@
 }
 
 .token-preview {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
   flex: 1;
 }
@@ -156,11 +156,11 @@
   background: rgba(158,42,43, 0.1);
   border: 1rpx solid #9e2a2b;
   color: #9e2a2b;
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: bold;
   padding: 0 16rpx;
-  height: 48rpx;
-  line-height: 48rpx;
+  height: 72rpx;
+  line-height: 72rpx;
   border-radius: 4rpx;
   margin: 0;
 }
@@ -177,7 +177,7 @@
   background: rgba(190,18,60, 0.1);
   border: 1rpx solid rgba(190,18,60, 0.4);
   color: #be123c;
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: bold;
   height: 80rpx;
   line-height: 80rpx;
@@ -216,7 +216,7 @@
 
 /* Agents Panel */
 .panel-desc {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
   margin-top: 6rpx;
   line-height: 1.4;
@@ -227,7 +227,7 @@
 }
 
 .spin-text {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
 }
 
@@ -267,7 +267,7 @@
 .import-submit-btn {
   background: linear-gradient(135deg, #9e2a2b, #b35c44);
   color: #f4f1ea;
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: bold;
   height: 70rpx;
   border-radius: 32rpx;
@@ -325,7 +325,7 @@
   border: 1rpx solid rgba(158,42,43, 0.3);
   border-radius: 6rpx;
   padding: 0 20rpx;
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #1a1a1a;
   width: 100%;
   box-sizing: border-box;
@@ -341,7 +341,7 @@
   border: 1rpx solid rgba(158,42,43, 0.3);
   border-radius: 6rpx;
   padding: 16rpx 20rpx;
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #1a1a1a;
   width: 100%;
   box-sizing: border-box;
@@ -353,7 +353,7 @@
   border: 1rpx solid rgba(158,42,43, 0.3);
   border-radius: 6rpx;
   padding: 16rpx 20rpx;
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #1a1a1a;
   width: 100%;
   box-sizing: border-box;
@@ -369,13 +369,13 @@
 
 .iq-badge-dot {
   color: #9e2a2b;
-  font-size: 24rpx;
+  font-size: 26rpx;
   margin-right: 12rpx;
   animation: pulse-cyan 1.5s infinite alternate;
 }
 
 .iq-badge-text {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #9e2a2b;
   font-weight: bold;
 }
@@ -399,13 +399,13 @@
 }
 
 .pledge-title {
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: bold;
   color: #a89982;
 }
 
 .pledge-text {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
 }
 
@@ -419,7 +419,7 @@
   background: rgba(59, 48, 36, 0.1);
   border: 1rpx solid rgba(59, 48, 36, 0.12);
   color: #8c7d68;
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: bold;
   height: 80rpx;
   line-height: 80rpx;
@@ -440,7 +440,7 @@
   flex: 1;
   background: linear-gradient(135deg, #9e2a2b, #b35c44);
   color: #f4f1ea;
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: bold;
   height: 80rpx;
   line-height: 80rpx;
@@ -464,7 +464,7 @@
   background: rgba(190,18,60, 0.1);
   border: 1rpx solid rgba(190,18,60, 0.3);
   color: #be123c;
-  font-size: 24rpx;
+  font-size: 26rpx;
   padding: 6rpx 16rpx;
   border-radius: 8rpx;
   line-height: 1.5;
@@ -513,20 +513,20 @@
 }
 
 .slider-label-left {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
   width: 100rpx;
   text-align: left;
 }
 
 .slider-label-center {
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: bold;
   color: #8c7d68;
 }
 
 .slider-label-right {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
   width: 100rpx;
   text-align: right;
@@ -548,7 +548,7 @@
 }
 
 .bubble-title-settings {
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: bold;
   color: #5b7a8c;
   margin-bottom: 8rpx;
@@ -562,7 +562,7 @@
 }
 
 .bubble-text-settings {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #3b3024;
   line-height: 1.5;
   font-style: italic;
@@ -654,7 +654,7 @@
 }
 
 .section-desc {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #8c7d68;
   line-height: 1.4;
   margin-top: 6rpx;
@@ -751,13 +751,13 @@
 }
 
 .setting-row-desc {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #8c7d68;
   margin-top: 4rpx;
 }
 
 .setting-row-value {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
 }
 
@@ -768,7 +768,7 @@
 .server-url-input {
   flex: 1;
   height: 64rpx;
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #1a1a1a;
   background: rgba(244, 241, 234, 0.8);
   border: 1rpx solid rgba(59, 48, 36, 0.15);
@@ -781,7 +781,7 @@
   height: 64rpx;
   line-height: 64rpx;
   padding: 0 28rpx;
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: bold;
   color: #fff;
   background: #9e2a2b;
@@ -798,8 +798,8 @@
 .logs-toggle-btn-settings {
   font-size: 26rpx;
   padding: 0 24rpx;
-  height: 56rpx;
-  line-height: 56rpx;
+  height: 72rpx;
+  line-height: 72rpx;
   background: rgba(158, 42, 43, 0.06);
   border: 1rpx solid rgba(158, 42, 43, 0.3);
   color: #9e2a2b;
@@ -812,8 +812,8 @@
 .logs-clear-btn-settings {
   font-size: 26rpx;
   padding: 0 24rpx;
-  height: 56rpx;
-  line-height: 56rpx;
+  height: 72rpx;
+  line-height: 72rpx;
   background: rgba(59, 48, 36, 0.05);
   border: 1rpx solid rgba(59, 48, 36, 0.15);
   color: #6b5b4a;
@@ -834,29 +834,30 @@
 
 .log-line {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  margin-bottom: 12rpx;
-  font-size: 24rpx;
+  flex-direction: column;
+  margin-bottom: 16rpx;
+  font-size: 26rpx;
   line-height: 1.5;
+}
+
+.log-line-head {
+  display: flex;
+  flex-direction: row;
+  gap: 12rpx;
+  margin-bottom: 4rpx;
 }
 
 .log-time {
   color: #8c7d68;
-  width: 110rpx;
-  flex-shrink: 0;
+  font-size: 24rpx;
 }
 
 .log-tag {
-  width: 130rpx;
-  flex-shrink: 0;
-  margin-right: 12rpx;
   font-weight: bold;
   font-size: 24rpx;
 }
 
 .log-msg {
-  flex: 1;
   word-break: break-all;
   color: #3b3024;
 }

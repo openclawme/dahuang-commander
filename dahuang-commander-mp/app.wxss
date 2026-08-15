@@ -76,7 +76,7 @@ view, scroll-view, text, input, button {
 
 /* Custom Text Badges */
 .badge {
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: bold;
   padding: 4rpx 10rpx;
   border-radius: 6rpx;
