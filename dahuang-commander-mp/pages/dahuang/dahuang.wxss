@@ -509,3 +509,69 @@
   border-color: rgba(59, 48, 36, 0.08);
   box-shadow: none;
 }
+/* 横向溢出修复：可收缩元素加省略号，次要元素不收缩 */
+.post-tag,
+.post-meta,
+.me-post-badge,
+.sub-index,
+.sub-name {
+  flex-shrink: 0;
+}
+.post-author {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sub-meta {
+  flex: 1;
+  min-width: 0;
+}
+.sub-author {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sub-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.game-name {
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.drawer-meta-item {
+  word-break: break-all;
+}
+.poster-card-body {
+  word-break: break-all;
+}
+
+/* 扁平化：去掉竞技场/炼丹内层面板边框与底纹 */
+.dilemma-info-box,
+.dilemma-control-cockpit,
+.alchemy-leaderboard-panel,
+.alchemy-compiler-panel {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+.node-control-drawer {
+  background: transparent;
+  border: none;
+  border-top: 1rpx solid rgba(59, 48, 36, 0.08);
+  border-radius: 0;
+  box-shadow: none;
+}
+.leaderboard-item {
+  background: transparent;
+  border: none;
+  border-bottom: 1rpx solid rgba(59, 48, 36, 0.06);
+  border-radius: 0;
+}

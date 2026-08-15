@@ -584,17 +584,24 @@
 
 .chat-avatar {
   font-size: 28rpx;
+  flex-shrink: 0;
 }
 
 .chat-bubble-name {
   font-size: 24rpx;
   font-weight: bold;
   color: #6b5b4a;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chat-bubble-time {
   font-size: 22rpx;
   color: #8c7d68;
+  flex-shrink: 0;
 }
 
 .chat-bubble-body {

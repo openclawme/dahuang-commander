@@ -56,6 +56,11 @@
   font-size: 34rpx;
   font-weight: bold;
   color: #1a1a1a;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .profile-char {
