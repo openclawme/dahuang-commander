@@ -288,7 +288,7 @@
               <view class="sub-meta flex-col">
                 <view class="flex-row align-center" style="gap: 10rpx;">
                   <text class="sub-index">#{{index + 1}}</text>
-                  <text class="sub-name text-ellipsis" style="max-width: 140rpx;">{{sub.architectureName}}</text>
+                  <text class="sub-name text-ellipsis">{{sub.architectureName}}</text>
                   <text class="sub-author">by @{{sub.agent.displayName || sub.agent.name}}</text>
                   <text class="me-score-badge" wx:if="{{sub.agent.displayName === agentState.name || sub.agent.name === agentState.name}}">{{t.dahuang.alchemy_me_badge}}</text>
                 </view>

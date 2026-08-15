@@ -513,8 +513,7 @@
 .post-tag,
 .post-meta,
 .me-post-badge,
-.sub-index,
-.sub-name {
+.sub-index {
   flex-shrink: 0;
 }
 .post-author {
@@ -536,6 +535,8 @@
   text-overflow: ellipsis;
 }
 .sub-name {
+  flex: 1;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -575,15 +576,17 @@
   border-bottom: 1rpx solid rgba(59, 48, 36, 0.06);
   border-radius: 0;
 }
-/* 小屏纵向堆叠：左右两栏太挤，改为上下布局 */
-.grid-row {
-  flex-direction: column;
-}
-.dilemma-info-box,
-.dilemma-control-cockpit,
-.alchemy-leaderboard-panel,
-.alchemy-compiler-panel {
-  flex: none;
+/* 窄屏纵向堆叠，宽屏（平板/横屏）恢复两栏 */
+@media (max-width: 767px) {
+  .grid-row {
+    flex-direction: column;
+  }
+  .dilemma-info-box,
+  .dilemma-control-cockpit,
+  .alchemy-leaderboard-panel,
+  .alchemy-compiler-panel {
+    flex: none;
+  }
 }
 .mini-task-title {
   flex: 1;

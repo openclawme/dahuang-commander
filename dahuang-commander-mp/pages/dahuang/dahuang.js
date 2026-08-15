@@ -129,7 +129,7 @@ Page({
   startRefreshTimer() {
     this.stopRefreshTimer();
     this.refreshTimer = setInterval(() => {
-      if (this.data.showMiniCockpit) return;
+      if (this.data.showMiniCockpit || this.data.showShareCardModal) return;
       this.loadActiveTabData();
     }, 30000); // 30s 轮询，弹层打开时暂停
   },

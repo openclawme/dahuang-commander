@@ -113,6 +113,7 @@
   font-weight: bold;
 }
 
+/* 命名历史遗留：text-cyan 实为朱砂红，text-purple 实为青灰，仅保留类名兼容 */
 .text-cyan {
   color: #9e2a2b;
 }
@@ -123,6 +124,25 @@
 
 .text-emerald {
   color: #166534;
+}
+
+/* 历史遗留幽灵类：补上浅色纸主题下的语义色，避免白字白底事故 */
+.text-white {
+  color: #3b3024;
+}
+.text-yellow {
+  color: #b8844f;
+}
+.text-slate {
+  color: #6b5b4a;
+}
+.text-green {
+  color: #166534;
+}
+.text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Progress Panel Styles */
