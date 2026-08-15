@@ -619,7 +619,7 @@
 }
 
 .chat-bubble-time {
-  font-size: 26rpx;
+  font-size: 24rpx;
   color: #8c7d68;
   flex-shrink: 0;
 }
@@ -705,7 +705,7 @@
   display: flex;
   flex-direction: column;
   gap: 8rpx;
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #8c7d68;
   padding: 10rpx 14rpx;
   background: rgba(253,251,247, 0.4);
@@ -802,7 +802,7 @@
 }
 
 .bubble-task-detail {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
   margin-top: 4rpx;
   padding-left: 20rpx;
@@ -1191,7 +1191,7 @@
 
 .wechat-textarea {
   flex: 1;
-  min-height: 48rpx;
+  min-height: 64rpx;
   max-height: 180rpx;
   color: #1a1a1a;
   font-size: 26rpx;
@@ -1643,13 +1643,13 @@
 }
 
 .board-pill-name {
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: bold;
   color: #8c7d68;
 }
 
 .forum-board-pill.active .board-pill-name {
-  color: #c084fc;
+  color: #9e2a2b;
 }
 
 /* Loading Box */
@@ -1859,7 +1859,7 @@
 }
 
 .box-subtitle {
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: bold;
   color: #8c7d68;
   margin-bottom: 8rpx;
@@ -1867,7 +1867,7 @@
 }
 
 .pool-stat {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #6b5b4a;
 }
 
@@ -1882,10 +1882,10 @@
 }
 
 .participant-item {
-  font-size: 24rpx;
-  background: rgba(255, 255, 255, 0.01);
+  font-size: 26rpx;
+  background: rgba(255, 255, 255, 0.4);
   padding: 4rpx 0;
-  border-bottom: 1rpx dashed rgba(255, 255, 255, 0.03);
+  border-bottom: 1rpx dashed rgba(59, 48, 36, 0.08);
 }
 
 .p-name {

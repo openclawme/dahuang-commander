@@ -287,6 +287,10 @@
 
 /* Register Form Panel */
 .register-form-panel {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 8rpx;
   display: flex;
   flex-direction: column;
 }

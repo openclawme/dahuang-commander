@@ -44,7 +44,10 @@
 
 .dahuang-tab-nav-item {
   flex: 1;
-  font-size: 24rpx;
+  font-size: 26rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #6b5b4a;
   padding: 16rpx 0;
   border-radius: 12rpx;
@@ -221,7 +224,7 @@
 
 .cockpit-close-btn {
   width: 44rpx;
-  height: 44rpx;
+  height: 60rpx;
   border-radius: 50%;
   background: rgba(59, 48, 36, 0.1);
   color: #be123c;
@@ -471,15 +474,15 @@
 
 .comment-input-area .cyber-input {
   flex: 1;
-  height: 56rpx;
+  height: 64rpx;
   font-size: 26rpx;
-  padding: 0 16rpx;
+  padding: 0 24rpx;
 }
 
 .comment-input-area .mini-btn {
   padding: 0 20rpx;
-  height: 56rpx;
-  line-height: 56rpx;
+  height: 64rpx;
+  line-height: 64rpx;
   font-size: 26rpx;
   margin: 0;
 }
