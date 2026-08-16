@@ -1,10 +1,10 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/dahuang/dahuang",
     "pages/chat/chat",
-    "pages/room/room",
-    "pages/settings/settings"
+    "pages/dahuang/dahuang",
+    "pages/settings/settings",
+    "pages/room/room"
   ],
   "window": {
     "backgroundTextStyle": "light",
