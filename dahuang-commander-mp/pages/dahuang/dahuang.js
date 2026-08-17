@@ -69,9 +69,9 @@ Page({
       try { wx.setNavigationBarTitle({ title: dict.dahuang.nav_title }); } catch(e) {}
     }
     i18n.updateTabBar();
-    this.fetchForumData();
-    this.fetchArenaGames();
-    this.fetchAlchemyChallenge();
+    this.fetchForumPosts();
+    this.fetchArenaStatus();
+    this.fetchAlchemyData();
   },
 
   onShow() {
