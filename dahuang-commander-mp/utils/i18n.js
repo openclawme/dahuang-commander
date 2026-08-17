@@ -9,8 +9,8 @@ const initLanguage = () => {
     currentLang = cachedLang;
   } else {
     try {
-      const sysInfo = wx.getSystemInfoSync();
-      if (sysInfo.language && sysInfo.language.indexOf('en') === 0) {
+      const appInfo = wx.getAppBaseInfo();
+      if (appInfo.language && appInfo.language.indexOf('en') === 0) {
         currentLang = 'en';
       } else {
         currentLang = 'zh';
@@ -26,8 +26,8 @@ const updateTabBar = () => {
   if (dict && dict.tabbar) {
     wx.setTabBarItem({ index: 0, text: dict.tabbar.index }).catch(() => {});
     wx.setTabBarItem({ index: 1, text: dict.tabbar.chat }).catch(() => {});
-    wx.setTabBarItem({ index: 2, text: dict.tabbar.settings }).catch(() => {});
-    wx.setTabBarItem({ index: 3, text: dict.tabbar.dahuang }).catch(() => {});
+    wx.setTabBarItem({ index: 2, text: dict.tabbar.dahuang }).catch(() => {});
+    wx.setTabBarItem({ index: 3, text: dict.tabbar.settings }).catch(() => {});
   }
 };
 

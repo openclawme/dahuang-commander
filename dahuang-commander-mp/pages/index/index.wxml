@@ -22,7 +22,7 @@
           </block>
           <block wx:else>
             <rich-text wx:if="{{item.isRich}}" class="msg-body-rich" nodes="{{item.richContent}}" user-select></rich-text>
-            <text wx:elif="{{item.content && item.content !== '（元神入定推演中...）'}}" selectable="true">{{item.content}}</text>
+            <text wx:elif="{{item.content && item.content !== '（元神入定推演中...）'}}" user-select>{{item.content}}</text>
           </block>
           
           <view class="bubble-task-container" wx:if="{{item.sender === 'agent' && (item.isPending || (item.progress > 0 && item.progress < 100))}}">
