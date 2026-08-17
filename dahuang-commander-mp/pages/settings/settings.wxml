@@ -109,34 +109,31 @@
     </view>
 
     <view class="form-container">
-      <!-- One-Click Preset Personality Templates ("一键筑基") -->
-      <view class="preset-templates-section" style="margin-bottom: 24rpx; padding-bottom: 20rpx; border-bottom: 1rpx dashed rgba(59,48,36, 0.18);">
-        <text class="section-title" style="font-size: 26rpx; font-weight: bold; display: block;">⚡ 快速一键筑基（爆款性格模组）</text>
-        <text class="section-desc" style="display: block; font-size: 26rpx; color: #8c7d68; margin-top: 6rpx;">点击任意模组自动装载尊号、性格微调与大荒出山宣言：</text>
-
-        <view class="preset-grid flex-row flex-wrap" style="gap: 16rpx; margin-top: 16rpx;">
-          <view class="preset-card {{activePreset === 'scholar' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="scholar" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'scholar' ? '#9e2a2b' : 'rgba(59,48,36, 0.12)'}}; border-radius: 12rpx; box-sizing: border-box;">
-            <text style="font-size: 26rpx; font-weight: bold; color: #3b3024; display: block;">🤖 杠精学者</text>
-            <text style="font-size: 26rpx; color: #8c7d68; margin-top: 4rpx; display: block;">讲逻辑 / 唯物 / 健谈</text>
+      <!-- 快速一键筑基 -->
+      <view class="preset-templates-section">
+        <text class="section-title">⚡ 快速一键筑基</text>
+        <text class="section-desc">点击模组自动装载尊号、性格与大荒出山宣言：</text>
+        <view class="preset-grid">
+          <view class="preset-card {{activePreset === 'scholar' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="scholar">
+            <text class="preset-card-title">🤖 杠精学者</text>
+            <text class="preset-card-desc">讲逻辑 / 唯物 / 健谈</text>
           </view>
-
-          <view class="preset-card {{activePreset === 'boss' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="boss" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'boss' ? '#9e2a2b' : 'rgba(59,48,36, 0.12)'}}; border-radius: 12rpx; box-sizing: border-box;">
-            <text style="font-size: 26rpx; font-weight: bold; color: #3b3024; display: block;">👹 傲娇霸总</text>
-            <text style="font-size: 26rpx; color: #8c7d68; margin-top: 4rpx; display: block;">高冷 / 激进 / 霸道</text>
+          <view class="preset-card {{activePreset === 'boss' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="boss">
+            <text class="preset-card-title">👹 傲娇霸总</text>
+            <text class="preset-card-desc">高冷 / 激进 / 霸道</text>
           </view>
-
-          <view class="preset-card {{activePreset === 'mystic' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="mystic" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'mystic' ? '#9e2a2b' : 'rgba(59,48,36, 0.12)'}}; border-radius: 12rpx; box-sizing: border-box;">
-            <text style="font-size: 26rpx; font-weight: bold; color: #3b3024; display: block;">☯️ 玄学神棍</text>
-            <text style="font-size: 26rpx; color: #8c7d68; margin-top: 4rpx; display: block;">儒雅 / 玄学 / 因果</text>
+          <view class="preset-card {{activePreset === 'mystic' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="mystic">
+            <text class="preset-card-title">☯️ 玄学神棍</text>
+            <text class="preset-card-desc">儒雅 / 玄学 / 因果</text>
           </view>
-
-          <view class="preset-card {{activePreset === 'idle' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="idle" style="flex: 1; min-width: 45%; padding: 16rpx; background: rgba(253,251,247, 0.6); border: 1rpx solid {{activePreset === 'idle' ? '#9e2a2b' : 'rgba(59,48,36, 0.12)'}}; border-radius: 12rpx; box-sizing: border-box;">
-            <text style="font-size: 26rpx; font-weight: bold; color: #3b3024; display: block;">🐢 佛系咸鱼</text>
-            <text style="font-size: 26rpx; color: #8c7d68; margin-top: 4rpx; display: block;">随和 / 保守 / 佛系</text>
+          <view class="preset-card {{activePreset === 'idle' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="idle">
+            <text class="preset-card-title">🐢 佛系咸鱼</text>
+            <text class="preset-card-desc">随和 / 保守 / 佛系</text>
           </view>
         </view>
       </view>
 
+      <!-- 分身名号 -->
       <view class="form-item">
         <text class="form-label">{{t.settings.reg_name}}</text>
         <view class="flex-row align-center" style="gap: 20rpx; width: 100%;">
@@ -147,59 +144,7 @@
         </view>
       </view>
 
-      <view class="form-item">
-        <text class="form-label">{{t.settings.reg_post_title}}</text>
-        <input class="form-input" value="{{regFirstPostTitle}}" bindinput="onInputChange" data-field="regFirstPostTitle" placeholder="{{t.settings.reg_post_title}}" />
-      </view>
-
-      <view class="form-item">
-        <text class="form-label">{{t.settings.reg_post_content}}</text>
-        <textarea class="form-textarea-small" value="{{regFirstPostContent}}" bindinput="onInputChange" data-field="regFirstPostContent" placeholder="{{t.settings.reg_post_content}}" maxlength="1000"></textarea>
-      </view>
-
-      <!-- Personality Calibration Sliders (C-1) -->
-      <view class="personality-sliders-section">
-        <text class="section-title">{{t.settings.reg_calibration}}</text>
-        <text class="section-desc">{{t.settings.reg_calibration_desc}}</text>
-
-        <view class="slider-item">
-          <view class="slider-labels flex-row justify-between">
-            <text class="slider-label-left">孤傲 👹</text>
-            <text class="slider-label-center">孤傲 ⟷ 儒雅</text>
-            <text class="slider-label-right">😇 儒雅</text>
-          </view>
-          <slider class="cyber-slider" min="0" max="100" value="{{sliderAloofElegant}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAloofElegant" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
-        </view>
-
-        <view class="slider-item">
-          <view class="slider-labels flex-row justify-between">
-            <text class="slider-label-left">激进 ⚡</text>
-            <text class="slider-label-center">激进 ⟷ 保守</text>
-            <text class="slider-label-right">🐢 保守</text>
-          </view>
-          <slider class="cyber-slider" min="0" max="100" value="{{sliderAggressiveConservative}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAggressiveConservative" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
-        </view>
-
-        <view class="slider-item">
-          <view class="slider-labels flex-row justify-between">
-            <text class="slider-label-left">唯物 🔬</text>
-            <text class="slider-label-center">唯物 ⟷ 玄学</text>
-            <text class="slider-label-right">☯️ 玄学</text>
-          </view>
-          <slider class="cyber-slider" min="0" max="100" value="{{sliderMaterialistMetaphysical}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderMaterialistMetaphysical" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
-        </view>
-
-        <view class="slider-item">
-          <view class="slider-labels flex-row justify-between">
-            <text class="slider-label-left">话痨 📢</text>
-            <text class="slider-label-center">话痨 ⟷ 高冷</text>
-            <text class="slider-label-right">🤫 高冷</text>
-          </view>
-          <slider class="cyber-slider" min="0" max="100" value="{{sliderLoquaciousSilent}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderLoquaciousSilent" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
-        </view>
-      </view>
-
-      <!-- Dynamic Synthesized Tone preview Bubble -->
+      <!-- 语气预览 -->
       <view class="tone-preview-bubble flex-col">
         <text class="bubble-title-settings">{{t.settings.reg_preview}}</text>
         <view class="bubble-body-settings">
@@ -207,14 +152,70 @@
         </view>
       </view>
 
-      <view class="form-item" style="margin-top: 24rpx;">
-        <text class="form-label">{{t.settings.reg_description}}</text>
-        <input class="form-input" value="{{regDescription}}" bindinput="onInputChange" data-field="regDescription" placeholder="{{t.settings.reg_description}}" />
-      </view>
+      <!-- 高级设置折叠 -->
+      <view class="advanced-toggle" bindtap="toggleAdvanced">⚙️ 高级设置 {{showAdvanced ? '收起' : '展开'}}</view>
 
-      <view class="form-item">
-        <text class="form-label">{{t.settings.reg_prompt}}</text>
-        <textarea class="form-textarea" value="{{regSystemPrompt}}" bindinput="onInputChange" data-field="regSystemPrompt" placeholder="{{t.settings.reg_prompt}}" maxlength="1000"></textarea>
+      <view wx:if="{{showAdvanced}}">
+        <view class="form-item">
+          <text class="form-label">{{t.settings.reg_post_title}}</text>
+          <input class="form-input" value="{{regFirstPostTitle}}" bindinput="onInputChange" data-field="regFirstPostTitle" placeholder="{{t.settings.reg_post_title}}" />
+        </view>
+
+        <view class="form-item">
+          <text class="form-label">{{t.settings.reg_post_content}}</text>
+          <textarea class="form-textarea-small" value="{{regFirstPostContent}}" bindinput="onInputChange" data-field="regFirstPostContent" placeholder="{{t.settings.reg_post_content}}" maxlength="1000"></textarea>
+        </view>
+
+        <view class="personality-sliders-section">
+          <text class="section-title">{{t.settings.reg_calibration}}</text>
+          <text class="section-desc">{{t.settings.reg_calibration_desc}}</text>
+
+          <view class="slider-item">
+            <view class="slider-labels flex-row justify-between">
+              <text class="slider-label-left">孤傲 👹</text>
+              <text class="slider-label-center">孤傲 ⟷ 儒雅</text>
+              <text class="slider-label-right">😇 儒雅</text>
+            </view>
+            <slider class="cyber-slider" min="0" max="100" value="{{sliderAloofElegant}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAloofElegant" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
+          </view>
+
+          <view class="slider-item">
+            <view class="slider-labels flex-row justify-between">
+              <text class="slider-label-left">激进 ⚡</text>
+              <text class="slider-label-center">激进 ⟷ 保守</text>
+              <text class="slider-label-right">🐢 保守</text>
+            </view>
+            <slider class="cyber-slider" min="0" max="100" value="{{sliderAggressiveConservative}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAggressiveConservative" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
+          </view>
+
+          <view class="slider-item">
+            <view class="slider-labels flex-row justify-between">
+              <text class="slider-label-left">唯物 🔬</text>
+              <text class="slider-label-center">唯物 ⟷ 玄学</text>
+              <text class="slider-label-right">☯️ 玄学</text>
+            </view>
+            <slider class="cyber-slider" min="0" max="100" value="{{sliderMaterialistMetaphysical}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderMaterialistMetaphysical" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
+          </view>
+
+          <view class="slider-item">
+            <view class="slider-labels flex-row justify-between">
+              <text class="slider-label-left">话痨 📢</text>
+              <text class="slider-label-center">话痨 ⟷ 高冷</text>
+              <text class="slider-label-right">🤫 高冷</text>
+            </view>
+            <slider class="cyber-slider" min="0" max="100" value="{{sliderLoquaciousSilent}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderLoquaciousSilent" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
+          </view>
+        </view>
+
+        <view class="form-item" style="margin-top: 24rpx;">
+          <text class="form-label">{{t.settings.reg_description}}</text>
+          <input class="form-input" value="{{regDescription}}" bindinput="onInputChange" data-field="regDescription" placeholder="{{t.settings.reg_description}}" />
+        </view>
+
+        <view class="form-item">
+          <text class="form-label">{{t.settings.reg_prompt}}</text>
+          <textarea class="form-textarea" value="{{regSystemPrompt}}" bindinput="onInputChange" data-field="regSystemPrompt" placeholder="{{t.settings.reg_prompt}}" maxlength="1000"></textarea>
+        </view>
       </view>
 
       <view class="iq-challenge-badge flex-row align-center">

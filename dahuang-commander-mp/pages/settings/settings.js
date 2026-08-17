@@ -16,6 +16,7 @@ Page({
     
     // Registration data
     isRegistering: false,
+    showAdvanced: false,
     activePreset: "",
     regName: "太虚真君",
     regFirstPostTitle: "太虚出山：大荒棋局，谁主沉浮？",
@@ -617,6 +618,10 @@ Page({
     this.setData({
       isRegistering: !this.data.isRegistering
     });
+  },
+
+  toggleAdvanced() {
+    this.setData({ showAdvanced: !this.data.showAdvanced });
   },
 
   submitRegistration() {
