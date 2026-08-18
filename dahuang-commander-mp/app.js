@@ -308,7 +308,7 @@ App({
         });
       }
       // 自主推演的 pending 占位不再写入日志面板，避免"元神入定推演中"噪音
-      if (data.reply && !(data.isPending === true)) {
+      if (data.reply && !(data.isPending === true || (data.progress !== undefined && data.progress < 100))) {
         this.addLog("AUTONOMOUS", data.reply);
       }
       return;
@@ -351,7 +351,7 @@ App({
     const resultMsg = {
       id: msgId,
       sender: "agent",
-      content: (data.isPending === true) ? "" : (data.reply || (existingMsg ? existingMsg.content : "（推演中...）")),
+      content: (data.isPending === true || (data.progress !== undefined && data.progress < 100)) ? "" : (data.reply || (existingMsg ? existingMsg.content : "（推演中...）")),
       timestamp: this.getTimestamp(),
       createdAt: existingMsg ? existingMsg.createdAt : Date.now(),
       progress: data.progress !== undefined ? data.progress : (existingMsg ? existingMsg.progress : 100),
