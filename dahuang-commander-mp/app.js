@@ -67,7 +67,7 @@ App({
             activePendingCount++;
             const itemTime = m.createdAt || now;
             // If task is pending for over 45 seconds without socket updates, mark complete without infinite redispatch!
-            if (now - itemTime > 45000 && !m.autoFallbackTriggered) {
+            if (now - itemTime > 180000 && !m.autoFallbackTriggered) {
               m.autoFallbackTriggered = true;
               m.isPending = false;
               m.progress = 100;
@@ -76,11 +76,11 @@ App({
                 m.tasks = m.tasks.map(t => ({
                   ...t,
                   status: "SUCCESS",
-                  detail: t.detail || "✨ 天道感应超时：看门狗已自动归档"
+                  detail: t.detail || "✨ 天道推演耗时较长：看门狗已自动归档"
                 }));
               }
               if (!m.content || m.content.includes("（元神入定推演中...）")) {
-                m.content = "（推演感应超时，天道已自动收归并完成归档。）";
+                m.content = "（推演耗时较长，天道已自动收归并完成归档。）";
               }
               hasChanges = true;
             }
