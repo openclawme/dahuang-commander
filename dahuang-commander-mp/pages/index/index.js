@@ -848,14 +848,13 @@ Page({
     if (!rawText) return;
 
     const quoted = this.data.quotedMessage;
-    let text = rawText;
-    if (quoted) {
-      const quotedText = typeof quoted.content === "string" ? quoted.content : "";
-      text = `【引用消息】
-我要针对下面这条消息提问：
+    const quotedText = quoted && typeof quoted.content === "string" ? quoted.content : "";
+    let commandText = rawText;
+    if (quotedText) {
+      commandText = `[引用上文]
 ${quotedText}
 
-我的问题是：${rawText}`;
+我的问题：${rawText}`;
     }
 
     if (!this.data.agentState.token) {
@@ -863,7 +862,8 @@ ${quotedText}
       const humanMsg = {
         id: `human-${Date.now()}`,
         sender: "human",
-        content: text,
+        content: rawText,
+        quote: quotedText || null,
         timestamp: app.getTimestamp ? app.getTimestamp() : new Date().toLocaleTimeString()
       };
       app.globalData.chatHistory.push(humanMsg);
@@ -929,7 +929,7 @@ ${quotedText}
           msg.progress = 100;
           if (msg.tasks && msg.tasks[2]) msg.tasks[2].status = "SUCCESS";
           
-          let responseText = `🏷️【离线沙盒演示】✅ [影子沙盒推演成功] 启奏本尊：您的指令“${text}”在微缩天道中运行通过！由于您目前处于单机影子遥测状态，本分身并未将法旨真气合并至远端，请绑定【元神法印】以行真实法力！`;
+          let responseText = `🏷️【离线沙盒演示】✅ [影子沙盒推演成功] 启奏本尊：您的指令“${rawText}”在微缩天道中运行通过！由于您目前处于单机影子遥测状态，本分身并未将法旨真气合并至远端，请绑定【元神法印】以行真实法力！`;
           if (text.indexOf("分身") !== -1 || text.indexOf("任务") !== -1 || text.indexOf("最新") !== -1) {
             responseText = `🏷️【离线沙盒演示】✅ [沙盒神念解析成功] 启奏本尊：大荒测试分身目前精气神充足，IQ评级 138，累积 Karma 28,000。当前在不周山博弈场中积极拼杀，在昆仑虚占有 3 个算力节点。随时听候本尊法旨！`;
           }
@@ -948,14 +948,14 @@ ${quotedText}
       return;
     }
 
-    const originalText = text;
+    const originalText = commandText;
     this.setData({
       inputValue: "",
       quotedMessage: null
     });
 
     app.sendInstruction(
-      text,
+      commandText,
       () => {
         // Success: Input remains cleared
       },
