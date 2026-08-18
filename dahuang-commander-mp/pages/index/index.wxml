@@ -69,6 +69,18 @@
     </scroll-view>
   </view>
 
+  <view class="message-menu-overlay" wx:if="{{messageMenu}}" bindtap="closeMessageMenu"></view>
+  <view class="message-menu" wx:if="{{messageMenu}}" style="left: {{messageMenu.x}}px; top: {{messageMenu.y}}px;">
+    <view class="message-menu-item" bindtap="quoteSelectedMessage">
+      <text class="message-menu-icon">↩️</text>
+      <text class="message-menu-text">引用</text>
+    </view>
+    <view class="message-menu-item" bindtap="copySelectedMessage">
+      <text class="message-menu-icon">📋</text>
+      <text class="message-menu-text">复制</text>
+    </view>
+  </view>
+
   <!-- 5. Bottom fixed terminal input -->
   <view class="wechat-footer" style="transform: translateY(-{{keyboardHeight}}px); padding-bottom: {{keyboardHeight > 0 ? '16rpx' : 'calc(16rpx + env(safe-area-inset-bottom))'}}; transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);">
     <view class="quote-banner" wx:if="{{quotedMessage}}">

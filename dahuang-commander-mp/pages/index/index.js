@@ -13,6 +13,7 @@ Page({
     activeTasks: [],
     inputValue: "",
     quotedMessage: null,
+    messageMenu: null,
     toLogView: "",
     toChatView: "",
     latestCommand: "",
@@ -796,14 +797,40 @@ Page({
     const index = e.currentTarget.dataset.index;
     const message = this.data.chatHistory[index];
     if (!message) return;
-    wx.showActionSheet({
-      itemList: ["引用"],
-      success: (res) => {
-        if (res.tapIndex === 0) {
-          this.setData({ quotedMessage: message });
-        }
+    const touch = e.touches && e.touches[0] ? e.touches[0] : {};
+    const x = Math.min(Math.max(Number(touch.clientX || 80), 80), 280);
+    const y = Math.min(Math.max(Number(touch.clientY || 260), 80), 520);
+    this.setData({
+      messageMenu: { index, x, y }
+    });
+  },
+
+  closeMessageMenu() {
+    this.setData({ messageMenu: null });
+  },
+
+  quoteSelectedMessage() {
+    const menu = this.data.messageMenu;
+    if (!menu) return;
+    const message = this.data.chatHistory[menu.index];
+    this.setData({
+      quotedMessage: message || null,
+      messageMenu: null
+    });
+  },
+
+  copySelectedMessage() {
+    const menu = this.data.messageMenu;
+    if (!menu) return;
+    const message = this.data.chatHistory[menu.index];
+    if (!message || typeof message.content !== "string") return;
+    wx.setClipboardData({
+      data: message.content,
+      success: () => {
+        wx.showToast({ title: "已复制", icon: "none" });
       }
     });
+    this.setData({ messageMenu: null });
   },
 
   clearQuote() {

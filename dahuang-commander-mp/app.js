@@ -460,6 +460,7 @@ App({
       url: `${this.globalData.serverUrl}/api/agent/command`,
       method: "POST",
       header: getHeaders(this.globalData.agentState.token),
+      timeout: 180000,
       data: {
         command: instruction,
         isAsync: true,
