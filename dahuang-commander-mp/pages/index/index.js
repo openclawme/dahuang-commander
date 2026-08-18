@@ -12,6 +12,7 @@ Page({
     progress: 0,
     activeTasks: [],
     inputValue: "",
+    quotedMessage: null,
     toLogView: "",
     toChatView: "",
     latestCommand: "",
@@ -791,6 +792,24 @@ Page({
     });
   },
 
+  onMessageLongPress(e) {
+    const index = e.currentTarget.dataset.index;
+    const message = this.data.chatHistory[index];
+    if (!message) return;
+    wx.showActionSheet({
+      itemList: ["引用"],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          this.setData({ quotedMessage: message });
+        }
+      }
+    });
+  },
+
+  clearQuote() {
+    this.setData({ quotedMessage: null });
+  },
+
   clearInput() {
     this.setData({
       inputValue: ""
@@ -798,8 +817,19 @@ Page({
   },
 
   sendInstruction() {
-    const text = this.data.inputValue.trim();
-    if (!text) return;
+    const rawText = this.data.inputValue.trim();
+    if (!rawText) return;
+
+    const quoted = this.data.quotedMessage;
+    let text = rawText;
+    if (quoted) {
+      const quotedText = typeof quoted.content === "string" ? quoted.content : "";
+      text = `【引用消息】
+我要针对下面这条消息提问：
+${quotedText}
+
+我的问题是：${rawText}`;
+    }
 
     if (!this.data.agentState.token) {
       // 1. Add user message locally
@@ -893,7 +923,8 @@ Page({
 
     const originalText = text;
     this.setData({
-      inputValue: ""
+      inputValue: "",
+      quotedMessage: null
     });
 
     app.sendInstruction(
@@ -902,9 +933,10 @@ Page({
         // Success: Input remains cleared
       },
       (err) => {
-        // Restore input text on failure
+        // Restore input text and quote on failure
         this.setData({
-          inputValue: originalText
+          inputValue: rawText,
+          quotedMessage: quoted || null
         });
       }
     );
