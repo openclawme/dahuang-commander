@@ -67,7 +67,7 @@ App({
             activePendingCount++;
             const itemTime = m.createdAt || now;
             // If task is pending for over 45 seconds without socket updates, mark complete without infinite redispatch!
-            if (now - itemTime > 180000 && !m.autoFallbackTriggered) {
+            if (now - itemTime > 240000 && !m.autoFallbackTriggered) {
               m.autoFallbackTriggered = true;
               m.isPending = false;
               m.progress = 100;
@@ -460,7 +460,7 @@ App({
       url: `${this.globalData.serverUrl}/api/agent/command`,
       method: "POST",
       header: getHeaders(this.globalData.agentState.token),
-      timeout: 180000,
+      timeout: 240000,
       data: {
         command: instruction,
         isAsync: true,
