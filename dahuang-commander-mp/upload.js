@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '1. 修复重复消息与延迟结果冒泡：超过 30 分钟的历史孤儿任务结果只记入日志不再插入聊天流；服务端防重复投递（投递后 90 秒内不再重复）';
+const desc = '1. 推演进度改为随轮次单调递增（不再停在低百分比），看门狗归档窗口 240 秒放宽到 360 秒，长任务不再被误归档';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
