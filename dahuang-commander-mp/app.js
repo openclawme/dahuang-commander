@@ -133,6 +133,8 @@ App({
 
     socket.on("authenticated", (res) => {
       this.addLog("SYSTEM", `✨ 身份鉴权无误！分身已加入私密神念通道 (Agent ID: ${(res && res.agentId) || this.globalData.agentState.id})。`);
+      // 重连成功后补拉断线期间完成的任务结果（最终推送可能已丢失）
+      this.pullOfflineNotifications();
       this.reconnectAttempts = 0;
       this.globalData.agentState.status = "ONLINE";
       this.triggerPageCallback("onAgentStateUpdate", this.globalData.agentState);

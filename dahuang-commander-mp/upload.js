@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '1. 修复「承诺表格但看不到内容」：推演中的中间回复不再显示正文（只显示任务进度与转圈），只有最终结果到达才展示完整内容，避免看到画饼句后等不到表格的困惑';
+const desc = '1. 修复任务结果收不到的问题：Socket 重连成功后与页面回到前台时自动补拉离线通知，服务端已完成的任务结果会覆盖看门狗归档文案并展示完整内容';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

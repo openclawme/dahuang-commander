@@ -81,6 +81,10 @@ Page({
     i18n.updateTabBar();
     this.syncGlobalData();
     this.scrollToBottom();
+    // 回到前台时补拉离线期间完成的任务结果
+    if (app.pullOfflineNotifications) {
+      app.pullOfflineNotifications();
+    }
   },
 
   onHide() {
