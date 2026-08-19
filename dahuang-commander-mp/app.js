@@ -378,6 +378,12 @@ App({
       isError: isErrorState
     };
 
+    // 历史孤儿任务的延迟结果（如崩溃恢复后很久才完成）：只记日志，不插入聊天流
+    const taskCreatedAt = data.taskCreatedAt ? new Date(data.taskCreatedAt).getTime() : null;
+    if (isNew && taskCreatedAt && Date.now() - taskCreatedAt > 30 * 60 * 1000) {
+      this.addLog("SYSTEM", `📦 历史任务「${(data.command || "").slice(0, 20)}」的延迟结果已归档（请求 ${msgId.slice(0, 12)}...）。`);
+      return;
+    }
     if (isNew) {
       this.globalData.chatHistory.push(resultMsg);
     } else {

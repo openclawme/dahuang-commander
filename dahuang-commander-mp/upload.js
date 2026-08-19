@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '1. 修复任务结果收不到的问题：Socket 重连成功后与页面回到前台时自动补拉离线通知，服务端已完成的任务结果会覆盖看门狗归档文案并展示完整内容';
+const desc = '1. 修复重复消息与延迟结果冒泡：超过 30 分钟的历史孤儿任务结果只记入日志不再插入聊天流；服务端防重复投递（投递后 90 秒内不再重复）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
