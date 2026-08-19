@@ -891,7 +891,7 @@ ${quotedText}
         id: reqId,
         sender: "agent",
         isPending: true,
-        content: "（元神入定推演中...）",
+        content: "（智能体处理中...）",
         timestamp: app.getTimestamp ? app.getTimestamp() : new Date().toLocaleTimeString(),
         progress: 5,
         tasks

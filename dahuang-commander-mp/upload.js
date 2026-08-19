@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '1. 推演进度改为随轮次单调递增（不再停在低百分比），看门狗归档窗口 240 秒放宽到 360 秒，长任务不再被误归档';
+const desc = '1. 后端文案现代化：模型提示词、工具反馈、日志等由文言修仙风改为现代流畅语言；占位文案统一为「智能体处理中...」，主人/用户判断与服务端同步';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

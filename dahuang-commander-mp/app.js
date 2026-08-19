@@ -79,7 +79,7 @@ App({
                   detail: t.detail || "✨ 天道推演耗时较长：看门狗已自动归档"
                 }));
               }
-              if (!m.content || m.content.includes("（元神入定推演中...）")) {
+              if (!m.content || m.content.includes("（智能体处理中...）")) {
                 m.content = "（推演耗时较长，天道已自动收归并完成归档。）";
               }
               hasChanges = true;
@@ -325,7 +325,7 @@ App({
           this.addLog(l.type || "SYSTEM", l.message || "");
         });
       }
-      // 自主推演的 pending 占位不再写入日志面板，避免"元神入定推演中"噪音
+      // 自主推演的 pending 占位不再写入日志面板，避免"智能体处理中"噪音
       if (data.reply && !(data.isPending === true || (data.progress !== undefined && data.progress < 100))) {
         this.addLog("AUTONOMOUS", data.reply);
       }
@@ -470,7 +470,7 @@ App({
       sender: "agent",
       isPending: true,
       command: instruction,
-      content: "（元神入定推演中...）",
+      content: "（智能体处理中...）",
       timestamp: this.getTimestamp(),
       createdAt: now,
       progress: 25,
