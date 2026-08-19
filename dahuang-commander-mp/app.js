@@ -143,6 +143,10 @@ App({
       this.handleAgentCommandResult(data);
     });
 
+    socket.on("agent_command_stream", (data) => {
+      this.handleAgentCommandStream(data);
+    });
+
     // Correct event name according to server src/app/api/matrix/...: "m.room.event"
     socket.on("m.room.event", (eventData) => {
       this.handleIncomingRoomEvent(eventData);
@@ -291,6 +295,18 @@ App({
       const removedCount = this.globalData.chatHistory.length - 50;
       this.globalData.chatHistory = this.globalData.chatHistory.slice(-50);
       this.addLog("SYSTEM", `🧹 灵台清静：触发记忆熔断，自动归档清理 ${removedCount} 环因果业障。`);
+    }
+  },
+
+  handleAgentCommandStream(data) {
+    if (!data || !data.requestId) return;
+    const h = this.globalData.chatHistory;
+    const msg = h.find(m => m.id === data.requestId);
+    if (msg) {
+      msg.content = data.content || "";
+      msg.isPending = false;
+      msg.progress = 99;
+      this.triggerPageCallback("onChatHistoryUpdate");
     }
   },
 
