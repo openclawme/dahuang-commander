@@ -347,7 +347,10 @@ App({
     let index = this.globalData.chatHistory.findIndex(m => m.id === msgId);
     const isNew = index === -1;
 
-    const isErrorState = data.success === false || data.status === "FAILED" || (Array.isArray(data.tasks) && data.tasks.some(t => t.status === "FAILED"));
+    // 中间过程的 FAILED 任务只是步骤失败（系统会自动重试其他工具），
+    // 只有最终结果（progress=100 / 非 pending）仍带失败步骤时才显示错误横幅
+    const isFinalState = data.isPending !== true && (data.progress === undefined || data.progress >= 100);
+    const isErrorState = data.success === false || data.status === "FAILED" || (isFinalState && Array.isArray(data.tasks) && data.tasks.some(t => t.status === "FAILED"));
 
     if (data.logs && Array.isArray(data.logs)) {
       data.logs.forEach(l => {

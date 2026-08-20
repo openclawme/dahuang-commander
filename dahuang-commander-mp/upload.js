@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '1. 后端文案现代化：模型提示词、工具反馈、日志等由文言修仙风改为现代流畅语言；占位文案统一为「智能体处理中...」，主人/用户判断与服务端同步';
+const desc = '真实任务分解与进度：规划器修复（JSON 模式 400 导致固定步骤）、任务状态随工具执行实时更新、进度按任务完成度计算、中间失败步骤不再误报中断';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
