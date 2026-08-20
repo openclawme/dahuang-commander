@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '修复：含图表的回复强制走富文本分支，SVG 源码不再以纯文本形式显示在图上边';
+const desc = '图表结构化下发：服务端剥离全部SVG/数据块标签，图表以charts字段直传，微信端只用原生Canvas绘制，全程零SVG';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

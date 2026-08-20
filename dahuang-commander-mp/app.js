@@ -348,8 +348,10 @@ App({
     if (data.reply) {
       const sanitized = this.sanitizeMessage({ content: data.reply }, false);
       data.reply = sanitized.content;
-      // 图表数据块（sanitizeMessage 提取）随消息保存，供原生 Canvas 绘制
-      if (sanitized.charts && sanitized.charts.length > 0) {
+      // 图表优先用服务端下发的结构化 charts 字段；
+      // 兼容旧消息/旧通知：从文本中解析图表数据块兜底
+      if (!(Array.isArray(data.charts) && data.charts.length > 0) &&
+          sanitized.charts && sanitized.charts.length > 0) {
         data.charts = sanitized.charts;
       }
       if (sanitized.isPending && data.progress !== 100 && data.isPending !== false) {
