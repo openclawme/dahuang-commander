@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '图表结构化下发：服务端剥离全部SVG/数据块标签，图表以charts字段直传，微信端只用原生Canvas绘制，全程零SVG';
+const desc = 'Agent清空能力：api_chat_clear/api_memory_clear 工具 + 结果携带 clearWindow/clearMemory 标记，客户端收到后本地清空窗口与日志';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

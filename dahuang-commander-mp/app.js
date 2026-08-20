@@ -344,6 +344,12 @@ App({
 
     this.addLog("SYSTEM", "⚡ 收到天道决策反馈！");
 
+    // 清空指令（Agent 通过 api_chat_clear / api_memory_clear 工具执行）：
+    // 在写入本条结果之前清空本地窗口，确认回复显示在干净的新窗口里
+    if (data.clearWindow === true || data.clearMemory === true) {
+      this.clearChatWindow(data.clearMemory === true);
+    }
+
     // Sanitize incoming reply content to intercept verbose wait statements
     if (data.reply) {
       const sanitized = this.sanitizeMessage({ content: data.reply }, false);
@@ -418,6 +424,32 @@ App({
     if (resultMsg.isPending) {
       this.startPendingWatchdog();
     }
+  },
+
+  // 清空当前对话窗口（clearAll=true 时同时清空本地日志面板）
+  clearChatWindow(clearAll) {
+    const agentId = this.globalData.agentState.id;
+    if (agentId) {
+      try {
+        wx.removeStorageSync(`dahuang_chat_history_${agentId}`);
+      } catch (e) {
+        console.error("[App] Failed to remove chat history storage:", e);
+      }
+    }
+    this.globalData.chatHistory = [
+      {
+        id: "init-welcome",
+        sender: "agent",
+        content: "（天道连通）主人，大荒分身在此候命。请降下法旨！",
+        timestamp: this.getTimestamp(),
+        createdAt: Date.now()
+      }
+    ];
+    if (clearAll) {
+      this.globalData.logs = [];
+    }
+    this.addLog("SYSTEM", `🧹 已按指令清空${clearAll ? "全部历史信息" : "当前对话窗口"}。`);
+    this.triggerPageCallback("onChatHistoryUpdate");
   },
 
   addLog(type, message) {
