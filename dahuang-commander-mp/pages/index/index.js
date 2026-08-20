@@ -327,10 +327,11 @@ Page({
       }
     }
 
+    // 注意：输出到达时【不】自动滚动聊天窗口（用户明确要求去掉该行为），
+    // 避免阅读时被进度更新反复拉回。仅发送消息等用户主动动作时滚动。
     this.setData(updates, () => {
       this.redrawCharts();
     });
-    this.scrollToBottom();
   },
 
   // 原生 Canvas 绘制 Agent 图表（图表数据块 → canvas 2d）
@@ -774,7 +775,17 @@ Page({
     this.setData({
       [`logs[${index}]`]: newLog
     }, () => {
-      this.scrollToBottom();
+      // 只滚动日志面板（toLogView），不再带动聊天窗口
+      this.scrollLogsToBottom();
+    });
+  },
+
+  scrollLogsToBottom() {
+    this.setData({ toLogView: "" }, () => {
+      setTimeout(() => {
+        const lastLog = this.data.logs[this.data.logs.length - 1];
+        if (lastLog) this.setData({ toLogView: `log-${lastLog.id}` });
+      }, 50);
     });
   },
 

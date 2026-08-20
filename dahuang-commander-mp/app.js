@@ -80,12 +80,22 @@ App({
                 }));
               }
               if (!m.content || m.content.includes("（智能体处理中...）")) {
-                m.content = "（推演耗时较长，天道已自动收归并完成归档。）";
+                m.content = "（推演耗时较长，看门狗已自动归档；若后台结果随后产出，会自动回填到这里。）";
               }
               hasChanges = true;
             }
           }
         });
+      }
+
+      // 有任务仍在等待时，周期性静默拉取离线通知：
+      // 弥补“任务完成瞬间 socket 断开 → 最终结果推送丢失”的竞态窗口
+      // （重连时的一次性拉取可能发生在结果入库之前，拉到空队列）
+      if (activePendingCount > 0) {
+        if (!this.lastPendingPullTs || now - this.lastPendingPullTs > 15000) {
+          this.lastPendingPullTs = now;
+          this.pullOfflineNotifications({ silent: true });
+        }
       }
 
       if (hasChanges) {
@@ -553,10 +563,13 @@ App({
     });
   },
 
-  pullOfflineNotifications() {
+  pullOfflineNotifications(opts) {
     if (!this.globalData.agentState.token) return;
+    const silent = !!(opts && opts.silent);
 
-    this.addLog("SYSTEM", "🔄 正在从天道同步离线神谕/定时提醒...");
+    if (!silent) {
+      this.addLog("SYSTEM", "🔄 正在从天道同步离线神谕/定时提醒...");
+    }
 
     wx.request({
       url: `${this.globalData.serverUrl}/api/agent/command`,
