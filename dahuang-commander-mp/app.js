@@ -338,6 +338,10 @@ App({
     if (data.reply) {
       const sanitized = this.sanitizeMessage({ content: data.reply }, false);
       data.reply = sanitized.content;
+      // 图表数据块（sanitizeMessage 提取）随消息保存，供原生 Canvas 绘制
+      if (sanitized.charts && sanitized.charts.length > 0) {
+        data.charts = sanitized.charts;
+      }
       if (sanitized.isPending && data.progress !== 100 && data.isPending !== false) {
         data.isPending = true;
       }
@@ -378,7 +382,8 @@ App({
       progress: data.progress !== undefined ? data.progress : (existingMsg ? existingMsg.progress : 100),
       tasks: updatedTasks,
       isPending: data.isPending !== undefined ? data.isPending : (data.progress < 100),
-      isError: isErrorState
+      isError: isErrorState,
+      charts: data.charts || (existingMsg ? existingMsg.charts : undefined)
     };
 
     // 历史孤儿任务的延迟结果（如崩溃恢复后很久才完成）：只记日志，不插入聊天流

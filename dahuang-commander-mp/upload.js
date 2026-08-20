@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '图表原生 Canvas 渲染：Agent 输出图表数据 JSON，微信端用原生 canvas 绘制曲线图/柱状图（不再依赖图片加载）';
+const desc = '修复：图表数据块随消息保存（实时推送路径 charts 字段丢失导致 Canvas 不绘制）；SVG/JSON 剥离确认';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
