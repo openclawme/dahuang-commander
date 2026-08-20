@@ -22,8 +22,10 @@ Page({
     showLogsPopup: false, 
     expandedTasks: {}, 
     keyboardHeight: 0,
-    showDetailedTasks: false,
+    showDetailedTasks: true,
     liveStatusText: "",
+    liveStatusTexts: [],
+    liveStatusTick: 0,
 
     // B-1 Orbit Aura & Particles
     avatarChar: "靈",
@@ -67,6 +69,7 @@ Page({
     }
     i18n.updateTabBar();
     this.syncGlobalData();
+    this.startLiveStatusTicker();
   },
 
   onShow() {
@@ -83,6 +86,7 @@ Page({
     i18n.updateTabBar();
     this.syncGlobalData();
     this.scrollToBottom();
+    this.startLiveStatusTicker();
     // 回到前台时补拉离线期间完成的任务结果
     if (app.pullOfflineNotifications) {
       app.pullOfflineNotifications();
@@ -90,9 +94,31 @@ Page({
   },
 
   onHide() {
+    this.stopLiveStatusTicker();
   },
 
   onUnload() {
+    this.stopLiveStatusTicker();
+  },
+
+  startLiveStatusTicker() {
+    this.stopLiveStatusTicker();
+    this.liveStatusTimer = setInterval(() => {
+      const texts = this.data.liveStatusTexts || [];
+      if (texts.length === 0) return;
+      const next = (this.data.liveStatusTick + 1) % texts.length;
+      this.setData({
+        liveStatusTick: next,
+        liveStatusText: texts[next]
+      });
+    }, 900);
+  },
+
+  stopLiveStatusTicker() {
+    if (this.liveStatusTimer) {
+      clearInterval(this.liveStatusTimer);
+      this.liveStatusTimer = null;
+    }
   },
 
   getAvatarInfo(did, name) {
@@ -177,7 +203,10 @@ Page({
       activeTasks = latestAgentMsg.tasks || [];
     }
     const activeTask = activeTasks.find(t => t.status === "PROCESSING") || activeTasks.find(t => t.status === "PENDING") || activeTasks[activeTasks.length - 1];
-    const liveStatusText = activeTask ? (activeTask.detail || activeTask.desc || "正在推演...") : (progress > 0 && progress < 100 ? "正在推演..." : "");
+    const taskFeed = activeTasks.filter(t => t.detail || t.desc).map(t => t.detail || t.desc);
+    const recentActionFeed = (logs || []).filter(l => l.type === "ACTION" || l.type === "SYSTEM").slice(-6).map(l => l.message).filter(Boolean);
+    const liveStatusTexts = [...new Set([...recentActionFeed, ...taskFeed])].slice(0, 12);
+    const liveStatusText = liveStatusTexts[this.data.liveStatusTick % Math.max(liveStatusTexts.length, 1)] || (activeTask ? (activeTask.detail || activeTask.desc || "正在推演...") : (progress > 0 && progress < 100 ? "正在推演..." : ""));
 
     const processedChatHistory = chatHistory.map(m => {
       let isRich = false;
@@ -253,6 +282,7 @@ Page({
     updates.latestCommand = latestCommand;
     updates.activeCommands = activeCommands;
     updates.liveStatusText = liveStatusText;
+    updates.liveStatusTexts = liveStatusTexts;
 
     // Calculate avatar visual parameters dynamically based on IQ and DID
     const { seed, char } = this.getAvatarInfo(agentState.did, agentState.name);
@@ -675,14 +705,17 @@ Page({
 
   onChatHistoryUpdate() {
     this.syncGlobalData();
+    this.startLiveStatusTicker();
   },
 
   onAgentStateUpdate(data) {
     this.syncGlobalData();
+    this.startLiveStatusTicker();
   },
 
   onAgentStatusChange(data) {
     this.syncGlobalData();
+    this.startLiveStatusTicker();
   },
 
   onLogsUpdate(newLog) {
