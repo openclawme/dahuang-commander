@@ -22,6 +22,8 @@ Page({
     showLogsPopup: false, 
     expandedTasks: {}, 
     keyboardHeight: 0,
+    showDetailedTasks: false,
+    liveStatusText: "",
 
     // B-1 Orbit Aura & Particles
     avatarChar: "靈",
@@ -174,6 +176,8 @@ Page({
       progress = latestAgentMsg.progress || 0;
       activeTasks = latestAgentMsg.tasks || [];
     }
+    const activeTask = activeTasks.find(t => t.status === "PROCESSING") || activeTasks.find(t => t.status === "PENDING") || activeTasks[activeTasks.length - 1];
+    const liveStatusText = activeTask ? (activeTask.detail || activeTask.desc || "正在推演...") : (progress > 0 && progress < 100 ? "正在推演..." : "");
 
     const processedChatHistory = chatHistory.map(m => {
       let isRich = false;
@@ -248,6 +252,7 @@ Page({
     updates.activeTasks = activeTasks;
     updates.latestCommand = latestCommand;
     updates.activeCommands = activeCommands;
+    updates.liveStatusText = liveStatusText;
 
     // Calculate avatar visual parameters dynamically based on IQ and DID
     const { seed, char } = this.getAvatarInfo(agentState.did, agentState.name);

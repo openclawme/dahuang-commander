@@ -699,6 +699,25 @@
   font-weight: bold;
 }
 
+.live-status-line {
+  margin-top: 10rpx;
+  padding: 8rpx 12rpx;
+  background: rgba(158, 42, 43, 0.05);
+  border-radius: 10rpx;
+  overflow: hidden;
+}
+
+.live-status-text {
+  font-size: 24rpx;
+  color: #9e2a2b;
+  animation: liveStatusBlink 1.2s ease-in-out infinite;
+}
+
+@keyframes liveStatusBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
 .bubble-progress-track {
   height: 6rpx;
   background: rgba(91,122,140, 0.1);

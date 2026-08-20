@@ -38,7 +38,10 @@
             <view class="bubble-progress-track">
               <view class="bubble-progress-fill" style="width: {{item.progress || 0}}%;"></view>
             </view>
-            <view class="bubble-task-list" wx:if="{{item.tasks && item.tasks.length > 0}}">
+            <view class="live-status-line" wx:if="{{liveStatusText}}">
+              <text class="live-status-text">{{liveStatusText}}</text>
+            </view>
+            <view class="bubble-task-list" wx:if="{{showDetailedTasks && item.tasks && item.tasks.length > 0}}">
               <view class="bubble-task-item flex-col" wx:for="{{item.tasks}}" wx:for-item="task" wx:key="id" style="{{task.status === 'PROCESSING' ? 'border-color: rgba(158,42,43, 0.25); background: rgba(158,42,43, 0.04);' : ''}}">
                 <view class="bubble-task-item-header flex-row align-center justify-between">
                   <view class="flex-row align-center" style="flex: 1; min-width: 0;">
