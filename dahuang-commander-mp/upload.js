@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '表格对齐修复：服务端行对齐到表头列数，客户端按每列最大内容宽度计算固定列宽，所有行共用列宽';
+const desc = '表格渲染回归 rich-text HTML：服务端统一渲染深色卡片风格表格（表头高亮/斑马纹/圆角），宽表自动去width100%+nowrap防压缩';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

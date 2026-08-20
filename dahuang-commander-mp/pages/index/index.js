@@ -227,12 +227,7 @@ Page({
         // （Canvas 图正常绘制，但源码文本漏在图上边）
         const hasChartMarkup = /<svg|application\/dahuang-chart/i.test(m.content || "") || (m.charts && m.charts.length > 0);
         if (hasChartMarkup) isRich = true;
-        // 结构化表格：富文本里剥离 HTML 表格，交由原生表格视图渲染，避免双重显示
-        if (m.tables && m.tables.length > 0) {
-          richContent = rich.html.replace(/<table[\s\S]*?<\/table>/gi, "");
-        } else {
-          richContent = rich.html;
-        }
+        richContent = rich.html;
       }
       
       const p = m.progress || 0;
