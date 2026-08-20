@@ -203,10 +203,17 @@ Page({
       activeTasks = latestAgentMsg.tasks || [];
     }
     const activeTask = activeTasks.find(t => t.status === "PROCESSING") || activeTasks.find(t => t.status === "PENDING") || activeTasks[activeTasks.length - 1];
-    const taskFeed = activeTasks.filter(t => t.detail || t.desc).map(t => t.detail || t.desc);
-    const recentActionFeed = (logs || []).filter(l => l.type === "ACTION" || l.type === "SYSTEM").slice(-6).map(l => l.message).filter(Boolean);
-    const liveStatusTexts = [...new Set([...recentActionFeed, ...taskFeed])].slice(0, 12);
-    const liveStatusText = liveStatusTexts[this.data.liveStatusTick % Math.max(liveStatusTexts.length, 1)] || (activeTask ? (activeTask.detail || activeTask.desc || "正在推演...") : (progress > 0 && progress < 100 ? "正在推演..." : ""));
+    const short = (v) => (v && v.length > 28 ? v.slice(0, 28) + "..." : v);
+    const taskFeed = activeTasks.map(t => {
+      if (!t.desc && !t.title) return null;
+      const label = t.desc || t.title || "";
+      if (t.status === "PROCESSING") return `正在${label}`;
+      if (t.status === "PENDING" || t.status === "WAITING") return `等待：${label}`;
+      if (t.status === "SUCCESS") return `完成：${label}`;
+      return label;
+    }).filter(Boolean).map(short);
+    const liveStatusTexts = taskFeed.length > 0 ? taskFeed : ["正在分析指令", "正在调用工具", "正在整理结果"];
+    const liveStatusText = liveStatusTexts[this.data.liveStatusTick % Math.max(liveStatusTexts.length, 1)] || (activeTask ? short(activeTask.desc || activeTask.title || "正在推演...") : (progress > 0 && progress < 100 ? "正在推演..." : ""));
 
     const processedChatHistory = chatHistory.map(m => {
       let isRich = false;
