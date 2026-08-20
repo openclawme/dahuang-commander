@@ -222,6 +222,11 @@ Page({
       if (m.sender === "agent" && m.content) {
         const rich = app.parseRichContent(m.content);
         isRich = !!(rich.html && (rich.html.indexOf("<table") !== -1 || rich.html.indexOf("<card") !== -1 || rich.html.indexOf("html-body-wrapper") !== -1));
+        // 图表消息强制走 rich-text 分支：内容里含 <svg>/图表数据块时，
+        // 若 isRich=false 会走纯文本分支把 SVG 源码原样显示出来
+        // （Canvas 图正常绘制，但源码文本漏在图上边）
+        const hasChartMarkup = /<svg|application\/dahuang-chart/i.test(m.content || "") || (m.charts && m.charts.length > 0);
+        if (hasChartMarkup) isRich = true;
         richContent = rich.html;
       }
       

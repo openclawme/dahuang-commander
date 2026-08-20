@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '可靠性：任务等待期间每15秒静默拉取离线结果（修复socket断开瞬间结果丢失）；去掉输出到达时自动滚动聊天窗口；看门狗文案改为如实描述';
+const desc = '修复：含图表的回复强制走富文本分支，SVG 源码不再以纯文本形式显示在图上边';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
