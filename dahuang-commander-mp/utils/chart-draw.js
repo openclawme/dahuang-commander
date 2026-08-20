@@ -3,6 +3,15 @@
 
 const COLORS = ['#f87171', '#38bdf8', '#34d399', '#fbbf24', '#c084fc', '#fb7185'];
 
+// 序列颜色：优先使用 spec.colors 里的自定义配色（服务端校验过的 #RRGGBB），
+// 缺省回落到系统默认调色板轮转——统一版式 + 逐图差异化
+function seriesColor(spec, si) {
+  if (spec.colors && /^#[0-9a-fA-F]{6}$/.test(spec.colors[si] || "")) {
+    return spec.colors[si];
+  }
+  return COLORS[si % COLORS.length];
+}
+
 function fmt(v) {
   const abs = Math.abs(v);
   if (abs >= 100) return String(Math.round(v));
@@ -107,7 +116,7 @@ function drawChart(canvas, spec, widthPx, heightPx) {
   ctx.font = '10px sans-serif';
   ctx.textAlign = 'left';
   spec.series.forEach((s, si) => {
-    const color = COLORS[si % COLORS.length];
+    const color = seriesColor(spec, si);
     const name = String(s.name || '序列' + (si + 1)).slice(0, 10);
     ctx.fillStyle = color;
     roundRectPath(ctx, legendX, legendY, 14, 4, 2);
@@ -119,7 +128,7 @@ function drawChart(canvas, spec, widthPx, heightPx) {
 
   // 序列绘制
   spec.series.forEach((s, si) => {
-    const color = COLORS[si % COLORS.length];
+    const color = seriesColor(spec, si);
     const values = s.values || [];
     if (spec.type === 'line') {
       ctx.strokeStyle = color;
