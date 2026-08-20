@@ -402,7 +402,7 @@ App({
       isPending: data.isPending !== undefined ? data.isPending : (data.progress < 100),
       isError: isErrorState,
       charts: data.charts || (existingMsg ? existingMsg.charts : undefined),
-      tables: data.tables || (existingMsg ? existingMsg.tables : undefined)
+      tables: this.decorateTables(data.tables) || (existingMsg ? existingMsg.tables : undefined)
     };
 
     // 历史孤儿任务的延迟结果（如崩溃恢复后很久才完成）：只记日志，不插入聊天流
@@ -425,6 +425,28 @@ App({
     if (resultMsg.isPending) {
       this.startPendingWatchdog();
     }
+  },
+
+  // 表格布局：按每列最大内容宽度计算固定列宽（CJK 字符按 2 个单位计），
+  // 所有行共用同一套列宽 → 表格严格对齐（各行独立 flex 会导致列错位）
+  decorateTables(tables) {
+    if (!Array.isArray(tables)) return tables;
+    return tables.map((t) => {
+      const headers = Array.isArray(t.headers) ? t.headers.map((h) => String(h)) : [];
+      const rows = Array.isArray(t.rows) ? t.rows.map((r) => (Array.isArray(r) ? r : [])) : [];
+      const colCount = Math.max(headers.length, ...rows.map((r) => r.length), 1);
+      const units = new Array(colCount).fill(0);
+      [headers, ...rows].forEach((row) => {
+        row.forEach((cell, i) => {
+          const s = String(cell == null ? "" : cell);
+          let u = 0;
+          for (let k = 0; k < s.length; k++) u += s.charCodeAt(k) > 255 ? 2 : 1;
+          if (u > units[i]) units[i] = u;
+        });
+      });
+      const colWidths = units.map((u) => Math.max(110, Math.min(380, u * 14 + 48)));
+      return { ...t, _colWidths: colWidths };
+    });
   },
 
   // 清空当前对话窗口（clearAll=true 时同时清空本地日志面板）

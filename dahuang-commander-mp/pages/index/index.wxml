@@ -40,17 +40,31 @@
             ></canvas>
           </view>
 
-          <!-- 原生表格（结构化 headers/rows：自然列宽、横向滚动、不压缩文字） -->
+          <!-- 原生表格（结构化 headers/rows：固定列宽对齐、横向滚动、不压缩文字） -->
           <view class="bubble-table-list" wx:if="{{item.tables && item.tables.length > 0}}">
             <view class="bubble-table-item" wx:for="{{item.tables}}" wx:for-item="tableSpec" wx:for-index="ti" wx:key="ti">
               <text class="bubble-table-title" wx:if="{{tableSpec.title}}">{{tableSpec.title}}</text>
               <scroll-view scroll-x class="bubble-table-scroll" enhanced show-scrollbar="{{false}}">
                 <view class="bubble-table-grid">
                   <view class="bubble-table-row bubble-table-header">
-                    <view class="bubble-table-cell bubble-table-cell-head" wx:for="{{tableSpec.headers}}" wx:for-item="h" wx:key="*this">{{h}}</view>
+                    <view
+                      class="bubble-table-cell bubble-table-cell-head"
+                      wx:for="{{tableSpec.headers}}"
+                      wx:for-item="h"
+                      wx:for-index="ci"
+                      wx:key="*this"
+                      style="width: {{tableSpec._colWidths ? tableSpec._colWidths[ci] : ''}}rpx;"
+                    >{{h}}</view>
                   </view>
                   <view class="bubble-table-row" wx:for="{{tableSpec.rows}}" wx:for-item="row" wx:key="*this">
-                    <view class="bubble-table-cell" wx:for="{{row}}" wx:for-item="cell" wx:key="*this">{{cell}}</view>
+                    <view
+                      class="bubble-table-cell"
+                      wx:for="{{row}}"
+                      wx:for-item="cell"
+                      wx:for-index="ci"
+                      wx:key="*this"
+                      style="width: {{tableSpec._colWidths ? tableSpec._colWidths[ci] : ''}}rpx;"
+                    >{{cell}}</view>
                   </view>
                 </view>
               </scroll-view>

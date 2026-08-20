@@ -2519,7 +2519,9 @@
 }
 .bubble-table-cell {
   flex-shrink: 0;
+  box-sizing: border-box;
   white-space: nowrap;
+  overflow: hidden;
   padding: 14rpx 20rpx;
   font-size: 24rpx;
   color: #cbd5e1;
