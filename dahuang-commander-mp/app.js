@@ -401,7 +401,8 @@ App({
       tasks: updatedTasks,
       isPending: data.isPending !== undefined ? data.isPending : (data.progress < 100),
       isError: isErrorState,
-      charts: data.charts || (existingMsg ? existingMsg.charts : undefined)
+      charts: data.charts || (existingMsg ? existingMsg.charts : undefined),
+      tables: data.tables || (existingMsg ? existingMsg.tables : undefined)
     };
 
     // 历史孤儿任务的延迟结果（如崩溃恢复后很久才完成）：只记日志，不插入聊天流

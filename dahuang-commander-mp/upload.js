@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = 'Agent清空能力：api_chat_clear/api_memory_clear 工具 + 结果携带 clearWindow/clearMemory 标记，客户端收到后本地清空窗口与日志';
+const desc = '原生表格渲染：Agent通过api_deliver_table交付结构化headers/rows，微信端自然列宽+横向滚动显示，解决文字压缩成长条问题';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

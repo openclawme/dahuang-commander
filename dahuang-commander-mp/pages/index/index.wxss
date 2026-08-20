@@ -2488,3 +2488,52 @@
   height: 440rpx;
   border-radius: 10rpx;
 }
+
+/* 原生表格（结构化数据：自然列宽 + 横向滚动，文字不压缩） */
+.bubble-table-list {
+  margin-top: 12rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+.bubble-table-title {
+  display: block;
+  font-size: 26rpx;
+  color: #7dd3fc;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+}
+.bubble-table-scroll {
+  width: 100%;
+  border-radius: 10rpx;
+  background: #151d2e;
+  border: 1rpx solid #26324a;
+}
+.bubble-table-grid {
+  display: flex;
+  flex-direction: column;
+}
+.bubble-table-row {
+  display: flex;
+  flex-direction: row;
+}
+.bubble-table-cell {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding: 14rpx 20rpx;
+  font-size: 24rpx;
+  color: #cbd5e1;
+  border-right: 1rpx solid #26324a;
+  border-bottom: 1rpx solid #26324a;
+}
+.bubble-table-cell-head {
+  color: #7dd3fc;
+  font-weight: bold;
+  background: rgba(56, 189, 248, 0.08);
+}
+.bubble-table-row:last-child .bubble-table-cell {
+  border-bottom: none;
+}
+.bubble-table-cell:last-child {
+  border-right: none;
+}
