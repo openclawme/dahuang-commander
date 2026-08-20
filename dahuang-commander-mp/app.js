@@ -649,13 +649,32 @@ App({
     const { html, videoUrl, videoPoster } = this.parseRichContent(content);
     const hasRichHtml = /<[a-z][\s\S]*>/i.test(content) || content.includes("**") || content.includes("`") || content.includes("<table") || content.includes("<div") || content.includes("<p") || content.includes("<badge") || content.includes("<card") || content.includes("<blockquote") || content.includes("<span");
 
+    // 图表数据块：<script type="application/dahuang-chart">JSON</script>
+    // 提取后在原生 Canvas 上绘制（微信 rich-text 不支持 svg/canvas）
+    const charts = [];
+    if (typeof content === "string") {
+      const chartRe = /<script\s+type=["']application\/dahuang-chart["']>([\s\S]*?)<\/script>/gi;
+      let cm;
+      while ((cm = chartRe.exec(content))) {
+        try {
+          const spec = JSON.parse(cm[1].trim());
+          if (spec && (spec.type === "line" || spec.type === "bar") &&
+              Array.isArray(spec.labels) && Array.isArray(spec.series) && spec.series.length > 0) {
+            charts.push(spec);
+          }
+        } catch (e) { /* 非法 JSON 忽略，仅文本显示 */ }
+      }
+      if (charts.length > 4) charts.length = 4; // 单条消息最多 4 张图
+    }
+
     return {
       ...safeMsg,
       content,
       isRich: hasRichHtml || Boolean(videoUrl),
       richContent: html,
       videoUrl,
-      videoPoster
+      videoPoster,
+      charts: charts.length > 0 ? charts : undefined
     };
   },
 
@@ -700,7 +719,10 @@ App({
       .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, "")
       .replace(/<title[^>]*>[\s\S]*?<\/title>/gi, "")
       .replace(/<meta[^>]*>/gi, "")
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      // 图表数据块与 SVG：分别交给 Canvas 绘制 / 剥离（rich-text 不支持）
+      .replace(/<script\s+type=["']application\/dahuang-chart["']>[\s\S]*?<\/script>/gi, "")
+      .replace(/<svg[\s\S]*?<\/svg>/gi, "");
 
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #d97706; font-weight: bold;">$1</strong>');
     html = html.replace(/`(.*?)`/g, '<code style="background: rgba(158,42,43, 0.06); color: #9e2a2b; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 22rpx; border: 1px solid rgba(158,42,43, 0.15);">$1</code>');

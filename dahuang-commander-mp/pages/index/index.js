@@ -1,6 +1,7 @@
 const app = require('../../utils/getApp.js');
 const i18n = require('../../utils/i18n.js');
 const { getHeaders } = require('../../utils/config.js');
+const { drawChart } = require('../../utils/chart-draw.js');
 
 Page({
   data: {
@@ -326,8 +327,43 @@ Page({
       }
     }
 
-    this.setData(updates);
+    this.setData(updates, () => {
+      this.redrawCharts();
+    });
     this.scrollToBottom();
+  },
+
+  // 原生 Canvas 绘制 Agent 图表（图表数据块 → canvas 2d）
+  redrawCharts() {
+    const history = this.data.chatHistory || [];
+    const hasCharts = history.some((m) => m.charts && m.charts.length > 0);
+    if (!hasCharts) return;
+
+    // 签名去重：进度刷新等无关更新不重画（避免 canvas 闪烁）
+    const signature = JSON.stringify(
+      history.filter((m) => m.charts && m.charts.length > 0).map((m) => [m.id, m.charts.length])
+    );
+    if (signature === this._chartSignature) return;
+    this._chartSignature = signature;
+
+    const query = wx.createSelectorQuery().in(this);
+    query.selectAll('.bubble-chart-canvas').fields({ node: true, size: true }).exec((res) => {
+      const nodes = (res && res[0]) || [];
+      let idx = 0;
+      history.forEach((msg) => {
+        if (!msg.charts || msg.charts.length === 0) return;
+        msg.charts.forEach((spec) => {
+          const info = nodes[idx++];
+          if (info && info.node && info.width > 0 && info.height > 0) {
+            try {
+              drawChart(info.node, spec, info.width, info.height);
+            } catch (e) {
+              console.error('[CHART] canvas draw failed:', e);
+            }
+          }
+        });
+      });
+    });
   },
 
   switchTab(e) {

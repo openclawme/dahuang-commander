@@ -2475,3 +2475,16 @@
 .fallback-action-box text {
   word-break: break-all;
 }
+
+/* 原生 Canvas 图表 */
+.bubble-chart-list {
+  margin-top: 12rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+.bubble-chart-canvas {
+  width: 100%;
+  height: 440rpx;
+  border-radius: 10rpx;
+}

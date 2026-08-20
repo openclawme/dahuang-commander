@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '真实任务分解与进度：规划器修复（JSON 模式 400 导致固定步骤）、任务状态随工具执行实时更新、进度按任务完成度计算、中间失败步骤不再误报中断';
+const desc = '图表原生 Canvas 渲染：Agent 输出图表数据 JSON，微信端用原生 canvas 绘制曲线图/柱状图（不再依赖图片加载）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
