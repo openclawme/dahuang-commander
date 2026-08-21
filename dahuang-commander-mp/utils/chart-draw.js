@@ -103,7 +103,8 @@ function drawChart(canvas, spec, widthPx, heightPx) {
 
   // X 轴标签（超过 8 个点抽样）
   ctx.textAlign = 'center';
-  const labelStep = n > 8 ? Math.ceil(n / 6) : 1;
+  // 标签抽样按可用宽度自适应：宽画布（横向滚动）下显示全部标签
+  const labelStep = plotW / n >= 48 ? 1 : Math.max(1, Math.ceil((n * 48) / plotW));
   for (let i = 0; i < n; i++) {
     if (i % labelStep !== 0) continue;
     ctx.fillStyle = '#8fa0bf';

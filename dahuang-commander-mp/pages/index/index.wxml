@@ -28,16 +28,25 @@
             <text wx:elif="{{item.content && item.content !== '（智能体处理中...）'}}" user-select>{{item.content}}</text>
           </block>
 
-          <!-- 原生 Canvas 图表（Agent 输出的图表数据块） -->
+          <!-- 原生 Canvas 图表（数据点多时画布加宽、横向滚动） -->
           <view class="bubble-chart-list" wx:if="{{item.charts && item.charts.length > 0}}">
-            <canvas
-              type="2d"
-              class="bubble-chart-canvas"
-              id="chart-canvas-{{item.id}}-{{ci}}"
+            <scroll-view
+              scroll-x
+              class="bubble-chart-scroll"
+              enhanced
+              show-scrollbar="{{false}}"
               wx:for="{{item.charts}}"
               wx:for-item="chartSpec"
               wx:for-index="ci"
-            ></canvas>
+              wx:key="ci"
+            >
+              <canvas
+                type="2d"
+                class="bubble-chart-canvas"
+                id="chart-canvas-{{item.id}}-{{ci}}"
+                style="width: {{chartSpec._minWidthPx ? chartSpec._minWidthPx + 'px' : ''}};"
+              ></canvas>
+            </scroll-view>
           </view>
           
           <view class="bubble-task-container" wx:if="{{item.sender === 'agent' && (item.isPending || (item.progress > 0 && item.progress < 100))}}">

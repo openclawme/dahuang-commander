@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '图表可选配色：api_deliver_chart 支持 colors 参数（#RRGGBB，经服务端校验），不填走系统默认调色板——统一版式+逐图差异化';
+const desc = '图表横向滚动：数据点多时画布按点数自适应加宽（每点50px），超出窗口可左右滑动，标签完整显示';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

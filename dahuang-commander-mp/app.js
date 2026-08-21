@@ -401,7 +401,7 @@ App({
       tasks: updatedTasks,
       isPending: data.isPending !== undefined ? data.isPending : (data.progress < 100),
       isError: isErrorState,
-      charts: data.charts || (existingMsg ? existingMsg.charts : undefined)
+      charts: this.decorateCharts(data.charts) || (existingMsg ? existingMsg.charts : undefined)
     };
 
     // 历史孤儿任务的延迟结果（如崩溃恢复后很久才完成）：只记日志，不插入聊天流
@@ -424,6 +424,19 @@ App({
     if (resultMsg.isPending) {
       this.startPendingWatchdog();
     }
+  },
+
+  // 图表布局：按数据点数量计算自然宽度（每点最少 50px + 坐标轴空间），
+  // 点数多时画布加宽并横向滚动，避免曲线被压进窗口宽度
+  decorateCharts(charts) {
+    if (!Array.isArray(charts)) return charts;
+    return charts.map((c) => {
+      const maxPoints = Math.max.apply(
+        null,
+        (Array.isArray(c.series) ? c.series : []).map((s) => (Array.isArray(s.values) ? s.values.length : 0)).concat([4])
+      );
+      return { ...c, _minWidthPx: Math.round(320 + Math.max(0, maxPoints - 4) * 50) };
+    });
   },
 
   // 清空当前对话窗口（clearAll=true 时同时清空本地日志面板）
