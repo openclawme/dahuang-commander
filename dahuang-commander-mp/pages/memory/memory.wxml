@@ -17,6 +17,82 @@
       </view>
     </view>
 
+    <!-- ⓪ AI 整理建议（提案队列，用户裁决） -->
+    <view class="settings-section">
+      <view class="section-header justify-between">
+        <text class="section-title">{{t.memory.maint_title}}</text>
+        <text class="row-arrow" bindtap="analyzeNow">{{analyzing ? t.memory.maint_analyzing : t.memory.maint_analyze_now}}</text>
+      </view>
+      <view class="maint-toggle-row flex-row align-center justify-between">
+        <text class="section-desc" style="flex: 1;">{{t.memory.maint_auto}}</text>
+        <switch checked="{{autoMaintain}}" bindchange="onAutoMaintainChange" color="#9e2a2b" />
+      </view>
+
+      <view class="settings-list" wx:if="{{proposals.length > 0}}">
+        <view class="maint-card flex-col" wx:for="{{proposals}}" wx:key="id">
+          <view class="flex-row align-center justify-between">
+            <text class="maint-type">{{item.type === 'CONFLICT' ? '⚠️ ' + t.memory.maint_conflict : item.type === 'MERGE' ? '🔀 ' + t.memory.maint_merge : item.type === 'PROMOTE' ? '⬆️ ' + t.memory.maint_promote : '🗜️ ' + t.memory.maint_compress}}</text>
+            <text class="fact-time">{{item.ts}}</text>
+          </view>
+          <text class="fact-content" wx:if="{{item.reason}}">{{item.reason}}</text>
+
+          <!-- CONFLICT：两条冲突事实 -->
+          <block wx:if="{{item.type === 'CONFLICT'}}">
+            <view class="maint-items flex-col">
+              <view class="maint-item" wx:for="{{item.before.items}}" wx:for-item="fi" wx:key="id">
+                <text class="maint-item-text">{{fi.content}}</text>
+              </view>
+            </view>
+            <view class="flex-row maint-actions">
+              <button class="maint-btn maint-btn-primary" bindtap="onProposalApply" data-id="{{item.id}}" data-action="keepNewer">{{t.memory.maint_keep_newer}}</button>
+              <button class="maint-btn" bindtap="onProposalApply" data-id="{{item.id}}" data-action="mergeHistory">{{t.memory.maint_merge_history}}</button>
+              <button class="maint-btn maint-btn-ghost" bindtap="onProposalDismiss" data-id="{{item.id}}">{{t.memory.maint_ignore}}</button>
+            </view>
+          </block>
+
+          <!-- MERGE：原文 + 合并文本（可编辑） -->
+          <block wx:if="{{item.type === 'MERGE'}}">
+            <view class="maint-items flex-col">
+              <view class="maint-item" wx:for="{{item.before.items}}" wx:for-item="fi" wx:key="id">
+                <text class="maint-item-text">{{fi.content}}</text>
+              </view>
+            </view>
+            <view class="maint-merged">
+              <text class="maint-merged-label">→ {{item.after.merged.content}}</text>
+              <text class="danger-link" bindtap="openMergeEdit" data-id="{{item.id}}" data-merged="{{item.after.merged.content}}">{{t.memory.maint_merge_edit}}</text>
+            </view>
+            <view class="flex-row maint-actions">
+              <button class="maint-btn maint-btn-primary" bindtap="onProposalApply" data-id="{{item.id}}" data-action="">{{t.memory.maint_approve}}</button>
+              <button class="maint-btn maint-btn-ghost" bindtap="onProposalDismiss" data-id="{{item.id}}">{{t.memory.maint_ignore}}</button>
+            </view>
+          </block>
+
+          <!-- PROMOTE：升级建议 -->
+          <block wx:if="{{item.type === 'PROMOTE'}}">
+            <view class="maint-merged">
+              <text class="maint-merged-label">→ {{item.after.fact.content}}</text>
+            </view>
+            <view class="flex-row maint-actions">
+              <button class="maint-btn maint-btn-primary" bindtap="onProposalApply" data-id="{{item.id}}" data-action="">{{t.memory.maint_approve}}</button>
+              <button class="maint-btn maint-btn-ghost" bindtap="onProposalDismiss" data-id="{{item.id}}">{{t.memory.maint_ignore}}</button>
+            </view>
+          </block>
+
+          <!-- COMPRESS：压缩建议 + token 估算 -->
+          <block wx:if="{{item.type === 'COMPRESS'}}">
+            <text class="fact-content">{{t.memory.maint_saved_tokens.replace('{tokens}', item.after.estimatedSavedTokens)}}</text>
+            <view class="flex-row maint-actions">
+              <button class="maint-btn maint-btn-primary" bindtap="onProposalApply" data-id="{{item.id}}" data-action="">{{t.memory.maint_apply_compress}}</button>
+              <button class="maint-btn maint-btn-ghost" bindtap="onProposalDismiss" data-id="{{item.id}}">{{t.memory.maint_ignore}}</button>
+            </view>
+          </block>
+        </view>
+      </view>
+      <view class="empty-agents flex-col align-center" wx:else>
+        <text class="empty-text">{{t.memory.maint_empty}}</text>
+      </view>
+    </view>
+
     <!-- ① 主人偏好 · 强调事项 -->
     <view class="settings-section">
       <view class="section-header section-header-col">
@@ -157,6 +233,18 @@
     <view class="flex-row justify-between" style="margin-top: 20rpx;">
       <button class="form-cancel-btn" bindtap="closeSoulForm">{{t.memory.fact_cancel}}</button>
       <button class="form-save-btn" bindtap="saveSoul">{{t.memory.soul_save}}</button>
+    </view>
+  </view>
+</view>
+
+<!-- 合并文本编辑浮层 -->
+<view class="form-overlay" wx:if="{{mergeEditVisible}}" bindtap="closeMergeEdit">
+  <view class="form-card" catchtap="">
+    <text class="form-title">{{t.memory.maint_merge_edit}}</text>
+    <textarea class="form-textarea form-textarea-tall" value="{{mergeDraft}}" bindinput="onMergeDraftInput" maxlength="300"></textarea>
+    <view class="flex-row justify-between" style="margin-top: 20rpx;">
+      <button class="form-cancel-btn" bindtap="closeMergeEdit">{{t.memory.fact_cancel}}</button>
+      <button class="form-save-btn" bindtap="onProposalApply" data-id="{{mergeEditId}}" data-action="">{{t.memory.maint_approve}}</button>
     </view>
   </view>
 </view>

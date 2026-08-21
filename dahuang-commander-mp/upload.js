@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '关键记忆管理：元神法印新增记忆入口（主人偏好/近期对话/长期记忆库/滚动摘要/人设五区），支持查看·编辑·删除；Agent自动记录偏好并即时提示';
+const desc = '记忆自维护（v1.2）：AI 整理建议区（矛盾/重复/升级/压缩四类提案+用户裁决）、低风险自动整理开关、token 节省估算、合并文本可编辑';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

@@ -17,6 +17,12 @@ Page({
     soulText: "",
     soulMutationCount: 0,
     // 编辑态
+    proposals: [],
+    autoMaintain: true,
+    analyzing: false,
+    mergeEditVisible: false,
+    mergeEditId: null,
+    mergeDraft: "",
     factFormVisible: false,
     factFormMode: "add", // add | edit
     factFormId: null,
@@ -40,6 +46,7 @@ Page({
       serverUrl: app.globalData.serverUrl || "https://dahuang.land"
     });
     this.loadMemory();
+    this.loadProposals();
   },
 
   request(method, path, data) {
@@ -99,6 +106,114 @@ Page({
     } catch (e) {
       this.setData({ episodicLoading: false });
     }
+  },
+
+  // ---- AI 整理建议 ----
+  async loadProposals() {
+    try {
+      const res = await this.request("GET", "/api/agent/memory/maintenance");
+      this.setData({
+        proposals: (res.proposals || []).map((x) => ({ ...x, ts: this.relativeTime(x.createdAt) })),
+        autoMaintain: res.autoMaintain !== false
+      });
+    } catch (e) { /* 静默失败，不影响主界面 */ }
+  },
+
+  async analyzeNow() {
+    if (this.data.analyzing) return;
+    const t = this.data.t.memory || {};
+    this.setData({ analyzing: true });
+    wx.showLoading({ title: t.maint_analyzing || "分析中..." });
+    try {
+      const res = await this.request("POST", "/api/agent/memory/maintenance/analyze");
+      wx.hideLoading();
+      this.setData({ analyzing: false });
+      wx.showToast({ title: (res.summary && res.summary.slice(0, 20)) || (t.maint_done || "整理完成"), icon: "none" });
+      this.loadProposals();
+      this.loadMemory();
+    } catch (e) {
+      wx.hideLoading();
+      this.setData({ analyzing: false });
+      wx.showToast({ title: t.op_failed || "操作失败", icon: "none" });
+    }
+  },
+
+  onProposalApply(e) {
+    const { id, action } = e.currentTarget.dataset;
+    const t = this.data.t.memory || {};
+    // 先读最新草稿（若用户编辑过合并文本）
+    const draft = this.data.mergeEditId === id ? this.data.mergeDraft : null;
+    if (draft) {
+      this.applyMergeWithDraft(id, draft, t);
+      return;
+    }
+    wx.showModal({
+      title: t.maint_approve || "批准",
+      content: "应用这条整理建议？",
+      confirmColor: "#9e2a2b",
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          const r = await this.request("POST", `/api/agent/memory/maintenance/${id}/apply`, { action: action || "" });
+          wx.showToast({ title: r.message || (t.save_ok || "已应用"), icon: "success" });
+          this.loadProposals();
+          this.loadMemory();
+        } catch (e) {
+          wx.showToast({ title: t.op_failed || "操作失败", icon: "none" });
+        }
+      }
+    });
+  },
+
+  async applyMergeWithDraft(id, draft, t) {
+    try {
+      const r = await this.request("POST", `/api/agent/memory/maintenance/${id}/apply`, { action: "mergeDraft", merged: draft });
+      wx.showToast({ title: r.message || (t.save_ok || "已应用"), icon: "success" });
+      this.setData({ mergeEditVisible: false, mergeEditId: null });
+      this.loadProposals();
+      this.loadMemory();
+    } catch (e) {
+      wx.showToast({ title: t.op_failed || "操作失败", icon: "none" });
+    }
+  },
+
+  onProposalDismiss(e) {
+    const { id } = e.currentTarget.dataset;
+    const t = this.data.t.memory || {};
+    wx.showModal({
+      title: t.maint_ignore || "忽略",
+      content: "忽略这条建议？",
+      confirmColor: "#9e2a2b",
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          await this.request("POST", `/api/agent/memory/maintenance/${id}/dismiss`);
+          wx.showToast({ title: t.delete_ok || "已忽略", icon: "success" });
+          this.loadProposals();
+        } catch (e) {
+          wx.showToast({ title: t.op_failed || "操作失败", icon: "none" });
+        }
+      }
+    });
+  },
+
+  openMergeEdit(e) {
+    const { id, merged } = e.currentTarget.dataset;
+    this.setData({ mergeEditVisible: true, mergeEditId: id, mergeDraft: merged || "" });
+  },
+
+  onMergeDraftInput(e) {
+    this.setData({ mergeDraft: e.detail.value });
+  },
+
+  closeMergeEdit() {
+    this.setData({ mergeEditVisible: false, mergeEditId: null, mergeDraft: "" });
+  },
+
+  onAutoMaintainChange(e) {
+    const enabled = e.detail.value;
+    this.setData({ autoMaintain: enabled });
+    this.request("POST", "/api/agent/memory/maintenance/auto", { enabled }).catch(() => {});
   },
 
   relativeTime(iso) {
