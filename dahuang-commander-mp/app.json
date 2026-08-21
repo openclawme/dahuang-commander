@@ -4,6 +4,7 @@
     "pages/chat/chat",
     "pages/dahuang/dahuang",
     "pages/settings/settings",
+    "pages/memory/memory",
     "pages/room/room"
   ],
   "window": {

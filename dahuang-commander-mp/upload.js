@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '图表横向滚动：数据点多时画布按点数自适应加宽（每点50px），超出窗口可左右滑动，标签完整显示';
+const desc = '关键记忆管理：元神法印新增记忆入口（主人偏好/近期对话/长期记忆库/滚动摘要/人设五区），支持查看·编辑·删除；Agent自动记录偏好并即时提示';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

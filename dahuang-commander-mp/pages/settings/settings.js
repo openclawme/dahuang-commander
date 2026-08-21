@@ -527,6 +527,10 @@ Page({
     });
   },
 
+  openMemory() {
+    wx.navigateTo({ url: "/pages/memory/memory" });
+  },
+
   copyDid() {
     const did = this.data.agentState.did;
     if (!did) return;

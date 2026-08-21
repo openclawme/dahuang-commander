@@ -1,0 +1,277 @@
+@import "../index/index.wxss";
+
+.container {
+  padding: 24rpx;
+  background-color: #f4f1ea;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.loading-box {
+  padding: 80rpx 0;
+  text-align: center;
+  color: #8c7d68;
+  font-size: 26rpx;
+}
+
+/* 档案头卡 */
+.profile-hero-card {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1rpx solid rgba(59, 48, 36, 0.12);
+  border-top: 6rpx solid #9e2a2b;
+  border-radius: 16rpx;
+  box-shadow: 0 10rpx 30rpx -10rpx rgba(59, 48, 36, 0.15);
+  padding: 32rpx;
+  margin-bottom: 32rpx;
+}
+
+.profile-name {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #1a1a1a;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-char {
+  font-size: 26rpx;
+  color: #6b5b4a;
+  margin-top: 6rpx;
+}
+
+/* 分区 */
+.settings-section {
+  margin-bottom: 44rpx;
+}
+
+.section-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8rpx 14rpx 8rpx;
+  border-bottom: 1rpx solid rgba(59, 48, 36, 0.12);
+  margin-bottom: 18rpx;
+}
+
+.section-title {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #3b3024;
+  margin-bottom: 8rpx;
+  display: block;
+}
+
+.section-desc {
+  font-size: 26rpx;
+  color: #8c7d68;
+  line-height: 1.4;
+  margin-top: 6rpx;
+  display: block;
+}
+
+.settings-list {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
+/* 行 */
+.agent-row {
+  padding: 20rpx 24rpx;
+  gap: 20rpx;
+  border-bottom: 1rpx solid rgba(59, 48, 36, 0.08);
+}
+
+.agent-row:last-child {
+  border-bottom: none;
+}
+
+.register-row {
+  border-bottom: none;
+}
+
+.register-row-icon {
+  width: 72rpx;
+  height: 72rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #9e2a2b;
+}
+
+.register-row-text {
+  flex: 1;
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #9e2a2b;
+}
+
+.row-hover {
+  background: rgba(158, 42, 43, 0.05);
+}
+
+.row-arrow {
+  font-size: 32rpx;
+  color: #a89982;
+  flex-shrink: 0;
+  font-weight: normal;
+}
+
+.danger-link {
+  font-size: 26rpx;
+  color: #b45309;
+}
+
+/* 空态 */
+.empty-agents {
+  padding: 80rpx 0;
+}
+
+.empty-icon {
+  font-size: 60rpx;
+  margin-bottom: 10rpx;
+}
+
+.empty-text {
+  font-size: 26rpx;
+  color: #8c7d68;
+  text-align: center;
+}
+
+/* 事实条目 */
+.fact-row {
+  padding: 20rpx 24rpx;
+  gap: 10rpx;
+  border-bottom: 1rpx solid rgba(59, 48, 36, 0.08);
+}
+
+.fact-row:last-child {
+  border-bottom: none;
+}
+
+.fact-label {
+  font-size: 22rpx;
+  font-weight: bold;
+  color: #9e2a2b;
+  background: rgba(158, 42, 43, 0.08);
+  border: 1rpx solid rgba(158, 42, 43, 0.25);
+  border-radius: 6rpx;
+  padding: 2rpx 12rpx;
+}
+
+.fact-time {
+  font-size: 22rpx;
+  color: #a89982;
+}
+
+.fact-content {
+  font-size: 26rpx;
+  color: #3b3024;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+/* 近期对话 / 长期记忆条目 */
+.shortterm-row,
+.episodic-row {
+  padding: 18rpx 24rpx;
+  gap: 8rpx;
+  border-bottom: 1rpx solid rgba(59, 48, 36, 0.08);
+}
+
+.shortterm-row:last-child,
+.episodic-row:last-child {
+  border-bottom: none;
+}
+
+/* 摘要/人设卡片 */
+.summary-card {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1rpx solid rgba(59, 48, 36, 0.12);
+  border-radius: 12rpx;
+  padding: 24rpx;
+}
+
+/* 编辑浮层 */
+.form-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(26, 26, 26, 0.55);
+  z-index: 90;
+  display: flex;
+  align-items: flex-end;
+}
+
+.form-card {
+  width: 100%;
+  background: #f4f1ea;
+  border-radius: 24rpx 24rpx 0 0;
+  padding: 40rpx 32rpx calc(40rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.form-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #1a1a1a;
+  display: block;
+  margin-bottom: 24rpx;
+}
+
+.form-input {
+  width: 100%;
+  background: #ffffff;
+  border: 1rpx solid rgba(59, 48, 36, 0.15);
+  border-radius: 10rpx;
+  padding: 18rpx 20rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+  margin-bottom: 20rpx;
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 160rpx;
+  background: #ffffff;
+  border: 1rpx solid rgba(59, 48, 36, 0.15);
+  border-radius: 10rpx;
+  padding: 18rpx 20rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.form-textarea-tall {
+  min-height: 320rpx;
+}
+
+.form-cancel-btn,
+.form-save-btn {
+  width: 46%;
+  border-radius: 10rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  line-height: 2.6;
+}
+
+.form-cancel-btn {
+  background: #ffffff;
+  color: #6b5b4a;
+  border: 1rpx solid rgba(59, 48, 36, 0.2);
+}
+
+.form-save-btn {
+  background: #9e2a2b;
+  color: #ffffff;
+}

@@ -1,0 +1,162 @@
+<scroll-view scroll-y class="container">
+  <view class="loading-box" wx:if="{{loading}}">
+    <text>{{t.memory.load_failed}}</text>
+  </view>
+
+  <block wx:else>
+    <!-- 档案头卡 -->
+    <view class="profile-hero-card flex-row align-center">
+      <view class="avatar-core-seal seal-color-0" style="width: 72rpx; height: 72rpx; flex-shrink: 0;">
+        <text class="seal-character" style="font-size: 30rpx; font-weight: bold; color: #fff;">{{agentState.name ? agentState.name.slice(0,1) : '元'}}</text>
+      </view>
+      <view class="flex-col" style="margin-left: 20rpx; flex: 1; min-width: 0;">
+        <text class="profile-name">{{agentState.name || '元神'}}</text>
+        <text class="profile-char">
+          {{t.memory.stats.replace('{facts}', facts.length).replace('{episodic}', episodicItems.length)}}
+        </text>
+      </view>
+    </view>
+
+    <!-- ① 主人偏好 · 强调事项 -->
+    <view class="settings-section">
+      <view class="section-header section-header-col">
+        <text class="section-title">{{t.memory.facts_title}}</text>
+        <text class="section-desc">{{t.memory.facts_desc}}</text>
+      </view>
+      <view class="settings-list">
+        <view class="fact-row flex-col" wx:for="{{facts}}" wx:key="id" bindtap="onFactTap"
+              data-id="{{item.id}}" data-label="{{item.label}}" data-content="{{item.content}}" hover-class="row-hover">
+          <view class="flex-row align-center" style="gap: 12rpx;">
+            <text class="fact-label" wx:if="{{item.label}}">{{item.label}}</text>
+            <text class="fact-time">{{item.ts}}</text>
+          </view>
+          <text class="fact-content" user-select>{{item.content}}</text>
+        </view>
+        <view class="empty-agents flex-col align-center" wx:if="{{facts.length === 0}}">
+          <text class="empty-icon">🧠</text>
+          <text class="empty-text">{{t.memory.facts_empty}}</text>
+        </view>
+        <view class="agent-row flex-row align-center register-row" bindtap="openFactAdd" hover-class="row-hover">
+          <text class="register-row-icon">＋</text>
+          <text class="register-row-text">{{t.memory.fact_add}}</text>
+          <text class="row-arrow">›</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- ② 近期对话记忆 -->
+    <view class="settings-section">
+      <view class="section-header justify-between">
+        <text class="section-title">{{t.memory.shortterm_title}}</text>
+        <text class="danger-link" wx:if="{{shortTerm.length > 0}}" bindtap="clearShortTerm">{{t.memory.shortterm_clear}}</text>
+      </view>
+      <view class="settings-list" wx:if="{{shortTerm.length > 0}}">
+        <view class="shortterm-row flex-col" wx:for="{{shortTerm}}" wx:key="index">
+          <text class="fact-time">{{item.role === 'user' ? '你' : 'Agent'}} · {{item.ts}}</text>
+          <text class="fact-content" user-select>{{item.content}}</text>
+        </view>
+      </view>
+      <view class="empty-agents flex-col align-center" wx:else>
+        <text class="empty-text">{{t.memory.shortterm_empty}}</text>
+      </view>
+    </view>
+
+    <!-- ③ 长期记忆库 -->
+    <view class="settings-section">
+      <view class="section-header justify-between">
+        <text class="section-title">{{t.memory.episodic_title}}</text>
+        <text class="danger-link" wx:if="{{episodicItems.length > 0}}" bindtap="clearEpisodic">{{t.memory.episodic_clear}}</text>
+      </view>
+      <view class="settings-list" wx:if="{{episodicItems.length > 0}}">
+        <view class="episodic-row flex-col" wx:for="{{episodicItems}}" wx:key="id" data-id="{{item.id}}" bindlongpress="deleteEpisodic">
+          <view class="flex-row justify-between align-center">
+            <text class="fact-time">{{item.ts}}</text>
+            <text class="danger-link" bindtap="deleteEpisodic" data-id="{{item.id}}">✕</text>
+          </view>
+          <text class="fact-content" user-select>{{item.content}}</text>
+        </view>
+        <view class="agent-row flex-row align-center register-row" wx:if="{{episodicCursor}}" bindtap="loadMoreEpisodic" hover-class="row-hover">
+          <text class="register-row-text">{{t.memory.episodic_more}}</text>
+          <text class="row-arrow">›</text>
+        </view>
+      </view>
+      <view class="empty-agents flex-col align-center" wx:else>
+        <text class="empty-text">{{t.memory.episodic_empty}}</text>
+      </view>
+    </view>
+
+    <!-- ④ 滚动摘要 -->
+    <view class="settings-section">
+      <view class="section-header justify-between">
+        <text class="section-title">{{t.memory.summary_title}}</text>
+        <text class="row-arrow" bindtap="openSummaryEdit">{{t.memory.summary_edit}}</text>
+      </view>
+      <view class="settings-list" wx:if="{{rollingSummary}}">
+        <view class="summary-card">
+          <text class="fact-content" user-select>{{rollingSummary}}</text>
+        </view>
+      </view>
+      <view class="empty-agents flex-col align-center" wx:else>
+        <text class="empty-text">{{t.memory.summary_empty}}</text>
+      </view>
+    </view>
+
+    <!-- ⑤ 人设（高级） -->
+    <view class="settings-section">
+      <view class="section-header justify-between" bindtap="toggleSoulAdvanced">
+        <text class="section-title">{{t.memory.soul_title}}</text>
+        <text class="row-arrow">{{showSoulAdvanced ? '收起' : '展开'}}</text>
+      </view>
+      <block wx:if="{{showSoulAdvanced}}">
+        <text class="section-desc" style="display:block; margin-bottom: 12rpx;">{{t.memory.soul_desc}}</text>
+        <view class="settings-list">
+          <view class="summary-card">
+            <text class="fact-content" user-select>{{soulText}}</text>
+          </view>
+          <view class="agent-row flex-row align-center register-row" bindtap="openSoulEdit" hover-class="row-hover">
+            <text class="register-row-icon">✎</text>
+            <text class="register-row-text">{{t.memory.soul_edit}}</text>
+            <text class="row-arrow">›</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </block>
+</scroll-view>
+
+<!-- 事实编辑浮层 -->
+<view class="form-overlay" wx:if="{{factFormVisible}}" bindtap="closeFactForm">
+  <view class="form-card" catchtap="">
+    <text class="form-title">{{factFormMode === 'edit' ? t.memory.fact_edit : t.memory.fact_add}}</text>
+    <input class="form-input" placeholder="{{t.memory.fact_label_ph}}" value="{{factLabel}}" bindinput="onFactInput" data-field="factLabel" maxlength="20" />
+    <textarea class="form-textarea" placeholder="{{t.memory.fact_content_ph}}" value="{{factContent}}" bindinput="onFactInput" data-field="factContent" maxlength="300"></textarea>
+    <view class="flex-row justify-between" style="margin-top: 20rpx;">
+      <button class="form-cancel-btn" bindtap="closeFactForm">{{t.memory.fact_cancel}}</button>
+      <button class="form-save-btn" bindtap="saveFact">{{t.memory.fact_save}}</button>
+    </view>
+  </view>
+</view>
+
+<!-- 摘要编辑浮层 -->
+<view class="form-overlay" wx:if="{{summaryFormVisible}}" bindtap="closeSummaryForm">
+  <view class="form-card" catchtap="">
+    <text class="form-title">{{t.memory.summary_edit}}</text>
+    <textarea class="form-textarea form-textarea-tall" placeholder="{{t.memory.summary_ph}}" value="{{summaryDraft}}" bindinput="onSummaryInput" maxlength="2000"></textarea>
+    <view class="flex-row justify-between" style="margin-top: 20rpx;">
+      <button class="form-cancel-btn" bindtap="closeSummaryForm">{{t.memory.fact_cancel}}</button>
+      <button class="form-save-btn" bindtap="saveSummary">{{t.memory.summary_save}}</button>
+    </view>
+  </view>
+</view>
+
+<!-- 人设编辑浮层 -->
+<view class="form-overlay" wx:if="{{soulFormVisible}}" bindtap="closeSoulForm">
+  <view class="form-card" catchtap="">
+    <text class="form-title">{{t.memory.soul_edit}}</text>
+    <textarea class="form-textarea form-textarea-tall" placeholder="{{t.memory.soul_ph}}" value="{{soulDraft}}" bindinput="onSoulInput" maxlength="1000"></textarea>
+    <view class="flex-row justify-between" style="margin-top: 20rpx;">
+      <button class="form-cancel-btn" bindtap="closeSoulForm">{{t.memory.fact_cancel}}</button>
+      <button class="form-save-btn" bindtap="saveSoul">{{t.memory.soul_save}}</button>
+    </view>
+  </view>
+</view>
