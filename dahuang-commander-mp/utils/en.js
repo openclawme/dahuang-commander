@@ -146,7 +146,8 @@ module.exports = {
     unfold: "Unfold",
     clear: "Clear",
     empty_logs: "No logs yet...",
-    memory_entry: "🧠 Key Memory (View · Edit)"
+    memory_entry: "🧠 Key Memory",
+    memory_entry_sub: "View & edit memories that shape agent behavior"
   },
   memory: {
     nav_title: "Key Memory",
@@ -200,6 +201,7 @@ module.exports = {
     maint_done: "Maintenance done",
 
     load_failed: "Failed to load memory",
+    loading: "Loading...",
     save_ok: "Saved",
     save_failed: "Save failed",
     delete_ok: "Deleted",

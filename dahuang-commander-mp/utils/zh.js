@@ -146,7 +146,8 @@ module.exports = {
  unfold: "展开",
  clear: "清除",
  empty_logs: "风平浪静，毫无波动...",
- memory_entry: "🧠 关键记忆（查看 · 编辑）"
+ memory_entry: "🧠 关键记忆",
+ memory_entry_sub: "查看 · 编辑影响 Agent 行为的记忆与偏好"
  },
  memory: {
  nav_title: "关键记忆",
@@ -200,6 +201,7 @@ module.exports = {
  maint_done: "整理完成",
 
  load_failed: "加载记忆失败，请稍后重试",
+ loading: "加载中...",
  save_ok: "已保存",
  save_failed: "保存失败，请稍后重试",
  delete_ok: "已删除",

@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '记忆自维护（v1.2）：AI 整理建议区（矛盾/重复/升级/压缩四类提案+用户裁决）、低风险自动整理开关、token 节省估算、合并文本可编辑';
+const desc = 'UI修复：立即分析/人设展开改为按钮样式、关键记忆入口改为卡片按钮、删除按钮扩大点击热区、加载中提示修正';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

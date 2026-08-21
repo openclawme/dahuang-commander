@@ -1,6 +1,6 @@
 <scroll-view scroll-y class="container">
   <view class="loading-box" wx:if="{{loading}}">
-    <text>{{t.memory.load_failed}}</text>
+    <text>{{t.memory.loading}}</text>
   </view>
 
   <block wx:else>
@@ -21,7 +21,7 @@
     <view class="settings-section">
       <view class="section-header justify-between">
         <text class="section-title">{{t.memory.maint_title}}</text>
-        <text class="row-arrow" bindtap="analyzeNow">{{analyzing ? t.memory.maint_analyzing : t.memory.maint_analyze_now}}</text>
+        <view class="maint-analyze-btn" bindtap="analyzeNow">{{analyzing ? "⏳ " + t.memory.maint_analyzing : "⚡ " + t.memory.maint_analyze_now}}</view>
       </view>
       <view class="maint-toggle-row flex-row align-center justify-between">
         <text class="section-desc" style="flex: 1;">{{t.memory.maint_auto}}</text>
@@ -127,8 +127,11 @@
         <text class="danger-link" wx:if="{{shortTerm.length > 0}}" bindtap="clearShortTerm">{{t.memory.shortterm_clear}}</text>
       </view>
       <view class="settings-list" wx:if="{{shortTerm.length > 0}}">
-        <view class="shortterm-row flex-col" wx:for="{{shortTerm}}" wx:key="index">
-          <text class="fact-time">{{item.role === 'user' ? '你' : 'Agent'}} · {{item.ts}}</text>
+        <view class="shortterm-row flex-col" wx:for="{{shortTerm}}" wx:key="id">
+          <view class="flex-row justify-between align-center">
+            <text class="fact-time">{{item.role === 'user' ? '你' : 'Agent'}} · {{item.ts}}</text>
+            <view class="icon-del-btn" bindtap="deleteShortTermItem" data-id="{{item.id}}">✕</view>
+          </view>
           <text class="fact-content" user-select>{{item.content}}</text>
         </view>
       </view>
@@ -147,7 +150,7 @@
         <view class="episodic-row flex-col" wx:for="{{episodicItems}}" wx:key="id" data-id="{{item.id}}" bindlongpress="deleteEpisodic">
           <view class="flex-row justify-between align-center">
             <text class="fact-time">{{item.ts}}</text>
-            <text class="danger-link" bindtap="deleteEpisodic" data-id="{{item.id}}">✕</text>
+            <view class="icon-del-btn" bindtap="deleteEpisodic" data-id="{{item.id}}">✕</view>
           </view>
           <text class="fact-content" user-select>{{item.content}}</text>
         </view>
@@ -181,7 +184,7 @@
     <view class="settings-section">
       <view class="section-header justify-between" bindtap="toggleSoulAdvanced">
         <text class="section-title">{{t.memory.soul_title}}</text>
-        <text class="row-arrow">{{showSoulAdvanced ? '收起' : '展开'}}</text>
+        <view class="maint-expand-btn">{{showSoulAdvanced ? "收起 ▲" : "展开 ▼"}}</view>
       </view>
       <block wx:if="{{showSoulAdvanced}}">
         <text class="section-desc" style="display:block; margin-bottom: 12rpx;">{{t.memory.soul_desc}}</text>

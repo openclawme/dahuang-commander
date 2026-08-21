@@ -302,6 +302,27 @@ Page({
   },
 
   // ---- 近期对话记忆 ----
+  deleteShortTermItem(e) {
+    const { id } = e.currentTarget.dataset;
+    if (!id) return;
+    const t = this.data.t.memory || {};
+    wx.showModal({
+      title: t.fact_delete || "删除",
+      content: t.fact_delete || "删除这条记忆？",
+      confirmColor: "#9e2a2b",
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          await this.request("DELETE", `/api/agent/memory/shortterm/${encodeURIComponent(id)}`);
+          wx.showToast({ title: t.delete_ok || "已删除", icon: "success" });
+          this.loadMemory();
+        } catch (e) {
+          wx.showToast({ title: t.op_failed || "操作失败", icon: "none" });
+        }
+      }
+    });
+  },
+
   clearShortTerm() {
     const t = this.data.t.memory || {};
     wx.showModal({
