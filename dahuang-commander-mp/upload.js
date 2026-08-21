@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '记忆页深度修复：删除按钮失效根因（id丢失+点击穿透）、浮层输入框点击消失（catchtap空串）、分析后静默刷新不闪加载页、表单占位符可读性';
+const desc = '摘要支持清空按钮；维护阈值下调（压缩100条/摘要1200字/事实分析5条），自动整理开启时压缩归档自动执行';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

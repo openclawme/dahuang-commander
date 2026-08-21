@@ -176,6 +176,8 @@ module.exports = {
  summary_title: "滚动摘要",
  summary_empty: "暂无滚动摘要",
  summary_edit: "编辑摘要",
+ summary_clear: "清空",
+ summary_clear_confirm: "确定清空滚动摘要？",
  summary_save: "保存摘要",
  summary_ph: "输入摘要内容（最多2000字）",
  soul_title: "人设（高级）",

@@ -389,6 +389,25 @@ Page({
   },
 
   // ---- 滚动摘要 ----
+  clearSummary() {
+    const t = this.data.t.memory || {};
+    wx.showModal({
+      title: t.summary_clear || "清空",
+      content: t.summary_clear_confirm || "确定清空滚动摘要？",
+      confirmColor: "#9e2a2b",
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          await this.request("PUT", "/api/agent/memory/summary", { summary: "" });
+          wx.showToast({ title: t.delete_ok || "已清空", icon: "success" });
+          this.loadMemory(true);
+        } catch (e) {
+          wx.showToast({ title: t.op_failed || "操作失败", icon: "none" });
+        }
+      }
+    });
+  },
+
   openSummaryEdit() {
     this.setData({ summaryFormVisible: true, summaryDraft: this.data.rollingSummary || "" });
   },

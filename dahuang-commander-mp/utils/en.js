@@ -176,6 +176,8 @@ module.exports = {
     summary_title: "Rolling Summary",
     summary_empty: "No summary yet",
     summary_edit: "Edit summary",
+    summary_clear: "Clear",
+    summary_clear_confirm: "Clear the rolling summary?",
     summary_save: "Save summary",
     summary_ph: "Summary text (max 2000 chars)",
     soul_title: "Soul (Advanced)",

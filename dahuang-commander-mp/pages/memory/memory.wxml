@@ -168,7 +168,10 @@
     <view class="settings-section">
       <view class="section-header justify-between">
         <text class="section-title">{{t.memory.summary_title}}</text>
-        <text class="row-arrow" bindtap="openSummaryEdit">{{t.memory.summary_edit}}</text>
+        <view class="flex-row align-center" style="gap: 24rpx;">
+          <text class="danger-link" wx:if="{{rollingSummary}}" bindtap="clearSummary">{{t.memory.summary_clear}}</text>
+          <view class="maint-expand-btn" bindtap="openSummaryEdit">{{t.memory.summary_edit}}</view>
+        </view>
       </view>
       <view class="settings-list" wx:if="{{rollingSummary}}">
         <view class="summary-card">
