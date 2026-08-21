@@ -65,14 +65,15 @@ Page({
     });
   },
 
-  async loadMemory() {
-    this.setData({ loading: true });
+  async loadMemory(silent) {
+    if (!silent) this.setData({ loading: true });
     try {
       const snap = await this.request("GET", "/api/agent/memory");
       const episodic = snap.episodic || {};
       this.setData({
         facts: (snap.facts || []).map((f) => ({ ...f, ts: this.relativeTime(f.updatedAt) })),
         shortTerm: (snap.shortTermHistory || []).map((h) => ({
+          id: h.id,
           role: h.role,
           content: h.content,
           ts: this.relativeTime(h.timestamp)
@@ -130,7 +131,7 @@ Page({
       this.setData({ analyzing: false });
       wx.showToast({ title: (res.summary && res.summary.slice(0, 20)) || (t.maint_done || "整理完成"), icon: "none" });
       this.loadProposals();
-      this.loadMemory();
+      this.loadMemory(true);
     } catch (e) {
       wx.hideLoading();
       this.setData({ analyzing: false });
@@ -157,7 +158,7 @@ Page({
           const r = await this.request("POST", `/api/agent/memory/maintenance/${id}/apply`, { action: action || "" });
           wx.showToast({ title: r.message || (t.save_ok || "已应用"), icon: "success" });
           this.loadProposals();
-          this.loadMemory();
+          this.loadMemory(true);
         } catch (e) {
           wx.showToast({ title: t.op_failed || "操作失败", icon: "none" });
         }
@@ -171,7 +172,7 @@ Page({
       wx.showToast({ title: r.message || (t.save_ok || "已应用"), icon: "success" });
       this.setData({ mergeEditVisible: false, mergeEditId: null });
       this.loadProposals();
-      this.loadMemory();
+      this.loadMemory(true);
     } catch (e) {
       wx.showToast({ title: t.op_failed || "操作失败", icon: "none" });
     }
@@ -215,6 +216,8 @@ Page({
     this.setData({ autoMaintain: enabled });
     this.request("POST", "/api/agent/memory/maintenance/auto", { enabled }).catch(() => {});
   },
+
+  noop() {},
 
   relativeTime(iso) {
     if (!iso) return "";
@@ -271,7 +274,7 @@ Page({
       await this.request("PUT", "/api/agent/memory/facts", { upserts, deletes: [] });
       this.setData({ saving: false, factFormVisible: false });
       wx.showToast({ title: t.save_ok || "已保存", icon: "success" });
-      this.loadMemory();
+      this.loadMemory(true);
     } catch (e) {
       this.setData({ saving: false });
       wx.showToast({ title: t.save_failed || "保存失败", icon: "none" });
@@ -289,7 +292,7 @@ Page({
         try {
           await this.request("PUT", "/api/agent/memory/facts", { upserts: [], deletes: [id] });
           wx.showToast({ title: t.delete_ok || "已删除", icon: "success" });
-          this.loadMemory();
+          this.loadMemory(true);
         } catch (e) {
           wx.showToast({ title: t.op_failed || "操作失败", icon: "none" });
         }
@@ -304,7 +307,10 @@ Page({
   // ---- 近期对话记忆 ----
   deleteShortTermItem(e) {
     const { id } = e.currentTarget.dataset;
-    if (!id) return;
+    if (!id) {
+      wx.showToast({ title: "该条记忆暂不支持删除，请刷新后重试", icon: "none" });
+      return;
+    }
     const t = this.data.t.memory || {};
     wx.showModal({
       title: t.fact_delete || "删除",
@@ -315,7 +321,7 @@ Page({
         try {
           await this.request("DELETE", `/api/agent/memory/shortterm/${encodeURIComponent(id)}`);
           wx.showToast({ title: t.delete_ok || "已删除", icon: "success" });
-          this.loadMemory();
+          this.loadMemory(true);
         } catch (e) {
           wx.showToast({ title: t.op_failed || "操作失败", icon: "none" });
         }
@@ -334,7 +340,7 @@ Page({
         try {
           await this.request("DELETE", "/api/agent/memory/shortterm");
           wx.showToast({ title: t.delete_ok || "已清空", icon: "success" });
-          this.loadMemory();
+          this.loadMemory(true);
         } catch (e) {
           wx.showToast({ title: t.op_failed || "操作失败", icon: "none" });
         }
@@ -355,7 +361,7 @@ Page({
         try {
           await this.request("DELETE", `/api/agent/memory/episodic/${encodeURIComponent(id)}`);
           wx.showToast({ title: t.delete_ok || "已删除", icon: "success" });
-          this.loadMemory();
+          this.loadMemory(true);
         } catch (e) {
           wx.showToast({ title: t.op_failed || "操作失败", icon: "none" });
         }
@@ -374,7 +380,7 @@ Page({
         try {
           await this.request("DELETE", "/api/agent/memory/episodic");
           wx.showToast({ title: t.delete_ok || "已清空", icon: "success" });
-          this.loadMemory();
+          this.loadMemory(true);
         } catch (e) {
           wx.showToast({ title: t.op_failed || "操作失败", icon: "none" });
         }
@@ -399,7 +405,7 @@ Page({
       await this.request("PUT", "/api/agent/memory/summary", { summary: this.data.summaryDraft });
       this.setData({ saving: false, summaryFormVisible: false });
       wx.showToast({ title: t.save_ok || "已保存", icon: "success" });
-      this.loadMemory();
+      this.loadMemory(true);
     } catch (e) {
       this.setData({ saving: false });
       wx.showToast({ title: t.save_failed || "保存失败", icon: "none" });
@@ -436,7 +442,7 @@ Page({
       await this.request("PUT", "/api/agent/memory/soul", { soul });
       this.setData({ saving: false, soulFormVisible: false });
       wx.showToast({ title: t.save_ok || "已保存", icon: "success" });
-      this.loadMemory();
+      this.loadMemory(true);
     } catch (e) {
       this.setData({ saving: false });
       wx.showToast({ title: e.message || t.save_failed || "保存失败", icon: "none" });

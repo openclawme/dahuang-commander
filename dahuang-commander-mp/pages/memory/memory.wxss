@@ -380,3 +380,11 @@
 .icon-del-btn:active {
   background: rgba(180, 83, 9, 0.16);
 }
+
+/* 输入占位符可读性 + 删除按钮按压 */
+.form-ph {
+  color: #a89982;
+}
+.icon-del-hover {
+  background: rgba(180, 83, 9, 0.18);
+}

@@ -156,6 +156,7 @@ module.exports = {
     facts_desc: "Key facts that shape agent behavior. Auto-recorded when you state or repeat preferences.",
     facts_empty: "Nothing yet — preferences you express will appear here",
     fact_add: "＋ Add fact",
+    fact_add_title: "Add fact",
     fact_label_ph: "Label (optional)",
     fact_content_ph: "Content (one natural sentence)",
     fact_save: "Save",

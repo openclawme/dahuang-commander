@@ -156,6 +156,7 @@ module.exports = {
  facts_desc: "影响 Agent 行为的关键事实。Agent 会在你明确表态、重复强调时自动记录。",
  facts_empty: "还没有记录——你对我说的偏好和强调事项会记录在这里",
  fact_add: "＋ 新增偏好",
+ fact_add_title: "新增偏好",
  fact_label_ph: "标签（选填，如「饮食」）",
  fact_content_ph: "内容（一句完整的话，如：主人不喜欢香菜）",
  fact_save: "保存",
