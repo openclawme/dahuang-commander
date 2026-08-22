@@ -204,6 +204,17 @@ module.exports = {
     maint_done: "Maintenance done",
 
     load_failed: "Failed to load memory",
+    just_now: "just now",
+    mins_ago: "m ago",
+    hours_ago: "h ago",
+    days_ago: "d ago",
+    role_you: "You",
+    expand: "Expand ▼",
+    collapse: "Collapse ▲",
+    modal_apply: "Apply this suggestion?",
+    modal_ignore: "Ignore this suggestion?",
+    del_unavailable: "This item cannot be deleted yet, please refresh",
+
     loading: "Loading...",
     save_ok: "Saved",
     save_failed: "Save failed",

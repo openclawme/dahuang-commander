@@ -388,3 +388,15 @@
 .icon-del-hover {
   background: rgba(180, 83, 9, 0.18);
 }
+
+/* 审查修复 */
+.section-header-col {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6rpx;
+}
+.maint-btn::after,
+.form-save-btn::after,
+.form-cancel-btn::after {
+  border: none;
+}

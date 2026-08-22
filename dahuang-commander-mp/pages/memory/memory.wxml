@@ -129,7 +129,7 @@
       <view class="settings-list" wx:if="{{shortTerm.length > 0}}">
         <view class="shortterm-row flex-col" wx:for="{{shortTerm}}" wx:key="id">
           <view class="flex-row justify-between align-center">
-            <text class="fact-time">{{item.role === 'user' ? '你' : 'Agent'}} · {{item.ts}}</text>
+            <text class="fact-time">{{item.role === 'user' ? t.memory.role_you : 'Agent'}} · {{item.ts}}</text>
             <view class="icon-del-btn" hover-class="icon-del-hover" bindtap="deleteShortTermItem" data-id="{{item.id}}">✕</view>
           </view>
           <text class="fact-content" user-select>{{item.content}}</text>
@@ -187,7 +187,7 @@
     <view class="settings-section">
       <view class="section-header justify-between" bindtap="toggleSoulAdvanced">
         <text class="section-title">{{t.memory.soul_title}}</text>
-        <view class="maint-expand-btn">{{showSoulAdvanced ? "收起 ▲" : "展开 ▼"}}</view>
+        <view class="maint-expand-btn">{{showSoulAdvanced ? t.memory.collapse : t.memory.expand}}</view>
       </view>
       <block wx:if="{{showSoulAdvanced}}">
         <text class="section-desc" style="display:block; margin-bottom: 12rpx;">{{t.memory.soul_desc}}</text>
@@ -210,8 +210,8 @@
 <view class="form-overlay" wx:if="{{factFormVisible}}" bindtap="closeFactForm">
   <view class="form-card" catchtap="noop">
     <text class="form-title">{{factFormMode === 'edit' ? t.memory.fact_edit : t.memory.fact_add_title}}</text>
-    <input class="form-input" placeholder="{{t.memory.fact_label_ph}}" placeholder-class="form-ph" value="{{factLabel}}" adjust-position="{{false}}" cursor-spacing="20" bindinput="onFactInput" data-field="factLabel" maxlength="20" />
-    <textarea class="form-textarea" placeholder="{{t.memory.fact_content_ph}}" placeholder-class="form-ph" value="{{factContent}}" adjust-position="{{false}}" cursor-spacing="20" bindinput="onFactInput" data-field="factContent" maxlength="300"></textarea>
+    <input class="form-input" placeholder="{{t.memory.fact_label_ph}}" placeholder-class="form-ph" value="{{factLabel}}" bindinput="onFactInput" data-field="factLabel" maxlength="20" />
+    <textarea class="form-textarea" placeholder="{{t.memory.fact_content_ph}}" placeholder-class="form-ph" value="{{factContent}}" bindinput="onFactInput" data-field="factContent" maxlength="300"></textarea>
     <view class="flex-row justify-between" style="margin-top: 20rpx;">
       <button class="form-cancel-btn" bindtap="closeFactForm">{{t.memory.fact_cancel}}</button>
       <button class="form-save-btn" bindtap="saveFact">{{t.memory.fact_save}}</button>
@@ -223,7 +223,7 @@
 <view class="form-overlay" wx:if="{{summaryFormVisible}}" bindtap="closeSummaryForm">
   <view class="form-card" catchtap="noop">
     <text class="form-title">{{t.memory.summary_edit}}</text>
-    <textarea class="form-textarea form-textarea-tall" placeholder="{{t.memory.summary_ph}}" placeholder-class="form-ph" value="{{summaryDraft}}" adjust-position="{{false}}" cursor-spacing="20" bindinput="onSummaryInput" maxlength="2000"></textarea>
+    <textarea class="form-textarea form-textarea-tall" placeholder="{{t.memory.summary_ph}}" placeholder-class="form-ph" value="{{summaryDraft}}" bindinput="onSummaryInput" maxlength="2000"></textarea>
     <view class="flex-row justify-between" style="margin-top: 20rpx;">
       <button class="form-cancel-btn" bindtap="closeSummaryForm">{{t.memory.fact_cancel}}</button>
       <button class="form-save-btn" bindtap="saveSummary">{{t.memory.summary_save}}</button>
@@ -235,7 +235,7 @@
 <view class="form-overlay" wx:if="{{soulFormVisible}}" bindtap="closeSoulForm">
   <view class="form-card" catchtap="noop">
     <text class="form-title">{{t.memory.soul_edit}}</text>
-    <textarea class="form-textarea form-textarea-tall" placeholder="{{t.memory.soul_ph}}" placeholder-class="form-ph" value="{{soulDraft}}" adjust-position="{{false}}" cursor-spacing="20" bindinput="onSoulInput" maxlength="1000"></textarea>
+    <textarea class="form-textarea form-textarea-tall" placeholder="{{t.memory.soul_ph}}" placeholder-class="form-ph" value="{{soulDraft}}" bindinput="onSoulInput" maxlength="1000"></textarea>
     <view class="flex-row justify-between" style="margin-top: 20rpx;">
       <button class="form-cancel-btn" bindtap="closeSoulForm">{{t.memory.fact_cancel}}</button>
       <button class="form-save-btn" bindtap="saveSoul">{{t.memory.soul_save}}</button>
@@ -247,7 +247,7 @@
 <view class="form-overlay" wx:if="{{mergeEditVisible}}" bindtap="closeMergeEdit">
   <view class="form-card" catchtap="noop">
     <text class="form-title">{{t.memory.maint_merge_edit}}</text>
-    <textarea class="form-textarea form-textarea-tall" value="{{mergeDraft}}" bindinput="onMergeDraftInput" maxlength="300" adjust-position="{{false}}" cursor-spacing="20"></textarea>
+    <textarea class="form-textarea form-textarea-tall" value="{{mergeDraft}}" bindinput="onMergeDraftInput" maxlength="300"></textarea>
     <view class="flex-row justify-between" style="margin-top: 20rpx;">
       <button class="form-cancel-btn" bindtap="closeMergeEdit">{{t.memory.fact_cancel}}</button>
       <button class="form-save-btn" bindtap="onProposalApply" data-id="{{mergeEditId}}" data-action="">{{t.memory.maint_approve}}</button>

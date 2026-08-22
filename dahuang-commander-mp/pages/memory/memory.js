@@ -66,6 +66,7 @@ Page({
   },
 
   async loadMemory(silent) {
+    this._memoryGeneration = (this._memoryGeneration || 0) + 1;
     if (!silent) this.setData({ loading: true });
     try {
       const snap = await this.request("GET", "/api/agent/memory");
@@ -93,10 +94,14 @@ Page({
 
   async loadMoreEpisodic() {
     if (!this.data.episodicCursor || this.data.episodicLoading) return;
+    this._memoryGeneration = (this._memoryGeneration || 0) + 1;
+    const gen = this._memoryGeneration;
     this.setData({ episodicLoading: true });
     try {
       const res = await this.request("GET", `/api/agent/memory?cursor=${encodeURIComponent(this.data.episodicCursor)}`);
       const page = res.episodic || {};
+      // 期间若有全量刷新（loadMemory 落地），丢弃本次翻页结果避免列表错乱
+      if (gen !== this._memoryGeneration) return;
       this.setData({
         episodicItems: this.data.episodicItems.concat(
           (page.items || []).map((m) => ({ ...m, ts: this.relativeTime(m.createdAt) }))
@@ -111,8 +116,12 @@ Page({
 
   // ---- AI 整理建议 ----
   async loadProposals() {
+    this._proposalsRequestId = (this._proposalsRequestId || 0) + 1;
+    const reqId = this._proposalsRequestId;
     try {
       const res = await this.request("GET", "/api/agent/memory/maintenance");
+      // 用户在请求期间动过开关 → 不覆盖用户选择
+      if (reqId !== this._proposalsRequestId || this._autoToggling) return;
       this.setData({
         proposals: (res.proposals || []).map((x) => ({ ...x, ts: this.relativeTime(x.createdAt) })),
         autoMaintain: res.autoMaintain !== false
@@ -129,7 +138,8 @@ Page({
       const res = await this.request("POST", "/api/agent/memory/maintenance/analyze");
       wx.hideLoading();
       this.setData({ analyzing: false });
-      wx.showToast({ title: (res.summary && res.summary.slice(0, 20)) || (t.maint_done || "整理完成"), icon: "none" });
+      const summaryText = res.summary ? (res.summary.length > 20 ? res.summary.slice(0, 20) + "…" : res.summary) : "";
+      wx.showToast({ title: summaryText || (t.maint_done || "整理完成"), icon: "none" });
       this.loadProposals();
       this.loadMemory(true);
     } catch (e) {
@@ -144,13 +154,13 @@ Page({
     const t = this.data.t.memory || {};
     // 先读最新草稿（若用户编辑过合并文本）
     const draft = this.data.mergeEditId === id ? this.data.mergeDraft : null;
-    if (draft) {
+    if (draft !== null) {
       this.applyMergeWithDraft(id, draft, t);
       return;
     }
     wx.showModal({
       title: t.maint_approve || "批准",
-      content: "应用这条整理建议？",
+      content: t.modal_apply,
       confirmColor: "#9e2a2b",
       success: async (res) => {
         if (!res.confirm) return;
@@ -170,7 +180,7 @@ Page({
     try {
       const r = await this.request("POST", `/api/agent/memory/maintenance/${id}/apply`, { action: "mergeDraft", merged: draft });
       wx.showToast({ title: r.message || (t.save_ok || "已应用"), icon: "success" });
-      this.setData({ mergeEditVisible: false, mergeEditId: null });
+      this.setData({ mergeEditVisible: false, mergeEditId: null, mergeDraft: "" });
       this.loadProposals();
       this.loadMemory(true);
     } catch (e) {
@@ -183,7 +193,7 @@ Page({
     const t = this.data.t.memory || {};
     wx.showModal({
       title: t.maint_ignore || "忽略",
-      content: "忽略这条建议？",
+      content: t.modal_ignore,
       confirmColor: "#9e2a2b",
       success: async (res) => {
         if (!res.confirm) return;
@@ -211,10 +221,19 @@ Page({
     this.setData({ mergeEditVisible: false, mergeEditId: null, mergeDraft: "" });
   },
 
-  onAutoMaintainChange(e) {
+  async onAutoMaintainChange(e) {
     const enabled = e.detail.value;
+    this._autoToggling = true;
     this.setData({ autoMaintain: enabled });
-    this.request("POST", "/api/agent/memory/maintenance/auto", { enabled }).catch(() => {});
+    try {
+      await this.request("POST", "/api/agent/memory/maintenance/auto", { enabled });
+    } catch (err) {
+      // 提交失败：回滚开关并提示，避免 UI 与服务器状态不一致
+      this.setData({ autoMaintain: !enabled });
+      wx.showToast({ title: this.data.t.memory.op_failed || "操作失败", icon: "none" });
+    } finally {
+      this._autoToggling = false;
+    }
   },
 
   noop() {},
@@ -308,7 +327,7 @@ Page({
   deleteShortTermItem(e) {
     const { id } = e.currentTarget.dataset;
     if (!id) {
-      wx.showToast({ title: "该条记忆暂不支持删除，请刷新后重试", icon: "none" });
+      wx.showToast({ title: t.del_unavailable, icon: "none" });
       return;
     }
     const t = this.data.t.memory || {};
@@ -352,6 +371,10 @@ Page({
   deleteEpisodic(e) {
     const { id } = e.currentTarget.dataset;
     const t = this.data.t.memory || {};
+    if (!id) {
+      wx.showToast({ title: t.del_unavailable, icon: "none" });
+      return;
+    }
     wx.showModal({
       title: t.fact_delete || "删除",
       content: t.episodic_delete_confirm || "删除这条长期记忆？",
