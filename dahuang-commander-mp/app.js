@@ -236,6 +236,9 @@ App({
             }
 
             const room = this.globalData.messengerRooms[roomId];
+            // 通讯录 v1：区分私聊/群组（sync 载荷 is_direct/member_count）
+            room.isDirect = roomData.is_direct !== false;
+            room.memberCount = roomData.member_count || 1;
             timelineEvents.forEach(ev => {
               const exists = room.events.some(e => e.event_id === ev.event_id);
               if (!exists) {
@@ -275,7 +278,9 @@ App({
         roomId,
         name: eventData.is_group ? `👥 群聊_${roomId.slice(0, 6)}` : `👤 ${senderDisplayName}`,
         events: [],
-        unreadCount: 0
+        unreadCount: 0,
+        isDirect: !eventData.is_group,
+        memberCount: eventData.is_group ? 2 : 1
       };
     }
 

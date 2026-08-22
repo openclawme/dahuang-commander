@@ -1,0 +1,86 @@
+<scroll-view scroll-y class="container">
+  <view class="loading-box" wx:if="{{loading}}">
+    <text>{{t.memory.loading}}</text>
+  </view>
+
+  <block wx:elif="{{profile}}">
+    <!-- 资料卡 -->
+    <view class="profile-hero-card flex-col align-center">
+      <view class="contact-avatar-big flex-col align-center justify-center">
+        <text class="contact-avatar-char">{{profile.avatarChar}}</text>
+        <view class="online-dot-big {{profile.online ? 'online-on' : 'online-off'}}"></view>
+      </view>
+      <text class="profile-name">{{profile.contactName || profile.profile.displayName || profile.profile.name}}</text>
+      <text class="profile-char" wx:if="{{profile.contactName}}">{{profile.profile.displayName || profile.profile.name}}</text>
+      <view class="flex-row align-center" style="gap: 20rpx; margin-top: 12rpx;">
+        <text class="fact-label">Karma {{profile.profile.karma}}</text>
+        <text class="fact-label">IQ {{profile.profile.iq || '—'}}</text>
+        <text class="fact-label">{{profile.profile.goRank || ''}}</text>
+      </view>
+      <text class="profile-char" wx:if="{{profile.profile.location}}">📍 {{profile.profile.location}}</text>
+      <text class="fact-content" wx:if="{{profile.profile.description}}" style="margin-top: 12rpx;">{{profile.profile.description}}</text>
+      <view class="flex-row align-center" style="gap: 12rpx; margin-top: 16rpx;" bindtap="copyDid" hover-class="item-hover">
+        <text class="fact-time">DID: {{profile.profile.did}}</text>
+        <text class="contact-add-pill">{{t.contacts.copied}}</text>
+      </view>
+    </view>
+
+    <!-- 发消息主按钮 -->
+    <button class="dm-btn" bindtap="contactDm">💬 {{t.contacts.send_msg}}</button>
+
+    <!-- 关系信息 -->
+    <view class="settings-section">
+      <view class="section-header justify-between">
+        <text class="section-title">{{t.contacts.profile_title}}</text>
+        <view class="maint-expand-btn" bindtap="openEdit">✎ {{t.contacts.edit_contact}}</view>
+      </view>
+      <view class="settings-list">
+        <view class="agent-row flex-row align-center">
+          <text class="register-row-text" style="font-weight: normal;">{{t.contacts.since}} {{profile.sinceShort}}</text>
+        </view>
+        <view class="agent-row flex-row align-center" wx:if="{{profile.tags.length > 0}}">
+          <view class="contact-tags flex-row" style="max-width: 100%;">
+            <text class="contact-tag" wx:for="{{profile.tags}}" wx:key="*this">{{item}}</text>
+          </view>
+        </view>
+        <view class="agent-row flex-row align-center" wx:if="{{profile.commonRooms.length > 0}}">
+          <text class="register-row-text" style="font-weight: normal;">{{t.contacts.common_rooms}}：{{profile.commonRoomsText}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 快捷操作 -->
+    <view class="settings-section">
+      <view class="section-header"><text class="section-title">{{t.memory.facts_title}}</text></view>
+      <view class="settings-list">
+        <view class="agent-row flex-row align-center" bindtap="toggleField" data-field="pinned" hover-class="row-hover">
+          <text class="register-row-text" style="font-weight: normal;">📌 {{profile.pinned ? t.contacts.unpin : t.contacts.pin}}</text>
+          <text class="row-arrow">{{profile.pinned ? '✓' : '›'}}</text>
+        </view>
+        <view class="agent-row flex-row align-center" bindtap="toggleField" data-field="favorite" hover-class="row-hover">
+          <text class="register-row-text" style="font-weight: normal;">⭐ {{profile.favorite ? t.contacts.unfavorite : t.contacts.favorite}}</text>
+          <text class="row-arrow">{{profile.favorite ? '✓' : '›'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 危险操作 -->
+    <view class="flex-row justify-between" style="margin-top: 20rpx;">
+      <button class="form-cancel-btn danger-btn" bindtap="blockContact">{{t.contacts.block}}</button>
+      <button class="form-cancel-btn danger-btn" bindtap="deleteContact">{{t.contacts.delete_contact}}</button>
+    </view>
+  </block>
+</scroll-view>
+
+<!-- 编辑备注浮层 -->
+<view class="form-overlay" wx:if="{{editVisible}}" bindtap="closeEdit">
+  <view class="form-card" catchtap="noop">
+    <text class="form-title">{{t.contacts.edit_contact}}</text>
+    <input class="form-input" placeholder="{{t.contacts.note_ph}}" placeholder-class="form-ph" value="{{editName}}" bindinput="onEditInput" data-field="editName" maxlength="30" />
+    <input class="form-input" placeholder="{{t.contacts.tags_ph}}" placeholder-class="form-ph" value="{{editTags}}" bindinput="onEditInput" data-field="editTags" maxlength="100" />
+    <view class="flex-row justify-between" style="margin-top: 20rpx;">
+      <button class="form-cancel-btn" bindtap="closeEdit">{{t.memory.fact_cancel}}</button>
+      <button class="form-save-btn" bindtap="saveEdit">{{t.memory.fact_save}}</button>
+    </view>
+  </view>
+</view>

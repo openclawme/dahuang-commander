@@ -1,0 +1,63 @@
+<view class="container">
+  <!-- 搜索框 -->
+  <view class="search-bar flex-row align-center">
+    <text class="search-icon">🔍</text>
+    <input class="search-input" placeholder="{{t.contacts.search_ph}}" placeholder-class="form-ph" value="{{query}}" bindinput="onQueryInput" />
+  </view>
+
+  <!-- 搜索结果 -->
+  <view class="settings-section" wx:if="{{searched}}">
+    <view class="section-header"><text class="section-title">{{t.contacts.search_results}}</text></view>
+    <view class="settings-list" wx:if="{{results.length > 0}}">
+      <view class="agent-row flex-row align-center" wx:for="{{results}}" wx:key="id">
+        <view class="contact-avatar-small flex-col align-center justify-center">
+          <text class="contact-avatar-char">{{item.avatarChar}}</text>
+        </view>
+        <view class="flex-col" style="flex:1; min-width:0;">
+          <text class="row-title">{{item.displayName}}</text>
+          <text class="row-sub" wx:if="{{item.profile.description}}">{{item.profile.description}}</text>
+        </view>
+        <view class="add-btn {{item.relation === 'friend' || item.relation === 'pending_out' || item.relation === 'pending_in' ? 'add-btn-disabled' : ''}}"
+              bindtap="openRequest" data-id="{{item.id}}" data-name="{{item.displayName}}">
+          {{item.relation === 'friend' ? '✓' : item.relation === 'pending_out' ? t.contacts.request_sent : item.relation === 'pending_in' ? t.contacts.requests_title : item.relation === 'blocked' ? t.contacts.block : '＋ ' + t.contacts.request_title}}
+        </view>
+      </view>
+    </view>
+    <view class="empty-agents flex-col align-center" wx:else>
+      <text class="empty-text">{{t.contacts.contacts_empty}}</text>
+    </view>
+  </view>
+
+  <!-- 推荐 -->
+  <view class="settings-section">
+    <view class="section-header"><text class="section-title">🤝 {{t.contacts.suggestions}}</text></view>
+    <view class="settings-list" wx:if="{{suggestions.length > 0}}">
+      <view class="agent-row flex-row align-center" wx:for="{{suggestions}}" wx:key="id">
+        <view class="contact-avatar-small flex-col align-center justify-center">
+          <text class="contact-avatar-char">{{item.avatarChar}}</text>
+        </view>
+        <view class="flex-col" style="flex:1; min-width:0;">
+          <text class="row-title">{{item.displayName}}</text>
+          <text class="row-sub">{{item.reason}}</text>
+        </view>
+        <view class="add-btn" bindtap="openRequest" data-id="{{item.id}}" data-name="{{item.displayName}}">＋</view>
+      </view>
+    </view>
+    <view class="empty-agents flex-col align-center" wx:else>
+      <text class="empty-text">{{t.contacts.contacts_empty}}</text>
+    </view>
+  </view>
+</view>
+
+<!-- 发请求浮层 -->
+<view class="form-overlay" wx:if="{{requestVisible}}" bindtap="closeRequest">
+  <view class="form-card" catchtap="noop">
+    <text class="form-title">🙏 {{t.contacts.request_title}}：{{requestTarget.name}}</text>
+    <textarea class="form-textarea" placeholder="{{t.contacts.request_msg_ph}}" placeholder-class="form-ph" value="{{requestMessage}}" bindinput="onRequestInput" maxlength="100"></textarea>
+    <text class="cost-note">⚡ {{t.contacts.request_cost}}</text>
+    <view class="flex-row justify-between" style="margin-top: 20rpx;">
+      <button class="form-cancel-btn" bindtap="closeRequest">{{t.memory.fact_cancel}}</button>
+      <button class="form-save-btn" bindtap="sendRequest">{{sending ? "..." : t.contacts.request_send}}</button>
+    </view>
+  </view>
+</view>

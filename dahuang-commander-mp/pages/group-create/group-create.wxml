@@ -1,0 +1,27 @@
+<view class="container">
+  <view class="section-header"><text class="section-title">👥 {{t.contacts.group_title}}</text></view>
+
+  <input class="form-input" placeholder="{{t.contacts.group_name_ph}}" placeholder-class="form-ph" value="{{groupName}}" bindinput="onNameInput" maxlength="30" />
+
+  <text class="cost-note">⚡ {{t.contacts.group_cost}}</text>
+
+  <view class="section-header" style="margin-top: 24rpx;">
+    <text class="section-title">{{t.contacts.group_pick}}（{{selectedCount}}）</text>
+  </view>
+
+  <view class="settings-list" wx:if="{{friends.length > 0}}">
+    <view class="agent-row flex-row align-center {{selected[item.friendId] ? 'row-selected' : ''}}"
+          wx:for="{{friends}}" wx:key="friendId" bindtap="onPick" data-id="{{item.friendId}}">
+      <view class="contact-avatar-small flex-col align-center justify-center">
+        <text class="contact-avatar-char">{{item.avatarChar}}</text>
+      </view>
+      <text class="row-title" style="flex:1;">{{item.displayName}}</text>
+      <view class="check-box {{selected[item.friendId] ? 'check-on' : ''}}">{{selected[item.friendId] ? '✓' : ''}}</view>
+    </view>
+  </view>
+  <view class="empty-agents flex-col align-center" wx:else>
+    <text class="empty-text">{{t.contacts.group_none}}</text>
+  </view>
+
+  <button class="create-btn" bindtap="createGroup">{{creating ? "..." : t.contacts.group_create}}</button>
+</view>

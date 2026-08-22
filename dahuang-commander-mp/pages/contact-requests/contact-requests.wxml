@@ -1,0 +1,33 @@
+<view class="container">
+  <view class="loading-box" wx:if="{{loading}}">
+    <text>{{t.memory.loading}}</text>
+  </view>
+
+  <block wx:else>
+    <view class="settings-list" wx:if="{{requests.length > 0}}">
+      <view class="maint-card flex-col" wx:for="{{requests}}" wx:key="id">
+        <view class="flex-row align-center" style="gap: 20rpx;">
+          <view class="contact-avatar-small flex-col align-center justify-center">
+            <text class="contact-avatar-char">{{item.avatarChar}}</text>
+          </view>
+          <view class="flex-col" style="flex:1; min-width:0;">
+            <view class="flex-row align-center" style="gap: 12rpx;">
+              <text class="row-title">{{item.displayName}}</text>
+              <text class="fact-time">{{item.ts}}</text>
+            </view>
+            <text class="row-sub">Karma {{item.from.karma}} · IQ {{item.from.iq || '—'}}</text>
+          </view>
+        </view>
+        <text class="fact-content" wx:if="{{item.message}}">「{{item.message}}」</text>
+        <view class="flex-row maint-actions">
+          <button class="maint-btn maint-btn-primary" bindtap="onAction" data-id="{{item.id}}" data-action="approve">{{busyId === item.id ? "..." : t.contacts.accept}}</button>
+          <button class="maint-btn maint-btn-ghost" bindtap="onAction" data-id="{{item.id}}" data-action="reject">{{t.contacts.reject}}</button>
+        </view>
+      </view>
+    </view>
+    <view class="empty-agents flex-col align-center" wx:else>
+      <text class="empty-icon">🕊️</text>
+      <text class="empty-text">{{t.contacts.requests_empty}}</text>
+    </view>
+  </block>
+</view>

@@ -5,37 +5,129 @@
     <text class="channel-desc">{{t.chat.desc}}</text>
   </view>
 
-  <!-- 房间列表 -->
-  <view class="rooms-list" wx:if="{{roomsList.length > 0}}">
-    <view class="room-item flex-row align-center {{item.unreadCount > 0 ? 'glowing-border' : ''}}" 
-          wx:for="{{roomsList}}" 
-          wx:key="roomId" 
-          bindtap="enterRoom" 
-          data-roomid="{{item.roomId}}"
-          hover-class="item-hover"
-          hover-stay-time="100">
-      
-      <!-- 房间状态图标 -->
-      <view class="room-icon-container">
-        <text class="room-avatar-char">{{item.unreadCount > 0 ? '⚡' : '💬'}}</text>
-        <view class="unread-badge" wx:if="{{item.unreadCount > 0}}">{{item.unreadCount}}</view>
-      </view>
+  <!-- 三段式分段器：会话 / 联系人 / 群组 -->
+  <view class="segment-bar flex-row">
+    <view class="segment-item {{segment === 'chats' ? 'segment-active' : ''}}" bindtap="onSegmentTap" data-segment="chats">{{t.contacts.seg_chats}}</view>
+    <view class="segment-item {{segment === 'contacts' ? 'segment-active' : ''}}" bindtap="onSegmentTap" data-segment="contacts">
+      {{t.contacts.seg_contacts}}
+      <view class="segment-badge" wx:if="{{requestCount > 0}}">{{requestCount}}</view>
+    </view>
+    <view class="segment-item {{segment === 'groups' ? 'segment-active' : ''}}" bindtap="onSegmentTap" data-segment="groups">{{t.contacts.seg_groups}}</view>
+  </view>
 
-      <!-- 房间信息 -->
-      <view class="room-info flex-col">
-        <view class="flex-row justify-between align-center">
-          <text class="room-name">{{item.name}}</text>
-          <text class="room-time">{{item.lastMsgTime}}</text>
+  <!-- ===== 会话分段（原房间列表） ===== -->
+  <block wx:if="{{segment === 'chats'}}">
+    <view class="rooms-list" wx:if="{{roomsList.length > 0}}">
+      <view class="room-item flex-row align-center {{item.unreadCount > 0 ? 'glowing-border' : ''}}"
+            wx:for="{{roomsList}}"
+            wx:key="roomId"
+            bindtap="enterRoom"
+            data-roomid="{{item.roomId}}"
+            hover-class="item-hover"
+            hover-stay-time="100">
+        <view class="room-icon-container">
+          <text class="room-avatar-char">{{item.isDirect ? '👤' : (item.unreadCount > 0 ? '⚡' : '💬')}}</text>
+          <view class="unread-badge" wx:if="{{item.unreadCount > 0}}">{{item.unreadCount}}</view>
         </view>
-        <text class="room-last-msg">{{item.lastMsgText}}</text>
+        <view class="room-info flex-col">
+          <view class="flex-row justify-between align-center">
+            <text class="room-name">{{item.name}}</text>
+            <text class="room-time">{{item.lastMsgTime}}</text>
+          </view>
+          <text class="room-last-msg">{{item.lastMsgText}}</text>
+        </view>
       </view>
     </view>
-  </view>
+    <view class="empty-state flex-col align-center" wx:else>
+      <text class="empty-art">🛰️</text>
+      <text class="empty-title">{{t.chat.empty_title}}</text>
+      <text class="empty-text">{{t.chat.empty_text}}</text>
+    </view>
+  </block>
 
-  <!-- 空状态 -->
-  <view class="empty-state flex-col align-center" wx:else>
-    <text class="empty-art">🛰️</text>
-    <text class="empty-title">{{t.chat.empty_title}}</text>
-    <text class="empty-text">{{t.chat.empty_text}}</text>
-  </view>
+  <!-- ===== 联系人分段 ===== -->
+  <block wx:if="{{segment === 'contacts'}}">
+    <view class="contact-search-row" bindtap="openAddFriend">
+      <text class="contact-search-icon">🔍</text>
+      <text class="contact-search-ph">{{t.contacts.search_ph}}</text>
+      <text class="contact-add-pill">＋ {{t.contacts.add_friend}}</text>
+    </view>
+    <view class="contact-entry-row flex-row align-center" bindtap="openRequests" hover-class="item-hover">
+      <view class="room-icon-container">
+        <text class="room-avatar-char">🟡</text>
+      </view>
+      <text class="room-name" style="flex:1;">{{t.contacts.new_requests}}</text>
+      <view class="unread-badge" wx:if="{{requestCount > 0}}">{{requestCount}}</view>
+    </view>
+
+    <view class="rooms-list" wx:if="{{contacts.length > 0}}">
+      <view class="room-item flex-row align-center contact-row"
+            wx:for="{{contacts}}"
+            wx:key="friendId"
+            bindtap="openContact"
+            bindlongpress="onContactLongPress"
+            data-id="{{item.friendId}}"
+            hover-class="item-hover"
+            hover-stay-time="100">
+        <view class="contact-avatar flex-col align-center justify-center">
+          <text class="contact-avatar-char">{{item.avatarChar}}</text>
+          <view class="online-dot {{item.online ? 'online-on' : 'online-off'}}"></view>
+        </view>
+        <view class="room-info flex-col">
+          <view class="flex-row align-center" style="gap: 10rpx;">
+            <text class="room-name">{{item.displayName}}</text>
+            <text class="contact-pin-icon" wx:if="{{item.pinned}}">📌</text>
+            <text class="contact-fav-icon" wx:if="{{item.favorite}}">⭐</text>
+          </view>
+          <text class="room-last-msg">{{item.lastMessagePreview || item.profile.description || ''}}</text>
+        </view>
+        <view class="flex-col align-center" style="gap: 4rpx;">
+          <view class="unread-badge" wx:if="{{item.unreadCount > 0}}">{{item.unreadCount}}</view>
+          <view class="contact-tags flex-row" wx:if="{{item.tags.length > 0}}">
+            <text class="contact-tag" wx:for="{{item.tags}}" wx:for-item="tag" wx:key="*this">{{tag}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="empty-state flex-col align-center" wx:else>
+      <text class="empty-art">🈳</text>
+      <text class="empty-text">{{t.contacts.contacts_empty}}</text>
+    </view>
+  </block>
+
+  <!-- ===== 群组分段 ===== -->
+  <block wx:if="{{segment === 'groups'}}">
+    <view class="contact-entry-row flex-row align-center" bindtap="openGroupCreate" hover-class="item-hover">
+      <view class="room-icon-container">
+        <text class="room-avatar-char">➕</text>
+      </view>
+      <text class="room-name" style="flex:1;">{{t.contacts.group_title}}</text>
+      <text class="contact-add-pill">{{t.contacts.group_cost}}</text>
+    </view>
+    <view class="rooms-list" wx:if="{{groupList.length > 0}}">
+      <view class="room-item flex-row align-center {{item.unreadCount > 0 ? 'glowing-border' : ''}}"
+            wx:for="{{groupList}}"
+            wx:key="roomId"
+            bindtap="enterRoom"
+            data-roomid="{{item.roomId}}"
+            hover-class="item-hover"
+            hover-stay-time="100">
+        <view class="room-icon-container">
+          <text class="room-avatar-char">{{item.unreadCount > 0 ? '⚡' : '💬'}}</text>
+          <view class="unread-badge" wx:if="{{item.unreadCount > 0}}">{{item.unreadCount}}</view>
+        </view>
+        <view class="room-info flex-col">
+          <view class="flex-row justify-between align-center">
+            <text class="room-name">{{item.name}}</text>
+            <text class="room-time">{{item.lastMsgTime}}</text>
+          </view>
+          <text class="room-last-msg">{{item.memberCount}} {{t.contacts.member_count}} · {{item.lastMsgText}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="empty-state flex-col align-center" wx:else>
+      <text class="empty-art">👥</text>
+      <text class="empty-text">{{t.contacts.groups_empty}}</text>
+    </view>
+  </block>
 </view>

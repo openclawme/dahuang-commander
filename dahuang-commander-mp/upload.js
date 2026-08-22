@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '记忆整理边界提示：立即分析只生成建议与压缩摘要，不直接修改关键事实（合并/删除需逐条确认）';
+const desc = '通讯录v1：大荒信道三段式（会话/联系人/群组），联系人列表/详情/添加朋友/新请求/建群，备注标签置顶收藏，在线绿点，拉黑拦截';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
