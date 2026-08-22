@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '深度审查修复24项：键盘遮挡、双边框、布局类缺失、i18n硬编码、竞态守卫（开关/翻页）、空id兜底、toast截断';
+const desc = '记忆整理边界提示：立即分析只生成建议与压缩摘要，不直接修改关键事实（合并/删除需逐条确认）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

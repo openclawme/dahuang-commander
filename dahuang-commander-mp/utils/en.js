@@ -202,6 +202,7 @@ module.exports = {
     maint_analyze_now: "Analyze now",
     maint_analyzing: "Analyzing...",
     maint_done: "Maintenance done",
+    maint_boundary: "Analyze only generates suggestions and compressed summaries; it never edits your key facts directly. Merging/deleting always requires your confirmation.",
 
     load_failed: "Failed to load memory",
     just_now: "just now",

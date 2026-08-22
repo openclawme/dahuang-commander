@@ -202,6 +202,7 @@ module.exports = {
  maint_analyze_now: "立即分析",
  maint_analyzing: "分析中...",
  maint_done: "整理完成",
+ maint_boundary: "「立即分析」只会生成整理建议与压缩摘要，不会直接修改你的关键事实；合并/删除需你逐条确认",
 
  load_failed: "加载记忆失败，请稍后重试",
  just_now: "刚刚",

@@ -27,6 +27,7 @@
         <text class="section-desc" style="flex: 1;">{{t.memory.maint_auto}}</text>
         <switch checked="{{autoMaintain}}" bindchange="onAutoMaintainChange" color="#9e2a2b" />
       </view>
+      <text class="section-desc maint-boundary-note">{{t.memory.maint_boundary}}</text>
 
       <view class="settings-list" wx:if="{{proposals.length > 0}}">
         <view class="maint-card flex-col" wx:for="{{proposals}}" wx:key="id">
