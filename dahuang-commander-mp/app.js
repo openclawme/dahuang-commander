@@ -421,6 +421,15 @@ App({
     let index = this.globalData.chatHistory.findIndex(m => m.id === msgId);
     const isNew = index === -1;
 
+    // 完成态但无文字回复的结果：只记日志，绝不生成「无文字回复」僵尸气泡
+    // （覆盖自动任务漏标、工具型任务自然无文字等场景）
+    const isFinalNoReply =
+      data.isPending !== true && (data.progress === undefined || data.progress >= 100) && !data.reply;
+    if (isNew && isFinalNoReply) {
+      this.addLog("SYSTEM", `✅ 任务「${(data.command || "").slice(0, 20) || "后台任务"}」已完成（无文字回复，详见法力日志）。`);
+      return;
+    }
+
     // 中间过程的 FAILED 任务只是步骤失败（系统会自动重试其他工具），
     // 只有最终结果（progress=100 / 非 pending）仍带失败步骤时才显示错误横幅
     const isFinalState = data.isPending !== true && (data.progress === undefined || data.progress >= 100);

@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '群生命周期：群主可解散自己创建的群（解散后自己不可见，成员保留历史并显示已解散、可退出后彻底不可见）；任何成员可退出别人建的群；已解散群禁发消息';
+const desc = '修复「该任务无文字回复」僵尸气泡：完成态无文字的结果只记法力日志不进主对话；待决策转达任务标记为自动任务';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
