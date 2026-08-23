@@ -9,7 +9,8 @@
     "pages/contact/contact",
     "pages/contact-add/contact-add",
     "pages/contact-requests/contact-requests",
-    "pages/group-create/group-create"
+    "pages/group-create/group-create",
+    "pages/login/login"
   ],
   "window": {
     "backgroundTextStyle": "light",

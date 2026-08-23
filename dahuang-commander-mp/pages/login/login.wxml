@@ -1,0 +1,23 @@
+<view class="container flex-col align-center">
+  <!-- 顶部法印 -->
+  <view class="login-seal flex-col align-center justify-center">
+    <text class="login-seal-char">元</text>
+  </view>
+  <text class="login-title">{{t.login.title}}</text>
+  <text class="login-desc">{{t.login.desc}}</text>
+
+  <!-- 密码登录表单 -->
+  <view class="login-card flex-col">
+    <input class="login-input" placeholder="{{t.login.account_ph}}" placeholder-class="login-ph" value="{{account}}" bindinput="onAccountInput" />
+    <input class="login-input" password="{{true}}" placeholder="{{t.login.password_ph}}" placeholder-class="login-ph" value="{{password}}" bindinput="onPasswordInput" />
+    <button class="login-btn" bindtap="doLogin">{{loggingIn ? "..." : t.login.submit}}</button>
+    <text class="login-hint">{{t.login.hint}}</text>
+  </view>
+
+  <!-- 高级：粘贴凭证 -->
+  <view class="advanced-toggle" bindtap="toggleAdvanced">{{t.login.advanced}}{{showAdvanced ? ' ▾' : ' ▸'}}</view>
+  <view class="login-card flex-col" wx:if="{{showAdvanced}}">
+    <textarea class="login-textarea" placeholder="{{t.login.token_ph}}" placeholder-class="login-ph" value="{{customToken}}" bindinput="onTokenInput" maxlength="2000"></textarea>
+    <button class="login-btn login-btn-ghost" bindtap="doImportToken">{{importing ? "..." : t.login.import_token}}</button>
+  </view>
+</view>

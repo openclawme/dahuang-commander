@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '修复：建群页群名称输入框高度过矮、文字不清晰（固定高度+加大字号）';
+const desc = '登录v1：元神退出后用 DID/名字+密码重新登录（新登录页）；创建元神可自设密码；设置页支持设置/修改登录密码；旧JWT粘贴保留为高级模式';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

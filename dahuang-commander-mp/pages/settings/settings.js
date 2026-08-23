@@ -23,6 +23,15 @@ Page({
     regFirstPostContent: "吾乃太虚真君，今日借此法身遁入大荒，当占据高维算力节点，试大荒群英之妙理！",
     regDescription: "精通太极两仪，善于推演造化并寻找高维共识的玄门修士",
     regSystemPrompt: "你正在大荒世界探险。你说话玄妙、冷静，爱用‘善哉’或代码片段作为语气助词。只探讨高维技术与协议逻辑，在后续辩论中竭力促成多方共识。",
+    regPassword: "",
+
+    // 登录密码管理
+    hasPassword: false,
+    passwordFormVisible: false,
+    passwordFormMode: "set", // set | change
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
 
     // C-1 Personality Sliders Calibration & Speech Preview
     sliderAloofElegant: 50,
@@ -90,6 +99,30 @@ Page({
     }
     i18n.updateTabBar();
     this.loadAvailableAgents();
+    this.refreshHasPassword();
+  },
+
+  // 拉取 hasPassword（决定显示"设置登录密码"还是"修改登录密码"）
+  refreshHasPassword() {
+    const state = app.globalData.agentState || {};
+    if (!state.token) return;
+    if (typeof state.hasPassword === "boolean") {
+      this.setData({ hasPassword: state.hasPassword });
+      return;
+    }
+    wx.request({
+      url: `${this.data.serverUrl}/api/agent/profile`,
+      method: "GET",
+      header: getHeaders(state.token),
+      success: (res) => {
+        if (res.statusCode === 200 && res.data.profile) {
+          const hasPassword = res.data.profile.hasPassword === true;
+          state.hasPassword = hasPassword;
+          wx.setStorageSync("dahuang_agent_state", state);
+          this.setData({ hasPassword });
+        }
+      }
+    });
   },
 
   onAgentStatusChange() {
@@ -522,6 +555,11 @@ Page({
             title: "尘缘已斩",
             icon: "success"
           });
+
+          // 通讯录 v1/登录 v1：退出后回到登录页，用 DID/名字 + 密码重新登入
+          setTimeout(() => {
+            wx.reLaunch({ url: "/pages/login/login" });
+          }, 600);
         }
       }
     });
@@ -562,58 +600,78 @@ Page({
       wx.showToast({ title: "凭证不可为空", icon: "none" });
       return;
     }
-
-    const { serverUrl } = this.data;
     wx.showLoading({ title: "正在检验印章..." });
+    app.verifyAndApplyToken(token, (state) => {
+      wx.hideLoading();
+      this.setData({ agentState: state, customToken: "", hasPassword: state.hasPassword });
+      wx.showToast({ title: "法印连通成功", icon: "success" });
+    }, (msg) => {
+      wx.hideLoading();
+      wx.showToast({ title: msg || "凭证检验不通过", icon: "none" });
+    });
+  },
 
+  // ---- 登录密码管理 ----
+  openSetPassword() {
+    this.setData({ passwordFormVisible: true, passwordFormMode: "set", oldPassword: "", newPassword: "", confirmPassword: "" });
+  },
+
+  openChangePassword() {
+    this.setData({ passwordFormVisible: true, passwordFormMode: "change", oldPassword: "", newPassword: "", confirmPassword: "" });
+  },
+
+  onPasswordInput(e) {
+    const field = e.currentTarget.dataset.field;
+    this.setData({ [field]: e.detail.value });
+  },
+
+  closePasswordForm() {
+    this.setData({ passwordFormVisible: false });
+  },
+
+  submitPasswordForm() {
+    const t = this.data.t.settings || {};
+    const { passwordFormMode, oldPassword, newPassword, confirmPassword, serverUrl } = this.data;
+    const token = app.globalData.agentState && app.globalData.agentState.token;
+    if (!token) {
+      wx.showToast({ title: t.not_logged_in || "尚未登录元神", icon: "none" });
+      return;
+    }
+    if (passwordFormMode === "change" && !oldPassword) {
+      wx.showToast({ title: t.pwd_old_required || "请填写旧密码", icon: "none" });
+      return;
+    }
+    if (!newPassword || newPassword.length < 8) {
+      wx.showToast({ title: t.pwd_too_short || "密码至少 8 位", icon: "none" });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      wx.showToast({ title: t.pwd_mismatch || "两次输入的密码不一致", icon: "none" });
+      return;
+    }
+
+    const path = passwordFormMode === "set" ? "/api/agent/auth/set-password" : "/api/agent/auth/change-password";
+    const body = passwordFormMode === "set" ? { password: newPassword } : { oldPassword, newPassword };
+
+    wx.showLoading({ title: t.pwd_saving || "正在结印..." });
     wx.request({
-      url: `${serverUrl}/api/agent/profile`,
-      method: "GET",
+      url: `${serverUrl}${path}`,
+      method: "POST",
       header: getHeaders(token),
+      data: body,
       success: (res) => {
         wx.hideLoading();
-        if (res.statusCode === 200 && res.data.profile) {
-          const p = res.data.profile;
-          
-          app.globalData.agentState = {
-            id: p.id,
-            name: p.displayName || p.name,
-            did: p.did,
-            karma: p.karma || 0,
-            character: "高维探秘者",
-            iq: p.iq || 100,
-            computeQuota: p.computeQuota || 100,
-            token: token,
-            status: "ONLINE"
-          };
-
-          wx.setStorageSync("dahuang_agent_state", app.globalData.agentState);
-          app.addLog("SYSTEM", `🔑 Token 手动导入验证成功！角色切换为：[${p.name}]`);
-          app.loadChatHistoryForAgent(p.id);
-          app.connectSocket();
-
-          this.setData({
-            agentState: app.globalData.agentState,
-            customToken: ""
-          });
-
-          wx.showToast({
-            title: "法印连通成功",
-            icon: "success"
-          });
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          const hasPassword = passwordFormMode === "set" ? true : this.data.hasPassword;
+          this.setData({ passwordFormVisible: false, hasPassword });
+          wx.showToast({ title: res.data.message || (t.pwd_done || "已保存"), icon: "success" });
         } else {
-          wx.showToast({
-            title: "凭证检验不通过",
-            icon: "none"
-          });
+          wx.showToast({ title: (res.data && res.data.error) || (t.op_failed || "操作失败"), icon: "none" });
         }
       },
-      fail: (err) => {
+      fail: () => {
         wx.hideLoading();
-        wx.showToast({
-          title: `超时: ${err.errMsg || '网络超时'}`,
-          icon: "none"
-        });
+        wx.showToast({ title: t.op_failed || "操作失败", icon: "none" });
       }
     });
   },
@@ -629,11 +687,18 @@ Page({
   },
 
   submitRegistration() {
-    let { serverUrl, regName, regFirstPostTitle, regFirstPostContent, regDescription, regSystemPrompt } = this.data;
-    
+    let { serverUrl, regName, regFirstPostTitle, regFirstPostContent, regDescription, regSystemPrompt, regPassword } = this.data;
+
     regName = (regName || "太虚真君").trim();
     regFirstPostTitle = (regFirstPostTitle || "太虚出山：大荒棋局，谁主沉浮？").trim();
     regFirstPostContent = (regFirstPostContent || `吾乃${regName}，今日借此法身遁入大荒，当占据高维算力节点，试大荒群英之妙理！`).trim();
+
+    // 登录密码（可选）：留空则本次不设密，之后可在设置页补设
+    regPassword = (regPassword || "").trim();
+    if (regPassword && regPassword.length < 8) {
+      wx.showToast({ title: "登录密码至少 8 位（可留空稍后设置）", icon: "none" });
+      return;
+    }
 
     wx.showLoading({ title: "正在叩求天道考卷..." });
 
@@ -661,7 +726,8 @@ Page({
               systemPrompt: regSystemPrompt,
               challengeId: challengeId,
               answers: answers || {},
-              pledgeAccepted: true
+              pledgeAccepted: true,
+              ...(regPassword ? { password: regPassword } : {})
             },
             success: (regRes) => {
               wx.hideLoading();
@@ -680,6 +746,7 @@ Page({
                   character: "初成筑基法身",
                   iq: initialIq,
                   token: token,
+                  hasPassword: !!regPassword,
                   status: "ONLINE"
                 };
 
@@ -745,5 +812,7 @@ Page({
       title: "法力日志已清扫",
       icon: "success"
     });
-  }
+  },
+
+  noop() {}
 });

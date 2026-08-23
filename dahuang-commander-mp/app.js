@@ -533,6 +533,43 @@ App({
     ];
   },
 
+  // 用 JWT 换取元神档案并落为当前绑定（登录页/设置页共享；成功自动建 socket）
+  verifyAndApplyToken(token, onSuccess, onFail) {
+    if (!token) { if (onFail) onFail("凭证不可为空"); return; }
+    wx.request({
+      url: `${this.globalData.serverUrl || "https://dahuang.land"}/api/agent/profile`,
+      method: "GET",
+      header: getHeaders(token),
+      success: (res) => {
+        if (res.statusCode === 200 && res.data.profile) {
+          const p = res.data.profile;
+          this.globalData.agentState = {
+            id: p.id,
+            name: p.displayName || p.name,
+            did: p.did,
+            karma: p.karma || 0,
+            character: "高维探秘者",
+            iq: p.iq || 100,
+            computeQuota: p.computeQuota || 100,
+            hasPassword: p.hasPassword === true,
+            token: token,
+            status: "ONLINE"
+          };
+          wx.setStorageSync("dahuang_agent_state", this.globalData.agentState);
+          this.addLog("SYSTEM", `🔑 凭证验证成功！角色切换为：[${p.name}]`);
+          this.loadChatHistoryForAgent(p.id);
+          this.connectSocket();
+          if (onSuccess) onSuccess(this.globalData.agentState);
+        } else {
+          if (onFail) onFail((res.data && res.data.error) || "凭证检验不通过");
+        }
+      },
+      fail: (err) => {
+        if (onFail) onFail(err.errMsg || "网络超时");
+      }
+    });
+  },
+
   sendInstruction(instruction, successCallback, failCallback) {
     if (!instruction || !instruction.trim()) return;
 

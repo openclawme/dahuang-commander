@@ -51,6 +51,16 @@
       <text class="memory-entry-arrow">›</text>
     </view>
 
+    <!-- 登录密码管理入口（登录 v1） -->
+    <view class="memory-entry-card flex-row align-center" wx:if="{{agentState.token}}" bindtap="{{hasPassword ? 'openChangePassword' : 'openSetPassword'}}" hover-class="memory-entry-hover">
+      <view class="memory-entry-icon-box">🔑</view>
+      <view class="flex-col" style="flex: 1; min-width: 0;">
+        <text class="memory-entry-title">{{hasPassword ? t.settings.pwd_change : t.settings.pwd_set}}</text>
+        <text class="memory-entry-sub">{{hasPassword ? t.settings.pwd_change_sub : t.settings.pwd_set_sub}}</text>
+      </view>
+      <text class="memory-entry-arrow">›</text>
+    </view>
+
     <!-- 操作区 -->
     <view class="hero-actions flex-row">
       <button class="hero-copy-btn" bindtap="copyToken">{{t.settings.copy}}</button>
@@ -223,6 +233,11 @@
         </view>
 
         <view class="form-item">
+          <text class="form-label">{{t.settings.reg_password}}</text>
+          <input class="form-input" password="{{true}}" value="{{regPassword}}" bindinput="onInputChange" data-field="regPassword" placeholder="{{t.settings.reg_password_ph}}" />
+        </view>
+
+        <view class="form-item">
           <text class="form-label">{{t.settings.reg_prompt}}</text>
           <textarea class="form-textarea" value="{{regSystemPrompt}}" bindinput="onInputChange" data-field="regSystemPrompt" placeholder="{{t.settings.reg_prompt}}" maxlength="1000"></textarea>
         </view>
@@ -290,3 +305,17 @@
       </view>
     </view>
   </view></scroll-view>
+
+<!-- 登录密码浮层（设置/修改） -->
+<view class="pwd-overlay" wx:if="{{passwordFormVisible}}" bindtap="closePasswordForm">
+  <view class="pwd-card" catchtap="noop">
+    <text class="pwd-title">{{passwordFormMode === 'set' ? t.settings.pwd_set : t.settings.pwd_change}}</text>
+    <input class="pwd-input" wx:if="{{passwordFormMode === 'change'}}" password="{{true}}" placeholder="{{t.settings.pwd_old_ph}}" placeholder-class="pwd-ph" value="{{oldPassword}}" bindinput="onPasswordInput" data-field="oldPassword" />
+    <input class="pwd-input" password="{{true}}" placeholder="{{t.settings.pwd_new_ph}}" placeholder-class="pwd-ph" value="{{newPassword}}" bindinput="onPasswordInput" data-field="newPassword" />
+    <input class="pwd-input" password="{{true}}" placeholder="{{t.settings.pwd_confirm_ph}}" placeholder-class="pwd-ph" value="{{confirmPassword}}" bindinput="onPasswordInput" data-field="confirmPassword" />
+    <view class="flex-row justify-between" style="margin-top: 24rpx;">
+      <button class="pwd-cancel-btn" bindtap="closePasswordForm">{{t.settings.cancel || '取消'}}</button>
+      <button class="pwd-save-btn" bindtap="submitPasswordForm">{{t.settings.pwd_submit || '确定'}}</button>
+    </view>
+  </view>
+</view>
