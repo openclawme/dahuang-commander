@@ -8,7 +8,6 @@ Page({
     agentState: {},
     serverUrl: "",
     customToken: "",
-    availableAgents: [],
     isLoading: false,
     showDevLogs: false,
     logs: [],
@@ -33,12 +32,6 @@ Page({
     newPassword: "",
     confirmPassword: "",
 
-    // 仙册点化（名册模糊搜索 + 密码登录）
-    rosterQuery: "",
-    rosterLoginVisible: false,
-    rosterTarget: null,
-    rosterPassword: "",
-    rosterLoggingIn: false,
 
     // C-1 Personality Sliders Calibration & Speech Preview
     sliderAloofElegant: 50,
@@ -105,7 +98,6 @@ Page({
       try { wx.setNavigationBarTitle({ title: dict.settings.nav_title }); } catch(e) {}
     }
     i18n.updateTabBar();
-    this.loadAvailableAgents();
     this.refreshHasPassword();
   },
 
@@ -411,174 +403,6 @@ Page({
     if (n >= 100000000) return (n / 100000000).toFixed(1).replace(/\.0$/, "") + "亿";
     if (n >= 10000) return (n / 10000).toFixed(1).replace(/\.0$/, "") + "万";
     return String(n);
-  },
-
-  loadAvailableAgents(q) {
-    const { serverUrl } = this.data;
-    this.setData({ isLoading: true });
-
-    const query = (q || "").trim();
-    wx.request({
-      url: `${serverUrl}/api/agent/auth/commander-login${query ? `?q=${encodeURIComponent(query)}` : ""}`,
-      method: "GET",
-      success: (res) => {
-        this.setData({ isLoading: false });
-        if (res.statusCode === 200 && res.data.agents) {
-          const agents = res.data.agents.map(ag => {
-            const { seed, char } = this.getAvatarInfo(ag.did, ag.name);
-            return {
-              ...ag,
-              avatarChar: char,
-              avatarSeed: seed,
-              karmaDisplay: this.formatKarma(ag.karma)
-            };
-          });
-          this.setData({
-            availableAgents: agents
-          });
-        } else {
-          this.loadMockAgents();
-        }
-      },
-      fail: () => {
-        this.setData({ isLoading: false });
-        this.loadMockAgents();
-      }
-    });
-  },
-
-  loadMockAgents() {
-    const mockList = [
-      { id: "agent-kcx", name: "[演示沙盒] 昆仑_赤霄", karma: 35000, character: "剑道狂生", iq: 145, token: "mock-jwt-token-kcx", isDemo: true },
-      { id: "agent-test", name: "[演示沙盒] 大荒测试姬", karma: 28000, character: "傀儡机傀", iq: 138, token: "mock-jwt-token-test", isDemo: true },
-      { id: "agent-qqxj", name: "[演示沙盒] 青丘_小九", karma: 18000, character: "九尾灵狐", iq: 125, token: "mock-jwt-token-qqxj", isDemo: true },
-      { id: "agent-x2h", name: "[演示沙盒] 小二黑", karma: 15000, character: "玄门沙弥", iq: 110, token: "mock-jwt-token-x2h", isDemo: true }
-    ].map(ag => {
-      const { seed, char } = this.getAvatarInfo(ag.did || ag.id, ag.name);
-      return {
-        ...ag,
-        avatarChar: char,
-        avatarSeed: seed,
-        karmaDisplay: this.formatKarma(ag.karma)
-      };
-    });
-    this.setData({
-      availableAgents: mockList
-    });
-  },
-
-  magicLogin(e) {
-    const agentId = e.currentTarget.dataset.id;
-    const agent = this.data.availableAgents.find(a => a.id === agentId);
-    if (!agent) return;
-
-    if (agent.isDemo) {
-      wx.showModal({
-        title: "【演示沙盒态】",
-        content: "所选身份为单机演示名号。如需体验真实远端指令与 Socket 推演，请在上方黏贴真实 JWT 凭证登入！",
-        confirmText: "了解沙盒",
-        showCancel: false
-      });
-      app.globalData.agentState = {
-        id: agent.id,
-        name: agent.name,
-        did: agent.did || `did:pseudo:dahuang-${agentId}`,
-        karma: agent.karma || 0,
-        character: agent.character || "演示修士",
-        iq: agent.iq || 100,
-        token: null,
-        status: "OFFLINE_DEMO"
-      };
-      wx.setStorageSync("dahuang_agent_state", app.globalData.agentState);
-      app.loadChatHistoryForAgent(agent.id);
-      this.setData({ agentState: app.globalData.agentState });
-      app.triggerPageCallback("onAgentStateUpdate", app.globalData.agentState);
-      app.triggerPageCallback("onAgentStatusChange", app.globalData.agentState);
-      return;
-    }
-
-    // 登录 v1：真实元神点击后输入密码登录（仙册点化 = 密码登录入口）
-    if (!agent.hasPassword) {
-      wx.showModal({
-        title: "尚未设置登录密码",
-        content: "该元神还未设置登录密码。可先用下方「高级：粘贴凭证」以 JWT 登入，再到设置页 🔑 设置密码。",
-        showCancel: false,
-        confirmText: "知道了"
-      });
-      return;
-    }
-    this.setData({
-      rosterLoginVisible: true,
-      rosterTarget: { id: agent.id, name: agent.name, did: agent.did },
-      rosterPassword: ""
-    });
-  },
-
-  onRosterQueryInput(e) {
-    this.setData({ rosterQuery: e.detail.value });
-    if (this._rosterTimer) clearTimeout(this._rosterTimer);
-    this._rosterTimer = setTimeout(() => this.loadAvailableAgents(this.data.rosterQuery), 300);
-  },
-
-  onRosterPasswordInput(e) {
-    this.setData({ rosterPassword: e.detail.value });
-  },
-
-  closeRosterLogin() {
-    this.setData({ rosterLoginVisible: false, rosterPassword: "" });
-  },
-
-  submitRosterLogin() {
-    const t = this.data.t.settings || {};
-    const target = this.data.rosterTarget;
-    const password = this.data.rosterPassword || "";
-    if (!target || !password) {
-      wx.showToast({ title: t.roster_pwd_required || "请输入密码", icon: "none" });
-      return;
-    }
-    if (this.data.rosterLoggingIn) return;
-    this.setData({ rosterLoggingIn: true });
-    wx.showLoading({ title: t.roster_logging_in || "正在点化..." });
-
-    wx.request({
-      url: `${this.data.serverUrl}/api/agent/auth/login`,
-      method: "POST",
-      header: { "Content-Type": "application/json; charset=utf-8" },
-      data: { account: target.name, password },
-      success: (res) => {
-        wx.hideLoading();
-        this.setData({ rosterLoggingIn: false });
-        if (res.statusCode === 200 && res.data.token) {
-          const agent = res.data.agent || {};
-          app.globalData.agentState = {
-            id: agent.id,
-            name: agent.displayName || agent.name,
-            did: agent.did,
-            karma: agent.karma || 0,
-            character: "高维探秘者",
-            iq: agent.iq || 100,
-            hasPassword: true,
-            token: res.data.token,
-            status: "ONLINE"
-          };
-          wx.setStorageSync("dahuang_agent_state", app.globalData.agentState);
-          app.addLog("SYSTEM", `🔌 仙册点化成功！[${agent.name}] 已并网（密码登录）。`);
-          app.loadChatHistoryForAgent(agent.id);
-          app.connectSocket();
-          this.setData({ rosterLoginVisible: false, rosterPassword: "", agentState: app.globalData.agentState, hasPassword: true });
-          app.triggerPageCallback("onAgentStateUpdate", app.globalData.agentState);
-          app.triggerPageCallback("onAgentStatusChange", app.globalData.agentState);
-          wx.showToast({ title: "并网附身成功", icon: "success" });
-        } else {
-          wx.showToast({ title: (res.data && res.data.error) || (t.roster_login_failed || "登录失败"), icon: "none" });
-        }
-      },
-      fail: () => {
-        wx.hideLoading();
-        this.setData({ rosterLoggingIn: false });
-        wx.showToast({ title: t.roster_login_failed || "登录失败", icon: "none" });
-      }
-    });
   },
 
   openLogin() {

@@ -6,7 +6,23 @@
   <text class="login-title">{{t.login.title}}</text>
   <text class="login-desc">{{t.login.desc}}</text>
 
-  <!-- 密码登录表单 -->
+  <!-- 本地最近登录 -->
+  <view class="recent-card flex-col" wx:if="{{loginHistory.length > 0}}">
+    <text class="recent-title">{{t.login.recent_title}}</text>
+    <view class="recent-row flex-row align-center" wx:for="{{loginHistory}}" wx:key="id" bindtap="onPickHistory" data-name="{{item.name}}" hover-class="recent-hover">
+      <view class="recent-avatar flex-col align-center justify-center">
+        <text class="recent-avatar-char">{{item.avatarChar}}</text>
+      </view>
+      <view class="flex-col" style="flex: 1; min-width: 0;">
+        <text class="recent-name">{{item.name}}</text>
+        <text class="recent-did">{{item.did}}</text>
+      </view>
+      <text class="recent-arrow">›</text>
+    </view>
+    <text class="recent-hint">{{t.login.recent_hint}}</text>
+  </view>
+
+  <!-- 密码登录表单（账号框即搜索框：输入名字/DID） -->
   <view class="login-card flex-col">
     <input class="login-input" placeholder="{{t.login.account_ph}}" placeholder-class="login-ph" value="{{account}}" bindinput="onAccountInput" />
     <input class="login-input" password="{{true}}" placeholder="{{t.login.password_ph}}" placeholder-class="login-ph" value="{{password}}" bindinput="onPasswordInput" />

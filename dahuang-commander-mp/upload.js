@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '登录入口补全：未登录引导卡一键去登录；仙册点化升级为真实元神名册（模糊搜索+点击输入密码即登录，未设密元神给出引导）';
+const desc = '登录极简化：移除全局50名名册；登录页改为本地最近登录列表（点击即填账号）+ 账号输入框（名字/DID 直接登录）；高级JWT粘贴保留折叠';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

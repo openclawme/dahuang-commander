@@ -556,6 +556,7 @@ App({
             status: "ONLINE"
           };
           wx.setStorageSync("dahuang_agent_state", this.globalData.agentState);
+          this.recordLoginHistory({ id: p.id, name: p.displayName || p.name, did: p.did });
           this.addLog("SYSTEM", `🔑 凭证验证成功！角色切换为：[${p.name}]`);
           this.loadChatHistoryForAgent(p.id);
           this.connectSocket();
@@ -568,6 +569,22 @@ App({
         if (onFail) onFail(err.errMsg || "网络超时");
       }
     });
+  },
+
+  // 本地最近登录元神（去重、最新在前、上限 10）——登录页快捷选择
+  recordLoginHistory(agent) {
+    if (!agent || !agent.id) return;
+    const key = "dahuang_login_history";
+    let list = [];
+    try { list = wx.getStorageSync(key) || []; } catch (e) { list = []; }
+    list = list.filter(a => a.id !== agent.id);
+    list.unshift({ id: agent.id, name: agent.name, did: agent.did || "", ts: Date.now() });
+    list = list.slice(0, 10);
+    try { wx.setStorageSync(key, list); } catch (e) {}
+  },
+
+  getLoginHistory() {
+    try { return wx.getStorageSync("dahuang_login_history") || []; } catch (e) { return []; }
   },
 
   sendInstruction(instruction, successCallback, failCallback) {

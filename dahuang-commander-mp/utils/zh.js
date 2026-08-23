@@ -30,6 +30,8 @@ module.exports = {
  account_required: "请填写账号与密码",
  token_required: "凭证不可为空",
  verifying: "正在检验印章...",
+ recent_title: "最近登录",
+ recent_hint: "点击元神名自动填入，输入密码即可",
  },
  contacts: {
  seg_chats: "会话",

@@ -8,6 +8,8 @@ Page({
     account: "",
     password: "",
     loggingIn: false,
+    // 本地最近登录
+    loginHistory: [],
     // 高级模式：粘贴 JWT
     showAdvanced: false,
     customToken: "",
@@ -19,12 +21,21 @@ Page({
   },
 
   onShow() {
-    this.setData({ serverUrl: app.globalData.serverUrl || "https://dahuang.land" });
+    this.setData({
+      serverUrl: app.globalData.serverUrl || "https://dahuang.land",
+      loginHistory: app.getLoginHistory().map(a => ({ ...a, avatarChar: (a.name || "?").slice(0, 1) }))
+    });
     // 已登录则直接回遥测页（如从登录页切走又切回）
     const state = app.globalData.agentState || {};
     if (state.token) {
       wx.switchTab({ url: "/pages/index/index" });
     }
+  },
+
+  onPickHistory(e) {
+    const name = e.currentTarget.dataset.name;
+    if (!name) return;
+    this.setData({ account: name, password: "" });
   },
 
   onAccountInput(e) {
@@ -77,6 +88,7 @@ Page({
             status: "ONLINE"
           };
           wx.setStorageSync("dahuang_agent_state", app.globalData.agentState);
+          app.recordLoginHistory({ id: agent.id, name: agent.displayName || agent.name, did: agent.did });
           app.addLog("SYSTEM", `🔑 密码登录成功！元神 [${agent.name}] 已并网。`);
           app.loadChatHistoryForAgent(agent.id);
           app.connectSocket();

@@ -30,6 +30,8 @@ module.exports = {
     account_required: "Please fill account and password",
     token_required: "Token required",
     verifying: "Verifying token...",
+    recent_title: "Recent sign-ins",
+    recent_hint: "Tap to fill the account, then enter password",
   },
   contacts: {
     seg_chats: "Chats",
