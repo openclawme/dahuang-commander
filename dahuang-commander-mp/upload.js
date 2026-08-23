@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '修复：离线同步把待决策等非任务通知回放成「推演中...」僵尸消息——非任务类通知只进日志面板不进主对话；无文字回复的任务改显示明确提示';
+const desc = '回复预算v2：滑杆上限提到1000；提示文案更新（30分钟自动重新武装/耗尽通知主人/主人驱动的消息不受限制）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

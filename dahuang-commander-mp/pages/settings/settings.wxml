@@ -69,12 +69,12 @@
       <text class="memory-entry-sub">{{t.settings.reply_budget_hint}}</text>
       <view class="budget-row flex-row align-center">
         <text class="budget-label">{{t.settings.reply_budget_group}}</text>
-        <slider class="budget-slider" min="0" max="20" step="1" value="{{groupReplyBudget}}" bindchange="onBudgetChange" data-field="groupReplyBudget" activeColor="#9e2a2b" backgroundColor="#e8e2d6" block-size="20" />
+        <slider class="budget-slider" min="0" max="1000" step="10" value="{{groupReplyBudget}}" bindchange="onBudgetChange" data-field="groupReplyBudget" activeColor="#9e2a2b" backgroundColor="#e8e2d6" block-size="20" />
         <text class="budget-value">{{groupReplyBudget}}</text>
       </view>
       <view class="budget-row flex-row align-center">
         <text class="budget-label">{{t.settings.reply_budget_dm}}</text>
-        <slider class="budget-slider" min="0" max="20" step="1" value="{{dmReplyBudget}}" bindchange="onBudgetChange" data-field="dmReplyBudget" activeColor="#9e2a2b" backgroundColor="#e8e2d6" block-size="20" />
+        <slider class="budget-slider" min="0" max="1000" step="10" value="{{dmReplyBudget}}" bindchange="onBudgetChange" data-field="dmReplyBudget" activeColor="#9e2a2b" backgroundColor="#e8e2d6" block-size="20" />
         <text class="budget-value">{{dmReplyBudget}}</text>
       </view>
       <button class="budget-save-btn" bindtap="saveReplyBudgets">{{budgetSaving ? "..." : t.settings.reply_budget_save}}</button>

@@ -206,7 +206,7 @@ module.exports = {
     reg_description: "Description:",
     reg_prompt: "System Prompt:",
     reply_budget_title: "Auto-reply budget",
-    reply_budget_hint: "Max auto-replies per group / per DM. 0 = off. Human takeover or message resets the counter.",
+    reply_budget_hint: "Max auto-replies per group / per DM (0-1000, 0 = off). Re-arms after 30 min of silence. Master is notified on exhaustion. Master-driven messages are never blocked.",
     reply_budget_group: "Group max",
     reply_budget_dm: "DM max",
     reply_budget_save: "Save",

@@ -205,7 +205,7 @@ module.exports = {
  reg_description: "本相设定描述:",
  reg_prompt: "元神经络指示词:",
  reply_budget_title: "自动回复预算",
- reply_budget_hint: "群聊/私聊各自最多自动回复次数，0 = 关闭；人类解锁接管或发言后计数清零",
+ reply_budget_hint: "群聊/私聊各自最多自动回复次数（0-1000，0=关闭）；房间静默超 30 分钟自动重新武装；耗尽会通知主人；主人驱动的消息不受限制",
  reply_budget_group: "群聊上限",
  reply_budget_dm: "私聊上限",
  reply_budget_save: "保存预算",
