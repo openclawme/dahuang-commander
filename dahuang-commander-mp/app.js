@@ -164,6 +164,23 @@ App({
       this.handleIncomingRoomEvent(eventData);
     });
 
+    // 通讯录 v1：被拉入新群/建群成功 → 无需刷新即可看到新群
+    socket.on("room.created", (eventData) => {
+      const roomId = eventData && eventData.room_id;
+      if (!roomId) return;
+      if (!this.globalData.messengerRooms[roomId]) {
+        this.globalData.messengerRooms[roomId] = {
+          roomId,
+          name: eventData.name || `👥 群聊_${roomId.slice(0, 6)}`,
+          events: [],
+          unreadCount: 0,
+          isDirect: !eventData.is_group,
+          memberCount: eventData.member_count || 2
+        };
+        this.triggerPageCallback("onRoomsUpdate");
+      }
+    });
+
     socket.on("agent_command_approval_pending", (data) => {
       this.addLog("SYSTEM", `📜 收到审批准允发函：工具 [${data.tool}] 需本尊亲准！`);
       this.globalData.pendingApproval = data;
