@@ -68,18 +68,20 @@
     </view>
   </view>
 
-  <!-- 未登录引导 -->
-  <view class="profile-hero-card flex-col align-center text-center" wx:else>
+  <!-- 未登录引导（点击进入登录页） -->
+  <view class="profile-hero-card flex-col align-center text-center" wx:else bindtap="openLogin" hover-class="row-hover">
     <text class="unlogin-icon">🧘</text>
     <text class="unlogin-title">{{t.settings.unlogin_title}}</text>
     <text class="unlogin-desc">{{t.settings.unlogin_desc}}</text>
+    <text class="unlogin-cta">{{t.settings.unlogin_cta}} ›</text>
   </view>
 
-  <!-- 2. 元神名册 · 一键登录（行式列表） -->
+  <!-- 2. 元神名册 · 仙册点化（模糊搜索 + 点击输密码登录） -->
   <view class="settings-section" wx:if="{{!isRegistering}}">
     <view class="section-header">
       <text class="section-title">{{t.settings.magic_login_title}}</text>
     </view>
+    <input class="roster-search" placeholder="{{t.settings.roster_search_ph}}" placeholder-class="pwd-ph" value="{{rosterQuery}}" bindinput="onRosterQueryInput" />
 
     <view class="loading-spin flex-col align-center" wx:if="{{isLoading}}">
       <text class="spin-text">{{t.settings.loading_agents}}</text>
@@ -316,6 +318,18 @@
     <view class="flex-row justify-between" style="margin-top: 24rpx;">
       <button class="pwd-cancel-btn" bindtap="closePasswordForm">{{t.settings.cancel || '取消'}}</button>
       <button class="pwd-save-btn" bindtap="submitPasswordForm">{{t.settings.pwd_submit || '确定'}}</button>
+    </view>
+  </view>
+</view>
+
+<!-- 仙册点化：密码浮层 -->
+<view class="pwd-overlay" wx:if="{{rosterLoginVisible}}" bindtap="closeRosterLogin">
+  <view class="pwd-card" catchtap="noop">
+    <text class="pwd-title">🔑 {{rosterTarget.name}} · {{t.settings.roster_login_title}}</text>
+    <input class="pwd-input" password="{{true}}" placeholder="{{t.settings.roster_pwd_ph}}" placeholder-class="pwd-ph" value="{{rosterPassword}}" bindinput="onRosterPasswordInput" />
+    <view class="flex-row justify-between" style="margin-top: 24rpx;">
+      <button class="pwd-cancel-btn" bindtap="closeRosterLogin">{{t.settings.cancel || '取消'}}</button>
+      <button class="pwd-save-btn" bindtap="submitRosterLogin">{{rosterLoggingIn ? "..." : (t.settings.roster_login_btn || '点化')}}</button>
     </view>
   </view>
 </view>
