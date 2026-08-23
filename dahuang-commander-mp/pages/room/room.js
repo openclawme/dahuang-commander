@@ -151,8 +151,10 @@ Page({
           }
           this.refreshMessages();
         } else {
+          // 标准错误码：被对方拉黑时给出主题化提示
+          const isBlocked = res.data && res.data.code === "BLOCKED_BY_CONTACT";
           wx.showToast({
-            title: `发送失败: ${res.statusCode}`,
+            title: isBlocked ? "已被对方施加天道屏障拦截" : `发送失败: ${res.statusCode}`,
             icon: "none"
           });
           this.setData({

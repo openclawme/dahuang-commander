@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '登录归一化：删除独立登录页，仙册点化改名「分身登录」成为唯一登录入口；本地最近登录直接点选，搜索框支持名字/DID模糊搜索；退出后留在设置页即可重新登录';
+const desc = '被拉黑发消息时的主题化提示：发送失败识别 BLOCKED_BY_CONTACT 标准错误码，显示「已被对方施加天道屏障拦截」';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
