@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '待主人决策v1：分身请示事项实时提醒（主对话框横幅+系统消息），登录时待办摘要；新增待办页（接受/拒绝/自定义答复，答复由分身转达对方；可忽略）';
+const desc = '修复：离线同步把待决策等非任务通知回放成「推演中...」僵尸消息——非任务类通知只进日志面板不进主对话；无文字回复的任务改显示明确提示';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

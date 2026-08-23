@@ -352,6 +352,13 @@ App({
   },
 
   handleAgentCommandResult(data) {
+    // 非任务结果类通知（如待决策 PENDING_DECISION 留痕）：
+    // 只进日志面板，绝不进主对话（否则会成为"（推演中...）"僵尸消息）
+    if (data.type && !data.requestId && !data.command && !data.reply) {
+      this.addLog("SYSTEM", data.message || `收到提醒：${data.title || data.type}`);
+      return;
+    }
+
     const isAutonomous = !!(
       data.isAutoReply === true || data.isAutoReply === "true" ||
       (data.requestId && (data.requestId.startsWith("cron-") || data.requestId.startsWith("auto-") || data.requestId.startsWith("bg-"))) ||
@@ -423,7 +430,7 @@ App({
     const resultMsg = {
       id: msgId,
       sender: "agent",
-      content: (data.isPending === true || (data.progress !== undefined && data.progress < 100)) ? "" : (data.reply || (existingMsg ? existingMsg.content : "（推演中...）")),
+      content: (data.isPending === true || (data.progress !== undefined && data.progress < 100)) ? "" : (data.reply || (existingMsg ? existingMsg.content : "（该任务无文字回复，详见法力日志）")),
       timestamp: this.getTimestamp(),
       createdAt: existingMsg ? existingMsg.createdAt : Date.now(),
       progress: data.progress !== undefined ? data.progress : (existingMsg ? existingMsg.progress : 100),
