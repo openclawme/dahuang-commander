@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '通讯录修复：被拉入新群实时通知（无需刷新可见）；测试可重复性修复';
+const desc = '修复：建群页群名称输入框高度过矮、文字不清晰（固定高度+加大字号）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
