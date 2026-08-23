@@ -32,6 +32,11 @@ Page({
     newPassword: "",
     confirmPassword: "",
 
+    // 自动回复预算
+    groupReplyBudget: 5,
+    dmReplyBudget: 3,
+    budgetSaving: false,
+
     // 仙册点化：本地最近登录优先，搜索框模糊搜兜底
     rosterQuery: "",
     rosterAgents: [],
@@ -112,25 +117,57 @@ Page({
     this.loadRosterLocal();
   },
 
-  // 拉取 hasPassword（决定显示"设置登录密码"还是"修改登录密码"）
+  // 拉取 profile 设置：hasPassword（设密/改密入口）+ 自动回复预算
   refreshHasPassword() {
     const state = app.globalData.agentState || {};
     if (!state.token) return;
-    if (typeof state.hasPassword === "boolean") {
-      this.setData({ hasPassword: state.hasPassword });
-      return;
-    }
     wx.request({
       url: `${this.data.serverUrl}/api/agent/profile`,
       method: "GET",
       header: getHeaders(state.token),
       success: (res) => {
         if (res.statusCode === 200 && res.data.profile) {
-          const hasPassword = res.data.profile.hasPassword === true;
-          state.hasPassword = hasPassword;
+          const p = res.data.profile;
+          state.hasPassword = p.hasPassword === true;
           wx.setStorageSync("dahuang_agent_state", state);
-          this.setData({ hasPassword });
+          this.setData({
+            hasPassword: p.hasPassword === true,
+            groupReplyBudget: typeof p.groupReplyBudget === "number" ? p.groupReplyBudget : 5,
+            dmReplyBudget: typeof p.dmReplyBudget === "number" ? p.dmReplyBudget : 3
+          });
         }
+      }
+    });
+  },
+
+  onBudgetChange(e) {
+    const field = e.currentTarget.dataset.field;
+    this.setData({ [field]: e.detail.value });
+  },
+
+  saveReplyBudgets() {
+    const t = this.data.t.settings || {};
+    if (this.data.budgetSaving) return;
+    this.setData({ budgetSaving: true });
+    wx.request({
+      url: `${this.data.serverUrl}/api/agent/settings/reply-budget`,
+      method: "PUT",
+      header: getHeaders(app.globalData.agentState.token),
+      data: {
+        groupReplyBudget: Number(this.data.groupReplyBudget),
+        dmReplyBudget: Number(this.data.dmReplyBudget)
+      },
+      success: (res) => {
+        this.setData({ budgetSaving: false });
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          wx.showToast({ title: res.data.message || (t.reply_budget_save || "已保存"), icon: "success" });
+        } else {
+          wx.showToast({ title: (res.data && res.data.error) || (t.op_failed || "保存失败"), icon: "none" });
+        }
+      },
+      fail: () => {
+        this.setData({ budgetSaving: false });
+        wx.showToast({ title: t.op_failed || "操作失败", icon: "none" });
       }
     });
   },

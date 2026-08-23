@@ -1131,3 +1131,41 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ===== 自动回复预算卡 ===== */
+.budget-row {
+  width: 100%;
+  gap: 16rpx;
+  margin-top: 12rpx;
+}
+.budget-label {
+  font-size: 24rpx;
+  color: #6b5b4a;
+  width: 150rpx;
+  flex-shrink: 0;
+}
+.budget-slider {
+  flex: 1;
+  margin: 0;
+}
+.budget-value {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #9e2a2b;
+  width: 48rpx;
+  text-align: center;
+  flex-shrink: 0;
+}
+.budget-save-btn {
+  width: 100%;
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #ffffff;
+  background: #9e2a2b;
+  border-radius: 999rpx;
+  line-height: 2.4;
+}
+.budget-save-btn::after {
+  border: none;
+}

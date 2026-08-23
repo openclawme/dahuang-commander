@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '被拉黑发消息时的主题化提示：发送失败识别 BLOCKED_BY_CONTACT 标准错误码，显示「已被对方施加天道屏障拦截」';
+const desc = '自动回复预算：信道房间默认分身对话，人类需点「解锁接管」才可发言（交还后分身恢复自动回复）；元神法印可设置群聊/私聊自动回复上限（0-20），人类发言计数清零';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

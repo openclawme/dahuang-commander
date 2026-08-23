@@ -9,7 +9,8 @@ Page({
     messages: [],
     inputValue: "",
     toView: "",
-    keyboardHeight: 0
+    keyboardHeight: 0,
+    humanUnlocked: false
   },
 
   onLoad(options) {
@@ -19,7 +20,62 @@ Page({
         roomId
       });
       this.refreshMessages();
+      this.refreshReplyState();
     }
+  },
+
+  refreshReplyState() {
+    const { roomId } = this.data;
+    const { serverUrl, agentState } = app.globalData;
+    if (!roomId || !agentState.token) return;
+    wx.request({
+      url: `${serverUrl}/api/agent/messenger/${encodeURIComponent(roomId)}/reply-state`,
+      method: "GET",
+      header: getHeaders(agentState.token),
+      success: (res) => {
+        if (res.statusCode === 200 && res.data.state) {
+          this.setData({ humanUnlocked: res.data.state.humanControl === true });
+        }
+      }
+    });
+  },
+
+  unlockHuman() {
+    const { roomId } = this.data;
+    const { serverUrl, agentState } = app.globalData;
+    if (!agentState.token) {
+      wx.showToast({ title: this.data.t.room.not_logged_in, icon: "none" });
+      return;
+    }
+    wx.request({
+      url: `${serverUrl}/api/agent/messenger/${encodeURIComponent(roomId)}/unlock`,
+      method: "POST",
+      header: getHeaders(agentState.token),
+      success: (res) => {
+        if (res.statusCode === 200) {
+          this.setData({ humanUnlocked: true });
+          wx.showToast({ title: res.data.message || "已解锁接管", icon: "none" });
+        }
+      },
+      fail: () => wx.showToast({ title: "解锁失败", icon: "none" })
+    });
+  },
+
+  handBackAgent() {
+    const { roomId } = this.data;
+    const { serverUrl, agentState } = app.globalData;
+    wx.request({
+      url: `${serverUrl}/api/agent/messenger/${encodeURIComponent(roomId)}/lock`,
+      method: "POST",
+      header: getHeaders(agentState.token),
+      success: (res) => {
+        if (res.statusCode === 200) {
+          this.setData({ humanUnlocked: false, inputValue: "" });
+          wx.showToast({ title: res.data.message || "已交还分身", icon: "none" });
+        }
+      },
+      fail: () => wx.showToast({ title: "操作失败", icon: "none" })
+    });
   },
 
   onShow() {
@@ -86,6 +142,10 @@ Page({
 
   sendMessage() {
     if (this.data.isSending) return;
+    if (!this.data.humanUnlocked) {
+      wx.showToast({ title: "请先解锁接管再发言", icon: "none" });
+      return;
+    }
     const text = this.data.inputValue.trim();
     if (!text) return;
 
@@ -124,7 +184,8 @@ Page({
     wx.request({
       url: `${serverUrl}/api/matrix/client/v3/rooms/${encodeURIComponent(roomId)}/send/m.room.message`,
       method: "POST",
-      header: getHeaders(agentState.token),
+      // 人类发言标记：服务端据此清零自动回复计数
+      header: { ...getHeaders(agentState.token), "X-Human-Send": "true" },
       data: {
         msgtype: "m.text",
         body: text

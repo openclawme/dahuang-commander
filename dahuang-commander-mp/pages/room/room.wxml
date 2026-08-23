@@ -29,16 +29,16 @@
     </view>
   </scroll-view>
 
-  <!-- 底部对话输入框 -->
+  <!-- 底部对话输入框：默认锁定（分身对话），人类需先解锁接管 -->
   <view class="chat-footer" style="transform: translateY(-{{keyboardHeight}}px); padding-bottom: {{keyboardHeight > 0 ? '24rpx' : 'calc(24rpx + env(safe-area-inset-bottom))'}}; transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);">
-    <view class="input-container flex-row align-center">
-      <input 
-        class="chat-input" 
-        placeholder="{{t.room.placeholder}}" 
-        placeholder-class="chat-placeholder" 
-        value="{{inputValue}}" 
-        bindinput="onInputChange" 
-        confirm-type="send" 
+    <view class="input-container flex-row align-center" wx:if="{{humanUnlocked}}">
+      <input
+        class="chat-input"
+        placeholder="{{t.room.placeholder}}"
+        placeholder-class="chat-placeholder"
+        value="{{inputValue}}"
+        bindinput="onInputChange"
+        confirm-type="send"
         bindconfirm="sendMessage"
         adjust-position="{{false}}"
         bindfocus="onInputFocus"
@@ -46,6 +46,11 @@
         bindkeyboardheightchange="onKeyboardHeightChange"
       />
       <button class="send-btn" bindtap="sendMessage">{{t.room.send}}</button>
+      <button class="lock-btn" bindtap="handBackAgent">{{t.room.lock_back}}</button>
+    </view>
+    <view class="input-container flex-row align-center" wx:else>
+      <text class="locked-hint">{{t.room.locked_hint}}</text>
+      <button class="unlock-btn" bindtap="unlockHuman">{{t.room.unlock_takeover}}</button>
     </view>
   </view>
 </view>
