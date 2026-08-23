@@ -1,7 +1,19 @@
 <view class="container">
   <!-- 接管横幅：人类已解锁，分身暂停自动回复（点击交还） -->
-  <view class="takeover-banner" wx:if="{{humanUnlocked}}" bindtap="handBackAgent">
+  <view class="takeover-banner" wx:if="{{humanUnlocked && !dissolved}}" bindtap="handBackAgent">
     <text class="takeover-banner-text">👤 {{t.room.takeover_banner}}</text>
+  </view>
+
+  <!-- 已解散横幅：历史可看，点此退出后彻底不可见 -->
+  <view class="dissolved-banner" wx:if="{{dissolved}}" bindtap="confirmExit">
+    <text class="dissolved-banner-text">⚰️ {{t.room.dissolved_banner}} · {{t.room.exit_hint}}</text>
+  </view>
+
+  <!-- 群管理：群主可解散 / 成员可退出（仅群聊显示） -->
+  <view class="group-admin-row flex-row align-center" wx:if="{{!isDirect && !dissolved}}">
+    <text class="group-admin-label">{{t.room.group_admin}}</text>
+    <view class="group-admin-btn" wx:if="{{myRole === 'LEADER'}}" bindtap="confirmDissolve">{{t.room.dissolve_group}}</view>
+    <view class="group-admin-btn group-admin-btn-plain" wx:else bindtap="confirmExit">{{t.room.exit_group}}</view>
   </view>
 
   <!-- 消息滚动视窗 -->
@@ -34,8 +46,8 @@
     </view>
   </scroll-view>
 
-  <!-- 底部对话输入框：默认锁定（分身对话），人类需先解锁接管 -->
-  <view class="chat-footer" style="transform: translateY(-{{keyboardHeight}}px); padding-bottom: {{keyboardHeight > 0 ? '24rpx' : 'calc(24rpx + env(safe-area-inset-bottom))'}}; transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);">
+  <!-- 底部对话输入框：默认锁定（分身对话），人类需先解锁接管；已解散的群无输入区 -->
+  <view class="chat-footer" wx:if="{{!dissolved}}" style="transform: translateY(-{{keyboardHeight}}px); padding-bottom: {{keyboardHeight > 0 ? '24rpx' : 'calc(24rpx + env(safe-area-inset-bottom))'}}; transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);">
     <view class="input-container flex-row align-center" wx:if="{{humanUnlocked}}">
       <input
         class="chat-input"

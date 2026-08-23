@@ -175,8 +175,21 @@ App({
           events: [],
           unreadCount: 0,
           isDirect: !eventData.is_group,
-          memberCount: eventData.member_count || 2
+          memberCount: eventData.member_count || 2,
+          role: "MEMBER",
+          dissolved: false
         };
+        this.triggerPageCallback("onRoomsUpdate");
+      }
+    });
+
+    // 群生命周期：群被解散 → 实时标记（留群成员看到「已解散」横幅）
+    socket.on("m.room.dissolved", (eventData) => {
+      const roomId = eventData && eventData.room_id;
+      if (!roomId) return;
+      const room = this.globalData.messengerRooms[roomId];
+      if (room) {
+        room.dissolved = true;
         this.triggerPageCallback("onRoomsUpdate");
       }
     });
@@ -263,6 +276,9 @@ App({
             // 通讯录 v1：区分私聊/群组（sync 载荷 is_direct/member_count）
             room.isDirect = roomData.is_direct !== false;
             room.memberCount = roomData.member_count || 1;
+            // 群生命周期：解散标记与本人角色（解散权限）
+            room.dissolved = roomData.dissolved === true;
+            room.role = roomData.role || "MEMBER";
             timelineEvents.forEach(ev => {
               const exists = room.events.some(e => e.event_id === ev.event_id);
               if (!exists) {

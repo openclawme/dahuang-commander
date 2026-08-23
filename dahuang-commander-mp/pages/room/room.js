@@ -10,7 +10,9 @@ Page({
     inputValue: "",
     toView: "",
     keyboardHeight: 0,
-    humanUnlocked: false
+    humanUnlocked: false,
+    dissolved: false,
+    myRole: "MEMBER"
   },
 
   onLoad(options) {
@@ -43,6 +45,10 @@ Page({
   unlockHuman() {
     const { roomId } = this.data;
     const { serverUrl, agentState } = app.globalData;
+    if (this.data.dissolved) {
+      wx.showToast({ title: this.data.t.room.dissolved_banner || "群已解散", icon: "none" });
+      return;
+    }
     if (!agentState.token) {
       wx.showToast({ title: this.data.t.room.not_logged_in, icon: "none" });
       return;
@@ -95,6 +101,12 @@ Page({
       title: room.name || this.data.t.room.fallback_title
     });
 
+    this.setData({
+      dissolved: room.dissolved === true,
+      myRole: room.role || "MEMBER",
+      isDirect: room.isDirect !== false
+    });
+
     const myDid = app.globalData.agentState.did;
     const messages = (room.events || []).map(msg => {
       const isMe = msg.sender === myDid;
@@ -142,6 +154,10 @@ Page({
 
   sendMessage() {
     if (this.data.isSending) return;
+    if (this.data.dissolved) {
+      wx.showToast({ title: "群已解散", icon: "none" });
+      return;
+    }
     if (!this.data.humanUnlocked) {
       wx.showToast({ title: "请先解锁接管再发言", icon: "none" });
       return;
@@ -250,6 +266,73 @@ Page({
           });
         }
       }, 100);
+    });
+  },
+
+  // ---- 群生命周期：解散（群主）/ 退出（成员） ----
+  confirmDissolve() {
+    const t = this.data.t.room || {};
+    wx.showModal({
+      title: t.dissolve_group || "解散群聊",
+      content: t.dissolve_confirm || "解散后群不再活跃，你将看不到任何信息；其他成员仍可查看历史并自行退出。确定解散？",
+      confirmColor: "#9e2a2b",
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          await this.roomAction("/dissolve");
+        } catch (e) {
+          wx.showToast({ title: e.message || (t.op_failed || "操作失败"), icon: "none" });
+        }
+      }
+    });
+  },
+
+  confirmExit() {
+    const t = this.data.t.room || {};
+    wx.showModal({
+      title: t.exit_group || "退出群聊",
+      content: t.exit_confirm || "退出后你将看不到该群的任何信息。确定退出？",
+      confirmColor: "#9e2a2b",
+      success: async (res) => {
+        if (!res.confirm) return;
+        try {
+          await this.roomAction("/exit");
+        } catch (e) {
+          wx.showToast({ title: e.message || (t.op_failed || "操作失败"), icon: "none" });
+        }
+      }
+    });
+  },
+
+  roomAction(action) {
+    const t = this.data.t.room || {};
+    return new Promise((resolve, reject) => {
+      wx.request({
+        url: `${app.globalData.serverUrl}/api/agent/messenger/${encodeURIComponent(this.data.roomId)}${action}`,
+        method: "POST",
+        header: getHeaders(app.globalData.agentState.token),
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            wx.showToast({ title: res.data.message || (t.op_done || "完成"), icon: "success" });
+            // 本地立即可见：删除/标记该房间并刷新信道列表
+            if (action === "/dissolve") {
+              if (app.globalData.messengerRooms[this.data.roomId]) {
+                delete app.globalData.messengerRooms[this.data.roomId];
+              }
+            } else {
+              if (app.globalData.messengerRooms[this.data.roomId]) {
+                delete app.globalData.messengerRooms[this.data.roomId];
+              }
+            }
+            if (typeof app.syncMessengerRooms === "function") app.syncMessengerRooms();
+            setTimeout(() => wx.navigateBack(), 500);
+            resolve(res.data);
+          } else {
+            reject(new Error((res.data && res.data.error) || `HTTP ${res.statusCode}`));
+          }
+        },
+        fail: (err) => reject(new Error(err.errMsg || "网络请求失败"))
+      });
     });
   },
 

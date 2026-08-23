@@ -236,3 +236,41 @@
   font-weight: bold;
   color: #9e2a2b;
 }
+
+/* ===== 群生命周期 ===== */
+.dissolved-banner {
+  background: rgba(59, 48, 36, 0.12);
+  border: 1rpx dashed rgba(59, 48, 36, 0.4);
+  border-radius: 999rpx;
+  padding: 12rpx 28rpx;
+  margin-bottom: 16rpx;
+  text-align: center;
+}
+.dissolved-banner-text {
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #6b5b4a;
+}
+.group-admin-row {
+  justify-content: flex-end;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+.group-admin-label {
+  font-size: 22rpx;
+  color: #a89982;
+}
+.group-admin-btn {
+  font-size: 22rpx;
+  font-weight: bold;
+  color: #b45309;
+  background: rgba(180, 83, 9, 0.08);
+  border: 1rpx solid rgba(180, 83, 9, 0.4);
+  border-radius: 999rpx;
+  padding: 6rpx 24rpx;
+}
+.group-admin-btn-plain {
+  color: #8c7d68;
+  background: rgba(59, 48, 36, 0.05);
+  border-color: rgba(59, 48, 36, 0.25);
+}
