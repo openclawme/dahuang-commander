@@ -27,6 +27,7 @@ Page({
     liveStatusText: "",
     liveStatusTexts: [],
     liveStatusTick: 0,
+    pendingCount: 0,
 
     // B-1 Orbit Aura & Particles
     avatarChar: "靈",
@@ -79,7 +80,8 @@ Page({
       t: dict,
       agentState: app.globalData.agentState || {},
       chatHistory: app.globalData.chatHistory || [],
-      pendingApproval: app.globalData.pendingApproval || null
+      pendingApproval: app.globalData.pendingApproval || null,
+      pendingCount: app.globalData.pendingDecisionCount || 0
     });
     if (dict.index && dict.index.nav_title) {
       try { wx.setNavigationBarTitle({ title: dict.index.nav_title }); } catch(e) {}
@@ -92,6 +94,31 @@ Page({
     if (app.pullOfflineNotifications) {
       app.pullOfflineNotifications();
     }
+    // 待决策：拉取数量；登录后若有待办，插入摘要提醒
+    this.refreshPendingDecisions();
+  },
+
+  refreshPendingDecisions() {
+    if (!app.refreshPendingDecisions) return;
+    app.refreshPendingDecisions((count) => {
+      this.setData({ pendingCount: count });
+      // 登录摘要：本次会话首次发现待办时在主对话插一条系统摘要
+      if (count > 0 && !app.globalData.pendingSummaryShown) {
+        app.globalData.pendingSummaryShown = true;
+        const titles = (app.globalData.pendingDecisionTitles || []).slice(0, 3).map(t => `「${t}」`).join("、");
+        app.pushSystemChat(`📋 待办摘要：有 ${count} 件事需要主人决策：${titles}${count > 3 ? "…" : ""}（点击顶部横幅处理）`);
+      }
+    });
+  },
+
+  onPendingDecision(data) {
+    if (data && typeof data.count === "number") {
+      this.setData({ pendingCount: data.count });
+    }
+  },
+
+  openDecisions() {
+    wx.navigateTo({ url: "/pages/decisions/decisions" });
   },
 
   onHide() {

@@ -1,11 +1,17 @@
 <view class="container">
 
   <view class="cyber-panel glow-cyan tab-pane-container chat-panel" style="{{keyboardHeight > 0 ? 'margin-bottom: ' + keyboardHeight + 'px;' : ''}}">
+    <!-- 待主人决策横幅 -->
+    <view class="decision-banner flex-row align-center" wx:if="{{pendingCount > 0}}" bindtap="openDecisions">
+      <text class="decision-banner-icon">📋</text>
+      <text class="decision-banner-text">{{t.index.decisions_banner.replace('{count}', pendingCount)}}</text>
+      <text class="decision-banner-arrow">›</text>
+    </view>
     <scroll-view class="chat-scroll" scroll-y scroll-into-view="{{toChatView}}" scroll-with-animation>
       <view class="chat-item chat-item-{{item.sender}}" wx:for="{{chatHistory}}" wx:key="id" id="chat-{{item.id}}" data-index="{{index}}" bindlongpress="onMessageLongPress">
         <view class="chat-bubble-header flex-row">
-          <text class="chat-avatar">{{item.sender === 'human' ? '👑' : '🧙‍♂️'}}</text>
-          <text class="chat-bubble-name">{{item.sender === 'human' ? t.index.you : (agentState.name || t.index.agent)}}</text>
+          <text class="chat-avatar">{{item.sender === 'human' ? '👑' : item.sender === 'system' ? '📋' : '🧙‍♂️'}}</text>
+          <text class="chat-bubble-name">{{item.sender === 'human' ? t.index.you : item.sender === 'system' ? t.index.system_label : (agentState.name || t.index.agent)}}</text>
           <text class="chat-bubble-time">{{item.timestamp}}</text>
         </view>
         

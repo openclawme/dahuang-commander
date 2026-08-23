@@ -624,6 +624,8 @@ Page({
           });
 
           // 分身登录 v1：退出后留在本页，下方分身登录区可直接选择最近登录的元神
+          app.globalData.pendingSummaryShown = false;
+          app.globalData.pendingDecisionCount = 0;
           this.loadRosterLocal();
         }
       }

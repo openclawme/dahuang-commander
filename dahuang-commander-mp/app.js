@@ -187,6 +187,13 @@ App({
       this.triggerPageCallback("onApprovalPending", data);
     });
 
+    // 待主人决策：分身上报的事项实时提醒
+    socket.on("agent_pending_decision", (data) => {
+      this.globalData.pendingDecisionCount = (data && data.count) || 1;
+      this.pushSystemChat(`⚠️ 有事情需要主人决策：${(data && data.title) || "待办事项"}（点击顶部横幅处理）`);
+      this.triggerPageCallback("onPendingDecision", data);
+    });
+
     socket.on("disconnect", (res) => {
       this.addLog("SYSTEM", "⚠️ 天道高维神念频道连接中断。");
       this.globalData.agentState.status = "OFFLINE";
@@ -485,6 +492,40 @@ App({
     }
     this.addLog("SYSTEM", `🧹 已按指令清空${clearAll ? "全部历史信息" : "当前对话窗口"}。`);
     this.triggerPageCallback("onChatHistoryUpdate");
+  },
+
+  // 主对话框插入一条系统消息（待办提醒/登录摘要等）
+  pushSystemChat(message) {
+    const newMsg = {
+      id: `sys-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      sender: "system",
+      content: message,
+      timestamp: this.getTimestamp()
+    };
+    this.globalData.chatHistory.push(newMsg);
+    this.trimChatHistory();
+    this.saveChatHistory();
+    this.triggerPageCallback("onChatHistoryUpdate");
+  },
+
+  // 拉取待决策事项数量（登录摘要/横幅计数）
+  refreshPendingDecisions(callback) {
+    const state = this.globalData.agentState || {};
+    if (!state.token) { if (callback) callback(0); return; }
+    wx.request({
+      url: `${this.globalData.serverUrl || "https://dahuang.land"}/api/agent/decisions`,
+      method: "GET",
+      header: getHeaders(state.token),
+      success: (res) => {
+        if (res.statusCode === 200 && res.data) {
+          const count = res.data.count || 0;
+          this.globalData.pendingDecisionCount = count;
+          this.globalData.pendingDecisionTitles = (res.data.decisions || []).slice(0, 3).map(d => d.title);
+          if (callback) callback(count);
+        } else if (callback) callback(0);
+      },
+      fail: () => { if (callback) callback(0); }
+    });
   },
 
   addLog(type, message) {

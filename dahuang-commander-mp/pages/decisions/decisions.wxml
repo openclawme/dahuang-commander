@@ -1,0 +1,40 @@
+<view class="container">
+  <view class="loading-box" wx:if="{{loading}}">
+    <text>{{t.memory.loading}}</text>
+  </view>
+
+  <block wx:else>
+    <view class="settings-list" wx:if="{{decisions.length > 0}}">
+      <view class="maint-card flex-col" wx:for="{{decisions}}" wx:key="id">
+        <view class="flex-row align-center justify-between">
+          <text class="maint-type">{{item.typeIcon}} {{item.title}}</text>
+          <text class="fact-time">{{item.ts}}</text>
+        </view>
+        <text class="fact-content" wx:if="{{item.detail}}">{{item.detail}}</text>
+        <view class="flex-row maint-actions">
+          <button class="maint-btn maint-btn-primary" bindtap="openAnswer" data-id="{{item.id}}" data-title="{{item.title}}" data-preset="{{t.decisions.accept_text}}">{{t.decisions.accept}}</button>
+          <button class="maint-btn" bindtap="openAnswer" data-id="{{item.id}}" data-title="{{item.title}}" data-preset="{{t.decisions.reject_text}}">{{t.decisions.reject}}</button>
+          <button class="maint-btn" bindtap="openAnswer" data-id="{{item.id}}" data-title="{{item.title}}" data-preset="">{{t.decisions.custom}}</button>
+          <button class="maint-btn maint-btn-ghost" bindtap="dismissDecision" data-id="{{item.id}}">{{busyId === item.id ? "..." : t.decisions.dismiss}}</button>
+        </view>
+      </view>
+    </view>
+    <view class="empty-agents flex-col align-center" wx:else>
+      <text class="empty-icon">🍃</text>
+      <text class="empty-text">{{t.decisions.empty}}</text>
+    </view>
+  </block>
+</view>
+
+<!-- 答复浮层 -->
+<view class="form-overlay" wx:if="{{answerVisible}}" bindtap="closeAnswer">
+  <view class="form-card" catchtap="noop">
+    <text class="form-title">✍️ {{answerTarget.title}}</text>
+    <textarea class="form-textarea" placeholder="{{t.decisions.answer_ph}}" placeholder-class="form-ph" value="{{answerText}}" bindinput="onAnswerInput" maxlength="200"></textarea>
+    <text class="cost-note">{{t.decisions.relay_hint}}</text>
+    <view class="flex-row justify-between" style="margin-top: 20rpx;">
+      <button class="form-cancel-btn" bindtap="closeAnswer">{{t.memory.fact_cancel}}</button>
+      <button class="form-save-btn" bindtap="submitAnswer">{{busyId === answerTarget.id ? "..." : t.decisions.submit}}</button>
+    </view>
+  </view>
+</view>

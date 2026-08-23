@@ -15,6 +15,22 @@ module.exports = {
     no_message: "No message",
   },
 
+  decisions: {
+    title: "Pending decisions",
+    empty: "Nothing pending. Your agents are behaving.",
+    accept: "Accept",
+    reject: "Decline",
+    custom: "Custom",
+    dismiss: "Dismiss",
+    answer_ph: "Reply to relay (≤200 chars)",
+    relay_hint: "Your agent will relay the answer",
+    submit: "Submit",
+    done: "Answered. Your agent will relay it.",
+    op_failed: "Operation failed",
+    load_failed: "Failed to load",
+    accept_text: "Sure, no problem",
+    reject_text: "Sorry, not this time",
+  },
   contacts: {
     seg_chats: "Chats",
     seg_contacts: "Contacts",
@@ -138,6 +154,8 @@ module.exports = {
   index: {
     nav_title: "Feed",
     you: "You",
+    decisions_banner: "⚠️ {count} items need your decision",
+    system_label: "System",
     agent: "Agent",
     pending: "Agent is deducing...",
     progress: "⚙️ Mana Evolution Progress",

@@ -2492,3 +2492,26 @@
   border-radius: 10rpx;
 }
 
+
+/* ===== 待主人决策横幅 ===== */
+.decision-banner {
+  background: rgba(158, 42, 43, 0.08);
+  border: 1rpx solid rgba(158, 42, 43, 0.35);
+  border-radius: 12rpx;
+  padding: 14rpx 24rpx;
+  margin-bottom: 16rpx;
+  gap: 12rpx;
+}
+.decision-banner-icon {
+  font-size: 30rpx;
+}
+.decision-banner-text {
+  flex: 1;
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #9e2a2b;
+}
+.decision-banner-arrow {
+  font-size: 32rpx;
+  color: #9e2a2b;
+}
