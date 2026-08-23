@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '自动回复预算：信道房间默认分身对话，人类需点「解锁接管」才可发言（交还后分身恢复自动回复）；元神法印可设置群聊/私聊自动回复上限（0-20），人类发言计数清零';
+const desc = '房间页输入区优化：交还分身移出输入行改为顶部横幅（输入框不再被挤占）；群聊自动回复修复（成员皆可接话+预算闸门位置修正）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

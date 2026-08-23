@@ -1,4 +1,9 @@
 <view class="container">
+  <!-- 接管横幅：人类已解锁，分身暂停自动回复（点击交还） -->
+  <view class="takeover-banner" wx:if="{{humanUnlocked}}" bindtap="handBackAgent">
+    <text class="takeover-banner-text">👤 {{t.room.takeover_banner}}</text>
+  </view>
+
   <!-- 消息滚动视窗 -->
   <scroll-view class="msg-scroll" scroll-y scroll-into-view="{{toView}}" scroll-with-animation style="{{keyboardHeight > 0 ? 'margin-bottom: ' + keyboardHeight + 'px;' : ''}}">
     <view class="msg-list">
@@ -46,7 +51,6 @@
         bindkeyboardheightchange="onKeyboardHeightChange"
       />
       <button class="send-btn" bindtap="sendMessage">{{t.room.send}}</button>
-      <button class="lock-btn" bindtap="handBackAgent">{{t.room.lock_back}}</button>
     </view>
     <view class="input-container flex-row align-center" wx:else>
       <text class="locked-hint">{{t.room.locked_hint}}</text>

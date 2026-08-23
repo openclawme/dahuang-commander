@@ -73,6 +73,7 @@ module.exports = {
  locked_hint: "分身对话中，人类需解锁方可发言",
  unlock_takeover: "解锁接管",
  lock_back: "交还分身",
+ takeover_banner: "已解锁接管 · 分身暂停自动回复，点此交还分身",
 },
  dahuang: {
  nav_title: "控制台",

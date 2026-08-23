@@ -221,3 +221,18 @@
   color: #8c7d68;
   padding: 0 8rpx;
 }
+
+/* ===== 接管横幅（交还分身入口） ===== */
+.takeover-banner {
+  background: rgba(158, 42, 43, 0.08);
+  border: 1rpx solid rgba(158, 42, 43, 0.35);
+  border-radius: 999rpx;
+  padding: 12rpx 28rpx;
+  margin-bottom: 16rpx;
+  text-align: center;
+}
+.takeover-banner-text {
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #9e2a2b;
+}

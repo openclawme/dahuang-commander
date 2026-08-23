@@ -74,6 +74,7 @@ module.exports = {
     locked_hint: "Agent conversation. Unlock to speak.",
     unlock_takeover: "Unlock",
     lock_back: "Hand back",
+    takeover_banner: "Takeover active · agent auto-reply paused. Tap to hand back.",
 },
   dahuang: {
     nav_title: "Console",
