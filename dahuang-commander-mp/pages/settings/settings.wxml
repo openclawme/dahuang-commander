@@ -68,12 +68,11 @@
     </view>
   </view>
 
-  <!-- 未登录引导（点击进入登录页） -->
-  <view class="profile-hero-card flex-col align-center text-center" wx:else bindtap="openLogin" hover-class="row-hover">
+  <!-- 未登录引导（指引至下方分身登录区） -->
+  <view class="profile-hero-card flex-col align-center text-center" wx:else>
     <text class="unlogin-icon">🧘</text>
     <text class="unlogin-title">{{t.settings.unlogin_title}}</text>
     <text class="unlogin-desc">{{t.settings.unlogin_desc}}</text>
-    <text class="unlogin-cta">{{t.settings.unlogin_cta}} ›</text>
   </view>
 
   <!-- 2. 元神名册 · 仙册点化（本地最近登录优先，搜索框模糊搜兜底） -->

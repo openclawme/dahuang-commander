@@ -416,11 +416,7 @@ Page({
     return String(n);
   },
 
-  openLogin() {
-    wx.navigateTo({ url: "/pages/login/login" });
-  },
-
-  // ---- 仙册点化：本地最近登录优先，搜索框模糊搜兜底 ----
+  // ---- 分身登录（原仙册点化）：本地最近登录优先，搜索框模糊搜兜底 ----
   formatKarma(k) {
     if (k === undefined || k === null) return "0";
     if (k >= 10000) return (k / 10000).toFixed(1) + "w";
@@ -590,10 +586,8 @@ Page({
             icon: "success"
           });
 
-          // 通讯录 v1/登录 v1：退出后回到登录页，用 DID/名字 + 密码重新登入
-          setTimeout(() => {
-            wx.reLaunch({ url: "/pages/login/login" });
-          }, 600);
+          // 分身登录 v1：退出后留在本页，下方分身登录区可直接选择最近登录的元神
+          this.loadRosterLocal();
         }
       }
     });

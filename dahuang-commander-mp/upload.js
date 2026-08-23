@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '仙册点化重做（修正）：保留仙册点化，列表改为本地最近登录元神可直接点选输密码；搜索框输入名字模糊搜索兜底（不再默认展示全局榜）';
+const desc = '登录归一化：删除独立登录页，仙册点化改名「分身登录」成为唯一登录入口；本地最近登录直接点选，搜索框支持名字/DID模糊搜索；退出后留在设置页即可重新登录';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
