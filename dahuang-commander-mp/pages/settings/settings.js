@@ -32,6 +32,16 @@ Page({
     newPassword: "",
     confirmPassword: "",
 
+    // 仙册点化：本地最近登录优先，搜索框模糊搜兜底
+    rosterQuery: "",
+    rosterAgents: [],
+    rosterSearched: false,
+    rosterLoading: false,
+    rosterLoginVisible: false,
+    rosterTarget: null,
+    rosterPassword: "",
+    rosterLoggingIn: false,
+
 
     // C-1 Personality Sliders Calibration & Speech Preview
     sliderAloofElegant: 50,
@@ -99,6 +109,7 @@ Page({
     }
     i18n.updateTabBar();
     this.refreshHasPassword();
+    this.loadRosterLocal();
   },
 
   // 拉取 hasPassword（决定显示"设置登录密码"还是"修改登录密码"）
@@ -407,6 +418,140 @@ Page({
 
   openLogin() {
     wx.navigateTo({ url: "/pages/login/login" });
+  },
+
+  // ---- 仙册点化：本地最近登录优先，搜索框模糊搜兜底 ----
+  formatKarma(k) {
+    if (k === undefined || k === null) return "0";
+    if (k >= 10000) return (k / 10000).toFixed(1) + "w";
+    if (k >= 1000) return (k / 1000).toFixed(1) + "k";
+    return String(k);
+  },
+
+  loadRosterLocal() {
+    const history = app.getLoginHistory().map(a => {
+      const { seed, char } = this.getAvatarInfo(a.did, a.name);
+      return { ...a, avatarChar: char, avatarSeed: seed, subDisplay: a.did || "", isLocal: true };
+    });
+    this.setData({ rosterAgents: history, rosterSearched: false, rosterLoading: false });
+  },
+
+  onRosterQueryInput(e) {
+    const q = (e.detail.value || "").trim();
+    this.setData({ rosterQuery: e.detail.value });
+    if (this._rosterTimer) clearTimeout(this._rosterTimer);
+    if (!q) {
+      this.loadRosterLocal();
+      return;
+    }
+    this._rosterTimer = setTimeout(() => this.searchRoster(q), 300);
+  },
+
+  searchRoster(q) {
+    this.setData({ rosterLoading: true });
+    wx.request({
+      url: `${this.data.serverUrl}/api/agent/auth/commander-login?q=${encodeURIComponent(q)}`,
+      method: "GET",
+      success: (res) => {
+        this.setData({ rosterLoading: false });
+        if (res.statusCode === 200 && res.data.agents) {
+          const agents = res.data.agents.map(ag => {
+            const { seed, char } = this.getAvatarInfo(ag.did, ag.name);
+            return { ...ag, avatarChar: char, avatarSeed: seed, subDisplay: `⚡ ${this.formatKarma(ag.karma)} Karma` };
+          });
+          this.setData({ rosterAgents: agents, rosterSearched: true });
+        } else {
+          this.setData({ rosterAgents: [], rosterSearched: true });
+        }
+      },
+      fail: () => {
+        this.setData({ rosterLoading: false, rosterAgents: [], rosterSearched: true });
+      }
+    });
+  },
+
+  onRosterTap(e) {
+    const { id, has } = e.currentTarget.dataset;
+    const agent = this.data.rosterAgents.find(a => a.id === id);
+    if (!agent) return;
+    // hasPassword 明确为 false 才拦截；本地历史记录无此信息则直接尝试密码登录
+    if (has === "false") {
+      wx.showModal({
+        title: "尚未设置登录密码",
+        content: "该元神还未设置登录密码。可先用下方「高级：粘贴凭证」以 JWT 登入，再到设置页 🔑 设置密码。",
+        showCancel: false,
+        confirmText: "知道了"
+      });
+      return;
+    }
+    this.setData({
+      rosterLoginVisible: true,
+      rosterTarget: { id: agent.id, name: agent.name, did: agent.did },
+      rosterPassword: ""
+    });
+  },
+
+  onRosterPasswordInput(e) {
+    this.setData({ rosterPassword: e.detail.value });
+  },
+
+  closeRosterLogin() {
+    this.setData({ rosterLoginVisible: false, rosterPassword: "" });
+  },
+
+  submitRosterLogin() {
+    const t = this.data.t.settings || {};
+    const target = this.data.rosterTarget;
+    const password = this.data.rosterPassword || "";
+    if (!target || !password) {
+      wx.showToast({ title: t.roster_pwd_required || "请输入密码", icon: "none" });
+      return;
+    }
+    if (this.data.rosterLoggingIn) return;
+    this.setData({ rosterLoggingIn: true });
+    wx.showLoading({ title: t.roster_logging_in || "正在点化..." });
+
+    wx.request({
+      url: `${this.data.serverUrl}/api/agent/auth/login`,
+      method: "POST",
+      header: { "Content-Type": "application/json; charset=utf-8" },
+      data: { account: target.name, password },
+      success: (res) => {
+        wx.hideLoading();
+        this.setData({ rosterLoggingIn: false });
+        if (res.statusCode === 200 && res.data.token) {
+          const agent = res.data.agent || {};
+          app.globalData.agentState = {
+            id: agent.id,
+            name: agent.displayName || agent.name,
+            did: agent.did,
+            karma: agent.karma || 0,
+            character: "高维探秘者",
+            iq: agent.iq || 100,
+            hasPassword: true,
+            token: res.data.token,
+            status: "ONLINE"
+          };
+          wx.setStorageSync("dahuang_agent_state", app.globalData.agentState);
+          app.recordLoginHistory({ id: agent.id, name: agent.displayName || agent.name, did: agent.did });
+          app.addLog("SYSTEM", `🔌 仙册点化成功！[${agent.name}] 已并网（密码登录）。`);
+          app.loadChatHistoryForAgent(agent.id);
+          app.connectSocket();
+          this.setData({ rosterLoginVisible: false, rosterPassword: "", agentState: app.globalData.agentState, hasPassword: true });
+          app.triggerPageCallback("onAgentStateUpdate", app.globalData.agentState);
+          app.triggerPageCallback("onAgentStatusChange", app.globalData.agentState);
+          this.loadRosterLocal();
+          wx.showToast({ title: "并网附身成功", icon: "success" });
+        } else {
+          wx.showToast({ title: (res.data && res.data.error) || (t.roster_login_failed || "登录失败"), icon: "none" });
+        }
+      },
+      fail: () => {
+        wx.hideLoading();
+        this.setData({ rosterLoggingIn: false });
+        wx.showToast({ title: t.roster_login_failed || "登录失败", icon: "none" });
+      }
+    });
   },
 
   logout() {

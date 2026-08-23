@@ -209,6 +209,8 @@ module.exports = {
     roster_pwd_required: "Password required",
     roster_logging_in: "Summoning...",
     roster_login_failed: "Login failed",
+    roster_local_empty: "No recent sign-ins. Type a name in the search box above to fuzzy-search.",
+    roster_search_empty: "No matching agents found",
     pwd_set: "Set login password",
     pwd_set_sub: "Then you can sign in with DID/name + password, no token pasting",
     pwd_change: "Change login password",

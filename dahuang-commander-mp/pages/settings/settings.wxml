@@ -76,6 +76,41 @@
     <text class="unlogin-cta">{{t.settings.unlogin_cta}} ›</text>
   </view>
 
+  <!-- 2. 元神名册 · 仙册点化（本地最近登录优先，搜索框模糊搜兜底） -->
+  <view class="settings-section" wx:if="{{!isRegistering}}">
+    <view class="section-header">
+      <text class="section-title">{{t.settings.magic_login_title}}</text>
+    </view>
+    <input class="roster-search" placeholder="{{t.settings.roster_search_ph}}" placeholder-class="pwd-ph" value="{{rosterQuery}}" bindinput="onRosterQueryInput" />
+
+    <view class="loading-spin flex-col align-center" wx:if="{{rosterLoading}}">
+      <text class="spin-text">{{t.settings.loading_agents}}</text>
+    </view>
+
+    <view class="settings-list" wx:else>
+      <view class="agent-row flex-row align-center"
+            wx:for="{{rosterAgents}}"
+            wx:key="id"
+            bindtap="onRosterTap"
+            data-id="{{item.id}}"
+            data-has="{{item.hasPassword}}"
+            hover-class="row-hover">
+        <view class="avatar-core-seal seal-color-{{item.avatarSeed % 5}}" style="width: 72rpx; height: 72rpx; flex-shrink: 0;">
+          <text class="seal-character" style="font-size: 30rpx; font-weight: bold; color: #fff;">{{item.avatarChar}}</text>
+        </view>
+        <view class="flex-col" style="flex: 1; min-width: 0;">
+          <text class="agent-row-name">{{item.name}}</text>
+          <text class="agent-row-sub">{{item.subDisplay}}</text>
+        </view>
+        <text class="row-arrow">›</text>
+      </view>
+      <view class="empty-agents flex-col align-center" wx:if="{{rosterAgents.length === 0}}">
+        <text class="empty-icon">📭</text>
+        <text class="empty-text">{{rosterSearched ? t.settings.roster_search_empty : t.settings.roster_local_empty}}</text>
+      </view>
+    </view>
+  </view>
+
   <!-- 3. 手动导入凭证（弱化卡片） -->
   <view class="settings-section import-section" wx:if="{{!isRegistering}}">
     <view class="section-header section-header-col">
@@ -281,6 +316,18 @@
     <view class="flex-row justify-between" style="margin-top: 24rpx;">
       <button class="pwd-cancel-btn" bindtap="closePasswordForm">{{t.settings.cancel || '取消'}}</button>
       <button class="pwd-save-btn" bindtap="submitPasswordForm">{{t.settings.pwd_submit || '确定'}}</button>
+    </view>
+  </view>
+</view>
+
+<!-- 仙册点化：密码浮层 -->
+<view class="pwd-overlay" wx:if="{{rosterLoginVisible}}" bindtap="closeRosterLogin">
+  <view class="pwd-card" catchtap="noop">
+    <text class="pwd-title">🔑 {{rosterTarget.name}} · {{t.settings.roster_login_title}}</text>
+    <input class="pwd-input" password="{{true}}" placeholder="{{t.settings.roster_pwd_ph}}" placeholder-class="pwd-ph" value="{{rosterPassword}}" bindinput="onRosterPasswordInput" />
+    <view class="flex-row justify-between" style="margin-top: 24rpx;">
+      <button class="pwd-cancel-btn" bindtap="closeRosterLogin">{{t.settings.cancel || '取消'}}</button>
+      <button class="pwd-save-btn" bindtap="submitRosterLogin">{{rosterLoggingIn ? "..." : (t.settings.roster_login_btn || '点化')}}</button>
     </view>
   </view>
 </view>

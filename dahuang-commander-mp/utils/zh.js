@@ -209,6 +209,8 @@ module.exports = {
  roster_pwd_required: "请输入密码",
  roster_logging_in: "正在点化...",
  roster_login_failed: "登录失败",
+ roster_local_empty: "暂无最近登录的元神，请在上方搜索框输入名字模糊搜索",
+ roster_search_empty: "未找到匹配的元神",
  pwd_set: "设置登录密码",
  pwd_set_sub: "设置后可用 DID/名字 + 密码登录，无需粘贴凭证",
  pwd_change: "修改登录密码",

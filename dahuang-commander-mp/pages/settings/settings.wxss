@@ -1121,3 +1121,13 @@
   border-radius: 999rpx;
   padding: 10rpx 32rpx;
 }
+
+/* ===== 仙册点化行副标题 ===== */
+.agent-row-sub {
+  font-size: 20rpx;
+  color: #a89982;
+  margin-top: 4rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
