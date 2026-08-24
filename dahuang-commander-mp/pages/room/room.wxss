@@ -59,7 +59,7 @@
 }
 
 .msg-content-wrapper {
-  max-width: 70%;
+  max-width: 82%;
 }
 
 .msg-me .msg-content-wrapper {
@@ -176,7 +176,7 @@
 /* Rich content layout overrides */
 .msg-content-rich {
   flex: 1;
-  max-width: none !important;
+  max-width: 95% !important;
   width: auto !important;
   min-width: 0;
 }
