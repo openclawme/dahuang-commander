@@ -93,7 +93,7 @@
   border: 1rpx solid var(--brand-line);
   color: var(--ink);
   box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.1);
-  border-radius: var(--radius-card) 0 16rpx 16rpx;
+  border-radius: 16rpx 0 16rpx 16rpx;
 }
 
 .bubble-other-glow {
@@ -190,7 +190,7 @@
   background-color: rgba(253,251,247, 0.9) !important; /* Slightly darker slate backplate */
   border: 1rpx solid rgba(158,42,43, 0.45) !important;
   box-shadow: 0 4rpx 20rpx rgba(158,42,43, 0.15) !important;
-  border-radius: var(--radius-md) !important;
+  border-radius: 12rpx !important;
 }
 
 /* ===== 人类解锁接管 ===== */
@@ -202,7 +202,7 @@
   font-weight: bold;
   line-height: 2.4;
   padding: 0 24rpx;
-  border-radius: var(--radius-pill);
+  border-radius: 999rpx;
 }
 .unlock-btn {
   background: var(--brand);
@@ -228,7 +228,7 @@
 .takeover-banner {
   background: var(--brand-soft);
   border: 1rpx solid var(--brand-line);
-  border-radius: var(--radius-pill);
+  border-radius: 999rpx;
   padding: 12rpx 28rpx;
   margin-bottom: 16rpx;
   text-align: center;
@@ -243,7 +243,7 @@
 .dissolved-banner {
   background: var(--line);
   border: 1rpx dashed var(--line-solid);
-  border-radius: var(--radius-pill);
+  border-radius: 999rpx;
   padding: 12rpx 28rpx;
   margin-bottom: 16rpx;
   text-align: center;
@@ -268,7 +268,7 @@
   color: var(--warn);
   background: rgba(180, 83, 9, 0.08);
   border: 1rpx solid rgba(180, 83, 9, 0.4);
-  border-radius: var(--radius-pill);
+  border-radius: 999rpx;
   padding: 6rpx 24rpx;
 }
 .group-admin-btn-plain {

@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = 'UI全面升级v2：新增圆角Token体系（sm/md/card/pill）并全站替换，配色/深色模式/头像/骨架屏/按压反馈同上一版';
+const desc = 'UI全面升级：设计Token体系（全局配色+自动深色模式）、房间图标语义配色、消息头像印章化、三页骨架屏、全局按压反馈、inline样式工具类化、头像图圆形裁剪';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
