@@ -85,6 +85,20 @@ Page({
     if (seg === "contacts") this.loadContacts();
   },
 
+  relativeTime(ts) {
+    if (!ts) return "";
+    const diff = Date.now() - ts;
+    const min = 60 * 1000;
+    const hour = 60 * min;
+    const day = 24 * hour;
+    if (diff < min) return "刚刚";
+    if (diff < hour) return `${Math.floor(diff / min)} 分钟前`;
+    if (diff < day) return `${Math.floor(diff / hour)} 小时前`;
+    if (diff < 7 * day) return `${Math.floor(diff / day)} 天前`;
+    const d = new Date(ts);
+    return `${d.getMonth() + 1}/${d.getDate()}`;
+  },
+
   decorateRooms(roomsObj) {
     const list = Object.values(roomsObj).map(r => {
       const latestEvent = r.events && r.events.length > 0 ? r.events[r.events.length - 1] : null;
@@ -99,8 +113,7 @@ Page({
           .trim();
         if (!lastMsgText) lastMsgText = "[神念信息]";
         lastMsgTs = latestEvent.ts || 0;
-        const date = new Date(lastMsgTs);
-        lastMsgTime = `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+        lastMsgTime = this.relativeTime(lastMsgTs);
       }
       return {
         roomId: r.roomId,
@@ -131,12 +144,17 @@ Page({
     this.setData({ loadingContacts: true });
     try {
       const res = await this.request("GET", "/api/agent/contacts");
-      const contacts = (res.contacts || []).map(c => ({
-        ...c,
-        displayName: c.contactName || c.profile.displayName || c.profile.name,
-        avatarChar: (c.contactName || c.profile.displayName || c.profile.name || "?").slice(0, 1),
-        lastTalkTs: c.lastTalkAt ? new Date(c.lastTalkAt).getTime() : 0
-      }));
+      const contacts = (res.contacts || []).map(c => {
+        const tags = (c.tags || []).slice(0, 2);
+        return {
+          ...c,
+          tags,
+          moreTagCount: Math.max(0, (c.tags || []).length - tags.length),
+          displayName: c.contactName || c.profile.displayName || c.profile.name,
+          avatarChar: (c.contactName || c.profile.displayName || c.profile.name || "?").slice(0, 1),
+          lastTalkTs: c.lastTalkAt ? new Date(c.lastTalkAt).getTime() : 0
+        };
+      });
       contacts.sort((a, b) => (Number(b.pinned) - Number(a.pinned)) || (b.lastTalkTs - a.lastTalkTs));
       this.setData({ contacts, requestCount: res.requestCount || 0, loadingContacts: false });
     } catch (e) {

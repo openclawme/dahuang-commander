@@ -26,7 +26,7 @@
             hover-class="item-hover"
             hover-stay-time="100">
         <view class="room-icon-container">
-          <text class="room-avatar-char">{{item.isDirect ? '👤' : (item.unreadCount > 0 ? '⚡' : '💬')}}</text>
+          <text class="room-avatar-char">{{item.isDirect ? '👤' : '👥'}}</text>
           <view class="unread-badge" wx:if="{{item.unreadCount > 0}}">{{item.unreadCount}}</view>
         </view>
         <view class="room-info flex-col">
@@ -85,6 +85,7 @@
           <view class="unread-badge" wx:if="{{item.unreadCount > 0}}">{{item.unreadCount}}</view>
           <view class="contact-tags flex-row" wx:if="{{item.tags.length > 0}}">
             <text class="contact-tag" wx:for="{{item.tags}}" wx:for-item="tag" wx:key="*this">{{tag}}</text>
+            <text class="contact-tag contact-tag-more" wx:if="{{item.moreTagCount > 0}}">+{{item.moreTagCount}}</text>
           </view>
         </view>
       </view>
@@ -113,7 +114,7 @@
             hover-class="item-hover"
             hover-stay-time="100">
         <view class="room-icon-container">
-          <text class="room-avatar-char">{{item.unreadCount > 0 ? '⚡' : '💬'}}</text>
+          <text class="room-avatar-char">👥</text>
           <view class="unread-badge" wx:if="{{item.unreadCount > 0}}">{{item.unreadCount}}</view>
         </view>
         <view class="room-info flex-col">
