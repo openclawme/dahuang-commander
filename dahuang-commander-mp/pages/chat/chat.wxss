@@ -359,3 +359,21 @@
 .room-item:active {
   transform: scale(0.985);
 }
+
+
+.empty-action {
+  margin-top: 28rpx;
+  padding: 16rpx 34rpx;
+  border-radius: 999rpx;
+  background: #9e2a2b;
+  color: #ffffff;
+  font-size: 26rpx;
+  font-weight: bold;
+  box-shadow: 0 8rpx 20rpx -8rpx rgba(158,42,43,0.45);
+}
+
+.room-avatar-char {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #9e2a2b;
+}

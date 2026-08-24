@@ -35,7 +35,7 @@
             hover-class="item-hover"
             hover-stay-time="100">
         <view class="room-icon-container">
-          <text class="room-avatar-char">{{item.isDirect ? '👤' : '👥'}}</text>
+          <text class="room-avatar-char">{{item.isDirect ? '私' : '群'}}</text>
           <view class="unread-badge" wx:if="{{item.unreadCount > 0}}">{{item.unreadCount}}</view>
         </view>
         <view class="room-info flex-col">
@@ -51,19 +51,20 @@
       <text class="empty-art">🛰️</text>
       <text class="empty-title">{{t.chat.empty_title}}</text>
       <text class="empty-text">{{t.chat.empty_text}}</text>
+      <view class="empty-action" bindtap="openAddFriend">＋ {{t.contacts.add_friend}}</view>
     </view>
   </block>
 
   <!-- ===== 联系人分段 ===== -->
   <block wx:if="{{segment === 'contacts'}}">
     <view class="contact-search-row" bindtap="openAddFriend">
-      <text class="contact-search-icon">🔍</text>
+      <text class="contact-search-icon">搜</text>
       <text class="contact-search-ph">{{t.contacts.search_ph}}</text>
       <text class="contact-add-pill">＋ {{t.contacts.add_friend}}</text>
     </view>
     <view class="contact-entry-row flex-row align-center" bindtap="openRequests" hover-class="item-hover">
       <view class="room-icon-container">
-        <text class="room-avatar-char">🟡</text>
+        <text class="room-avatar-char">请</text>
       </view>
       <text class="room-name" style="flex:1;">{{t.contacts.new_requests}}</text>
       <view class="unread-badge" wx:if="{{requestCount > 0}}">{{requestCount}}</view>
@@ -112,6 +113,7 @@
     <view class="empty-state flex-col align-center" wx:else>
       <text class="empty-art">🈳</text>
       <text class="empty-text">{{t.contacts.contacts_empty}}</text>
+      <view class="empty-action" bindtap="openAddFriend">＋ {{t.contacts.add_friend}}</view>
     </view>
   </block>
 
@@ -119,7 +121,7 @@
   <block wx:if="{{segment === 'groups'}}">
     <view class="contact-entry-row flex-row align-center" bindtap="openGroupCreate" hover-class="item-hover">
       <view class="room-icon-container">
-        <text class="room-avatar-char">➕</text>
+        <text class="room-avatar-char">＋</text>
       </view>
       <text class="room-name" style="flex:1;">{{t.contacts.group_title}}</text>
       <text class="contact-add-pill">{{t.contacts.group_cost}}</text>
@@ -142,7 +144,7 @@
             hover-class="item-hover"
             hover-stay-time="100">
         <view class="room-icon-container">
-          <text class="room-avatar-char">👥</text>
+          <text class="room-avatar-char">群</text>
           <view class="unread-badge" wx:if="{{item.unreadCount > 0}}">{{item.unreadCount}}</view>
         </view>
         <view class="room-info flex-col">
@@ -157,6 +159,7 @@
     <view class="empty-state flex-col align-center" wx:else>
       <text class="empty-art">👥</text>
       <text class="empty-text">{{t.contacts.groups_empty}}</text>
+      <view class="empty-action" bindtap="openGroupCreate">＋ {{t.contacts.group_title}}</view>
     </view>
   </block>
 </view>
