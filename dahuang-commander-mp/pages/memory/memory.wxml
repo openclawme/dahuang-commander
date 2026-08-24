@@ -1,7 +1,13 @@
 <scroll-view scroll-y class="container">
-  <view class="loading-box" wx:if="{{loading}}">
-    <text>{{t.memory.loading}}</text>
-  </view>
+  <view class="skeleton-list" wx:if="{{loading}}">
+      <view class="skeleton-row flex-row align-center" wx:for="{{[1,2,3]}}" wx:key="*this">
+        <view class="skeleton-avatar"></view>
+        <view class="skeleton-lines flex-col">
+          <view class="skeleton-line skeleton-line-title"></view>
+          <view class="skeleton-line skeleton-line-sub"></view>
+        </view>
+      </view>
+    </view>
 
   <block wx:else>
     <!-- 档案头卡 -->
@@ -24,7 +30,7 @@
         <view class="maint-analyze-btn" bindtap="analyzeNow">{{analyzing ? "⏳ " + t.memory.maint_analyzing : "⚡ " + t.memory.maint_analyze_now}}</view>
       </view>
       <view class="maint-toggle-row flex-row align-center justify-between">
-        <text class="section-desc" style="flex: 1;">{{t.memory.maint_auto}}</text>
+        <text class="section-desc flex-1">{{t.memory.maint_auto}}</text>
         <switch checked="{{autoMaintain}}" bindchange="onAutoMaintainChange" color="#9e2a2b" />
       </view>
       <text class="section-desc maint-boundary-note">{{t.memory.maint_boundary}}</text>
@@ -103,7 +109,7 @@
       <view class="settings-list">
         <view class="fact-row flex-col" wx:for="{{facts}}" wx:key="id" bindtap="onFactTap"
               data-id="{{item.id}}" data-label="{{item.label}}" data-content="{{item.content}}" hover-class="row-hover">
-          <view class="flex-row align-center" style="gap: 12rpx;">
+          <view class="flex-row align-center gap-12">
             <text class="fact-label" wx:if="{{item.label}}">{{item.label}}</text>
             <text class="fact-time">{{item.ts}}</text>
           </view>
@@ -169,7 +175,7 @@
     <view class="settings-section">
       <view class="section-header justify-between">
         <text class="section-title">{{t.memory.summary_title}}</text>
-        <view class="flex-row align-center" style="gap: 24rpx;">
+        <view class="flex-row align-center gap-24">
           <text class="danger-link" wx:if="{{rollingSummary}}" bindtap="clearSummary">{{t.memory.summary_clear}}</text>
           <view class="maint-expand-btn" bindtap="openSummaryEdit">{{t.memory.summary_edit}}</view>
         </view>

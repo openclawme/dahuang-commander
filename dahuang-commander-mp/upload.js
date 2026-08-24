@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '修复「该任务无文字回复」僵尸气泡：完成态无文字的结果只记法力日志不进主对话；待决策转达任务标记为自动任务';
+const desc = 'UI全面升级：设计Token体系（全局配色+自动深色模式）、房间图标语义配色、消息头像印章化、三页骨架屏、全局按压反馈、inline样式工具类化、头像图圆形裁剪';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

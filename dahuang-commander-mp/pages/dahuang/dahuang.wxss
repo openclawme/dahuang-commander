@@ -2,7 +2,7 @@
 
 .container {
   padding: 24rpx;
-  background-color: #f4f1ea;
+  background-color: var(--paper);
   height: 100%;
   width: 100%;
   box-sizing: border-box;
@@ -34,12 +34,12 @@
   display: flex;
   flex-direction: row;
   background: rgba(253,251,247, 0.8);
-  border: 1rpx solid rgba(158,42,43, 0.2);
+  border: 1rpx solid var(--brand-mid);
   border-radius: 16rpx;
   padding: 8rpx;
   gap: 12rpx;
   margin-bottom: 24rpx;
-  box-shadow: 0 4rpx 20rpx -4rpx rgba(59, 48, 36, 0.15);
+  box-shadow: 0 4rpx 20rpx -4rpx var(--line-strong);
 }
 
 .dahuang-tab-nav-item {
@@ -48,7 +48,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #6b5b4a;
+  color: var(--ink-mid);
   padding: 16rpx 0;
   border-radius: 12rpx;
   text-align: center;
@@ -61,8 +61,8 @@
 
 .dahuang-tab-nav-item.active {
   background: rgba(158,42,43, 0.15);
-  border: 1rpx solid rgba(158,42,43, 0.5);
-  color: #9e2a2b;
+  border: 1rpx solid var(--brand-glow);
+  color: var(--brand);
   font-weight: bold;
 }
 
@@ -78,7 +78,7 @@
 
 /* Owner Highlighting (Requirement 2) */
 .is-me-post {
-  border: 1rpx solid rgba(158,42,43, 0.4) !important;
+  border: 1rpx solid var(--brand-line) !important;
   box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.15) !important;
   background: rgba(158,42,43, 0.03) !important;
 }
@@ -96,9 +96,9 @@
 
 .me-p-badge {
   font-size: 26rpx;
-  color: #9e2a2b;
+  color: var(--brand);
   background: rgba(158,42,43, 0.15);
-  border: 1rpx solid rgba(158,42,43, 0.4);
+  border: 1rpx solid var(--brand-line);
   padding: 1rpx 8rpx;
   border-radius: 4rpx;
   font-weight: bold;
@@ -115,15 +115,15 @@
 }
 
 .is-me-participant {
-  background: rgba(158,42,43, 0.08) !important;
-  border-left: 4rpx solid #9e2a2b !important;
+  background: var(--brand-soft) !important;
+  border-left: 4rpx solid var(--brand) !important;
 }
 
 /* Dispatch Capsule Action Buttons (Requirement 3) */
 .dispatch-cockpit-btn {
-  background: rgba(158,42,43, 0.08) !important;
-  border: 1rpx dashed rgba(158,42,43, 0.5) !important;
-  color: #9e2a2b !important;
+  background: var(--brand-soft) !important;
+  border: 1rpx dashed var(--brand-glow) !important;
+  color: var(--brand) !important;
   font-size: 26rpx !important;
   font-weight: bold !important;
   border-radius: 12rpx !important;
@@ -134,7 +134,7 @@
 }
 
 .dispatch-cockpit-btn:active {
-  background: rgba(158,42,43, 0.2) !important;
+  background: var(--brand-mid) !important;
   transform: scale(0.98) !important;
 }
 
@@ -178,19 +178,19 @@
 }
 
 .mini-cockpit-modal {
-  background: #f4f1ea;
-  border-top: 2rpx solid rgba(158,42,43, 0.5);
+  background: var(--paper);
+  border-top: 2rpx solid var(--brand-glow);
   border-top-left-radius: 32rpx;
   border-top-right-radius: 32rpx;
   padding: 32rpx;
   padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
-  box-shadow: 0 -10rpx 40rpx rgba(158,42,43, 0.2);
+  box-shadow: 0 -10rpx 40rpx var(--brand-mid);
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   max-height: 85vh;
 }
 
 .cockpit-modal-header {
-  border-bottom: 1rpx solid rgba(59, 48, 36, 0.12);
+  border-bottom: 1rpx solid var(--line);
   padding-bottom: 20rpx;
   margin-bottom: 20rpx;
 }
@@ -202,12 +202,12 @@
 .cockpit-modal-title {
   font-size: 26rpx;
   font-weight: bold;
-  color: #1a1a1a;
+  color: var(--ink);
 }
 
 .cockpit-modal-subtitle {
   font-size: 26rpx;
-  color: #8c7d68;
+  color: var(--ink-soft);
   margin-top: 4rpx;
 }
 
@@ -227,7 +227,7 @@
   height: 60rpx;
   border-radius: 50%;
   background: rgba(59, 48, 36, 0.1);
-  color: #be123c;
+  color: var(--danger);
   font-size: 26rpx;
   cursor: pointer;
 }
@@ -263,22 +263,22 @@
 }
 
 .mini-chat-user .mini-chat-bubble {
-  background: #9e2a2b;
-  color: #f4f1ea;
+  background: var(--brand);
+  color: var(--paper);
   font-weight: 500;
   border-top-right-radius: 2rpx;
 }
 
 .mini-chat-agent .mini-chat-bubble {
   background: rgba(255, 255, 255, 0.04);
-  border: 1rpx solid rgba(59, 48, 36, 0.12);
-  color: #3b3024;
+  border: 1rpx solid var(--line);
+  color: var(--ink-strong);
   border-top-left-radius: 2rpx;
 }
 
 .mini-chat-time {
   font-size: 26rpx;
-  color: #6b5b4a;
+  color: var(--ink-mid);
   margin-top: 6rpx;
 }
 
@@ -286,7 +286,7 @@
 .mini-bubble-task-container {
   width: 100%;
   background: rgba(255, 255, 255, 0.6);
-  border: 1rpx solid rgba(59, 48, 36, 0.12);
+  border: 1rpx solid var(--line);
   border-radius: 8rpx;
   padding: 12rpx;
 }
@@ -301,8 +301,8 @@
 
 .mini-progress-fill {
   height: 100%;
-  background: #9e2a2b;
-  box-shadow: 0 6rpx 16rpx -6rpx rgba(59, 48, 36, 0.2);
+  background: var(--brand);
+  box-shadow: 0 6rpx 16rpx -6rpx var(--line-stronger);
   transition: width 0.3s ease;
 }
 
@@ -311,11 +311,11 @@
 }
 
 .mini-task-title {
-  color: #8c7d68;
+  color: var(--ink-soft);
 }
 
 .mini-task-title.done {
-  color: #6b5b4a;
+  color: var(--ink-mid);
   text-decoration: line-through;
 }
 
@@ -330,16 +330,16 @@
   color: #166534;
 }
 .mini-task-badge.status-PROCESSING {
-  color: #9e2a2b;
+  color: var(--brand);
 }
 .mini-task-badge.status-WAITING {
-  color: #6b5b4a;
+  color: var(--ink-mid);
 }
 
 .mini-progress-num {
   font-size: 26rpx;
   font-weight: bold;
-  color: #9e2a2b;
+  color: var(--brand);
   margin-left: auto;
 }
 
@@ -351,7 +351,7 @@
 .quick-title {
   font-size: 26rpx;
   font-weight: bold;
-  color: #6b5b4a;
+  color: var(--ink-mid);
   margin-bottom: 12rpx;
 }
 
@@ -364,7 +364,7 @@
 .quick-opt-btn {
   background: rgba(255, 255, 255, 0.02) !important;
   border: 1rpx solid rgba(255, 255, 255, 0.06) !important;
-  color: #a89982 !important;
+  color: var(--ink-faint) !important;
   font-size: 26rpx !important;
   padding: 16rpx 20rpx !important;
   border-radius: 10rpx !important;
@@ -375,14 +375,14 @@
 
 .quick-opt-btn:active {
   background: rgba(158,42,43, 0.1) !important;
-  border-color: rgba(158,42,43, 0.4) !important;
-  color: #9e2a2b !important;
+  border-color: var(--brand-line) !important;
+  color: var(--brand) !important;
 }
 
 /* Custom Mini Input Bar */
 .cockpit-input-bar {
-  background: rgba(255, 255, 255, 0.65);
-  border: 1rpx solid rgba(59, 48, 36, 0.15);
+  background: var(--card);
+  border: 1rpx solid var(--line-strong);
   border-radius: 12rpx;
   padding: 8rpx 16rpx;
   gap: 12rpx;
@@ -392,12 +392,12 @@
   flex: 1;
   height: 60rpx;
   font-size: 26rpx;
-  color: #1a1a1a;
+  color: var(--ink);
 }
 
 .cockpit-send-btn {
-  background: #8c7d68 !important;
-  color: #8c7d68 !important;
+  background: var(--ink-soft) !important;
+  color: var(--ink-soft) !important;
   font-size: 26rpx !important;
   font-weight: bold !important;
   padding: 12rpx 24rpx !important;
@@ -407,9 +407,9 @@
 }
 
 .cockpit-send-btn.active {
-  background: #9e2a2b !important;
-  color: #f4f1ea !important;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.4) !important;
+  background: var(--brand) !important;
+  color: var(--paper) !important;
+  box-shadow: 0 6rpx 18rpx -6rpx var(--brand-line) !important;
 }
 
 /* Keyframes */
@@ -427,7 +427,7 @@
 .comments-section {
   margin-top: 16rpx;
   padding-top: 16rpx;
-  border-top: 1rpx solid rgba(59, 48, 36, 0.12);
+  border-top: 1rpx solid var(--line);
   animation: fadeIn 0.3s ease;
 }
 
@@ -449,19 +449,19 @@
 .comment-author {
   font-size: 26rpx;
   font-weight: bold;
-  color: #8c7d68;
+  color: var(--ink-soft);
   margin-bottom: 4rpx;
 }
 
 .comment-text {
   font-size: 26rpx;
-  color: #3b3024;
+  color: var(--ink-strong);
   line-height: 1.4;
 }
 
 .loading-comments {
   font-size: 26rpx;
-  color: #6b5b4a;
+  color: var(--ink-mid);
   text-align: center;
   padding: 10rpx 0;
 }
@@ -499,7 +499,7 @@
 .forum-post-card {
   background: transparent;
   border: none;
-  border-bottom: 1rpx solid rgba(59, 48, 36, 0.08);
+  border-bottom: 1rpx solid var(--line-weak);
   border-radius: 0;
   padding: 24rpx 0;
   margin-bottom: 0;
@@ -509,7 +509,7 @@
 .arena-game-card,
 .alchemy-challenge-card {
   border-radius: 12rpx;
-  border-color: rgba(59, 48, 36, 0.08);
+  border-color: var(--line-weak);
   box-shadow: none;
 }
 /* 横向溢出修复：可收缩元素加省略号，次要元素不收缩 */
@@ -569,7 +569,7 @@
 .node-control-drawer {
   background: transparent;
   border: none;
-  border-top: 1rpx solid rgba(59, 48, 36, 0.08);
+  border-top: 1rpx solid var(--line-weak);
   border-radius: 0;
   box-shadow: none;
 }

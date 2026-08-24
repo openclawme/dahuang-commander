@@ -2,7 +2,7 @@
 
 .container {
   padding: 24rpx;
-  background-color: #f4f1ea;
+  background-color: var(--paper);
   min-height: 100%;
   width: 100%;
   box-sizing: border-box;
@@ -11,7 +11,7 @@
 .loading-box {
   padding: 80rpx 0;
   text-align: center;
-  color: #8c7d68;
+  color: var(--ink-soft);
   font-size: 26rpx;
 }
 
@@ -23,8 +23,8 @@
 }
 
 .maint-card {
-  background: rgba(255, 255, 255, 0.65);
-  border: 1rpx solid rgba(158, 42, 43, 0.2);
+  background: var(--card);
+  border: 1rpx solid var(--brand-mid);
   border-radius: 12rpx;
   padding: 20rpx;
   margin-bottom: 16rpx;
@@ -35,7 +35,7 @@
   width: 72rpx;
   height: 72rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #9e2a2b, #6b1f20);
+  background: var(--brand-grad);
   flex-shrink: 0;
 }
 
@@ -48,23 +48,23 @@
 .row-title {
   font-size: 28rpx;
   font-weight: bold;
-  color: #3b3024;
+  color: var(--ink-strong);
 }
 
 .row-sub {
   font-size: 22rpx;
-  color: #8c7d68;
+  color: var(--ink-soft);
   margin-top: 4rpx;
 }
 
 .fact-time {
   font-size: 22rpx;
-  color: #a89982;
+  color: var(--ink-faint);
 }
 
 .fact-content {
   font-size: 26rpx;
-  color: #3b3024;
+  color: var(--ink-strong);
   line-height: 1.5;
   word-break: break-all;
 }
@@ -80,22 +80,22 @@
   line-height: 2.2;
   padding: 0 24rpx;
   border-radius: 8rpx;
-  background: #ffffff;
-  color: #3b3024;
-  border: 1rpx solid rgba(59, 48, 36, 0.2);
+  background: var(--surface);
+  color: var(--ink-strong);
+  border: 1rpx solid var(--line-stronger);
   margin: 0;
 }
 
 .maint-btn-primary {
-  background: #9e2a2b;
+  background: var(--brand);
   color: #ffffff;
-  border-color: #9e2a2b;
+  border-color: var(--brand);
 }
 
 .maint-btn-ghost {
   border-color: transparent;
   background: transparent;
-  color: #8c7d68;
+  color: var(--ink-soft);
 }
 
 .maint-btn::after {
@@ -113,6 +113,6 @@
 
 .empty-text {
   font-size: 26rpx;
-  color: #8c7d68;
+  color: var(--ink-soft);
   text-align: center;
 }

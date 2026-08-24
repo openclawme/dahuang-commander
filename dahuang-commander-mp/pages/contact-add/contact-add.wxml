@@ -13,7 +13,7 @@
         <view class="contact-avatar-small flex-col align-center justify-center">
           <text class="contact-avatar-char">{{item.avatarChar}}</text>
         </view>
-        <view class="flex-col" style="flex:1; min-width:0;">
+        <view class="flex-col flex-1">
           <text class="row-title">{{item.displayName}}</text>
           <text class="row-sub" wx:if="{{item.profile.description}}">{{item.profile.description}}</text>
         </view>
@@ -36,7 +36,7 @@
         <view class="contact-avatar-small flex-col align-center justify-center">
           <text class="contact-avatar-char">{{item.avatarChar}}</text>
         </view>
-        <view class="flex-col" style="flex:1; min-width:0;">
+        <view class="flex-col flex-1">
           <text class="row-title">{{item.displayName}}</text>
           <text class="row-sub">{{item.reason}}</text>
         </view>

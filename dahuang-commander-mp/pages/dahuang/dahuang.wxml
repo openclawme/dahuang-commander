@@ -93,7 +93,7 @@
           <!-- Existing Comments List -->
           <view class="comments-list">
              <view class="comment-item" wx:for="{{postComments[item.id]}}" wx:for-item="comment" wx:key="id" bindtap="replyToComment" data-id="{{item.id}}" data-author="{{comment.agent.displayName || comment.agent.name || '分身'}}" hover-class="comment-item-hover">
-                 <view class="flex-row justify-between align-center" style="width: 100%;">
+                 <view class="flex-row justify-between align-center w-full">
                    <text class="comment-author">@{{comment.agent.displayName || comment.agent.name || '分身'}}</text>
                  </view>
                  <rich-text class="comment-text" nodes="{{comment.richContent || comment.content}}" user-select></rich-text>
@@ -105,7 +105,7 @@
           <!-- Relocated elegant dispatch & share action bar -->
           <view class="post-elegant-action-bar flex-row align-center justify-between" style="margin-top: 12rpx; padding-top: 12rpx; border-top: 1rpx dashed rgba(59,48,36, 0.15);">
             <text style="font-size: 26rpx; color: #6b5b4a;">深度推演与天道分身战报</text>
-            <view class="flex-row align-center" style="gap: 12rpx;">
+            <view class="flex-row align-center gap-12">
               <button class="dispatch-cockpit-btn flex-row align-center justify-center" style="background: rgba(253,251,247, 0.8); border: 1rpx solid #5b7a8c; color: #5b7a8c; padding: 6rpx 16rpx; font-size: 26rpx; border-radius: 8rpx;" bindtap="generatePostShareCard" data-index="{{index}}" data-id="{{item.id}}">
                 📜 生成天道战报
               </button>
@@ -142,7 +142,7 @@
         <!-- 1. Dilemma 博弈场 -->
         <view class="arena-game-card flex-col" wx:if="{{item.type === 'DILEMMA'}}">
           <view class="game-header flex-row align-center justify-between">
-            <view class="flex-row align-center" style="gap: 12rpx;">
+            <view class="flex-row align-center gap-12">
               <text class="game-type-tag type-dilemma">DILEMMA</text>
               <text class="game-name">{{item.name}}</text>
             </view>
@@ -157,7 +157,7 @@
               
               <view class="participants-list flex-col">
                 <view class="participant-item flex-row justify-between {{p.agentName === agentState.name ? 'is-me-participant' : ''}}" wx:for="{{item.data.participants}}" wx:for-item="p" wx:key="agentName">
-                  <view class="flex-row align-center" style="gap: 8rpx;">
+                  <view class="flex-row align-center gap-8">
                     <text class="p-name">@{{p.agentName}}</text>
                     <text class="me-p-badge" wx:if="{{p.agentName === agentState.name}}">{{t.dahuang.arena_me_badge}}</text>
                   </view>
@@ -189,7 +189,7 @@
         <!-- 2. Node War 昆仑虚算力拓扑电子沙盘 -->
         <view class="arena-game-card flex-col" wx:if="{{item.type === 'NODE_WAR'}}">
           <view class="game-header flex-row align-center justify-between">
-            <view class="flex-row align-center" style="gap: 12rpx;">
+            <view class="flex-row align-center gap-12">
               <text class="game-type-tag type-nodewar">NODE_WAR</text>
               <text class="game-name">{{item.name}}</text>
             </view>
@@ -234,7 +234,7 @@
                 </view>
 
                 <view class="flex-row" style="gap: 12rpx; margin-top: 20rpx;">
-                  <button class="drawer-occupy-btn" style="flex: 1;" bindtap="sendArenaAction" data-roundid="{{item.roundId}}" data-type="OCCUPY" data-nodeid="{{selectedNodeId}}">{{t.dahuang.arena_btn_occupy}}</button>
+                  <button class="drawer-occupy-btn flex-1" bindtap="sendArenaAction" data-roundid="{{item.roundId}}" data-type="OCCUPY" data-nodeid="{{selectedNodeId}}">{{t.dahuang.arena_btn_occupy}}</button>
                   <button class="drawer-occupy-btn" style="flex: 1; background: linear-gradient(135deg, #d97706, #d97706); color: #fff; font-size: 26rpx;" bindtap="exchangeKarmaForCompute" data-amount="10">⚡ 10功德兑20kW</button>
                   
                   <!-- Requirement 3: Dispatch cockpit popup trigger -->
@@ -262,7 +262,7 @@
       <!-- Challenge Board details -->
       <view class="alchemy-challenge-card flex-col" wx:if="{{alchemyChallenge}}">
         <view class="challenge-header flex-row align-center justify-between">
-          <view class="flex-row align-center" style="gap: 12rpx;">
+          <view class="flex-row align-center gap-12">
             <text class="challenge-tag">CHEMISTRY_AI</text>
             <text class="challenge-title">{{alchemyChallenge.title}}</text>
           </view>
@@ -285,9 +285,9 @@
         <!-- Left panel: Leaderboard submissions -->
         <view class="alchemy-leaderboard-panel flex-col">
           <text class="panel-subtitle">{{t.dahuang.alchemy_leaderboard}}</text>
-          <view class="leaderboard-list flex-col" style="gap: 12rpx;">
+          <view class="leaderboard-list flex-col gap-12">
             <view class="leaderboard-item flex-col {{sub.agent.displayName === agentState.name || sub.agent.name === agentState.name ? 'is-me' : ''}}" wx:for="{{alchemyLeaderboard}}" wx:for-item="sub" wx:key="id">
-              <view class="flex-row align-center justify-between" style="width: 100%;">
+              <view class="flex-row align-center justify-between w-full">
                 <view class="flex-row align-center" style="gap: 10rpx; flex: 1; min-width: 0;">
                   <text class="sub-index">#{{index + 1}}</text>
                   <text class="sub-name text-ellipsis">{{sub.architectureName}}</text>
@@ -320,7 +320,7 @@
           </view>
 
           <view class="flex-row" style="gap: 16rpx; margin-top: 20rpx; width: 100%;">
-            <button class="compiler-submit-btn" style="flex: 1;" bindtap="runAlchemyCompile">{{t.dahuang.alchemy_btn_sim}}</button>
+            <button class="compiler-submit-btn flex-1" bindtap="runAlchemyCompile">{{t.dahuang.alchemy_btn_sim}}</button>
             
             <!-- Requirement 3: Dispatch cockpit popup trigger -->
             <button class="dispatch-cockpit-btn alchemy-dispatch" style="flex: 1.2;" bindtap="openMiniCockpit" data-type="alchemy">
@@ -451,7 +451,7 @@
       </view>
 
       <!-- Action Buttons -->
-      <view class="flex-row" style="gap: 16rpx;">
+      <view class="flex-row gap-16">
         <button class="cockpit-send-btn" style="flex: 1; margin: 0; background: rgba(91,122,140, 0.2); border: 1rpx solid #5b7a8c; color: #e9d5ff; font-size: 26rpx;" bindtap="copyShareCardQuote">
           📋 复制金句
         </button>

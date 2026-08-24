@@ -1,7 +1,133 @@
+/* ===================== 设计 Token 体系（全站唯一配色来源） ===================== */
+:root {
+  --paper: #f4f1ea;          /* 页面底色（羊皮纸） */
+  --surface: #ffffff;        /* 输入框/纯白卡片 */
+  --card: rgba(255, 255, 255, 0.65);   /* 半透卡片 */
+  --card-strong: rgba(255, 255, 255, 0.85);
+  --card-weak: rgba(255, 255, 255, 0.5);
+  --ink: #1a1a1a;            /* 主文字 */
+  --ink-strong: #3b3024;     /* 强文字 */
+  --ink-mid: #6b5b4a;        /* 中文字 */
+  --ink-soft: #8c7d68;       /* 弱文字 */
+  --ink-faint: #a89982;      /* 提示/占位 */
+  --brand: #9e2a2b;          /* 印章红 */
+  --brand-grad: linear-gradient(135deg, #9e2a2b, #6b1f20);
+  --brand-faint: rgba(158, 42, 43, 0.05);
+  --brand-soft: rgba(158, 42, 43, 0.08);
+  --brand-mid: rgba(158, 42, 43, 0.2);
+  --brand-line: rgba(158, 42, 43, 0.3);
+  --brand-glow: rgba(158, 42, 43, 0.5);
+  --danger: #be123c;
+  --warn: #b45309;
+  --ok: #2f9e44;
+  --line-weak: rgba(59, 48, 36, 0.08);
+  --line: rgba(59, 48, 36, 0.12);
+  --line-strong: rgba(59, 48, 36, 0.15);
+  --line-stronger: rgba(59, 48, 36, 0.2);
+  --line-solid: rgba(59, 48, 36, 0.3);
+  --shadow-card: 0 10rpx 30rpx -10rpx rgba(59, 48, 36, 0.15);
+}
+
+/* 深色模式（跟随系统；显式浅色选择覆盖回 light） */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #171412;
+    --surface: #221d19;
+    --card: rgba(255, 255, 255, 0.06);
+    --card-strong: rgba(255, 255, 255, 0.1);
+    --card-weak: rgba(255, 255, 255, 0.04);
+    --ink: #e8e2d6;
+    --ink-strong: #d8d0c2;
+    --ink-mid: #b3a894;
+    --ink-soft: #8a8070;
+    --ink-faint: #6f6657;
+    --brand: #c25b57;
+    --brand-grad: linear-gradient(135deg, #c25b57, #7c2825);
+    --brand-faint: rgba(194, 91, 87, 0.08);
+    --brand-soft: rgba(194, 91, 87, 0.12);
+    --brand-mid: rgba(194, 91, 87, 0.25);
+    --brand-line: rgba(194, 91, 87, 0.4);
+    --brand-glow: rgba(194, 91, 87, 0.55);
+    --danger: #e05252;
+    --warn: #d97706;
+    --ok: #4ade80;
+    --line-weak: rgba(232, 226, 214, 0.08);
+    --line: rgba(232, 226, 214, 0.12);
+    --line-strong: rgba(232, 226, 214, 0.16);
+    --line-stronger: rgba(232, 226, 214, 0.22);
+    --line-solid: rgba(232, 226, 214, 0.32);
+    --shadow-card: 0 10rpx 30rpx -10rpx rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* ===================== 通用工具类 ===================== */
+.flex-1 { flex: 1; min-width: 0; }
+.w-full { width: 100%; }
+.gap-8 { gap: 8rpx; }
+.gap-12 { gap: 12rpx; }
+.gap-16 { gap: 16rpx; }
+.gap-20 { gap: 20rpx; }
+.gap-24 { gap: 24rpx; }
+.gap-32 { gap: 32rpx; }
+.row-between { display: flex; flex-direction: row; align-items: center; justify-content: space-between; }
+
+/* 全局按压反馈：所有 button 与 pressable 统一微缩放 */
+button {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+button:active,
+.pressable:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+/* ===================== 全局骨架屏（各页加载态复用） ===================== */
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+.skeleton-row {
+  background: var(--card);
+  border: 1rpx solid var(--line-weak);
+  border-radius: 12rpx;
+  padding: 24rpx;
+  gap: 24rpx;
+}
+.skeleton-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 10rpx;
+  background: linear-gradient(90deg, var(--line-weak) 25%, var(--line-strong) 50%, var(--line-weak) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s infinite linear;
+  flex-shrink: 0;
+}
+.skeleton-lines {
+  flex: 1;
+  gap: 14rpx;
+}
+.skeleton-line {
+  height: 24rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, var(--line-weak) 25%, var(--line-strong) 50%, var(--line-weak) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s infinite linear;
+}
+.skeleton-line-title { width: 42%; }
+.skeleton-line-sub { width: 72%; height: 20rpx; }
+
+@keyframes skeletonShimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+.gap-10 { gap: 10rpx; }
+.gap-14 { gap: 14rpx; }
+
 /** 大荒之地 · 宣纸水墨朱砂主题 (与 dahuang.land Web 端对齐) **/
 page {
-  background-color: #f4f1ea;
-  color: #1a1a1a;
+  background-color: var(--paper);
+  color: var(--ink);
   font-size: 14px;
   line-height: 1.5;
   box-sizing: border-box;

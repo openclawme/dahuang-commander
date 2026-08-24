@@ -2,7 +2,7 @@
 
 .container {
   padding: 24rpx;
-  background-color: #f4f1ea;
+  background-color: var(--paper);
   min-height: 100%;
   width: 100%;
   box-sizing: border-box;
@@ -14,14 +14,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 8rpx 14rpx 8rpx;
-  border-bottom: 1rpx solid rgba(59, 48, 36, 0.12);
+  border-bottom: 1rpx solid var(--line);
   margin-bottom: 14rpx;
 }
 
 .section-title {
   font-size: 26rpx;
   font-weight: bold;
-  color: #3b3024;
+  color: var(--ink-strong);
   display: block;
 }
 
@@ -29,24 +29,24 @@
   width: 100%;
   height: 96rpx;
   line-height: 96rpx;
-  background: #ffffff;
-  border: 1rpx solid rgba(59, 48, 36, 0.15);
+  background: var(--surface);
+  border: 1rpx solid var(--line-strong);
   border-radius: 10rpx;
   padding: 0 24rpx;
   font-size: 30rpx;
-  color: #3b3024;
+  color: var(--ink-strong);
   box-sizing: border-box;
   margin-bottom: 12rpx;
 }
 
 .form-ph {
-  color: #a89982;
+  color: var(--ink-faint);
 }
 
 .cost-note {
   display: block;
   font-size: 22rpx;
-  color: #b45309;
+  color: var(--warn);
 }
 
 .settings-list {
@@ -59,22 +59,22 @@
 .agent-row {
   padding: 18rpx 24rpx;
   gap: 20rpx;
-  border-bottom: 1rpx solid rgba(59, 48, 36, 0.08);
-  background: rgba(255, 255, 255, 0.5);
+  border-bottom: 1rpx solid var(--line-weak);
+  background: var(--card-weak);
   border-radius: 10rpx;
   margin-bottom: 10rpx;
 }
 
 .row-selected {
-  background: rgba(158, 42, 43, 0.08);
-  border: 1rpx solid rgba(158, 42, 43, 0.3);
+  background: var(--brand-soft);
+  border: 1rpx solid var(--brand-line);
 }
 
 .contact-avatar-small {
   width: 72rpx;
   height: 72rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #9e2a2b, #6b1f20);
+  background: var(--brand-grad);
   flex-shrink: 0;
 }
 
@@ -87,14 +87,14 @@
 .row-title {
   font-size: 28rpx;
   font-weight: bold;
-  color: #3b3024;
+  color: var(--ink-strong);
 }
 
 .check-box {
   width: 44rpx;
   height: 44rpx;
   border-radius: 50%;
-  border: 2rpx solid rgba(59, 48, 36, 0.3);
+  border: 2rpx solid var(--line-solid);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -104,8 +104,8 @@
 }
 
 .check-on {
-  background: #9e2a2b;
-  border-color: #9e2a2b;
+  background: var(--brand);
+  border-color: var(--brand);
 }
 
 .empty-agents {
@@ -114,19 +114,19 @@
 
 .empty-text {
   font-size: 26rpx;
-  color: #8c7d68;
+  color: var(--ink-soft);
   text-align: center;
 }
 
 .create-btn {
   width: 100%;
-  background: #9e2a2b;
+  background: var(--brand);
   color: #ffffff;
   font-size: 30rpx;
   font-weight: bold;
   border-radius: 12rpx;
   margin-top: 32rpx;
-  box-shadow: 0 8rpx 20rpx -8rpx rgba(158, 42, 43, 0.5);
+  box-shadow: 0 8rpx 20rpx -8rpx var(--brand-glow);
 }
 
 .create-btn::after {

@@ -15,7 +15,7 @@
       <view class="contact-avatar-small flex-col align-center justify-center">
         <text class="contact-avatar-char">{{item.avatarChar}}</text>
       </view>
-      <text class="row-title" style="flex:1;">{{item.displayName}}</text>
+      <text class="row-title flex-1">{{item.displayName}}</text>
       <view class="check-box {{selected[item.friendId] ? 'check-on' : ''}}">{{selected[item.friendId] ? '✓' : ''}}</view>
     </view>
   </view>

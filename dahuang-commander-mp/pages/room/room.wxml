@@ -21,11 +21,11 @@
     <view class="msg-list">
       <view class="msg-item flex-row {{item.isMe ? 'msg-me' : 'msg-other'}}" wx:for="{{messages}}" wx:key="event_id" id="msg-{{item.event_id}}">
         <!-- 头像 -->
-        <view class="msg-avatar" wx:if="{{!item.isMe}}">
-          <text class="avatar-char">🤖</text>
+        <view class="msg-avatar seal-color-{{item.sealSeed}}" wx:if="{{!item.isMe}}">
+          <text class="avatar-char">{{item.avatarChar}}</text>
         </view>
-        <view class="msg-avatar" wx:if="{{item.isMe}}">
-          <text class="avatar-char">🧑‍💻</text>
+        <view class="msg-avatar seal-color-{{item.sealSeed}}" wx:if="{{item.isMe}}">
+          <text class="avatar-char">{{item.avatarChar}}</text>
         </view>
 
         <!-- 消息主体 -->

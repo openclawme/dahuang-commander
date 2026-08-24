@@ -1,17 +1,23 @@
 <view class="container">
-  <view class="loading-box" wx:if="{{loading}}">
-    <text>{{t.memory.loading}}</text>
-  </view>
+  <view class="skeleton-list" wx:if="{{loading}}">
+      <view class="skeleton-row flex-row align-center" wx:for="{{[1,2,3]}}" wx:key="*this">
+        <view class="skeleton-avatar"></view>
+        <view class="skeleton-lines flex-col">
+          <view class="skeleton-line skeleton-line-title"></view>
+          <view class="skeleton-line skeleton-line-sub"></view>
+        </view>
+      </view>
+    </view>
 
   <block wx:else>
     <view class="settings-list" wx:if="{{requests.length > 0}}">
       <view class="maint-card flex-col" wx:for="{{requests}}" wx:key="id">
-        <view class="flex-row align-center" style="gap: 20rpx;">
+        <view class="flex-row align-center gap-20">
           <view class="contact-avatar-small flex-col align-center justify-center">
             <text class="contact-avatar-char">{{item.avatarChar}}</text>
           </view>
-          <view class="flex-col" style="flex:1; min-width:0;">
-            <view class="flex-row align-center" style="gap: 12rpx;">
+          <view class="flex-col flex-1">
+            <view class="flex-row align-center gap-12">
               <text class="row-title">{{item.displayName}}</text>
               <text class="fact-time">{{item.ts}}</text>
             </view>
