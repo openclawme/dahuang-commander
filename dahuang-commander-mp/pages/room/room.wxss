@@ -1,7 +1,7 @@
 .container {
   height: 100%;
   width: 100%;
-  background-color: var(--paper);
+  background-color: #f4f1ea;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -44,20 +44,18 @@
   justify-content: center;
   flex-shrink: 0;
   background-color: rgba(158,42,43, 0.1);
-  border: 2rpx solid var(--brand);
-  box-shadow: 0 6rpx 18rpx -6rpx var(--brand-line);
+  border: 2rpx solid #9e2a2b;
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.3);
 }
 
 .msg-me .msg-avatar {
   background-color: rgba(158,42,43, 0.1);
-  border: 2rpx solid var(--brand);
-  box-shadow: 0 6rpx 18rpx -6rpx var(--brand-line);
+  border: 2rpx solid #9e2a2b;
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.3);
 }
 
 .avatar-char {
-  font-size: 30rpx;
-  font-weight: bold;
-  color: #ffffff;
+  font-size: 32rpx;
 }
 
 .msg-content-wrapper {
@@ -74,7 +72,7 @@
 
 .sender-name {
   font-size: 26rpx;
-  color: var(--ink-mid);
+  color: #6b5b4a;
   margin-bottom: 6rpx;
   font-weight: bold;
 }
@@ -90,8 +88,8 @@
 
 .bubble-me-glow {
   background-color: rgba(158,42,43, 0.12);
-  border: 1rpx solid var(--brand-line);
-  color: var(--ink);
+  border: 1rpx solid rgba(158,42,43, 0.4);
+  color: #1a1a1a;
   box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.1);
   border-radius: 16rpx 0 16rpx 16rpx;
 }
@@ -99,7 +97,7 @@
 .bubble-other-glow {
   background-color: rgba(91,122,140, 0.15);
   border: 1rpx solid rgba(91,122,140, 0.4);
-  color: var(--ink-strong);
+  color: #3b3024;
   box-shadow: 0 6rpx 18rpx -6rpx rgba(91,122,140, 0.1);
   border-radius: 0 16rpx 16rpx 16rpx;
 }
@@ -110,7 +108,7 @@
 
 .msg-time {
   font-size: 26rpx;
-  color: var(--ink-soft);
+  color: #8c7d68;
   margin-top: 6rpx;
 }
 
@@ -122,16 +120,16 @@
 
 .chat-footer {
   position: relative;
-  background-color: var(--paper);
-  border-top: 1rpx solid var(--brand-mid);
+  background-color: #f4f1ea;
+  border-top: 1rpx solid rgba(158,42,43, 0.2);
   padding: 16rpx 20rpx;
-  box-shadow: 0 -10rpx 30rpx -8rpx var(--line-stronger);
+  box-shadow: 0 -10rpx 30rpx -8rpx rgba(59, 48, 36, 0.2);
   z-index: 100;
 }
 
 .chat-footer .input-container {
   background: #fdfbf7;
-  border: 1rpx solid var(--line-strong);
+  border: 1rpx solid rgba(59, 48, 36, 0.15);
   border-radius: 38rpx;
   padding: 8rpx 16rpx 8rpx 24rpx;
   flex: 1;
@@ -141,7 +139,7 @@
   flex: 1;
   background: transparent;
   border: none;
-  color: var(--ink);
+  color: #1a1a1a;
   font-size: 26rpx;
   height: 60rpx;
   line-height: 60rpx;
@@ -149,12 +147,12 @@
 }
 
 .chat-placeholder {
-  color: var(--ink-soft);
+  color: #8c7d68;
   font-size: 26rpx;
 }
 
 .send-btn {
-  background: linear-gradient(135deg, var(--brand), var(--danger));
+  background: linear-gradient(135deg, #9e2a2b, #be123c);
   color: #ffffff;
   font-size: 28rpx;
   font-weight: bold;
@@ -164,7 +162,7 @@
   line-height: 76rpx;
   margin: 0 0 0 16rpx;
   border: none;
-  box-shadow: 0 6rpx 18rpx -6rpx var(--brand-line);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(158, 42, 43, 0.35);
 }
 
 .send-btn::after {
@@ -205,13 +203,13 @@
   border-radius: 999rpx;
 }
 .unlock-btn {
-  background: var(--brand);
+  background: #9e2a2b;
   color: #ffffff;
 }
 .lock-btn {
-  background: var(--brand-soft);
-  color: var(--brand);
-  border: 1rpx solid var(--brand-line);
+  background: rgba(158, 42, 43, 0.08);
+  color: #9e2a2b;
+  border: 1rpx solid rgba(158, 42, 43, 0.3);
 }
 .unlock-btn::after,
 .lock-btn::after {
@@ -220,14 +218,14 @@
 .locked-hint {
   flex: 1;
   font-size: 24rpx;
-  color: var(--ink-soft);
+  color: #8c7d68;
   padding: 0 8rpx;
 }
 
 /* ===== 接管横幅（交还分身入口） ===== */
 .takeover-banner {
-  background: var(--brand-soft);
-  border: 1rpx solid var(--brand-line);
+  background: rgba(158, 42, 43, 0.08);
+  border: 1rpx solid rgba(158, 42, 43, 0.35);
   border-radius: 999rpx;
   padding: 12rpx 28rpx;
   margin-bottom: 16rpx;
@@ -236,13 +234,13 @@
 .takeover-banner-text {
   font-size: 24rpx;
   font-weight: bold;
-  color: var(--brand);
+  color: #9e2a2b;
 }
 
 /* ===== 群生命周期 ===== */
 .dissolved-banner {
-  background: var(--line);
-  border: 1rpx dashed var(--line-solid);
+  background: rgba(59, 48, 36, 0.12);
+  border: 1rpx dashed rgba(59, 48, 36, 0.4);
   border-radius: 999rpx;
   padding: 12rpx 28rpx;
   margin-bottom: 16rpx;
@@ -251,7 +249,7 @@
 .dissolved-banner-text {
   font-size: 24rpx;
   font-weight: bold;
-  color: var(--ink-mid);
+  color: #6b5b4a;
 }
 .group-admin-row {
   justify-content: flex-end;
@@ -260,19 +258,19 @@
 }
 .group-admin-label {
   font-size: 22rpx;
-  color: var(--ink-faint);
+  color: #a89982;
 }
 .group-admin-btn {
   font-size: 22rpx;
   font-weight: bold;
-  color: var(--warn);
+  color: #b45309;
   background: rgba(180, 83, 9, 0.08);
   border: 1rpx solid rgba(180, 83, 9, 0.4);
   border-radius: 999rpx;
   padding: 6rpx 24rpx;
 }
 .group-admin-btn-plain {
-  color: var(--ink-soft);
+  color: #8c7d68;
   background: rgba(59, 48, 36, 0.05);
-  border-color: var(--line-solid);
+  border-color: rgba(59, 48, 36, 0.25);
 }

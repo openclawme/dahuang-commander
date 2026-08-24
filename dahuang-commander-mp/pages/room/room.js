@@ -108,14 +108,8 @@ Page({
     });
 
     const myDid = app.globalData.agentState.did;
-    const myName = app.globalData.agentState.name || "我";
     const messages = (room.events || []).map(msg => {
       const isMe = msg.sender === myDid;
-      const senderName = msg.senderName || (isMe ? myName : "道");
-      let hash = 0;
-      for (let i = 0; i < senderName.length; i++) hash = (hash * 31 + senderName.charCodeAt(i)) | 0;
-      const sealSeed = Math.abs(hash) % 5;
-      const avatarChar = (senderName || "道").slice(0, 1);
       const date = new Date(msg.ts);
       const hours = String(date.getHours()).padStart(2, "0");
       const minutes = String(date.getMinutes()).padStart(2, "0");
@@ -126,8 +120,6 @@ Page({
       return {
         ...msg,
         isMe,
-        sealSeed,
-        avatarChar,
         timeStr,
         isRich,
         richContent: rich.html,

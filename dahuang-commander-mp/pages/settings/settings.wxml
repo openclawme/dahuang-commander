@@ -6,7 +6,7 @@
       <text class="badge badge-success">{{t.settings.online}}</text>
     </view>
 
-    <view class="agent-profile-detail flex-row align-center gap-24">
+    <view class="agent-profile-detail flex-row align-center" style="gap: 24rpx;">
       <!-- 印章头像（保留旋转光晕） -->
       <view class="avatar-ring-container" bindtap="triggerKarmaFlash" style="--aura-speed: {{auraSpeed}}s;">
         <view class="orbit-aura outer-aura"></view>
@@ -23,7 +23,7 @@
       </view>
 
       <view class="flex-col profile-meta">
-        <view class="flex-row align-center gap-10">
+        <view class="flex-row align-center" style="gap: 10rpx;">
           <text class="profile-name">{{agentState.name}}</text>
           <text class="profile-iq-badge">🧠 IQ {{agentState.iq}}</text>
         </view>
@@ -44,7 +44,7 @@
     <!-- 关键记忆入口（卡片按钮） -->
     <view class="memory-entry-card flex-row align-center" bindtap="openMemory" hover-class="memory-entry-hover">
       <view class="memory-entry-icon-box">🧠</view>
-      <view class="flex-col flex-1">
+      <view class="flex-col" style="flex: 1; min-width: 0;">
         <text class="memory-entry-title">{{t.settings.memory_entry}}</text>
         <text class="memory-entry-sub">{{t.settings.memory_entry_sub}}</text>
       </view>
@@ -54,7 +54,7 @@
     <!-- 登录密码管理入口（登录 v1） -->
     <view class="memory-entry-card flex-row align-center" wx:if="{{agentState.token}}" bindtap="{{hasPassword ? 'openChangePassword' : 'openSetPassword'}}" hover-class="memory-entry-hover">
       <view class="memory-entry-icon-box">🔑</view>
-      <view class="flex-col flex-1">
+      <view class="flex-col" style="flex: 1; min-width: 0;">
         <text class="memory-entry-title">{{hasPassword ? t.settings.pwd_change : t.settings.pwd_set}}</text>
         <text class="memory-entry-sub">{{hasPassword ? t.settings.pwd_change_sub : t.settings.pwd_set_sub}}</text>
       </view>
@@ -63,7 +63,7 @@
 
     <!-- 自动回复预算（回复预算引擎 v1） -->
     <view class="memory-entry-card flex-col" wx:if="{{agentState.token}}">
-      <view class="flex-row align-center justify-between w-full">
+      <view class="flex-row align-center justify-between" style="width: 100%;">
         <text class="memory-entry-title">💬 {{t.settings.reply_budget_title}}</text>
       </view>
       <text class="memory-entry-sub">{{t.settings.reply_budget_hint}}</text>
@@ -116,7 +116,7 @@
         <view class="avatar-core-seal seal-color-{{item.avatarSeed % 5}}" style="width: 72rpx; height: 72rpx; flex-shrink: 0;">
           <text class="seal-character" style="font-size: 30rpx; font-weight: bold; color: #fff;">{{item.avatarChar}}</text>
         </view>
-        <view class="flex-col flex-1">
+        <view class="flex-col" style="flex: 1; min-width: 0;">
           <text class="agent-row-name">{{item.name}}</text>
           <text class="agent-row-sub">{{item.subDisplay}}</text>
         </view>
@@ -175,7 +175,7 @@
       <view class="form-item">
         <text class="form-label">{{t.settings.reg_name}}</text>
         <view class="flex-row align-center" style="gap: 20rpx; width: 100%;">
-          <input class="form-input flex-1" value="{{regName}}" bindinput="onInputChange" data-field="regName" placeholder="{{t.settings.reg_name_placeholder}}" />
+          <input class="form-input" style="flex: 1;" value="{{regName}}" bindinput="onInputChange" data-field="regName" placeholder="{{t.settings.reg_name_placeholder}}" />
           <view class="avatar-core-seal seal-color-{{regAvatarSeed % 5}}" style="width: 70rpx; height: 70rpx; flex-shrink: 0;" wx:if="{{regAvatarChar}}">
             <text class="seal-character" style="font-size: 28rpx; font-weight: bold; color: #fff;">{{regAvatarChar}}</text>
           </view>
@@ -287,7 +287,7 @@
       <!-- 界面语言 -->
       <view class="setting-row flex-row align-center justify-between" bindtap="toggleLanguage" hover-class="row-hover">
         <text class="setting-row-label">{{t.settings.language_label}}</text>
-        <view class="flex-row align-center gap-8">
+        <view class="flex-row align-center" style="gap: 8rpx;">
           <text class="setting-row-value">{{currentLang === 'zh' ? '中文' : 'English'}}</text>
           <text class="row-arrow">›</text>
         </view>

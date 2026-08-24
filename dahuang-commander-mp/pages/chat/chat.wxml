@@ -34,7 +34,7 @@
             data-roomid="{{item.roomId}}"
             hover-class="item-hover"
             hover-stay-time="100">
-        <view class="room-icon-container {{item.isDirect ? 'room-icon-direct' : 'room-icon-group'}}">
+        <view class="room-icon-container">
           <text class="room-avatar-char">{{item.isDirect ? '私' : '群'}}</text>
           <view class="unread-badge" wx:if="{{item.unreadCount > 0}}">{{item.unreadCount}}</view>
         </view>
@@ -66,7 +66,7 @@
       <view class="room-icon-container">
         <text class="room-avatar-char">请</text>
       </view>
-      <text class="room-name flex-1">{{t.contacts.new_requests}}</text>
+      <text class="room-name" style="flex:1;">{{t.contacts.new_requests}}</text>
       <view class="unread-badge" wx:if="{{requestCount > 0}}">{{requestCount}}</view>
     </view>
 
@@ -94,7 +94,7 @@
           <view class="online-dot {{item.online ? 'online-on' : 'online-off'}}"></view>
         </view>
         <view class="room-info flex-col">
-          <view class="flex-row align-center gap-10">
+          <view class="flex-row align-center" style="gap: 10rpx;">
             <text class="room-name">{{item.displayName}}</text>
             <text class="contact-pin-icon" wx:if="{{item.pinned}}">📌</text>
             <text class="contact-fav-icon" wx:if="{{item.favorite}}">⭐</text>
@@ -123,7 +123,7 @@
       <view class="room-icon-container">
         <text class="room-avatar-char">＋</text>
       </view>
-      <text class="room-name flex-1">{{t.contacts.group_title}}</text>
+      <text class="room-name" style="flex:1;">{{t.contacts.group_title}}</text>
       <text class="contact-add-pill">{{t.contacts.group_cost}}</text>
     </view>
     <view class="skeleton-list" wx:if="{{loadingRooms}}">
@@ -143,7 +143,7 @@
             data-roomid="{{item.roomId}}"
             hover-class="item-hover"
             hover-stay-time="100">
-        <view class="room-icon-container room-icon-group">
+        <view class="room-icon-container">
           <text class="room-avatar-char">群</text>
           <view class="unread-badge" wx:if="{{item.unreadCount > 0}}">{{item.unreadCount}}</view>
         </view>

@@ -58,7 +58,7 @@
           <view class="bubble-task-container" wx:if="{{item.sender === 'agent' && (item.isPending || (item.progress > 0 && item.progress < 100))}}">
             <view class="bubble-progress-row flex-row align-center justify-between">
               <text class="bubble-progress-lbl">{{t.index.progress}}</text>
-              <view class="flex-row align-center gap-10">
+              <view class="flex-row align-center" style="gap: 10rpx;">
                 <text class="bubble-progress-pct">{{item.progress || 0}}%</text>
               </view>
             </view>
@@ -68,7 +68,7 @@
             <view class="bubble-task-list" wx:if="{{showDetailedTasks && item.tasks && item.tasks.length > 0}}">
               <view class="bubble-task-item flex-col" wx:for="{{item.tasks}}" wx:for-item="task" wx:key="id" style="{{task.status === 'PROCESSING' ? 'border-color: rgba(158,42,43, 0.25); background: rgba(158,42,43, 0.04);' : ''}}">
                 <view class="bubble-task-item-header flex-row align-center justify-between">
-                  <view class="flex-row align-center flex-1">
+                  <view class="flex-row align-center" style="flex: 1; min-width: 0;">
                     <icon type="{{task.status === 'SUCCESS' ? 'success' : (task.status === 'FAILED' ? 'warn' : 'waiting')}}" size="10" color="{{task.status === 'SUCCESS' ? '#166534' : (task.status === 'FAILED' ? '#be123c' : '#9e2a2b')}}" style="margin-right: 8rpx; flex-shrink: 0;"></icon>
                     <text class="bubble-task-title {{task.status === 'SUCCESS' ? 'bubble-task-done' : ''}} text-ellipsis">{{task.desc || task.title || t.index.step}}</text>
                   </view>

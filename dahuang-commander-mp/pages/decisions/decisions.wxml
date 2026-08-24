@@ -1,13 +1,7 @@
 <view class="container">
-  <view class="skeleton-list" wx:if="{{loading}}">
-      <view class="skeleton-row flex-row align-center" wx:for="{{[1,2,3]}}" wx:key="*this">
-        <view class="skeleton-avatar"></view>
-        <view class="skeleton-lines flex-col">
-          <view class="skeleton-line skeleton-line-title"></view>
-          <view class="skeleton-line skeleton-line-sub"></view>
-        </view>
-      </view>
-    </view>
+  <view class="loading-box" wx:if="{{loading}}">
+    <text>{{t.memory.loading}}</text>
+  </view>
 
   <block wx:else>
     <view class="settings-list" wx:if="{{decisions.length > 0}}">
