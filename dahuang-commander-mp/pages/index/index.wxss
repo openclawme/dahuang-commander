@@ -386,7 +386,7 @@
 .terminal-console {
   background: rgba(244,241,234, 0.95);
   border: 1rpx solid var(--brand-line);
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
   box-shadow: inset 0 0 20rpx var(--brand-soft);
   display: flex;
   flex-direction: column;
@@ -605,7 +605,7 @@
 .chat-avatar {
   width: 48rpx;
   height: 48rpx;
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -657,7 +657,7 @@
 .chat-bubble-body {
   max-width: 85%;
   padding: 14rpx 18rpx;
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
   font-size: 30rpx;
   line-height: 1.6;
   word-wrap: break-word;
@@ -712,7 +712,7 @@
   margin-top: 10rpx;
   padding: 8rpx 12rpx;
   background: var(--brand-faint);
-  border-radius: 10rpx;
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
@@ -873,7 +873,7 @@
 .compact-progress-indicator {
   background: rgba(91,122,140, 0.04);
   border: 1rpx solid rgba(91,122,140, 0.25);
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
   padding: 14rpx 18rpx;
   margin-bottom: 16rpx;
   display: flex;
@@ -943,7 +943,7 @@
   max-width: 650rpx;
   background: rgba(253,251,247, 0.95);
   border: 2rpx solid #eab308;
-  border-radius: 16rpx;
+  border-radius: var(--radius-card);
   box-shadow: 0 6rpx 18rpx -6rpx rgba(234, 179, 8, 0.25), inset 0 0 30rpx rgba(234, 179, 8, 0.05);
   display: flex;
   flex-direction: column;
@@ -1015,7 +1015,7 @@
   gap: 16rpx;
   background: rgba(244,241,234, 0.5);
   border: 1rpx solid rgba(59, 48, 36, 0.1);
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
   padding: 20rpx;
 }
 
@@ -1067,7 +1067,7 @@
 .reason-scroll {
   background: rgba(244,241,234, 0.6);
   border: 1rpx solid rgba(234, 179, 8, 0.15);
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
   padding: 16rpx 20rpx;
   height: 200rpx;
   box-sizing: border-box;
@@ -1094,7 +1094,7 @@
   line-height: 72rpx;
   font-size: 26rpx;
   font-weight: bold;
-  border-radius: 10rpx;
+  border-radius: var(--radius-sm);
   text-align: center;
   margin: 0;
   display: flex;
@@ -1229,7 +1229,7 @@
   z-index: 91;
   min-width: 200rpx;
   background: var(--surface);
-  border-radius: 16rpx;
+  border-radius: var(--radius-card);
   box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.16);
   overflow: hidden;
   display: flex;
@@ -1244,7 +1244,7 @@
   padding: 16rpx 18rpx;
   font-size: 28rpx;
   color: #1f2937;
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
 }
 
 .message-menu-item:active {
@@ -1267,7 +1267,7 @@
   margin-bottom: 12rpx;
   background: rgba(158, 42, 43, 0.06);
   border-left: 6rpx solid var(--brand);
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
 }
 
 .quote-banner-left {
@@ -1471,7 +1471,7 @@
   flex: 1;
   min-height: 0;
   background-color: rgba(244,241,234, 0.5);
-  border-radius: 16rpx;
+  border-radius: var(--radius-card);
   padding: 16rpx;
   box-sizing: border-box;
 }
@@ -1702,7 +1702,7 @@
   flex-direction: row;
   background: rgba(244,241,234, 0.6);
   border: 1rpx solid rgba(59, 48, 36, 0.1);
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
   padding: 4rpx;
   gap: 4rpx;
 }
@@ -1818,7 +1818,7 @@
 .forum-post-card {
   background: rgba(253,251,247, 0.45);
   border: 1rpx solid rgba(255, 255, 255, 0.04);
-  border-radius: 16rpx;
+  border-radius: var(--radius-card);
   padding: 20rpx;
   margin-bottom: 16rpx;
 }
@@ -1917,7 +1917,7 @@
   flex: 1;
   background: rgba(244,241,234, 0.5);
   border: 1rpx solid rgba(255, 255, 255, 0.06);
-  border-radius: 10rpx;
+  border-radius: var(--radius-sm);
   padding: 8rpx 16rpx;
   font-size: 26rpx;
   color: var(--ink);
@@ -1931,7 +1931,7 @@
   font-size: 26rpx;
   font-weight: bold;
   padding: 8rpx 16rpx;
-  border-radius: 10rpx;
+  border-radius: var(--radius-sm);
   margin: 0;
   line-height: 1.4;
 }
@@ -1992,7 +1992,7 @@
 .dilemma-info-box {
   flex: 1.1;
   background: rgba(244,241,234, 0.3);
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
   padding: 16rpx;
 }
 
@@ -2046,7 +2046,7 @@
   flex: 1;
   background: rgba(217,119,6, 0.05);
   border: 1rpx solid rgba(217,119,6, 0.15);
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
   padding: 16rpx;
 }
 
@@ -2112,7 +2112,7 @@
   gap: 4rpx;
   background: var(--paper);
   border: 2rpx solid var(--brand-mid);
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
   padding: 6rpx;
   box-sizing: border-box;
 }
@@ -2193,7 +2193,7 @@
   margin-top: 16rpx;
   background: rgba(253,251,247, 0.85);
   border: 1rpx solid var(--brand-mid);
-  border-radius: 16rpx;
+  border-radius: var(--radius-card);
   padding: 16rpx;
   box-sizing: border-box;
   min-height: 150rpx;
@@ -2316,7 +2316,7 @@
   gap: 8rpx;
   background: rgba(244,241,234, 0.3);
   padding: 12rpx;
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
 }
 
 .challenge-meta-item {
@@ -2329,7 +2329,7 @@
   flex: 1;
   background: rgba(253,251,247, 0.3);
   border: 1rpx solid rgba(255, 255, 255, 0.04);
-  border-radius: 16rpx;
+  border-radius: var(--radius-card);
   padding: 16rpx;
 }
 
@@ -2348,7 +2348,7 @@
 .leaderboard-item {
   background: rgba(244,241,234, 0.4);
   border: 1rpx solid rgba(255, 255, 255, 0.03);
-  border-radius: 10rpx;
+  border-radius: var(--radius-sm);
   padding: 10rpx 14rpx;
 }
 
@@ -2398,7 +2398,7 @@
   flex: 1.1;
   background: rgba(253,251,247, 0.3);
   border: 1rpx solid rgba(255, 255, 255, 0.04);
-  border-radius: 16rpx;
+  border-radius: var(--radius-card);
   padding: 16rpx;
 }
 
@@ -2406,7 +2406,7 @@
   font-size: 26rpx;
   background: var(--paper);
   border: 1rpx solid rgba(158,42,43, 0.15);
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
   padding: 12rpx;
   color: var(--brand);
   width: 100%;
@@ -2420,7 +2420,7 @@
   font-size: 26rpx;
   font-weight: bold;
   padding: 12rpx 0;
-  border-radius: 10rpx;
+  border-radius: var(--radius-sm);
   margin-top: 12rpx;
   width: 100%;
   line-height: 1.4;
@@ -2498,7 +2498,7 @@
 .bubble-chart-canvas {
   min-width: 100%;
   height: 440rpx;
-  border-radius: 10rpx;
+  border-radius: var(--radius-sm);
 }
 
 
@@ -2506,7 +2506,7 @@
 .decision-banner {
   background: var(--brand-soft);
   border: 1rpx solid var(--brand-line);
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
   padding: 14rpx 24rpx;
   margin-bottom: 16rpx;
   gap: 12rpx;

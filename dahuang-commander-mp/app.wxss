@@ -26,6 +26,10 @@
   --line-stronger: rgba(59, 48, 36, 0.2);
   --line-solid: rgba(59, 48, 36, 0.3);
   --shadow-card: 0 10rpx 30rpx -10rpx rgba(59, 48, 36, 0.15);
+  --radius-sm: 10rpx;    /* 输入框/小行 */
+  --radius-md: 12rpx;    /* 行/小卡 */
+  --radius-card: 16rpx;  /* 卡片 */
+  --radius-pill: 999rpx; /* 胶囊按钮 */
 }
 
 /* 深色模式（跟随系统；显式浅色选择覆盖回 light） */

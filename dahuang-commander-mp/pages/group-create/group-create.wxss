@@ -31,7 +31,7 @@
   line-height: 96rpx;
   background: var(--surface);
   border: 1rpx solid var(--line-strong);
-  border-radius: 10rpx;
+  border-radius: var(--radius-sm);
   padding: 0 24rpx;
   font-size: 30rpx;
   color: var(--ink-strong);
@@ -61,7 +61,7 @@
   gap: 20rpx;
   border-bottom: 1rpx solid var(--line-weak);
   background: var(--card-weak);
-  border-radius: 10rpx;
+  border-radius: var(--radius-sm);
   margin-bottom: 10rpx;
 }
 
@@ -124,7 +124,7 @@
   color: #ffffff;
   font-size: 30rpx;
   font-weight: bold;
-  border-radius: 12rpx;
+  border-radius: var(--radius-md);
   margin-top: 32rpx;
   box-shadow: 0 8rpx 20rpx -8rpx var(--brand-glow);
 }
