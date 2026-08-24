@@ -120,6 +120,7 @@ Page({
       return {
         ...msg,
         isMe,
+        avatarChar: (msg.senderName || "?").slice(0, 1),
         timeStr,
         isRich,
         richContent: rich.html,

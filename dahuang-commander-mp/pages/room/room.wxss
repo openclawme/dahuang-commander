@@ -141,8 +141,8 @@
   border: none;
   color: #1a1a1a;
   font-size: 26rpx;
-  height: 60rpx;
-  line-height: 60rpx;
+  height: 88rpx;
+  line-height: 88rpx;
   padding: 0;
 }
 
@@ -158,8 +158,8 @@
   font-weight: bold;
   border-radius: 38rpx;
   padding: 0 36rpx;
-  height: 76rpx;
-  line-height: 76rpx;
+  height: 88rpx;
+  line-height: 88rpx;
   margin: 0 0 0 16rpx;
   border: none;
   box-shadow: 0 6rpx 18rpx -6rpx rgba(158, 42, 43, 0.35);

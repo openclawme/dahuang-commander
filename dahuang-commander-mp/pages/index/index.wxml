@@ -8,7 +8,7 @@
       <text class="decision-banner-arrow">›</text>
     </view>
     <scroll-view class="chat-scroll" scroll-y scroll-into-view="{{toChatView}}" scroll-with-animation>
-      <view class="chat-item chat-item-{{item.sender}}" wx:for="{{chatHistory}}" wx:key="id" id="chat-{{item.id}}" data-index="{{index}}" bindlongpress="onMessageLongPress">
+      <view class="chat-item chat-item-{{item.sender}} {{item.sender === 'system' ? 'chat-item-system' : ''}}" wx:for="{{chatHistory}}" wx:key="id" id="chat-{{item.id}}" data-index="{{index}}" bindlongpress="onMessageLongPress">
         <view class="chat-bubble-header flex-row">
           <text class="chat-avatar">{{item.sender === 'human' ? '我' : item.sender === 'system' ? '系' : avatarChar}}</text>
           <text class="chat-bubble-name">{{item.sender === 'human' ? t.index.you : item.sender === 'system' ? t.index.system_label : (agentState.name || t.index.agent)}}</text>

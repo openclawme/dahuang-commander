@@ -2539,3 +2539,19 @@
 .bubble-rich {
   max-width: 95%;
 }
+
+
+.chat-item-system {
+  align-items: center;
+}
+.chat-item-system .chat-bubble-header {
+  display: none;
+}
+.chat-item-system .chat-bubble-body {
+  max-width: 92%;
+  background: rgba(107, 91, 74, 0.06);
+  border: 1rpx dashed rgba(107, 91, 74, 0.2);
+  box-shadow: none;
+  color: #6b5b4a;
+  text-align: center;
+}
