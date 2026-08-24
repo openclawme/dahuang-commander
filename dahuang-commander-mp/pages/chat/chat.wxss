@@ -274,3 +274,88 @@
   font-weight: bold;
 }
 
+
+
+/* ===== UI 体验增强：骨架屏 / 头像 / 微动画 ===== */
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+.skeleton-row {
+  background: rgba(255,255,255,0.65);
+  border: 1rpx solid rgba(59,48,36,0.1);
+  border-radius: 12rpx;
+  padding: 24rpx;
+  gap: 24rpx;
+}
+.skeleton-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 10rpx;
+  background: linear-gradient(90deg, rgba(59,48,36,0.08) 25%, rgba(59,48,36,0.14) 50%, rgba(59,48,36,0.08) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s infinite linear;
+  flex-shrink: 0;
+}
+.skeleton-lines {
+  flex: 1;
+  gap: 14rpx;
+}
+.skeleton-line {
+  height: 24rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, rgba(59,48,36,0.08) 25%, rgba(59,48,36,0.14) 50%, rgba(59,48,36,0.08) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.4s infinite linear;
+}
+.skeleton-line-title { width: 42%; }
+.skeleton-line-sub { width: 72%; height: 20rpx; }
+
+@keyframes skeletonShimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.contact-avatar {
+  position: relative;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 10rpx;
+  overflow: visible;
+  background: rgba(158,42,43,0.1);
+  border: 1rpx solid rgba(158,42,43,0.3);
+  flex-shrink: 0;
+}
+.contact-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 10rpx;
+  overflow: hidden;
+}
+.contact-avatar-char {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #9e2a2b;
+}
+.online-dot {
+  position: absolute;
+  right: -8rpx;
+  bottom: -8rpx;
+  width: 22rpx;
+  height: 22rpx;
+  border-radius: 50%;
+  border: 3rpx solid #f4f1ea;
+}
+.online-on { background: #16a34a; }
+.online-off { background: #b5aa9a; }
+
+.segment-item {
+  transition: all 0.18s ease;
+}
+.room-item {
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.room-item:active {
+  transform: scale(0.985);
+}

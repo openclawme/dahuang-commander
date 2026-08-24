@@ -11,6 +11,7 @@ Page({
     contacts: [],
     requestCount: 0,
     loadingContacts: false,
+    loadingRooms: true,
     serverUrl: ""
   },
 
@@ -135,7 +136,8 @@ Page({
     const list = this.decorateRooms(rooms);
     this.setData({
       roomsList: list,
-      groupList: list.filter(r => !r.isDirect)
+      groupList: list.filter(r => !r.isDirect),
+      loadingRooms: false
     });
   },
 
@@ -152,6 +154,7 @@ Page({
           moreTagCount: Math.max(0, (c.tags || []).length - tags.length),
           displayName: c.contactName || c.profile.displayName || c.profile.name,
           avatarChar: (c.contactName || c.profile.displayName || c.profile.name || "?").slice(0, 1),
+          avatarUrl: c.profile.avatarUrl || "",
           lastTalkTs: c.lastTalkAt ? new Date(c.lastTalkAt).getTime() : 0
         };
       });
