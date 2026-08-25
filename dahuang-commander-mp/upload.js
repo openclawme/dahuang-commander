@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '图片上传交互重做：选图即见预览、逐张上传状态（上传中/失败）、结束成功提示、最多4张；';
+const desc = '图片功能修复：相对URL渲染（解决内网裂图）、发送的图片进入对话历史可点击预览、移除缩略图同步删除服务器文件、上传失败张数提示、发送失败恢复图片';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

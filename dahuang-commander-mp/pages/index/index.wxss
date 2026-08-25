@@ -2615,3 +2615,18 @@
   border-radius: 10rpx;
 }
 .wechat-image-status.error { color: #f6d6d6; background: rgba(158,42,43,0.55); }
+
+/* ===== 主人对话图片（发送历史 + 输入区缩略图统一） ===== */
+.human-image-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 10rpx;
+}
+.human-image-thumb {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 8rpx;
+  border: 1rpx solid rgba(59, 48, 36, 0.15);
+}

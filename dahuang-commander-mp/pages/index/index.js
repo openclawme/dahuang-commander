@@ -1003,7 +1003,7 @@ Page({
           pendingImages: []
         });
         wx.hideLoading();
-        if (uploaded.length) wx.showToast({ title: `已上传 ${uploaded.length} 张`, icon: "none" });
+        if (uploaded.length) wx.showToast({ title: failed > 0 ? `已上传 ${uploaded.length} 张，${failed} 张失败` : `已上传 ${uploaded.length} 张`, icon: "none" });
         else wx.showToast({ title: "上传失败，请重试", icon: "none" });
       }
     });
@@ -1019,7 +1019,7 @@ Page({
         filePath: tempFilePath,
         name: "file",
         header,
-        success: (r) => { try { const d = JSON.parse(r.data); resolve(d.absoluteUrl || null); } catch (e) { resolve(null); } },
+        success: (r) => { try { const d = JSON.parse(r.data); resolve(d.url || null); } catch (e) { resolve(null); } },
         fail: () => resolve(null)
       });
     });
@@ -1028,8 +1028,17 @@ Page({
   removeImage(e) {
     const i = e.currentTarget.dataset.index;
     const arr = this.data.images.slice();
-    arr.splice(i, 1);
+    const removed = arr.splice(i, 1)[0];
     this.setData({ images: arr });
+    // 同步删除服务器文件（用户不要的图不留在磁盘上）
+    if (removed && removed.startsWith("/api/uploads/")) {
+      const name = removed.split("/").pop();
+      wx.request({
+        url: `${app.globalData.serverUrl}/api/agent/upload-image/${encodeURIComponent(name)}`,
+        method: "DELETE",
+        header: getHeaders(app.globalData.agentState.token)
+      });
+    }
   },
 
   sendInstruction() {
@@ -1143,6 +1152,7 @@ ${quotedText}
       quotedMessage: null
     });
 
+    const sentImages = (this.data.images || []).slice();
     app.sendInstruction(
       commandText,
       () => {
@@ -1150,14 +1160,26 @@ ${quotedText}
         this.setData({ images: [] });
       },
       (err) => {
-        // Restore input text and quote on failure
+        // Restore input text / quote / images on failure
         this.setData({
           inputValue: rawText,
-          quotedMessage: quoted || null
+          quotedMessage: quoted || null,
+          images: sentImages
         });
       },
-      this.data.images
+      sentImages
     );
+  },
+
+  previewHumanImage(e) {
+    const src = e.currentTarget.dataset.src;
+    if (!src) return;
+    const list = (this.data.chatHistory || [])
+      .filter((m) => m.sender === "human" && Array.isArray(m.images))
+      .flatMap((m) => m.images);
+    const urls = list.length ? list : [src];
+    const absolute = urls.map((u) => (u.startsWith("http") ? u : `${this.data.serverUrl}${u}`));
+    wx.previewImage({ current: absolute.find((u) => u.includes(src.split("/").pop() || "")) || absolute[0], urls: absolute });
   },
 
   triggerQuickCommand(e) {

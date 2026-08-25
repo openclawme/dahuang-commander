@@ -668,6 +668,7 @@ App({
       id: `human-${now}-${Math.floor(Math.random() * 10000)}`,
       sender: "human",
       content: instruction,
+      images: images && images.length ? images.slice() : [],
       timestamp: this.getTimestamp(),
       createdAt: now
     };

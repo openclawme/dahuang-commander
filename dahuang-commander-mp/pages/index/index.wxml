@@ -34,6 +34,12 @@
             <text wx:elif="{{item.content && item.content !== '（智能体处理中...）'}}" user-select>{{item.content}}</text>
           </block>
 
+          <!-- 主人发送的图片（历史记录 + 点击大图预览） -->
+          <view class="human-image-grid" wx:if="{{item.sender === 'human' && item.images && item.images.length > 0}}">
+            <image class="human-image-thumb" wx:for="{{item.images}}" wx:for-item="img" wx:key="*this"
+                   src="{{serverUrl}}{{img}}" mode="aspectFill" bindtap="previewHumanImage" data-src="{{img}}"></image>
+          </view>
+
           <!-- 原生 Canvas 图表（数据点多时画布加宽、横向滚动） -->
           <view class="bubble-chart-list" wx:if="{{item.charts && item.charts.length > 0}}">
             <scroll-view
@@ -128,7 +134,7 @@
     </view>
     <view class="wechat-image-list" wx:if="{{images && images.length > 0}}">
       <view class="wechat-image-item" wx:for="{{images}}" wx:key="*this">
-        <image src="{{item}}" mode="aspectFill" class="wechat-image-thumb"></image>
+        <image src="{{serverUrl}}{{item}}" mode="aspectFill" class="wechat-image-thumb"></image>
         <view class="wechat-image-remove" catchtap="removeImage" data-index="{{index}}">×</view>
       </view>
     </view>
