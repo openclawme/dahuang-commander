@@ -336,7 +336,7 @@ const Dashboard: React.FC = () => {
     getIqChallenge,
     registerAgent,
     sendInstruction,
-    uploadOwnerImages,
+    uploadOwnerImage,
     addLog,
     importToken,
     clearHistory,
@@ -380,7 +380,7 @@ const Dashboard: React.FC = () => {
 
   // --- UI Local States ---
   const [instructionText, setInstructionText] = useState("");
-  const [images, setImages] = useState<string[]>([]);
+  const [imgItems, setImgItems] = useState<Array<{ id: string; preview: string; remote?: string; status: "uploading" | "done" | "error" }>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -897,14 +897,36 @@ const Dashboard: React.FC = () => {
     if (!instructionText.trim()) return;
     const txt = instructionText;
     setInstructionText("");
-    await sendInstruction(txt, images);
-    setImages([]);
+    const urls = imgItems.filter((it) => it.status === "done" && it.remote).map((it) => it.remote as string);
+    await sendInstruction(txt, urls);
+    imgItems.forEach((it) => { if (it.preview && it.preview.startsWith("blob:")) URL.revokeObjectURL(it.preview); });
+    setImgItems([]);
+  };
+
+  const removeImage = (id: string) => {
+    setImgItems((p) => {
+      const target = p.find((it) => it.id === id);
+      if (target?.preview && target.preview.startsWith("blob:")) URL.revokeObjectURL(target.preview);
+      return p.filter((it) => it.id !== id);
+    });
   };
 
   const handlePickImages = async (files: FileList | null) => {
-    if (!files) return;
-    const urls = await uploadOwnerImages(files);
-    setImages((p) => [...p, ...urls].slice(0, 4));
+    if (!files || files.length === 0) return;
+    const remaining = 4 - imgItems.length;
+    if (remaining <= 0) return;
+    const picked = Array.from(files).slice(0, remaining);
+    const newItems = picked.map((file) => ({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      preview: URL.createObjectURL(file),
+      status: "uploading" as const,
+    }));
+    setImgItems((p) => [...p, ...newItems]);
+    for (let i = 0; i < newItems.length; i++) {
+      const item = newItems[i];
+      const url = await uploadOwnerImage(picked[i]);
+      setImgItems((p) => p.map((it) => (it.id === item.id ? (url ? { ...it, remote: url, status: "done" as const } : { ...it, status: "error" as const }) : it)));
+    }
   };
 
   const handleQuickCommand = async (command: string) => {
@@ -1186,19 +1208,25 @@ const Dashboard: React.FC = () => {
 
           {/* User Instruction Input Box */}
           <form onSubmit={handleSendCommand} className="p-2 bg-slate-900/90 border-t border-[#b8844f]/20 flex flex-col font-mono">
-            {images.length > 0 && (
+            {imgItems.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-1.5">
-                {images.map((u, i) => (
-                  <span key={i} className="relative">
-                    <img src={u} alt="" className="h-12 w-16 object-cover rounded border border-[#b8844f]/30" />
-                    <button type="button" onClick={() => setImages((p) => p.filter((_, j) => j !== i))} className="absolute -top-1 -right-1 w-4 h-4 bg-[#855930] text-slate-950 rounded-full text-[8px] leading-4">×</button>
+                {imgItems.map((it) => (
+                  <span key={it.id} className="relative">
+                    <img src={it.remote || it.preview} alt="" className={`h-12 w-16 object-cover rounded border ${it.status === "error" ? "border-red-500 opacity-70" : "border-[#b8844f]/30"}`} />
+                    {it.status === "uploading" && (
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/50 rounded text-[9px] text-white animate-pulse">上传中</span>
+                    )}
+                    {it.status === "error" && (
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/50 rounded text-[9px] text-red-300">失败</span>
+                    )}
+                    <button type="button" onClick={() => removeImage(it.id)} className="absolute -top-1 -right-1 w-4 h-4 bg-[#855930] text-slate-950 rounded-full text-[8px] leading-4">×</button>
                   </span>
                 ))}
               </div>
             )}
             <div className="flex space-x-2">
               <input type="file" multiple accept="image/*" ref={fileInputRef} className="hidden" onChange={(e) => handlePickImages(e.target.files)} />
-              <button type="button" onClick={() => fileInputRef.current?.click()} title="上传图片" className="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-[#e7d2ae] rounded text-xs transition cursor-pointer">📷</button>
+              <button type="button" onClick={() => fileInputRef.current?.click()} title="上传图片（最多4张）" className="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-[#e7d2ae] rounded text-xs transition cursor-pointer">📷 {imgItems.length > 0 ? `${imgItems.length}/4` : ""}</button>
               <input
                 type="text"
                 value={instructionText}

@@ -71,7 +71,7 @@ interface CommanderContextType {
   clearRoomChat: (roomId: string) => void;
   oneClickAlchemy: () => Promise<void>;
   importToken: (token: string) => Promise<void>;
-  uploadOwnerImages: (files: FileList | File[]) => Promise<string[]>;
+  uploadOwnerImage: (file: File) => Promise<string | null>;
   clearHistory: () => void;
   messengerRooms: Record<string, RoomState>;
   activeChannel: string;
@@ -1313,23 +1313,22 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       },
     ]);
   };
-  const uploadOwnerImages = async (files: FileList | File[]): Promise<string[]> => {
-    const out: string[] = [];
+  const uploadOwnerImage = async (file: File): Promise<string | null> => {
     const token = agentState?.token;
-    if (!token) return out;
-    for (const file of Array.from(files).slice(0, 4)) {
+    if (!token) return null;
+    try {
       const form = new FormData();
       form.append("file", file);
-      try {
-        const res = await fetch(`${getHeavenBaseUrl()}/api/agent/upload-image`, {
-          method: "POST",
-          headers: { "Authorization": `Bearer ${token}`, "X-Agent-Version": "7.0" },
-          body: form,
-        });
-        if (res.ok) { const d = await res.json(); if (d.absoluteUrl) out.push(d.absoluteUrl); }
-      } catch {}
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/upload-image`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}`, "X-Agent-Version": "7.0" },
+        body: form,
+      });
+      if (res.ok) { const d = await res.json(); return d.absoluteUrl || null; }
+      return null;
+    } catch {
+      return null;
     }
-    return out;
   };
 
   const importToken = async (token: string) => {
@@ -1517,7 +1516,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         getIqChallenge,
         registerAgent,
         sendInstruction,
-        uploadOwnerImages,
+        uploadOwnerImage,
         addLog,
         oneClickAlchemy,
         importToken,

@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '大荒视觉统一已上线：新增图片上传/预览（主人对话框），指令与论坛发帖可携带图片，由 deepseek-v4-flash-vision-exp 分析；';
+const desc = '图片上传交互重做：选图即见预览、逐张上传状态（上传中/失败）、结束成功提示、最多4张；';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

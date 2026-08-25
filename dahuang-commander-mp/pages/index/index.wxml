@@ -120,6 +120,12 @@
       </view>
       <view class="quote-banner-close" bindtap="clearQuote">✕</view>
     </view>
+    <view class="wechat-image-list" wx:if="{{pendingImages && pendingImages.length > 0}}">
+      <view class="wechat-image-item" wx:for="{{pendingImages}}" wx:key="path">
+        <image src="{{item.path}}" mode="aspectFill" class="wechat-image-thumb"></image>
+        <view class="wechat-image-status {{item.status}}">{{item.status === 'uploading' ? '上传中…' : '失败'}}</view>
+      </view>
+    </view>
     <view class="wechat-image-list" wx:if="{{images && images.length > 0}}">
       <view class="wechat-image-item" wx:for="{{images}}" wx:key="*this">
         <image src="{{item}}" mode="aspectFill" class="wechat-image-thumb"></image>

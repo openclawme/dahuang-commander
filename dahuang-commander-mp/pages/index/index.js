@@ -14,6 +14,7 @@ Page({
     activeTasks: [],
     inputValue: "",
     images: [],
+    pendingImages: [],
     quotedMessage: null,
     messageMenu: null,
     toLogView: "",
@@ -974,30 +975,53 @@ Page({
 
   chooseImages() {
     const max = 4 - this.data.images.length;
-    if (max <= 0) return;
+    if (max <= 0) {
+      wx.showToast({ title: "最多上传 4 张图片", icon: "none" });
+      return;
+    }
     wx.chooseMedia({
       count: max,
       mediaType: ['image'],
       sizeType: ['compressed'],
       sourceType: ['album', 'camera'],
       success: async (res) => {
-        const serverUrl = app.globalData.serverUrl;
-        for (const f of (res.tempFiles || [])) {
-          try {
-            const up = await new Promise((resolve, reject) => {
-              wx.uploadFile({
-                url: `${serverUrl}/api/agent/upload-image`,
-                filePath: f.tempFilePath,
-                name: 'file',
-                header: getHeaders(app.globalData.agentState.token),
-                success: (r) => { try { resolve(JSON.parse(r.data)); } catch (e) { reject(e); } },
-                fail: reject
-              });
-            });
-            if (up && up.absoluteUrl) this.setData({ images: [...this.data.images, up.absoluteUrl].slice(0, 4) });
-          } catch (e) {}
+        const files = res.tempFiles || [];
+        if (!files.length) return;
+        const pending = files.map((f) => ({ path: f.tempFilePath, status: "uploading" }));
+        this.setData({ pendingImages: pending });
+        wx.showLoading({ title: "上传中…", mask: true });
+        const uploaded = [];
+        let failed = 0;
+        for (let i = 0; i < files.length; i++) {
+          const url = await this.uploadOneImage(files[i].tempFilePath);
+          if (url) { uploaded.push(url); pending[i].status = "done"; }
+          else { failed += 1; pending[i].status = "error"; }
+          this.setData({ pendingImages: pending });
         }
+        this.setData({
+          images: [...this.data.images, ...uploaded].slice(0, 4),
+          pendingImages: []
+        });
+        wx.hideLoading();
+        if (uploaded.length) wx.showToast({ title: `已上传 ${uploaded.length} 张`, icon: "none" });
+        else wx.showToast({ title: "上传失败，请重试", icon: "none" });
       }
+    });
+  },
+
+  uploadOneImage(tempFilePath) {
+    return new Promise((resolve) => {
+      const header = { "X-Agent-Version": "7.0" };
+      const token = app.globalData.agentState.token;
+      if (token) header["Authorization"] = `Bearer ${token}`;
+      wx.uploadFile({
+        url: `${app.globalData.serverUrl}/api/agent/upload-image`,
+        filePath: tempFilePath,
+        name: "file",
+        header,
+        success: (r) => { try { const d = JSON.parse(r.data); resolve(d.absoluteUrl || null); } catch (e) { resolve(null); } },
+        fail: () => resolve(null)
+      });
     });
   },
 
