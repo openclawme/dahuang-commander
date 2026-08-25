@@ -995,10 +995,10 @@ Page({
         for (let i = 0; i < files.length; i++) {
           // 客户端预检：单张 >8MB 直接拦截（与服务端同限）
           const info = await new Promise((r) => wx.getFileSystemManager().getFileInfo({ filePath: files[i].tempFilePath, success: r, fail: () => r({ size: 0 }) }));
-          if (info.size > 8 * 1024 * 1024) {
+          if (info.size > 6 * 1024 * 1024) {
             failed += 1;
             pending[i].status = "error";
-            this._uploadErr = "单张图片需 ≤8MB";
+            this._uploadErr = "单张图片需 ≤6MB";
             this.setData({ pendingImages: pending });
             continue;
           }
@@ -1020,29 +1020,33 @@ Page({
 
   uploadOneImage(tempFilePath) {
     return new Promise((resolve) => {
-      const header = { "X-Agent-Version": "7.0" };
-      const token = app.globalData.agentState.token;
-      if (token) header["Authorization"] = `Bearer ${token}`;
-      wx.uploadFile({
-        url: `${app.globalData.serverUrl}/api/agent/upload-image`,
+      // 走 wx.request + base64（复用已放行的 request 域名；
+      // wx.uploadFile 需要单独的微信后台 uploadFile 域名白名单）
+      const extMatch = (tempFilePath || "").match(/\.(\w+)$/);
+      const ext = extMatch ? extMatch[1].toLowerCase() : "jpg";
+      const mimeMap = { png: "png", jpg: "jpeg", jpeg: "jpeg", gif: "gif", webp: "webp" };
+      const mime = mimeMap[ext] || "jpeg";
+      wx.getFileSystemManager().readFile({
         filePath: tempFilePath,
-        name: "file",
-        header,
+        encoding: "base64",
         success: (r) => {
-          try {
-            const d = JSON.parse(r.data);
-            if (r.statusCode >= 200 && r.statusCode < 300) {
-              resolve(d.url || null);
-            } else {
-              this._uploadErr = d.error || `HTTP ${r.statusCode}`;
-              resolve(null);
-            }
-          } catch (e) {
-            this._uploadErr = r.statusCode === 413 ? "图片过大（网关限制），请压缩后重试" : "上传失败";
-            resolve(null);
-          }
+          wx.request({
+            url: `${app.globalData.serverUrl}/api/agent/upload-image`,
+            method: "POST",
+            header: getHeaders(app.globalData.agentState.token),
+            data: { base64: `data:image/${mime};base64,${r.data}` },
+            success: (res) => {
+              if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.url) {
+                resolve(res.data.url);
+              } else {
+                this._uploadErr = (res.data && res.data.error) || `HTTP ${res.statusCode}`;
+                resolve(null);
+              }
+            },
+            fail: (err) => { this._uploadErr = err.errMsg || "网络失败"; resolve(null); }
+          });
         },
-        fail: (err) => { this._uploadErr = err.errMsg || "网络失败"; resolve(null); }
+        fail: () => { this._uploadErr = "读取图片失败"; resolve(null); }
       });
     });
   },

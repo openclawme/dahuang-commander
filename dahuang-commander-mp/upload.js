@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '图片上传修复：>8MB 客户端预检拦截、网关 413/业务错误给出具体原因提示（不再笼统报上传失败）';
+const desc = '图片上传改走 wx.request+base64（复用 request 域名，无需配置微信后台 uploadFile 域名）；单张上限 6MB';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
