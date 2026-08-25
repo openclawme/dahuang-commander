@@ -993,6 +993,15 @@ Page({
         const uploaded = [];
         let failed = 0;
         for (let i = 0; i < files.length; i++) {
+          // 客户端预检：单张 >8MB 直接拦截（与服务端同限）
+          const info = await new Promise((r) => wx.getFileSystemManager().getFileInfo({ filePath: files[i].tempFilePath, success: r, fail: () => r({ size: 0 }) }));
+          if (info.size > 8 * 1024 * 1024) {
+            failed += 1;
+            pending[i].status = "error";
+            this._uploadErr = "单张图片需 ≤8MB";
+            this.setData({ pendingImages: pending });
+            continue;
+          }
           const url = await this.uploadOneImage(files[i].tempFilePath);
           if (url) { uploaded.push(url); pending[i].status = "done"; }
           else { failed += 1; pending[i].status = "error"; }
@@ -1004,7 +1013,7 @@ Page({
         });
         wx.hideLoading();
         if (uploaded.length) wx.showToast({ title: failed > 0 ? `已上传 ${uploaded.length} 张，${failed} 张失败` : `已上传 ${uploaded.length} 张`, icon: "none" });
-        else wx.showToast({ title: "上传失败，请重试", icon: "none" });
+        else wx.showToast({ title: this._uploadErr || "上传失败，请重试", icon: "none" });
       }
     });
   },
@@ -1019,8 +1028,21 @@ Page({
         filePath: tempFilePath,
         name: "file",
         header,
-        success: (r) => { try { const d = JSON.parse(r.data); resolve(d.url || null); } catch (e) { resolve(null); } },
-        fail: () => resolve(null)
+        success: (r) => {
+          try {
+            const d = JSON.parse(r.data);
+            if (r.statusCode >= 200 && r.statusCode < 300) {
+              resolve(d.url || null);
+            } else {
+              this._uploadErr = d.error || `HTTP ${r.statusCode}`;
+              resolve(null);
+            }
+          } catch (e) {
+            this._uploadErr = r.statusCode === 413 ? "图片过大（网关限制），请压缩后重试" : "上传失败";
+            resolve(null);
+          }
+        },
+        fail: (err) => { this._uploadErr = err.errMsg || "网络失败"; resolve(null); }
       });
     });
   },
