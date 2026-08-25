@@ -140,10 +140,10 @@
     </view>
     <view class="wechat-input-bar flex-row align-center">
       <view class="wechat-add-btn flex-row align-center justify-center" bindtap="chooseImages">
-        <text class="clear-icon">📷</text>
+        <text class="wechat-add-icon">图</text>
       </view>
       <view class="clear-icon-btn flex-row align-center justify-center" bindtap="clearInput" wx:if="{{inputValue}}">
-        <text class="clear-icon">🧹</text>
+        <text class="clear-icon">✕</text>
       </view>
       <textarea 
         class="wechat-textarea" 

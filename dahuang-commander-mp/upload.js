@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '图片上传改走 wx.request+base64（复用 request 域名，无需配置微信后台 uploadFile 域名）；单张上限 6MB';
+const desc = '输入区美化：相机按钮改印章风「图」字圆钮（居中）、清理按钮定圆、文本框单行高度文字居中';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
