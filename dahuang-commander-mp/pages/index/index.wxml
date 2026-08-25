@@ -69,7 +69,7 @@
               <view class="bubble-task-item flex-col" wx:for="{{item.tasks}}" wx:for-item="task" wx:key="id" style="{{task.status === 'PROCESSING' ? 'border-color: rgba(158,42,43, 0.25); background: rgba(158,42,43, 0.04);' : ''}}">
                 <view class="bubble-task-item-header flex-row align-center justify-between">
                   <view class="flex-row align-center" style="flex: 1; min-width: 0;">
-                    <icon type="{{task.status === 'SUCCESS' ? 'success' : (task.status === 'FAILED' ? 'warn' : 'waiting')}}" size="10" color="{{task.status === 'SUCCESS' ? '#166534' : (task.status === 'FAILED' ? '#be123c' : '#9e2a2b')}}" style="margin-right: 8rpx; flex-shrink: 0;"></icon>
+                    <icon type="{{task.status === 'SUCCESS' ? 'success' : (task.status === 'FAILED' ? 'warn' : 'waiting')}}" size="10" color="{{task.status === 'SUCCESS' ? '#3b5e59' : (task.status === 'FAILED' ? '#be123c' : '#9e2a2b')}}" style="margin-right: 8rpx; flex-shrink: 0;"></icon>
                     <text class="bubble-task-title {{task.status === 'SUCCESS' ? 'bubble-task-done' : ''}} text-ellipsis">{{task.desc || task.title || t.index.step}}</text>
                   </view>
                   <text class="bubble-task-status-badge status-{{task.status}}">{{task.status}}</text>
@@ -120,7 +120,16 @@
       </view>
       <view class="quote-banner-close" bindtap="clearQuote">✕</view>
     </view>
+    <view class="wechat-image-list" wx:if="{{images && images.length > 0}}">
+      <view class="wechat-image-item" wx:for="{{images}}" wx:key="*this">
+        <image src="{{item}}" mode="aspectFill" class="wechat-image-thumb"></image>
+        <view class="wechat-image-remove" catchtap="removeImage" data-index="{{index}}">×</view>
+      </view>
+    </view>
     <view class="wechat-input-bar flex-row align-center">
+      <view class="wechat-add-btn flex-row align-center justify-center" bindtap="chooseImages">
+        <text class="clear-icon">📷</text>
+      </view>
       <view class="clear-icon-btn flex-row align-center justify-center" bindtap="clearInput" wx:if="{{inputValue}}">
         <text class="clear-icon">🧹</text>
       </view>

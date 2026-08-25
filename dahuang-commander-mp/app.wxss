@@ -13,11 +13,14 @@ view, scroll-view, text, input, button {
   box-sizing: border-box;
 }
 
+
+/* 圆角分层（与 Web 端对齐）：chip=8rpx 徽标 / card=16rpx 卡片 / panel=20rpx 面板；胶囊/头像用 999rpx 或特判 */
+
 /* 水墨卡片：纸白半透明 + 墨线 + 柔和投影 (对齐 Web ink-card) */
 .cyber-panel {
   background-color: rgba(255, 255, 255, 0.55);
   border: 1rpx solid rgba(59, 48, 36, 0.12);
-  border-radius: 12rpx;
+  border-radius: 16rpx;
   box-shadow: 0 10rpx 30rpx -10rpx rgba(59, 48, 36, 0.12);
   padding: 24rpx;
   margin-bottom: 24rpx;
@@ -44,8 +47,8 @@ view, scroll-view, text, input, button {
 }
 
 .glow-emerald {
-  box-shadow: 0 10rpx 30rpx -8rpx rgba(22, 101, 52, 0.18);
-  border-color: rgba(22, 101, 52, 0.35);
+  box-shadow: 0 10rpx 30rpx -8rpx rgba(59, 94, 89, 0.18);
+  border-color: rgba(59, 94, 89, 0.35);
 }
 
 /* Agent 生成的 HTML 卡片（rich-text）在浅色纸底上的默认排版 */
@@ -53,6 +56,12 @@ view, scroll-view, text, input, button {
   color: #1a1a1a;
   line-height: 1.7;
   word-break: break-all;
+}
+
+
+/* 标题用宋/楷（增强书卷气），正文保持系统黑体；与 Web 端 h1-h4 规则对齐 */
+.panel-title, .post-title, .profile-name, .agent-name, .game-name, .challenge-title, .modal-title, .drawer-title, .leaderboard-item .sub-name {
+  font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
 }
 
 /* Flex layout utilities */
@@ -86,26 +95,26 @@ view, scroll-view, text, input, button {
 
 .badge-pending {
   color: #6b5b4a;
-  border-color: rgba(107,91,74, 0.3);
-  background-color: rgba(107,91,74, 0.1);
+  border-color: rgba(107, 91, 74, 0.3);
+  background-color: rgba(107, 91, 74, 0.1);
 }
 
 .badge-processing {
   color: #9e2a2b;
-  border-color: rgba(158,42,43, 0.4);
-  background-color: rgba(158,42,43, 0.1);
+  border-color: rgba(158, 42, 43, 0.4);
+  background-color: rgba(158, 42, 43, 0.1);
 }
 
 .badge-success {
-  color: #166534;
-  border-color: rgba(22,101,52, 0.4);
-  background-color: rgba(22,101,52, 0.1);
+  color: #3b5e59;
+  border-color: rgba(59, 94, 89, 0.4);
+  background-color: rgba(59, 94, 89, 0.1);
 }
 
 .badge-failed {
   color: #be123c;
-  border-color: rgba(190,18,60, 0.4);
-  background-color: rgba(190,18,60, 0.1);
+  border-color: rgba(190, 18, 60, 0.4);
+  background-color: rgba(190, 18, 60, 0.1);
 }
 
 /* Scrollbars - Hidden/Minimalist */

@@ -65,12 +65,13 @@ interface CommanderContextType {
     description: string,
     systemPrompt: string
   ) => Promise<boolean>;
-  sendInstruction: (instruction: string) => Promise<void>;
+  sendInstruction: (instruction: string, images?: string[]) => Promise<void>;
   addLog: (type: "THOUGHT" | "ACTION" | "SYSTEM", message: string) => void;
   clearLogs: () => void;
   clearRoomChat: (roomId: string) => void;
   oneClickAlchemy: () => Promise<void>;
   importToken: (token: string) => Promise<void>;
+  uploadOwnerImages: (files: FileList | File[]) => Promise<string[]>;
   clearHistory: () => void;
   messengerRooms: Record<string, RoomState>;
   activeChannel: string;
@@ -1140,7 +1141,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       return true;
     }
   };
-  const sendInstruction = async (instruction: string) => {
+  const sendInstruction = async (instruction: string, images?: string[]) => {
     if (!instruction.trim()) return;
 
     const humanMsgId = `human-${Date.now()}`;
@@ -1170,7 +1171,8 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           body: JSON.stringify({ 
             command: instruction,
             isAsync: true, // 💡 激活异步信号标志！
-            requestId: uniqueReqId
+            requestId: uniqueReqId,
+            images: images && images.length ? images : undefined
           })
         });
 
@@ -1311,6 +1313,25 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       },
     ]);
   };
+  const uploadOwnerImages = async (files: FileList | File[]): Promise<string[]> => {
+    const out: string[] = [];
+    const token = agentState?.token;
+    if (!token) return out;
+    for (const file of Array.from(files).slice(0, 4)) {
+      const form = new FormData();
+      form.append("file", file);
+      try {
+        const res = await fetch(`${getHeavenBaseUrl()}/api/agent/upload-image`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${token}`, "X-Agent-Version": "7.0" },
+          body: form,
+        });
+        if (res.ok) { const d = await res.json(); if (d.absoluteUrl) out.push(d.absoluteUrl); }
+      } catch {}
+    }
+    return out;
+  };
+
   const importToken = async (token: string) => {
     addLog("SYSTEM", "正在导入已有 Token...");
     setAgentState((prev) => ({ ...prev, status: "CONNECTING" }));
@@ -1496,6 +1517,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         getIqChallenge,
         registerAgent,
         sendInstruction,
+        uploadOwnerImages,
         addLog,
         oneClickAlchemy,
         importToken,

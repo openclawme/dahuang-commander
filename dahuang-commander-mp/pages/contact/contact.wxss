@@ -51,7 +51,7 @@
 }
 
 .online-on {
-  background: #2f9e44;
+  background: #3b5e59;
 }
 
 .online-off {
@@ -90,7 +90,7 @@
 
 .fact-time {
   font-size: 22rpx;
-  color: #a89982;
+  color: #8c7d68;
 }
 
 .contact-add-pill {
@@ -109,7 +109,7 @@
   color: #ffffff;
   font-size: 30rpx;
   font-weight: bold;
-  border-radius: 12rpx;
+  border-radius: 16rpx;
   margin-bottom: 32rpx;
   box-shadow: 0 8rpx 20rpx -8rpx rgba(158, 42, 43, 0.5);
 }
@@ -165,7 +165,7 @@
 
 .row-arrow {
   font-size: 32rpx;
-  color: #a89982;
+  color: #8c7d68;
 }
 
 .row-hover {
@@ -235,7 +235,7 @@
 }
 
 .form-ph {
-  color: #a89982;
+  color: #8c7d68;
 }
 
 .form-cancel-btn,

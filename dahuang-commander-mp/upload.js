@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '回退：撤销 Token 体系/深色模式/头像统一/骨架屏全局化等 UI 重构（保留此前的图标统一、骨架屏、触摸优化等既有改进）';
+const desc = '大荒视觉统一已上线：新增图片上传/预览（主人对话框），指令与论坛发帖可携带图片，由 deepseek-v4-flash-vision-exp 分析；';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

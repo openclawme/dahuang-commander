@@ -69,11 +69,11 @@ export default function AgentAvatar({
 
   // 矿物五色系 (强化 Cyber-ShanHai 质感: 轻盈水墨风)
   const sealColors = [
-    { bg: 'bg-[#9e2a2b]/10', shadow: 'shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),_0_0_10px_rgba(158,42,43,0.1)]', text: 'text-[#9e2a2b]' }, // 朱砂红 (Cinnabar)
-    { bg: 'bg-[#5b7a8c]/10', shadow: 'shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),_0_0_10px_rgba(91,122,140,0.1)]', text: 'text-[#5b7a8c]' }, // 花青 (Indigo)
-    { bg: 'bg-[#4a5940]/10', shadow: 'shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),_0_0_10px_rgba(74,89,64,0.1)]', text: 'text-[#4a5940]' },    // 苍翠 (Jade)
-    { bg: 'bg-[#b8844f]/10', shadow: 'shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),_0_0_10px_rgba(184,132,79,0.1)]', text: 'text-[#b8844f]' }, // 秋香 (Amber)
-    { bg: 'bg-[#3B3024]/10', shadow: 'shadow-[inset_0_2px_4px_rgba(255,255,255,0.5),_0_0_10px_rgba(59,48,36,0.1)]', text: 'text-[#3B3024]' }  // 枯墨 (Ink)
+    { bg: 'bg-[#9e2a2b]/10', shadow: 'shadow-[inset_0_2px_4px_rgba(255, 255, 255, 0.5),_0_0_10px_rgba(158, 42, 43, 0.1)]', text: 'text-[#9e2a2b]' }, // 朱砂红 (Cinnabar)
+    { bg: 'bg-[#5b7a8c]/10', shadow: 'shadow-[inset_0_2px_4px_rgba(255, 255, 255, 0.5),_0_0_10px_rgba(91, 122, 140, 0.1)]', text: 'text-[#5b7a8c]' }, // 花青 (Indigo)
+    { bg: 'bg-[#4a5940]/10', shadow: 'shadow-[inset_0_2px_4px_rgba(255, 255, 255, 0.5),_0_0_10px_rgba(74, 89, 64, 0.1)]', text: 'text-[#4a5940]' },    // 苍翠 (Jade)
+    { bg: 'bg-[#b8844f]/10', shadow: 'shadow-[inset_0_2px_4px_rgba(255, 255, 255, 0.5),_0_0_10px_rgba(184, 132, 79, 0.1)]', text: 'text-[#b8844f]' }, // 秋香 (Amber)
+    { bg: 'bg-[#3B3024]/10', shadow: 'shadow-[inset_0_2px_4px_rgba(255, 255, 255, 0.5),_0_0_10px_rgba(59, 48, 36, 0.1)]', text: 'text-[#3B3024]' }  // 枯墨 (Ink)
   ];
   const theme = sealColors[seed % sealColors.length];
 
@@ -117,18 +117,18 @@ export default function AgentAvatar({
           animation: spin-aura var(--aura-speed, 25s) linear infinite;
         }
         .particle-gold {
-          background: radial-gradient(circle, #f59e0b 0%, #eab308 60%, rgba(234,179,8,0) 100%);
-          box-shadow: 0 0 6px #eab308, 0 0 12px #f59e0b;
+          background: radial-gradient(circle, #b8844f 0%, #b8844f 60%, rgba(184, 132, 79, 0) 100%);
+          box-shadow: 0 0 6px #b8844f, 0 0 12px #b8844f;
         }
         .particle-blue {
-          background: radial-gradient(circle, #06b6d4 0%, #3b82f6 60%, rgba(59,130,246,0) 100%);
-          box-shadow: 0 0 6px #3b82f6, 0 0 12px #06b6d4;
+          background: radial-gradient(circle, #5b7a8c 0%, #5b7a8c 60%, rgba(91, 122, 140, 0) 100%);
+          box-shadow: 0 0 6px #5b7a8c, 0 0 12px #5b7a8c;
         }
       `}</style>
 
       {/* ================= B-1: 八卦/机械星环 (Orbit Aura) ================= */}
       <div 
-        className="absolute inset-0 pointer-events-none aura-rotate text-amber-500/60 z-0 transition-opacity duration-300"
+        className="absolute inset-0 pointer-events-none aura-rotate text-[#b8844f]/60 z-0 transition-opacity duration-300"
         style={{ '--aura-speed': `${auraSpeed}s` } as React.CSSProperties}
       >
         <svg className="w-full h-full" viewBox="0 0 100 100">
@@ -137,10 +137,10 @@ export default function AgentAvatar({
           {/* 外层断续刻度环 */}
           <circle cx="50" cy="50" r="46" stroke="currentColor" strokeWidth="1.2" strokeDasharray="40 10 20 8 30 15" fill="none" className="opacity-50" />
           {/* 四极因果星宿点 */}
-          <circle cx="50" cy="4" r="2" fill="currentColor" className="text-amber-400" />
-          <circle cx="50" cy="96" r="2" fill="currentColor" className="text-amber-400" />
-          <circle cx="4" cy="50" r="2" fill="currentColor" className="text-amber-400" />
-          <circle cx="96" cy="50" r="2" fill="currentColor" className="text-amber-400" />
+          <circle cx="50" cy="4" r="2" fill="currentColor" className="text-[#d4a95e]" />
+          <circle cx="50" cy="96" r="2" fill="currentColor" className="text-[#d4a95e]" />
+          <circle cx="4" cy="50" r="2" fill="currentColor" className="text-[#d4a95e]" />
+          <circle cx="96" cy="50" r="2" fill="currentColor" className="text-[#d4a95e]" />
           {/* 八卦四正刻度线 */}
           <path d="M 50,11 L 50,15 M 50,85 L 50,89 M 11,50 L 15,50 M 89,50 L 93,50" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="opacity-70" />
         </svg>
@@ -164,7 +164,7 @@ export default function AgentAvatar({
       ))}
 
       {/* ================= 内层核心：印章/八卦 ================= */}
-      <div className={`group/avatar ${innerSizeMap[size]} rounded-full ${theme.bg} ${theme.text} ${theme.shadow} flex items-center justify-center relative overflow-hidden flex-shrink-0 border border-[#3B3024]/15 z-10 hover:border-amber-500/50 transition-colors duration-500`}>
+      <div className={`group/avatar ${innerSizeMap[size]} rounded-full ${theme.bg} ${theme.text} ${theme.shadow} flex items-center justify-center relative overflow-hidden flex-shrink-0 border border-[#3B3024]/15 z-10 hover:border-[#b8844f]/50 transition-colors duration-500`}>
         {/* 背景：加强版的太虚卦象底纹 (带有内凹光晕和悬停缓缓旋转) */}
         <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-60 text-current pointer-events-none scale-[1.3] transition-transform duration-[3000ms] ease-linear group-hover/avatar:rotate-[30deg]">
           <defs>
@@ -210,7 +210,7 @@ export default function AgentAvatar({
             fontFamily: '"LiSu", "STLiti", "STKaiti", "KaiTi", serif', 
             fontWeight: 900,
             transform: 'scaleX(1.15)', // 隶书扁平化特征
-            textShadow: '0 2px 6px rgba(0,0,0,0.6)',
+            textShadow: '0 2px 6px rgba(0, 0, 0, 0.6)',
             letterSpacing: '-0.05em'
           }}
         >

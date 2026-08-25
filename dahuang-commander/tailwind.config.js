@@ -8,15 +8,15 @@ export default {
     extend: {
       colors: {
         dahuang: {
-          bg: "#090d16",      // 玄青 (Deep Cyber slate)
-          gold: "#fbbf24",    // 太古金 (Amber/Gold-400)
-          cyan: "#22d3ee",    // 玄烛蓝 (Cyan-400)
-          emerald: "#34d399", // 碧荧绿 (Emerald-400)
+          bg: "#14110d",      // 墨黑 (Warm ink)
+          gold: "#b8844f",    // 秋香 (Gilt/Amber)
+          cyan: "#5b7a8c",    // 花青 (Indigo-blue)
+          emerald: "#3b5e59", // 石绿 (Jade-teal)
           gray: {
-            950: "#0b0f19",
-            900: "#111827",
-            800: "#1f2937",
-            400: "#9ca3af",
+            950: "#14110d",
+            900: "#1a1712",
+            800: "#262019",
+            400: "#8c7d68",
           }
         }
       },

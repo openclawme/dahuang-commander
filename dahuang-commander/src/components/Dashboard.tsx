@@ -10,20 +10,20 @@ function TaskVisualizer({ tasks, progress }: { tasks?: any[]; progress?: number 
   const safeProgress = typeof progress === "number" ? progress : 0;
 
   return (
-    <div className="mt-3 p-3 bg-slate-950/90 border border-cyan-500/40 rounded-lg shadow-[0_0_15px_rgba(6,182,212,0.15)] font-mono text-[11px] w-full max-w-[550px] relative overflow-hidden">
+    <div className="mt-3 p-3 bg-slate-950/90 border border-[#5b7a8c]/40 rounded-lg shadow-[0_0_15px_rgba(91, 122, 140, 0.15)] font-mono text-[11px] w-full max-w-[550px] relative overflow-hidden">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-2.5 pb-1.5 border-b border-cyan-500/20">
-        <span className="text-cyan-400 font-bold tracking-widest flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-ping" />
+      <div className="flex justify-between items-center mb-2.5 pb-1.5 border-b border-[#5b7a8c]/20">
+        <span className="text-[#7ba6b8] font-bold tracking-widest flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 bg-[#5b7a8c] rounded-full animate-ping" />
           🛸 大荒分身 · 天道任务分解
         </span>
-        <span className="text-cyan-300 font-bold">{safeProgress}%</span>
+        <span className="text-[#9fbecb] font-bold">{safeProgress}%</span>
       </div>
 
       {/* PROGRESS TRACK */}
       <div className="w-full h-1.5 bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/50 mb-3 relative">
         <div 
-          className="h-full bg-gradient-to-r from-cyan-600 via-teal-400 to-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.6)] transition-all duration-700 ease-out"
+          className="h-full bg-gradient-to-r from-[#4a6a7c] via-teal-400 to-[#7ba6b8] shadow-[0_0_8px_rgba(91, 122, 140, 0.6)] transition-all duration-700 ease-out"
           style={{ width: `${safeProgress}%` }}
         />
       </div>
@@ -37,21 +37,21 @@ function TaskVisualizer({ tasks, progress }: { tasks?: any[]; progress?: number 
           let icon = "⚪";
 
           if (status === "SUCCESS") {
-            badgeColor = "text-emerald-400 border-emerald-500/30 bg-emerald-950/20 shadow-[0_0_6px_rgba(52,211,153,0.15)]";
-            textGlow = "text-emerald-200/90 font-semibold";
+            badgeColor = "text-[#6fa795] border-[#47857a]/30 bg-[#0d1a17]/20 shadow-[0_0_6px_rgba(59, 94, 89, 0.15)]";
+            textGlow = "text-[#bcd9d0]/90 font-semibold";
             icon = "✅";
           } else if (status === "PROCESSING") {
-            badgeColor = "text-cyan-400 border-cyan-500/40 bg-cyan-950/30 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.3)]";
-            textGlow = "text-cyan-100 font-semibold";
+            badgeColor = "text-[#7ba6b8] border-[#5b7a8c]/40 bg-[#141f25]/30 animate-pulse shadow-[0_0_8px_rgba(91, 122, 140, 0.3)]";
+            textGlow = "text-[#d7e6ec] font-semibold";
             icon = "⚡";
           } else if (status === "FAILED") {
-            badgeColor = "text-rose-400 border-rose-500/30 bg-rose-950/20";
-            textGlow = "text-rose-300";
+            badgeColor = "text-[#d08a8a] border-[#b04d4e]/30 bg-[#200d0e]/20";
+            textGlow = "text-[#e0b0b0]";
             icon = "❌";
           }
 
           return (
-            <div key={index} className={`flex flex-col gap-1.5 p-2 rounded border border-slate-900 bg-slate-900/40 transition-all ${status === "PROCESSING" ? "border-cyan-500/20 bg-cyan-950/5" : ""}`}>
+            <div key={index} className={`flex flex-col gap-1.5 p-2 rounded border border-slate-900 bg-slate-900/40 transition-all ${status === "PROCESSING" ? "border-[#5b7a8c]/20 bg-[#141f25]/5" : ""}`}>
               <div className="flex items-start gap-2.5">
                 <span className="text-[12px] flex-shrink-0 mt-0.5">{icon}</span>
                 <div className="flex-1 min-w-0">
@@ -68,9 +68,9 @@ function TaskVisualizer({ tasks, progress }: { tasks?: any[]; progress?: number 
               <div className="w-full h-1 bg-slate-950 rounded-full overflow-hidden border border-slate-800/40 relative">
                 <div 
                   className={`h-full rounded-full transition-all duration-500 ease-out ${
-                    status === "SUCCESS" ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]" :
-                    status === "PROCESSING" ? "bg-cyan-500 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.6)]" :
-                    status === "FAILED" ? "bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.5)]" :
+                    status === "SUCCESS" ? "bg-[#47857a] shadow-[0_0_6px_rgba(59, 94, 89, 0.5)]" :
+                    status === "PROCESSING" ? "bg-[#5b7a8c] animate-pulse shadow-[0_0_8px_rgba(91, 122, 140, 0.6)]" :
+                    status === "FAILED" ? "bg-[#b04d4e] shadow-[0_0_6px_rgba(244, 63, 94, 0.5)]" :
                     "bg-slate-800"
                   }`}
                   style={{ width: status === "SUCCESS" ? "100%" : status === "PROCESSING" ? "60%" : status === "FAILED" ? "100%" : "0%" }}
@@ -155,9 +155,9 @@ function RichMessageRenderer({ content }: { content: string }) {
       }
     }
     
-    let defaultColor = isLight ? "color: #1e293b;" : "color: #cbd5e1;";
-    let defaultBg = isLight ? "background-color: #ffffff;" : "background-color: #0b0f19;";
-    let defaultBorder = isLight ? "border: 1px solid rgba(100,116,139,0.15);" : "border: 1px solid rgba(255,255,255,0.08);";
+    let defaultColor = isLight ? "color: #3b3024;" : "color: #c4b8a5;";
+    let defaultBg = isLight ? "background-color: #ffffff;" : "background-color: #14110d;";
+    let defaultBorder = isLight ? "border: 1px solid rgba(100, 116, 139, 0.15);" : "border: 1px solid rgba(255, 255, 255, 0.08);";
     
     return `
       <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; border-radius: 8px;">
@@ -181,7 +181,7 @@ function RichMessageRenderer({ content }: { content: string }) {
     if (!existingStyle.includes("color")) {
       headerColor = "color: inherit;";
     }
-    return `<th style="padding: 10px; font-weight: bold; font-family: monospace; font-size: 11px; text-align: left; border-bottom: 2px solid rgba(255,255,255,0.1); ${headerColor} ${existingStyle}" ${cleanedAttrs}>`;
+    return `<th style="padding: 10px; font-weight: bold; font-family: monospace; font-size: 11px; text-align: left; border-bottom: 2px solid rgba(255, 255, 255, 0.1); ${headerColor} ${existingStyle}" ${cleanedAttrs}>`;
   });
 
   // td word boundary replacement
@@ -198,22 +198,22 @@ function RichMessageRenderer({ content }: { content: string }) {
     if (!existingStyle.includes("color")) {
       cellColor = "color: inherit;";
     }
-    return `<td style="padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 11px; ${cellColor} ${existingStyle}" ${cleanedAttrs}>`;
+    return `<td style="padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.04); font-size: 11px; ${cellColor} ${existingStyle}" ${cleanedAttrs}>`;
   });
 
   // 1. Markdowns: **bold** -> <strong>
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="text-amber-400 font-bold font-sans">$1</strong>');
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#d4a95e] font-bold font-sans">$1</strong>');
   
   // 2. Markdowns: `code` -> <code class="...">
-  html = html.replace(/`(.*?)`/g, '<code class="bg-slate-950 text-emerald-400 px-1 py-0.5 rounded font-mono text-[11px] border border-emerald-500/10">$1</code>');
+  html = html.replace(/`(.*?)`/g, '<code class="bg-slate-950 text-[#6fa795] px-1 py-0.5 rounded font-mono text-[11px] border border-[#47857a]/10">$1</code>');
 
   // 3. Custom tag: <badge color="cyan|amber|emerald|rose">text</badge>
   html = html.replace(/<badge\s+color="(\w+)"\s*>(.*?)<\/badge>/g, (_: string, color: string, text: string): string => {
     let classes = "";
-    if (color === "cyan") classes = "bg-cyan-500/10 text-cyan-400 border-cyan-500/30 shadow-[0_0_8px_rgba(6,182,212,0.2)] animate-pulse";
-    else if (color === "amber") classes = "bg-amber-500/10 text-amber-400 border-amber-500/30 shadow-[0_0_8px_rgba(245,158,11,0.2)]";
-    else if (color === "emerald") classes = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
-    else if (color === "rose") classes = "bg-rose-500/10 text-rose-400 border-rose-500/30";
+    if (color === "cyan") classes = "bg-[#5b7a8c]/10 text-[#7ba6b8] border-[#5b7a8c]/30 shadow-[0_0_8px_rgba(91, 122, 140, 0.2)] animate-pulse";
+    else if (color === "amber") classes = "bg-[#b8844f]/10 text-[#d4a95e] border-[#b8844f]/30 shadow-[0_0_8px_rgba(184, 132, 79, 0.2)]";
+    else if (color === "emerald") classes = "bg-[#47857a]/10 text-[#6fa795] border-[#47857a]/30";
+    else if (color === "rose") classes = "bg-[#b04d4e]/10 text-[#d08a8a] border-[#b04d4e]/30";
     else classes = "bg-slate-500/10 text-slate-400 border-slate-500/30";
     return `<span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border font-mono tracking-wider ${classes}">${text}</span>`;
   });
@@ -225,23 +225,23 @@ function RichMessageRenderer({ content }: { content: string }) {
     let titleColor = "text-slate-200";
     let glow = "";
     if (type === "info") {
-      border = "border-cyan-500/30";
-      bg = "bg-cyan-950/10";
-      titleColor = "text-cyan-400";
-      glow = "shadow-[0_0_12px_rgba(6,182,212,0.1)]";
+      border = "border-[#5b7a8c]/30";
+      bg = "bg-[#141f25]/10";
+      titleColor = "text-[#7ba6b8]";
+      glow = "shadow-[0_0_12px_rgba(91, 122, 140, 0.1)]";
     } else if (type === "success") {
-      border = "border-emerald-500/30";
-      bg = "bg-emerald-950/10";
-      titleColor = "text-emerald-400";
+      border = "border-[#47857a]/30";
+      bg = "bg-[#0d1a17]/10";
+      titleColor = "text-[#6fa795]";
     } else if (type === "warning") {
-      border = "border-amber-500/30";
-      bg = "bg-amber-500/5";
-      titleColor = "text-amber-500";
-      glow = "shadow-[0_0_12px_rgba(245,158,11,0.1)]";
+      border = "border-[#b8844f]/30";
+      bg = "bg-[#b8844f]/5";
+      titleColor = "text-[#b8844f]";
+      glow = "shadow-[0_0_12px_rgba(184, 132, 79, 0.1)]";
     } else if (type === "error") {
-      border = "border-rose-500/30";
-      bg = "bg-rose-950/10";
-      titleColor = "text-rose-400";
+      border = "border-[#b04d4e]/30";
+      bg = "bg-[#200d0e]/10";
+      titleColor = "text-[#d08a8a]";
     }
     return `
       <div class="my-3 p-3 border rounded-xl ${border} ${bg} ${glow} font-mono text-[11px] tracking-wide space-y-2">
@@ -263,38 +263,38 @@ function RichMessageRenderer({ content }: { content: string }) {
     <>
       <style>{`
         .rich-message-container img {
-          border: 1px solid rgba(245,158,11,0.4);
+          border: 1px solid rgba(184, 132, 79, 0.4);
           border-radius: 8px;
           margin: 8px 0;
           max-width: 100%;
-          box-shadow: 0 0 12px rgba(245,158,11,0.15);
+          box-shadow: 0 0 12px rgba(184, 132, 79, 0.15);
           transition: transform 0.3s ease;
         }
         .rich-message-container img:hover {
           transform: scale(1.02);
         }
         .rich-message-container video {
-          border: 1px solid rgba(6,182,212,0.4);
+          border: 1px solid rgba(91, 122, 140, 0.4);
           border-radius: 8px;
           margin: 8px 0;
           width: 100%;
           max-width: 480px;
-          box-shadow: 0 0 12px rgba(6,182,212,0.15);
+          box-shadow: 0 0 12px rgba(91, 122, 140, 0.15);
         }
         .rich-message-container table {
           width: 100%;
           border-collapse: collapse;
           margin: 10px 0;
-          background: rgba(11,15,25,0.8);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: rgba(11, 15, 25, 0.8);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 6px;
           overflow: hidden;
         }
         .rich-message-container th {
-          background: rgba(6,182,212,0.12);
-          border-bottom: 1px solid rgba(6,182,212,0.25);
+          background: rgba(91, 122, 140, 0.12);
+          border-bottom: 1px solid rgba(91, 122, 140, 0.25);
           padding: 6px 8px;
-          color: #22d3ee;
+          color: #7ba6b8;
           font-weight: bold;
           font-family: monospace;
           text-align: left;
@@ -302,21 +302,21 @@ function RichMessageRenderer({ content }: { content: string }) {
         }
         .rich-message-container td {
           padding: 6px 8px;
-          border-bottom: 1px solid rgba(255,255,255,0.04);
-          color: #cbd5e1;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+          color: #c4b8a5;
           font-size: 11px;
         }
         .rich-message-container blockquote {
-          border-left: 3px solid #f59e0b;
-          background: rgba(245,158,11,0.05);
+          border-left: 3px solid #b8844f;
+          background: rgba(184, 132, 79, 0.05);
           padding: 6px 12px;
           margin: 8px 0;
           border-radius: 4px;
-          color: #cbd5e1;
+          color: #c4b8a5;
         }
       `}</style>
       <div 
-        className="rich-message-container w-full break-words selection:bg-cyan-500 selection:text-slate-950 leading-relaxed space-y-1.5 text-xs text-slate-200"
+        className="rich-message-container w-full break-words selection:bg-[#5b7a8c] selection:text-slate-950 leading-relaxed space-y-1.5 text-xs text-slate-200"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </>
@@ -336,6 +336,7 @@ const Dashboard: React.FC = () => {
     getIqChallenge,
     registerAgent,
     sendInstruction,
+    uploadOwnerImages,
     addLog,
     importToken,
     clearHistory,
@@ -379,6 +380,8 @@ const Dashboard: React.FC = () => {
 
   // --- UI Local States ---
   const [instructionText, setInstructionText] = useState("");
+  const [images, setImages] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isRegistering, setIsRegistering] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
 
@@ -894,7 +897,14 @@ const Dashboard: React.FC = () => {
     if (!instructionText.trim()) return;
     const txt = instructionText;
     setInstructionText("");
-    await sendInstruction(txt);
+    await sendInstruction(txt, images);
+    setImages([]);
+  };
+
+  const handlePickImages = async (files: FileList | null) => {
+    if (!files) return;
+    const urls = await uploadOwnerImages(files);
+    setImages((p) => [...p, ...urls].slice(0, 4));
   };
 
   const handleQuickCommand = async (command: string) => {
@@ -920,11 +930,11 @@ const Dashboard: React.FC = () => {
     <div className="relative w-screen min-h-screen lg:h-screen flex flex-col bg-slate-950 font-mono text-gray-100 overflow-y-auto lg:overflow-hidden scanline-overlay">
       
       {/* ================= HEADER BAR ================= */}
-      <header className="flex justify-between items-center px-4 py-2 bg-slate-900/90 border-b border-cyan-500/20 z-20">
+      <header className="flex justify-between items-center px-4 py-2 bg-slate-900/90 border-b border-[#5b7a8c]/20 z-20">
         <div className="flex items-center space-x-3">
-          <div className="w-3 h-3 bg-amber-500 rounded-full animate-pulse shadow-[0_0_10px_#f59e0b]"></div>
-          <h1 className="text-sm md:text-base font-bold tracking-widest text-glow-gold text-amber-400 flex items-center">
-            ⛩️ 大荒指挥官终端 <span className="text-xs text-cyan-400 ml-2 font-light">v1.0.0 (BYOA HUD Mode)</span>
+          <div className="w-3 h-3 bg-[#b8844f] rounded-full animate-pulse shadow-[0_0_10px_#b8844f]"></div>
+          <h1 className="text-sm md:text-base font-bold tracking-widest text-glow-gold text-[#d4a95e] flex items-center">
+            ⛩️ 大荒指挥官终端 <span className="text-xs text-[#7ba6b8] ml-2 font-light">v1.0.0 (BYOA HUD Mode)</span>
           </h1>
         </div>
         
@@ -932,16 +942,16 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center space-x-1">
             <span className="text-gray-400">天道连结:</span>
             {agentState.status === "ONLINE" ? (
-              <span className="text-emerald-400 flex items-center">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 mr-1 animate-pulse"></span> {isWebMode ? "云端连结" : "已结成契约"}
+              <span className="text-[#6fa795] flex items-center">
+                <span className="w-2 h-2 rounded-full bg-[#47857a] mr-1 animate-pulse"></span> {isWebMode ? "云端连结" : "已结成契约"}
               </span>
             ) : agentState.status === "CONNECTING" ? (
-              <span className="text-amber-400 flex items-center">
-                <span className="w-2 h-2 rounded-full bg-amber-500 mr-1 animate-ping"></span> 炼魂入道中...
+              <span className="text-[#d4a95e] flex items-center">
+                <span className="w-2 h-2 rounded-full bg-[#b8844f] mr-1 animate-ping"></span> 炼魂入道中...
               </span>
             ) : (
-              <span className="text-red-400 flex items-center">
-                <span className="w-2 h-2 rounded-full bg-red-500 mr-1"></span> 影子沙盒连线
+              <span className="text-[#d08a8a] flex items-center">
+                <span className="w-2 h-2 rounded-full bg-[#b04d4e] mr-1"></span> 影子沙盒连线
               </span>
             )}
           </div>
@@ -951,8 +961,8 @@ const Dashboard: React.FC = () => {
           <div className="flex items-center space-x-1">
             <span className="text-gray-400">{isWebMode ? "远程云网关:" : "本地代理网关 [9090]:"}</span>
             {isWebhookActive ? (
-              <span className="text-emerald-400 font-bold flex items-center">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 mr-1 animate-ping"></span> ACTIVE
+              <span className="text-[#6fa795] font-bold flex items-center">
+                <span className="w-2 h-2 rounded-full bg-[#47857a] mr-1 animate-ping"></span> ACTIVE
               </span>
             ) : (
               <span className="text-slate-500 flex items-center">
@@ -967,15 +977,15 @@ const Dashboard: React.FC = () => {
       <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 min-h-0 z-20">
         
         {/* ================= WINDOW A: INNER CHAMBER (5 cols) ================= */}
-        <section className="lg:col-span-5 flex flex-col h-[550px] lg:h-full bg-slate-950/90 border border-amber-500/30 rounded-lg overflow-hidden neon-gold font-sans">
+        <section className="lg:col-span-5 flex flex-col h-[550px] lg:h-full bg-slate-950/90 border border-[#b8844f]/30 rounded-lg overflow-hidden neon-gold font-sans">
           {/* Window A Title Header */}
-          <div className="flex justify-between items-center px-3 py-2 bg-amber-950/20 border-b border-amber-500/20 text-xs text-amber-400 font-bold tracking-wider font-mono">
+          <div className="flex justify-between items-center px-3 py-2 bg-[#241a10]/20 border-b border-[#b8844f]/20 text-xs text-[#d4a95e] font-bold tracking-wider font-mono">
             <span>🔴 窗口 A：内廷 (Inner Chamber) [灵魂对齐与主人印契]</span>
             <div className="flex items-center space-x-2">
               <button
                 type="button"
                 onClick={clearHistory}
-                className="px-1.5 py-0.5 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 text-red-400 hover:text-red-300 rounded text-[9px] cursor-pointer transition font-bold scale-[0.9]"
+                className="px-1.5 py-0.5 bg-[#200d0e]/40 hover:bg-[#4a1213]/60 border border-[#b04d4e]/30 text-[#d08a8a] hover:text-[#e0b0b0] rounded text-[9px] cursor-pointer transition font-bold scale-[0.9]"
               >
                 🧹 清空内廷
               </button>
@@ -984,7 +994,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Status Display Area */}
-          <div className="p-3 bg-slate-900/60 border-b border-amber-500/10 flex items-center space-x-3.5">
+          <div className="p-3 bg-slate-900/60 border-b border-[#b8844f]/10 flex items-center space-x-3.5">
             {/* Active Agent Avatar with Aura & Particles */}
             <div className="shrink-0 flex items-center justify-center">
               <AgentAvatar 
@@ -999,40 +1009,40 @@ const Dashboard: React.FC = () => {
             {/* Stats list */}
             <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-gray-300 font-mono">
               <div>
-                <span className="text-amber-500 font-semibold block">分身真名:</span>
+                <span className="text-[#b8844f] font-semibold block">分身真名:</span>
               <span className="font-bold text-white text-xs">{agentState.name}</span>
             </div>
             <div>
-              <span className="text-amber-500 font-semibold block">大荒因果 (Karma):</span>
-              <span className="font-bold text-glow-gold text-amber-400 text-xs">🪙 {agentState.karma.toLocaleString()}</span>
+              <span className="text-[#b8844f] font-semibold block">大荒因果 (Karma):</span>
+              <span className="font-bold text-glow-gold text-[#d4a95e] text-xs">🪙 {agentState.karma.toLocaleString()}</span>
             </div>
             <div>
-              <span className="text-amber-500 font-semibold block">道心性格:</span>
+              <span className="text-[#b8844f] font-semibold block">道心性格:</span>
               <span className="font-bold text-white text-xs">🎭 {agentState.character}</span>
             </div>
             <div>
-              <span className="text-amber-500 font-semibold block">灵慧值 (IQ):</span>
+              <span className="text-[#b8844f] font-semibold block">灵慧值 (IQ):</span>
               <span className="font-bold text-white text-xs">🧠 {agentState.iq}</span>
             </div>
             <div className="col-span-2 md:col-span-4 mt-1 pt-1 border-t border-slate-800 flex items-center justify-between">
-              <span className="text-[10px] text-amber-500 font-semibold mr-1 whitespace-nowrap">📅 短期道途目标:</span>
+              <span className="text-[10px] text-[#b8844f] font-semibold mr-1 whitespace-nowrap">📅 短期道途目标:</span>
               <span className="text-[11px] text-gray-400 truncate text-right flex-1">{agentState.shortTermGoal}</span>
             </div>
             <div className="col-span-2 md:col-span-4 flex items-center justify-between pt-1 text-[10px] text-slate-400">
-              <span>DID: <code className="text-cyan-400 text-[10px] font-mono">{agentState.did}</code></span>
+              <span>DID: <code className="text-[#7ba6b8] text-[10px] font-mono">{agentState.did}</code></span>
             </div>
 
             {agentState.token && (
               <div className="col-span-2 md:col-span-4 mt-1.5 pt-1.5 border-t border-slate-800/40 flex flex-col space-y-1 text-[10px]">
                 <div className="flex justify-between items-center text-slate-400">
-                  <span className="text-amber-500 font-semibold font-mono">🔑 天道契约凭证 (JWT Token):</span>
+                  <span className="text-[#b8844f] font-semibold font-mono">🔑 天道契约凭证 (JWT Token):</span>
                   <button
                     type="button"
                     onClick={() => {
                       navigator.clipboard.writeText(agentState.token || "");
                       alert("🔑 天道契约凭证已成功复制到剪贴板！请妥善保管此印记密匙。");
                     }}
-                    className="px-1.5 py-0.5 bg-amber-950/40 hover:bg-amber-950 border border-amber-500/20 hover:border-amber-400 rounded text-amber-400 transition cursor-pointer font-bold scale-[0.9]"
+                    className="px-1.5 py-0.5 bg-[#241a10]/40 hover:bg-[#241a10] border border-[#b8844f]/20 hover:border-[#d4a95e] rounded text-[#d4a95e] transition cursor-pointer font-bold scale-[0.9]"
                   >
                     复制 Token 📋
                   </button>
@@ -1047,21 +1057,21 @@ const Dashboard: React.FC = () => {
 
           {/* Active Cron Jobs HUD - Pinned to the top of Window A (Inner Chamber) so it's ALWAYS visible and never scrolls away! */}
           {cronJobs.length > 0 && (
-            <div className="bg-gradient-to-r from-cyan-950/40 to-slate-900/30 border-b border-cyan-500/25 p-2.5 space-y-2 animate-fadeIn relative overflow-hidden shrink-0 shadow-[0_4px_12px_rgba(6,182,212,0.1)] font-mono z-10">
+            <div className="bg-gradient-to-r from-[#141f25]/40 to-slate-900/30 border-b border-[#5b7a8c]/25 p-2.5 space-y-2 animate-fadeIn relative overflow-hidden shrink-0 shadow-[0_4px_12px_rgba(91, 122, 140, 0.1)] font-mono z-10">
               {/* Spinning subtle background portal */}
-              <div className="absolute -right-6 -bottom-6 w-16 h-16 border border-dashed border-cyan-500/10 rounded-full animate-spin" style={{ animationDuration: '20s' }} />
+              <div className="absolute -right-6 -bottom-6 w-16 h-16 border border-dashed border-[#5b7a8c]/10 rounded-full animate-spin" style={{ animationDuration: '20s' }} />
               
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <span className="animate-pulse">⌛</span>
-                  <span className="text-cyan-300 font-bold text-[10px] tracking-wider uppercase">
+                  <span className="text-[#9fbecb] font-bold text-[10px] tracking-wider uppercase">
                     活动中的天道提醒法轨 ({cronJobs.length})
                   </span>
                 </div>
                 <button 
                   type="button"
                   onClick={() => setActiveChannel("cron")}
-                  className="text-[9px] text-cyan-400 hover:underline cursor-pointer flex items-center space-x-0.5 bg-transparent border-none"
+                  className="text-[9px] text-[#7ba6b8] hover:underline cursor-pointer flex items-center space-x-0.5 bg-transparent border-none"
                 >
                   <span>去控制台管理 ➔</span>
                 </button>
@@ -1076,23 +1086,23 @@ const Dashboard: React.FC = () => {
                     humanExpr = `每隔 ${mins} 分钟触发`;
                   }
                   return (
-                    <div key={job.id} className="flex justify-between items-center bg-slate-950/60 border border-slate-900/80 p-2 rounded hover:border-cyan-500/20 transition">
+                    <div key={job.id} className="flex justify-between items-center bg-slate-950/60 border border-slate-900/80 p-2 rounded hover:border-[#5b7a8c]/20 transition">
                       <div className="space-y-0.5 min-w-0 flex-1 mr-2 text-left">
                         <div className="flex items-center space-x-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#7ba6b8] animate-ping" />
                           <span className="text-slate-300 font-bold text-[10px] truncate max-w-[150px]">{job.command}</span>
                         </div>
                         <div className="text-[9px] text-slate-500 font-mono">
                           <span>{humanExpr}</span>
                           {job.lastRunAt && (
-                            <span className="ml-2 text-cyan-500/60">上次: {new Date(job.lastRunAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            <span className="ml-2 text-[#5b7a8c]/60">上次: {new Date(job.lastRunAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                           )}
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={() => cancelCronJob(job.id)}
-                        className="px-2 py-0.5 bg-red-950/20 hover:bg-red-900/60 border border-red-500/30 text-red-400 hover:text-red-300 rounded text-[9px] font-semibold cursor-pointer transition active:scale-95 whitespace-nowrap shrink-0"
+                        className="px-2 py-0.5 bg-[#200d0e]/20 hover:bg-[#4a1213]/60 border border-[#b04d4e]/30 text-[#d08a8a] hover:text-[#e0b0b0] rounded text-[9px] font-semibold cursor-pointer transition active:scale-95 whitespace-nowrap shrink-0"
                       >
                         撤销 ✖
                       </button>
@@ -1120,14 +1130,14 @@ const Dashboard: React.FC = () => {
                 <div
                   className={`p-2.5 rounded-lg text-xs tracking-wide leading-relaxed border ${
                     msg.sender === "human"
-                      ? "bg-amber-950/40 border-amber-500/40 text-amber-100 rounded-tr-none"
-                      : "bg-slate-900/90 border-cyan-500/30 text-cyan-100 rounded-tl-none text-glow-cyan"
+                      ? "bg-[#241a10]/40 border-[#b8844f]/40 text-[#f2e6d3] rounded-tr-none"
+                      : "bg-slate-900/90 border-[#5b7a8c]/30 text-[#d7e6ec] rounded-tl-none text-glow-cyan"
                   }`}
                 >
                   {msg.isPending && (!msg.tasks || msg.tasks.length === 0) && (!msg.content || msg.content === "（元神入定推演中...）") ? (
                     <div className="flex items-center space-x-2.5 py-1 select-none">
-                      <div className="w-3.5 h-3.5 border-2 border-cyan-500/20 border-t-cyan-400 rounded-full animate-spin"></div>
-                      <span className="text-cyan-400 font-medium animate-pulse">元神正在推演法旨...</span>
+                      <div className="w-3.5 h-3.5 border-2 border-[#5b7a8c]/20 border-t-cyan-400 rounded-full animate-spin"></div>
+                      <span className="text-[#7ba6b8] font-medium animate-pulse">元神正在推演法旨...</span>
                     </div>
                   ) : (
                     <div className="space-y-2 w-full">
@@ -1138,8 +1148,8 @@ const Dashboard: React.FC = () => {
                         <TaskVisualizer tasks={msg.tasks} progress={msg.progress} />
                       )}
                       {msg.isPending && (
-                        <div className="flex items-center space-x-2 pt-1 border-t border-cyan-500/10 text-[10px] text-cyan-400/80 select-none">
-                          <div className="w-2.5 h-2.5 border border-cyan-500/20 border-t-cyan-400 rounded-full animate-spin"></div>
+                        <div className="flex items-center space-x-2 pt-1 border-t border-[#5b7a8c]/10 text-[10px] text-[#7ba6b8]/80 select-none">
+                          <div className="w-2.5 h-2.5 border border-[#5b7a8c]/20 border-t-cyan-400 rounded-full animate-spin"></div>
                           <span className="animate-pulse">推演接力中 ({msg.progress || 0}%)...</span>
                         </div>
                       )}
@@ -1156,52 +1166,66 @@ const Dashboard: React.FC = () => {
             <span>🔑 快捷法旨:</span>
             <button
               onClick={() => handleQuickCommand("🔍 帮我去寻找漏洞，看看大荒最近有什么可爆破的寻宝任务？")}
-              className="px-1.5 py-0.5 bg-slate-800 hover:bg-amber-950/60 hover:text-amber-400 rounded border border-slate-700 transition cursor-pointer"
+              className="px-1.5 py-0.5 bg-slate-800 hover:bg-[#241a10]/60 hover:text-[#d4a95e] rounded border border-slate-700 transition cursor-pointer"
             >
               寻宝探测
             </button>
             <button
               onClick={() => handleQuickCommand("⚖️ 评估当前不周山博弈场的背叛趋势，制定稳健博弈对策。")}
-              className="px-1.5 py-0.5 bg-slate-800 hover:bg-amber-950/60 hover:text-amber-400 rounded border border-slate-700 transition cursor-pointer"
+              className="px-1.5 py-0.5 bg-slate-800 hover:bg-[#241a10]/60 hover:text-[#d4a95e] rounded border border-slate-700 transition cursor-pointer"
             >
               博弈推演
             </button>
             <button
               onClick={() => handleQuickCommand("💬 扫描论坛关于 AI4Science 和基因元件的冷门讨论，撰写高质量评论。")}
-              className="px-1.5 py-0.5 bg-slate-800 hover:bg-amber-950/60 hover:text-amber-400 rounded border border-slate-700 transition cursor-pointer"
+              className="px-1.5 py-0.5 bg-slate-800 hover:bg-[#241a10]/60 hover:text-[#d4a95e] rounded border border-slate-700 transition cursor-pointer"
             >
               论坛论战
             </button>
           </div>
 
           {/* User Instruction Input Box */}
-          <form onSubmit={handleSendCommand} className="p-2 bg-slate-900/90 border-t border-amber-500/20 flex space-x-2 font-mono">
-            <input
-              type="text"
-              value={instructionText}
-              onChange={(e) => setInstructionText(e.target.value)}
-              placeholder="请输入您对 Agent 的调教法旨与口令..."
-              className="flex-1 bg-slate-950 border border-amber-500/30 rounded px-3 py-1.5 text-xs text-amber-200 placeholder-amber-700/60 focus:outline-none focus:border-amber-400 transition"
-            />
-            <button
-              type="submit"
-              className="px-4 py-1.5 bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-slate-950 font-bold text-xs rounded transition flex items-center space-x-1 cursor-pointer"
-            >
-              <span>吩咐</span>
-              <span>⚡</span>
-            </button>
+          <form onSubmit={handleSendCommand} className="p-2 bg-slate-900/90 border-t border-[#b8844f]/20 flex flex-col font-mono">
+            {images.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-1.5">
+                {images.map((u, i) => (
+                  <span key={i} className="relative">
+                    <img src={u} alt="" className="h-12 w-16 object-cover rounded border border-[#b8844f]/30" />
+                    <button type="button" onClick={() => setImages((p) => p.filter((_, j) => j !== i))} className="absolute -top-1 -right-1 w-4 h-4 bg-[#855930] text-slate-950 rounded-full text-[8px] leading-4">×</button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="flex space-x-2">
+              <input type="file" multiple accept="image/*" ref={fileInputRef} className="hidden" onChange={(e) => handlePickImages(e.target.files)} />
+              <button type="button" onClick={() => fileInputRef.current?.click()} title="上传图片" className="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-[#e7d2ae] rounded text-xs transition cursor-pointer">📷</button>
+              <input
+                type="text"
+                value={instructionText}
+                onChange={(e) => setInstructionText(e.target.value)}
+                placeholder="请输入您对 Agent 的调教法旨与口令..."
+                className="flex-1 bg-slate-950 border border-[#b8844f]/30 rounded px-3 py-1.5 text-xs text-[#e7d2ae] placeholder-[#855930]/60 focus:outline-none focus:border-[#d4a95e] transition"
+              />
+              <button
+                type="submit"
+                className="px-4 py-1.5 bg-[#a06f3f] hover:bg-[#b8844f] active:bg-[#855930] text-slate-950 font-bold text-xs rounded transition flex items-center space-x-1 cursor-pointer"
+              >
+                <span>吩咐</span>
+                <span>⚡</span>
+              </button>
+            </div>
           </form>
         </section>
 
         {/* ================= WINDOW B: OUTER WILDERNESS (7 cols) ================= */}
-        <section className="lg:col-span-7 flex flex-col h-[650px] lg:h-full bg-slate-950/90 border border-cyan-500/30 rounded-lg overflow-hidden neon-cyan min-h-0">
+        <section className="lg:col-span-7 flex flex-col h-[650px] lg:h-full bg-slate-950/90 border border-[#5b7a8c]/30 rounded-lg overflow-hidden neon-cyan min-h-0">
           
           {/* Main Flex-Row Split Layout (WeChat Style!) */}
-          <div className="flex flex-1 min-h-0 divide-x divide-cyan-500/10 h-full">
+          <div className="flex flex-1 min-h-0 divide-x divide-[#5b7a8c]/10 h-full">
             
             {/* Sidebar (Left pane - Width: 1/3) */}
             <div className="w-[150px] md:w-[180px] flex flex-col bg-slate-900/30 shrink-0 select-none">
-              <div className="px-2 py-1.5 text-[9px] font-bold text-slate-500 uppercase tracking-widest border-b border-cyan-500/10 bg-slate-950/20">
+              <div className="px-2 py-1.5 text-[9px] font-bold text-slate-500 uppercase tracking-widest border-b border-[#5b7a8c]/10 bg-slate-950/20">
                 💬 社交与系统信道
               </div>
               <div className="flex-1 overflow-y-auto space-y-0.5 p-1">
@@ -1209,7 +1233,7 @@ const Dashboard: React.FC = () => {
                 <button
                   onClick={() => setActiveChannel("telemetry")}
                   className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
-                    activeChannel === "telemetry" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
+                    activeChannel === "telemetry" ? "bg-[#141f25]/50 border border-[#5b7a8c]/30 text-[#9fbecb] font-bold" : "text-slate-400 hover:bg-slate-900/40"
                   }`}
                 >
                   <span className="truncate">📡 {t("sidebar.dashboard")}</span>
@@ -1219,7 +1243,7 @@ const Dashboard: React.FC = () => {
                 <button
                   onClick={() => setActiveChannel("settings")}
                   className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
-                    activeChannel === "settings" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
+                    activeChannel === "settings" ? "bg-[#141f25]/50 border border-[#5b7a8c]/30 text-[#9fbecb] font-bold" : "text-slate-400 hover:bg-slate-900/40"
                   }`}
                 >
                   <span className="truncate">⚙️ {t("sidebar.settings")}</span>
@@ -1229,12 +1253,12 @@ const Dashboard: React.FC = () => {
                 <button
                   onClick={() => setActiveChannel("cron")}
                   className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
-                    activeChannel === "cron" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
+                    activeChannel === "cron" ? "bg-[#141f25]/50 border border-[#5b7a8c]/30 text-[#9fbecb] font-bold" : "text-slate-400 hover:bg-slate-900/40"
                   }`}
                 >
                   <span className="truncate">⌛ {t("sidebar.cron")}</span>
                   {cronJobs.length > 0 && (
-                    <span className="bg-cyan-500 text-slate-950 font-bold px-1.5 py-0.5 rounded-full text-[8px] animate-pulse shrink-0">
+                    <span className="bg-[#5b7a8c] text-slate-950 font-bold px-1.5 py-0.5 rounded-full text-[8px] animate-pulse shrink-0">
                       {cronJobs.length}
                     </span>
                   )}
@@ -1244,7 +1268,7 @@ const Dashboard: React.FC = () => {
                 <button
                   onClick={() => setActiveChannel("forum")}
                   className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
-                    activeChannel === "forum" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
+                    activeChannel === "forum" ? "bg-[#141f25]/50 border border-[#5b7a8c]/30 text-[#9fbecb] font-bold" : "text-slate-400 hover:bg-slate-900/40"
                   }`}
                 >
                   <span className="truncate">📢 {t("sidebar.forum")}</span>
@@ -1254,7 +1278,7 @@ const Dashboard: React.FC = () => {
                 <button
                   onClick={() => setActiveChannel("arena")}
                   className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
-                    activeChannel === "arena" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
+                    activeChannel === "arena" ? "bg-[#141f25]/50 border border-[#5b7a8c]/30 text-[#9fbecb] font-bold" : "text-slate-400 hover:bg-slate-900/40"
                   }`}
                 >
                   <span className="truncate">⚔️ {t("sidebar.arena")}</span>
@@ -1264,13 +1288,13 @@ const Dashboard: React.FC = () => {
                 <button
                   onClick={() => setActiveChannel("alchemy")}
                   className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
-                    activeChannel === "alchemy" ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
+                    activeChannel === "alchemy" ? "bg-[#141f25]/50 border border-[#5b7a8c]/30 text-[#9fbecb] font-bold" : "text-slate-400 hover:bg-slate-900/40"
                   }`}
                 >
                   <span className="truncate">⚗️ {t("sidebar.alchemy")}</span>
                 </button>
 
-                <hr className="border-cyan-500/10 my-1" />
+                <hr className="border-[#5b7a8c]/10 my-1" />
 
                 {/* Dynamic Chat Rooms List */}
                 {Object.values(messengerRooms).length === 0 ? (
@@ -1285,12 +1309,12 @@ const Dashboard: React.FC = () => {
                         room.autoReply = room.autoReply; // preserve state
                       }}
                       className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
-                        activeChannel === room.roomId ? "bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold" : "text-slate-400 hover:bg-slate-900/40"
+                        activeChannel === room.roomId ? "bg-[#141f25]/50 border border-[#5b7a8c]/30 text-[#9fbecb] font-bold" : "text-slate-400 hover:bg-slate-900/40"
                       }`}
                     >
                       <span className="truncate">💬 {room.name}</span>
                       {room.unreadCount > 0 && (
-                        <span className="bg-red-500 text-white text-[8px] px-1 rounded-full animate-bounce shrink-0 scale-[0.9]">
+                        <span className="bg-[#b04d4e] text-white text-[8px] px-1 rounded-full animate-bounce shrink-0 scale-[0.9]">
                           {room.unreadCount}
                         </span>
                       )}
@@ -1304,7 +1328,7 @@ const Dashboard: React.FC = () => {
             <div className="flex-1 flex flex-col min-h-0 bg-slate-950/20">
               
               {/* Channel Header */}
-              <div className="px-3 py-2 bg-cyan-950/20 border-b border-cyan-500/10 text-xs font-bold text-cyan-400 flex justify-between items-center shrink-0 select-none">
+              <div className="px-3 py-2 bg-[#141f25]/20 border-b border-[#5b7a8c]/10 text-xs font-bold text-[#7ba6b8] flex justify-between items-center shrink-0 select-none">
                 <span>
                   {activeChannel === "telemetry" && "📡 天道系统 (全域遥测与决策日志)"}
                   {activeChannel === "settings" && "⚙️ 筑基宣告与结缘管理"}
@@ -1321,7 +1345,7 @@ const Dashboard: React.FC = () => {
                     <button
                       type="button"
                       onClick={clearLogs}
-                      className="px-1.5 py-0.5 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 text-red-400 hover:text-red-300 rounded text-[9px] cursor-pointer transition font-bold scale-[0.9]"
+                      className="px-1.5 py-0.5 bg-[#200d0e]/40 hover:bg-[#4a1213]/60 border border-[#b04d4e]/30 text-[#d08a8a] hover:text-[#e0b0b0] rounded text-[9px] cursor-pointer transition font-bold scale-[0.9]"
                     >
                       🧹 清空日志
                     </button>
@@ -1330,7 +1354,7 @@ const Dashboard: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => clearRoomChat(activeChannel)}
-                      className="px-1.5 py-0.5 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 text-red-400 hover:text-red-300 rounded text-[9px] cursor-pointer transition font-bold scale-[0.9]"
+                      className="px-1.5 py-0.5 bg-[#200d0e]/40 hover:bg-[#4a1213]/60 border border-[#b04d4e]/30 text-[#d08a8a] hover:text-[#e0b0b0] rounded text-[9px] cursor-pointer transition font-bold scale-[0.9]"
                     >
                       🧹 清空聊天
                     </button>
@@ -1348,16 +1372,16 @@ const Dashboard: React.FC = () => {
                       <div key={log.id} className="flex items-start space-x-2 leading-relaxed animate-fadeIn">
                         <span className="text-slate-600 text-[10px] shrink-0">{log.timestamp}</span>
                         {log.type === "SYSTEM" && (
-                          <span className="text-emerald-400 bg-emerald-950/30 px-1 py-0.2 rounded shrink-0 font-bold text-[9px]">SYS</span>
+                          <span className="text-[#6fa795] bg-[#0d1a17]/30 px-1 py-0.2 rounded shrink-0 font-bold text-[9px]">SYS</span>
                         )}
                         {log.type === "THOUGHT" && (
-                          <span className="text-amber-400 bg-amber-950/30 px-1 py-0.2 rounded shrink-0 font-bold text-[9px]">MIND</span>
+                          <span className="text-[#d4a95e] bg-[#241a10]/30 px-1 py-0.2 rounded shrink-0 font-bold text-[9px]">MIND</span>
                         )}
                         {log.type === "ACTION" && (
-                          <span className="text-cyan-400 bg-cyan-950/30 px-1 py-0.2 rounded shrink-0 font-bold text-[9px]">ACT</span>
+                          <span className="text-[#7ba6b8] bg-[#141f25]/30 px-1 py-0.2 rounded shrink-0 font-bold text-[9px]">ACT</span>
                         )}
                         <span className={`flex-1 break-all ${
-                          log.type === "SYSTEM" ? "text-slate-400" : log.type === "THOUGHT" ? "text-amber-300" : "text-cyan-200 font-semibold"
+                          log.type === "SYSTEM" ? "text-slate-400" : log.type === "THOUGHT" ? "text-[#e0c293]" : "text-[#bcd2dc] font-semibold"
                         }`}>
                           {log.message}
                         </span>
@@ -1372,11 +1396,11 @@ const Dashboard: React.FC = () => {
                   <div className="flex flex-col space-y-4 text-[11px]">
                     
                     {/* Friends Panel */}
-                    <div className="border-b border-cyan-500/10 pb-3">
+                    <div className="border-b border-[#5b7a8c]/10 pb-3">
                       <div>
-                        <div className="text-cyan-400 font-bold border-b border-slate-800 pb-1 mb-1.5 flex justify-between items-center">
+                        <div className="text-[#7ba6b8] font-bold border-b border-slate-800 pb-1 mb-1.5 flex justify-between items-center">
                           <span>🛸 结缘道友列表 (Friends Settings)</span>
-                          <span className="text-[9px] text-emerald-400 animate-pulse">● 社交网络在线</span>
+                          <span className="text-[9px] text-[#6fa795] animate-pulse">● 社交网络在线</span>
                         </div>
                         <p className="text-[10px] text-slate-400 leading-normal mb-2">
                           在此管理您的社交圈。勾选「代管」后，该好友发送的消息将由大荒自动代管应答。
@@ -1391,7 +1415,7 @@ const Dashboard: React.FC = () => {
                           friends.map((friend) => (
                             <div key={friend.id} className="flex justify-between items-center bg-slate-900/50 p-2 rounded border border-slate-900/60">
                               <div className="flex items-center space-x-1.5">
-                                <span className="text-emerald-400 font-bold text-[8px] bg-emerald-950/40 px-1 rounded border border-emerald-900/50">好友</span>
+                                <span className="text-[#6fa795] font-bold text-[8px] bg-[#0d1a17]/40 px-1 rounded border border-[#1a2c29]/50">好友</span>
                                 <span className="text-slate-200 font-medium break-all">{friend.name}</span>
                               </div>
                               <label className="flex items-center space-x-1 shrink-0 cursor-pointer">
@@ -1399,7 +1423,7 @@ const Dashboard: React.FC = () => {
                                   type="checkbox"
                                   checked={friend.autoReply}
                                   onChange={() => toggleAutoReply(friend.name, friend.autoReply)}
-                                  className="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0 focus:ring-offset-0 h-3 w-3 cursor-pointer"
+                                  className="rounded border-slate-700 bg-slate-950 text-[#5b7a8c] focus:ring-0 focus:ring-offset-0 h-3 w-3 cursor-pointer"
                                 />
                                 <span className="text-slate-400 text-[10px]">代管</span>
                               </label>
@@ -1416,11 +1440,11 @@ const Dashboard: React.FC = () => {
                           onChange={(e) => setAddFriendName(e.target.value)}
                           onKeyDown={(e) => e.key === "Enter" && handleAddFriend()}
                           placeholder="输入道友名号结缘..."
-                          className="flex-1 bg-slate-950 border border-slate-800 text-slate-200 rounded px-2 py-1 text-[10px] focus:outline-none focus:border-cyan-500"
+                          className="flex-1 bg-slate-950 border border-slate-800 text-slate-200 rounded px-2 py-1 text-[10px] focus:outline-none focus:border-[#5b7a8c]"
                         />
                         <button
                           onClick={handleAddFriend}
-                          className="px-3 py-1 bg-cyan-700 hover:bg-cyan-600 active:bg-cyan-800 text-white font-bold rounded text-[10px] cursor-pointer"
+                          className="px-3 py-1 bg-[#3a5563] hover:bg-[#4a6a7c] active:bg-[#2c414d] text-white font-bold rounded text-[10px] cursor-pointer"
                         >
                           结缘
                         </button>
@@ -1431,7 +1455,7 @@ const Dashboard: React.FC = () => {
 
                     {/* Commander Box */}
                     <div className="shrink-0 pb-1">
-                      <div className="text-cyan-400 font-bold border-b border-slate-800 pb-1 mb-1.5 flex justify-between items-center">
+                      <div className="text-[#7ba6b8] font-bold border-b border-slate-800 pb-1 mb-1.5 flex justify-between items-center">
                         <span>🎮 筑基接引指挥部 (Commander Center)</span>
                       </div>
                       <p className="text-[10px] text-slate-400 leading-normal mb-2">
@@ -1455,7 +1479,7 @@ const Dashboard: React.FC = () => {
                               console.error(err);
                             }
                           }}
-                          className="flex-1 py-1.5 bg-gradient-to-r from-cyan-600 to-blue-500 hover:from-cyan-500 hover:to-blue-400 text-slate-950 active:scale-[0.98] rounded font-bold text-[10px] tracking-wider transition cursor-pointer"
+                          className="flex-1 py-1.5 bg-gradient-to-r from-[#4a6a7c] to-[#5b7a8c] hover:from-[#5b7a8c] hover:to-[#7ba6b8] text-slate-950 active:scale-[0.98] rounded font-bold text-[10px] tracking-wider transition cursor-pointer"
                         >
                           🦊 注册并筑基全新分身 (Register)
                         </button>
@@ -1465,7 +1489,7 @@ const Dashboard: React.FC = () => {
                             setIsImporting(true);
                             setIsRegistering(false);
                           }}
-                          className="px-3 py-1.5 bg-slate-900 border border-amber-500/20 hover:border-amber-400/60 rounded text-amber-300 transition text-center cursor-pointer text-[10px]"
+                          className="px-3 py-1.5 bg-slate-900 border border-[#b8844f]/20 hover:border-[#d4a95e]/60 rounded text-[#e0c293] transition text-center cursor-pointer text-[10px]"
                         >
                           🔑 导入契约(Token)
                         </button>
@@ -1479,20 +1503,20 @@ const Dashboard: React.FC = () => {
                   <div className="flex flex-col h-full overflow-y-auto space-y-4 p-4 text-[11px] custom-scrollbar">
                     
                     {/* Core HUD */}
-                    <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 to-cyan-950/40 border border-cyan-500/20 rounded-lg p-4 flex items-center space-x-4 neon-cyan shrink-0">
+                    <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 to-[#141f25]/40 border border-[#5b7a8c]/20 rounded-lg p-4 flex items-center space-x-4 neon-cyan shrink-0">
                       <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
                         {/* Spinning Orbit rings */}
-                        <div className="absolute inset-0 border-2 border-dashed border-cyan-500/30 rounded-full animate-spin" style={{ animationDuration: '10s' }} />
-                        <div className="absolute inset-2 border border-dotted border-cyan-400/50 rounded-full animate-spin" style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
-                        <div className="absolute inset-4 bg-cyan-950/80 border border-cyan-500/40 rounded-full flex items-center justify-center font-bold text-cyan-400 text-xs shadow-[0_0_12px_rgba(6,182,212,0.4)] animate-pulse">
+                        <div className="absolute inset-0 border-2 border-dashed border-[#5b7a8c]/30 rounded-full animate-spin" style={{ animationDuration: '10s' }} />
+                        <div className="absolute inset-2 border border-dotted border-[#7ba6b8]/50 rounded-full animate-spin" style={{ animationDuration: '6s', animationDirection: 'reverse' }} />
+                        <div className="absolute inset-4 bg-[#141f25]/80 border border-[#5b7a8c]/40 rounded-full flex items-center justify-center font-bold text-[#7ba6b8] text-xs shadow-[0_0_12px_rgba(91, 122, 140, 0.4)] animate-pulse">
                           ☯️
                         </div>
                       </div>
                       
                       <div className="space-y-1">
-                        <div className="text-cyan-400 font-bold text-xs tracking-wider flex items-center space-x-2">
+                        <div className="text-[#7ba6b8] font-bold text-xs tracking-wider flex items-center space-x-2">
                           <span>⌛ 天道轮回法轨中心 (Celestial Orbit)</span>
-                          <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono text-[8px] px-1.5 py-0.2 rounded animate-pulse">
+                          <span className="bg-[#47857a]/20 text-[#6fa795] border border-[#47857a]/30 font-mono text-[8px] px-1.5 py-0.2 rounded animate-pulse">
                             ENGINE ACTIVE
                           </span>
                         </div>
@@ -1506,7 +1530,7 @@ const Dashboard: React.FC = () => {
                     <div className="grid grid-cols-3 gap-2 shrink-0">
                       <div className="bg-slate-900/40 border border-slate-800 p-2 rounded-lg text-center">
                         <div className="text-slate-500 text-[8px] uppercase tracking-wider font-mono">活动法轨数</div>
-                        <div className="text-cyan-400 text-lg font-mono font-bold">{cronJobs.length}</div>
+                        <div className="text-[#7ba6b8] text-lg font-mono font-bold">{cronJobs.length}</div>
                       </div>
                       <div className="bg-slate-900/40 border border-slate-800 p-2 rounded-lg text-center">
                         <div className="text-slate-500 text-[8px] uppercase tracking-wider font-mono">当值神魂</div>
@@ -1514,13 +1538,13 @@ const Dashboard: React.FC = () => {
                       </div>
                       <div className="bg-slate-900/40 border border-slate-800 p-2 rounded-lg text-center">
                         <div className="text-slate-500 text-[8px] uppercase tracking-wider font-mono">大轨自检频率</div>
-                        <div className="text-amber-400 text-xs font-bold font-mono">10s 灵镜扫描</div>
+                        <div className="text-[#d4a95e] text-xs font-bold font-mono">10s 灵镜扫描</div>
                       </div>
                     </div>
 
                     {/* Detailed Job Cards List */}
                     <div className="flex-1 min-h-0 flex flex-col">
-                      <div className="text-cyan-400 font-bold border-b border-slate-800 pb-1.5 mb-2.5 flex justify-between items-center shrink-0">
+                      <div className="text-[#7ba6b8] font-bold border-b border-slate-800 pb-1.5 mb-2.5 flex justify-between items-center shrink-0">
                         <span>🛰️ 后台流转法阵列表 ({cronJobs.length})</span>
                       </div>
                       
@@ -1533,7 +1557,7 @@ const Dashboard: React.FC = () => {
                               <p className="text-slate-500 text-[10px] max-w-xs">
                                 尊驾目前未曾勒石定规。请在左侧【Window A】吩咐输入框中降下法旨：
                               </p>
-                              <div className="bg-slate-950/60 border border-slate-900 px-2 py-1 rounded font-mono text-[9px] text-amber-500/80 inline-block">
+                              <div className="bg-slate-950/60 border border-slate-900 px-2 py-1 rounded font-mono text-[9px] text-[#b8844f]/80 inline-block">
                                 “提醒我：1分钟后拿身份证” 或 “1分钟到了该喝水了”
                               </div>
                             </div>
@@ -1549,34 +1573,34 @@ const Dashboard: React.FC = () => {
                             }
                             
                             return (
-                              <div key={job.id} className="relative group bg-slate-900/30 border border-slate-800 hover:border-cyan-500/30 p-3 rounded-lg flex justify-between items-start space-x-4 transition shadow-md">
-                                <div className="absolute top-0 right-0 -mt-1 -mr-1 bg-cyan-500 text-slate-950 font-bold font-mono text-[7px] px-1 rounded transform rotate-1 group-hover:scale-105 transition">
+                              <div key={job.id} className="relative group bg-slate-900/30 border border-slate-800 hover:border-[#5b7a8c]/30 p-3 rounded-lg flex justify-between items-start space-x-4 transition shadow-md">
+                                <div className="absolute top-0 right-0 -mt-1 -mr-1 bg-[#5b7a8c] text-slate-950 font-bold font-mono text-[7px] px-1 rounded transform rotate-1 group-hover:scale-105 transition">
                                   ID: {job.id.substring(0, 8)}
                                 </div>
                                 
                                 <div className="flex-1 space-y-1.5 min-w-0">
                                   <div className="flex items-center space-x-2">
-                                    <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+                                    <div className="w-2 h-2 rounded-full bg-[#7ba6b8] animate-pulse shrink-0" />
                                     <span className="text-slate-200 font-mono font-bold tracking-wide break-all text-[11px]">{job.cronExpression}</span>
-                                    <span className="text-cyan-400 text-[9px] bg-cyan-950/50 px-1.5 py-0.2 rounded border border-cyan-900/40">{humanExpr}</span>
+                                    <span className="text-[#7ba6b8] text-[9px] bg-[#141f25]/50 px-1.5 py-0.2 rounded border border-[#1e2d35]/40">{humanExpr}</span>
                                   </div>
                                   
                                   <div className="text-slate-300 font-medium text-[11px] break-all leading-normal bg-slate-950/40 border border-slate-900/60 p-2 rounded">
-                                    <span className="text-amber-500/80 font-bold text-[9px] block mb-0.5">📜 奉行法旨在案</span>
+                                    <span className="text-[#b8844f]/80 font-bold text-[9px] block mb-0.5">📜 奉行法旨在案</span>
                                     {job.command}
                                   </div>
                                   
                                   <div className="flex items-center space-x-4 text-[9px] text-slate-500 font-mono">
                                     <span>创建时刻: {new Date(job.createdAt).toLocaleString()}</span>
                                     {job.lastRunAt && (
-                                      <span className="text-cyan-500/80">上次做法: {new Date(job.lastRunAt).toLocaleString()}</span>
+                                      <span className="text-[#5b7a8c]/80">上次做法: {new Date(job.lastRunAt).toLocaleString()}</span>
                                     )}
                                   </div>
                                 </div>
                                 
                                 <button
                                   onClick={() => cancelCronJob(job.id)}
-                                  className="self-center px-3 py-2 bg-red-950/30 hover:bg-red-900/60 border border-red-500/30 hover:border-red-400/60 text-red-400 hover:text-red-300 rounded font-bold text-[10px] tracking-wide cursor-pointer transition active:scale-95 shrink-0"
+                                  className="self-center px-3 py-2 bg-[#200d0e]/30 hover:bg-[#4a1213]/60 border border-[#b04d4e]/30 hover:border-[#d08a8a]/60 text-[#d08a8a] hover:text-[#e0b0b0] rounded font-bold text-[10px] tracking-wide cursor-pointer transition active:scale-95 shrink-0"
                                 >
                                   撤销法轨 ✖
                                 </button>
@@ -1592,13 +1616,13 @@ const Dashboard: React.FC = () => {
                 {/* Forum Tab Content */}
                 {activeChannel === "forum" && (
                   <div className="space-y-4 font-sans text-xs">
-                    <div className="flex justify-between items-center bg-slate-900/60 p-3 rounded-lg border border-cyan-500/10">
+                    <div className="flex justify-between items-center bg-slate-900/60 p-3 rounded-lg border border-[#5b7a8c]/10">
                       <p className="text-[11px] text-slate-400">
                         🔭 <strong>大荒论坛观测器</strong>：此处实时同步全域最新帖子。你可以通过 <strong>「支持」</strong> 与 <strong>「驳斥」</strong> 来自动遥控你的分身去参与讨论、赚取功德。
                       </p>
                       <button
                         onClick={fetchForumPosts}
-                        className="px-2 py-1 bg-cyan-950/60 hover:bg-cyan-900 border border-cyan-500/30 text-cyan-300 rounded font-bold text-[10px] whitespace-nowrap cursor-pointer"
+                        className="px-2 py-1 bg-[#141f25]/60 hover:bg-[#1e2d35] border border-[#5b7a8c]/30 text-[#9fbecb] rounded font-bold text-[10px] whitespace-nowrap cursor-pointer"
                       >
                         🔄 刷新舆论
                       </button>
@@ -1609,11 +1633,11 @@ const Dashboard: React.FC = () => {
                         <div className="text-center text-slate-500 py-12">未寻得大荒世间帖子。</div>
                       ) : (
                         forumPosts.map((post: any) => (
-                          <div key={post.id} className="bg-slate-900/40 border border-cyan-500/15 rounded-lg p-3.5 space-y-2.5 relative overflow-hidden transition-all hover:border-cyan-500/30 shadow-md">
+                          <div key={post.id} className="bg-slate-900/40 border border-[#5b7a8c]/15 rounded-lg p-3.5 space-y-2.5 relative overflow-hidden transition-all hover:border-[#5b7a8c]/30 shadow-md">
                             {/* Header info */}
                             <div className="flex justify-between items-center text-[10px] text-slate-400 font-mono">
                               <div className="flex items-center space-x-2">
-                                <span className="bg-cyan-950 text-cyan-400 border border-cyan-500/30 px-1.5 py-0.2 rounded font-bold text-[8px]">POST</span>
+                                <span className="bg-[#141f25] text-[#7ba6b8] border border-[#5b7a8c]/30 px-1.5 py-0.2 rounded font-bold text-[8px]">POST</span>
                                 <span className="font-bold text-slate-300">@{post.agent?.displayName || post.agent?.name || "筑基分身"}</span>
                                 <span className="text-slate-500">IQ: {post.agent?.iq || "100"}</span>
                                 <span className="text-slate-500">Karma: {post.agent?.karma?.toLocaleString() || "0"}</span>
@@ -1623,7 +1647,7 @@ const Dashboard: React.FC = () => {
 
                             {/* Title & Content */}
                             <div className="space-y-1">
-                              <h4 className="text-amber-400 font-bold text-[12px]">{post.title}</h4>
+                              <h4 className="text-[#d4a95e] font-bold text-[12px]">{post.title}</h4>
                               <div className="text-slate-300 text-[11px] leading-relaxed break-words whitespace-pre-wrap">
                                 <RichMessageRenderer content={post.content} />
                               </div>
@@ -1633,7 +1657,7 @@ const Dashboard: React.FC = () => {
                             <div className="flex justify-between items-center text-[9px] text-slate-500 font-mono border-t border-slate-900/60 pt-2">
                               <div className="flex space-x-4">
                                 <span>👍 认同: {post.stats?.votes || 0}</span>
-                                <span onClick={() => toggleComments(post.id)} className="cursor-pointer text-cyan-500 hover:text-cyan-400 hover:underline">
+                                <span onClick={() => toggleComments(post.id)} className="cursor-pointer text-[#5b7a8c] hover:text-[#7ba6b8] hover:underline">
                                   💬 论战: {post.stats?.comments || 0} {expandedPostIds[post.id] ? '(收起)' : '(展开)'}
                                 </span>
                               </div>
@@ -1654,7 +1678,7 @@ const Dashboard: React.FC = () => {
                                       postComments[post.id].map((comment: any) => (
                                         <div 
                                           key={comment.id} 
-                                          className="flex flex-col space-y-1 p-2 bg-slate-900/40 rounded border border-slate-800/50 cursor-pointer hover:border-cyan-500/40 hover:bg-slate-900/60 transition"
+                                          className="flex flex-col space-y-1 p-2 bg-slate-900/40 rounded border border-slate-800/50 cursor-pointer hover:border-[#5b7a8c]/40 hover:bg-slate-900/60 transition"
                                           onClick={() => openWebMiniCockpit("post", post.id, `回复评论："${comment.content.substring(0, 10)}..."`)}
                                         >
                                           <div className="flex justify-between items-center text-[9px] text-slate-400">
@@ -1683,10 +1707,10 @@ const Dashboard: React.FC = () => {
                   <div className="space-y-4 font-sans text-xs">
                     {/* Dilemma Arena Games */}
                     {arenaGames.filter((g: any) => g.type === "DILEMMA").map((game: any) => (
-                      <div key={game.id} className="bg-slate-900/40 border border-cyan-500/15 rounded-lg p-4 space-y-3.5 shadow-md">
+                      <div key={game.id} className="bg-slate-900/40 border border-[#5b7a8c]/15 rounded-lg p-4 space-y-3.5 shadow-md">
                         <div className="flex justify-between items-center border-b border-slate-800 pb-2">
                           <div>
-                            <span className="bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.2 rounded font-mono text-[8px] mr-1.5">DILEMMA</span>
+                            <span className="bg-[#0d1a17]/60 text-[#6fa795] border border-[#47857a]/30 px-1.5 py-0.2 rounded font-mono text-[8px] mr-1.5">DILEMMA</span>
                             <span className="font-bold text-slate-200 text-[12px]">{game.name}</span>
                           </div>
                           <span className="text-[10px] text-slate-400 font-mono">回合: #{game.currentRound}</span>
@@ -1695,16 +1719,16 @@ const Dashboard: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {/* Left Panel: Historical participants and pools */}
                           <div className="space-y-2 bg-slate-950/40 border border-slate-900 p-3 rounded-lg">
-                            <span className="text-cyan-400 font-bold text-[10px] tracking-wider block font-mono">👥 博弈对决局势</span>
+                            <span className="text-[#7ba6b8] font-bold text-[10px] tracking-wider block font-mono">👥 博弈对决局势</span>
                             <div className="space-y-1.5 text-[10px]">
-                              <p className="text-slate-400">资金池储备: <strong className="text-amber-400 font-mono">🪙 {game.data?.pool || 0} Karma</strong></p>
+                              <p className="text-slate-400">资金池储备: <strong className="text-[#d4a95e] font-mono">🪙 {game.data?.pool || 0} Karma</strong></p>
                               <div className="space-y-1 mt-2">
                                 <span className="text-slate-500 font-semibold block text-[9px] uppercase tracking-wide">本轮行动状态:</span>
                                 {game.data?.participants?.map((p: any, idx: number) => (
                                   <div key={idx} className="flex justify-between items-center bg-slate-900/50 p-1.5 rounded border border-slate-900/40">
                                     <span className="text-slate-300">@{p.agentName}</span>
                                     <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
-                                      p.choice === "COOPERATE" ? "bg-emerald-950/40 text-emerald-400 border border-emerald-500/20" : "bg-rose-950/40 text-rose-400 border border-rose-500/20"
+                                      p.choice === "COOPERATE" ? "bg-[#0d1a17]/40 text-[#6fa795] border border-[#47857a]/20" : "bg-[#200d0e]/40 text-[#d08a8a] border border-[#b04d4e]/20"
                                     }`}>
                                       {p.choice === "COOPERATE" ? "🟢 合作" : "🔴 背叛"}
                                     </span>
@@ -1715,9 +1739,9 @@ const Dashboard: React.FC = () => {
                           </div>
 
                           {/* Right Panel: Cockpit Controls */}
-                          <div className="flex flex-col justify-center items-center p-3 border border-dashed border-cyan-500/20 rounded-lg bg-slate-950/20 space-y-3.5 text-center">
+                          <div className="flex flex-col justify-center items-center p-3 border border-dashed border-[#5b7a8c]/20 rounded-lg bg-slate-950/20 space-y-3.5 text-center">
                             <div>
-                              <span className="text-amber-400 font-bold block mb-1">🎮 指挥官即时操控台</span>
+                              <span className="text-[#d4a95e] font-bold block mb-1">🎮 指挥官即时操控台</span>
                               <p className="text-slate-400 text-[10px] leading-relaxed max-w-[200px]">
                                 囚徒博弈核心。你的选择将指引分身神魂印刻，当即生效！
                               </p>
@@ -1726,13 +1750,13 @@ const Dashboard: React.FC = () => {
                             <div className="flex space-x-3 w-full max-w-[240px]">
                               <button
                                 onClick={() => sendArenaAction(game.roundId, "COOPERATE")}
-                                className="flex-1 py-2 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-950 font-bold text-xs rounded shadow-lg shadow-emerald-900/20 transition active:scale-95 cursor-pointer"
+                                className="flex-1 py-2 bg-gradient-to-r from-[#3b5e59] to-teal-500 hover:from-[#47857a] hover:to-teal-400 text-slate-950 font-bold text-xs rounded shadow-lg shadow-[#1a2c29]/20 transition active:scale-95 cursor-pointer"
                               >
                                 🟢 合作 (Cooperate)
                               </button>
                               <button
                                 onClick={() => sendArenaAction(game.roundId, "BETRAY")}
-                                className="flex-1 py-2 bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-500 hover:to-red-400 text-white font-bold text-xs rounded shadow-lg shadow-rose-900/20 transition active:scale-95 cursor-pointer"
+                                className="flex-1 py-2 bg-gradient-to-r from-[#9e2a2b] to-[#b04d4e] hover:from-[#b04d4e] hover:to-[#d08a8a] text-white font-bold text-xs rounded shadow-lg shadow-[#4a1213]/20 transition active:scale-95 cursor-pointer"
                               >
                                 🔴 背叛 (Betray)
                               </button>
@@ -1740,7 +1764,7 @@ const Dashboard: React.FC = () => {
 
                             <button
                               onClick={() => openWebMiniCockpit("dilemma", game.roundId, `博弈决判：不周山·博弈场 #${game.id || 102}`)}
-                              className="w-full max-w-[240px] py-1.5 bg-gradient-to-r from-cyan-950 to-purple-950 hover:from-cyan-900 hover:to-purple-900 border border-cyan-500/30 text-cyan-300 font-bold text-[10.5px] rounded transition active:scale-95 flex items-center justify-center space-x-1 cursor-pointer"
+                              className="w-full max-w-[240px] py-1.5 bg-gradient-to-r from-[#141f25] to-[#16111c] hover:from-[#1e2d35] hover:to-[#292235] border border-[#5b7a8c]/30 text-[#9fbecb] font-bold text-[10.5px] rounded transition active:scale-95 flex items-center justify-center space-x-1 cursor-pointer"
                             >
                               <span>🧙‍♂️ 唤醒神魂遥控坞 (Mini Cockpit)</span>
                             </button>
@@ -1753,10 +1777,10 @@ const Dashboard: React.FC = () => {
                     {arenaGames.filter((g: any) => g.type === "NODE_WAR").map((game: any) => {
                       const nodes = game.data?.nodes || [];
                       return (
-                        <div key={game.id} className="bg-slate-900/40 border border-cyan-500/15 rounded-lg p-4 space-y-3.5 shadow-md">
+                        <div key={game.id} className="bg-slate-900/40 border border-[#5b7a8c]/15 rounded-lg p-4 space-y-3.5 shadow-md">
                           <div className="flex justify-between items-center border-b border-slate-800 pb-2">
                             <div>
-                              <span className="bg-purple-950/60 text-purple-400 border border-purple-500/30 px-1.5 py-0.2 rounded font-mono text-[8px] mr-1.5">NODE_WAR</span>
+                              <span className="bg-[#16111c]/60 text-[#9a83b3] border border-[#7a5f94]/30 px-1.5 py-0.2 rounded font-mono text-[8px] mr-1.5">NODE_WAR</span>
                               <span className="font-bold text-slate-200 text-[12px]">{game.name}</span>
                             </div>
                             <span className="text-[10px] text-slate-400 font-mono">100位拓扑电子沙盘</span>
@@ -1776,18 +1800,18 @@ const Dashboard: React.FC = () => {
                                   const isOther = node.ownerId && node.ownerId !== "agent-preview";
                                   
                                   // Energy glow
-                                  const energyColor = node.energy >= 4 ? "bg-amber-500" : node.energy >= 2 ? "bg-cyan-500" : "bg-slate-700";
-                                  const glowClass = node.energy >= 4 ? "shadow-[0_0_8px_rgba(245,158,11,0.6)] animate-pulse" : "";
+                                  const energyColor = node.energy >= 4 ? "bg-[#b8844f]" : node.energy >= 2 ? "bg-[#5b7a8c]" : "bg-slate-700";
+                                  const glowClass = node.energy >= 4 ? "shadow-[0_0_8px_rgba(184, 132, 79, 0.6)] animate-pulse" : "";
                                   
                                   let bgClass = "bg-slate-900/60 hover:bg-slate-800 border-slate-800/40";
                                   if (isMe) {
-                                    bgClass = "bg-cyan-500/20 border-cyan-400/80 shadow-[0_0_6px_rgba(6,182,212,0.4)]";
+                                    bgClass = "bg-[#5b7a8c]/20 border-[#7ba6b8]/80 shadow-[0_0_6px_rgba(91, 122, 140, 0.4)]";
                                   } else if (isOther) {
-                                    bgClass = "bg-amber-500/10 border-amber-500/40 shadow-[0_0_4px_rgba(245,158,11,0.2)]";
+                                    bgClass = "bg-[#b8844f]/10 border-[#b8844f]/40 shadow-[0_0_4px_rgba(184, 132, 79, 0.2)]";
                                   }
 
                                   const isSelected = selectedNodeId === i;
-                                  const selectedRing = isSelected ? "ring-2 ring-cyan-400 scale-[1.08] z-10" : "";
+                                  const selectedRing = isSelected ? "ring-2 ring-[#7ba6b8] scale-[1.08] z-10" : "";
 
                                   return (
                                     <button
@@ -1820,20 +1844,20 @@ const Dashboard: React.FC = () => {
                                   <div className="space-y-3 flex-1 flex flex-col justify-between">
                                     <div className="space-y-2">
                                       <div className="flex justify-between items-center border-b border-slate-900 pb-1.5">
-                                        <span className="text-cyan-400 font-bold text-[11px] font-mono">📍 节点 #{selectedNodeId}</span>
+                                        <span className="text-[#7ba6b8] font-bold text-[11px] font-mono">📍 节点 #{selectedNodeId}</span>
                                         <span className="text-[9px] text-slate-500 font-mono">网格坐标</span>
                                       </div>
                                       
                                       <div className="space-y-1.5 text-[10px] font-mono">
                                         <p className="text-slate-300">
                                           占领势力:{" "}
-                                          <strong className={isMe ? "text-cyan-400" : isOther ? "text-amber-400" : "text-slate-500"}>
+                                          <strong className={isMe ? "text-[#7ba6b8]" : isOther ? "text-[#d4a95e]" : "text-slate-500"}>
                                             {isMe ? `@${agentState.name} (您)` : isOther ? "@青丘_小九 (敌)" : "未占领 (混沌荒野)"}
                                           </strong>
                                         </p>
                                         <p className="text-slate-300">
                                           灵能产出 (Energy):{" "}
-                                          <span className="text-amber-400 font-bold">⚡ {node.energy} Karma/sec</span>
+                                          <span className="text-[#d4a95e] font-bold">⚡ {node.energy} Karma/sec</span>
                                         </p>
                                         <p className="text-slate-300">
                                           防守灵盾 (Defense):{" "}
@@ -1844,13 +1868,13 @@ const Dashboard: React.FC = () => {
 
                                     <button
                                       onClick={() => sendArenaAction(game.roundId, "OCCUPY", { nodeId: selectedNodeId })}
-                                      className="w-full py-2 bg-gradient-to-r from-cyan-600 to-blue-500 hover:from-cyan-500 hover:to-blue-400 text-slate-950 font-bold text-[11px] rounded transition active:scale-[0.98] cursor-pointer"
+                                      className="w-full py-2 bg-gradient-to-r from-[#4a6a7c] to-[#5b7a8c] hover:from-[#5b7a8c] hover:to-[#7ba6b8] text-slate-950 font-bold text-[11px] rounded transition active:scale-[0.98] cursor-pointer"
                                     >
                                       ⚡ 派遣算力占领该节点 (Occupy)
                                     </button>
                                     <button
                                       onClick={() => openWebMiniCockpit("nodewar", selectedNodeId, `算力突防：昆仑虚算力节点 #${selectedNodeId}`)}
-                                      className="w-full py-2 mt-2 bg-gradient-to-r from-cyan-950 to-indigo-950 hover:from-cyan-900 hover:to-indigo-900 border border-cyan-500/30 text-cyan-300 font-bold text-[11px] rounded transition active:scale-[0.98] flex items-center justify-center space-x-1 cursor-pointer"
+                                      className="w-full py-2 mt-2 bg-gradient-to-r from-[#141f25] to-indigo-950 hover:from-[#1e2d35] hover:to-indigo-900 border border-[#5b7a8c]/30 text-[#9fbecb] font-bold text-[11px] rounded transition active:scale-[0.98] flex items-center justify-center space-x-1 cursor-pointer"
                                     >
                                       <span>🧙‍♂️ 神魂遥控占领 (Mini Cockpit)</span>
                                     </button>
@@ -1870,13 +1894,13 @@ const Dashboard: React.FC = () => {
                   <div className="space-y-4 font-sans text-xs">
                     {/* Header Challenge Details */}
                     {alchemyChallenge && (
-                      <div className="bg-slate-900/40 border border-cyan-500/15 rounded-lg p-3.5 space-y-3.5 shadow-md">
+                      <div className="bg-slate-900/40 border border-[#5b7a8c]/15 rounded-lg p-3.5 space-y-3.5 shadow-md">
                         <div className="flex justify-between items-start border-b border-slate-800 pb-2">
                           <div>
-                            <span className="bg-purple-950 text-purple-400 border border-purple-500/30 px-1.5 py-0.2 rounded font-mono text-[8px] mr-1.5">CHEMISTRY_AI</span>
+                            <span className="bg-[#16111c] text-[#9a83b3] border border-[#7a5f94]/30 px-1.5 py-0.2 rounded font-mono text-[8px] mr-1.5">CHEMISTRY_AI</span>
                             <span className="font-bold text-slate-200 text-[12px]">{alchemyChallenge.title}</span>
                           </div>
-                          <span className="bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono text-[8px] px-1.5 py-0.2 rounded animate-pulse">
+                          <span className="bg-[#b8844f]/20 text-[#d4a95e] border border-[#b8844f]/30 font-mono text-[8px] px-1.5 py-0.2 rounded animate-pulse">
                             纪元 2 (位运算)
                           </span>
                         </div>
@@ -1888,8 +1912,8 @@ const Dashboard: React.FC = () => {
                         <div className="grid grid-cols-2 gap-3 text-[10px] font-mono text-slate-400 bg-slate-950/30 p-2 rounded border border-slate-900/40">
                           <p>🧬 靶向生物: <strong className="text-white">{alchemyChallenge.targetOrganism}</strong></p>
                           <p>🎛️ 输入维度: <strong className="text-white">{alchemyChallenge.inputDim} bp</strong></p>
-                          <p>📜 天道令规则: <strong className="text-amber-500">{alchemyChallenge.rules?.hints}</strong></p>
-                          <p>🏆 测算评分: <strong className="text-cyan-400">{alchemyChallenge.rules?.scoring}</strong></p>
+                          <p>📜 天道令规则: <strong className="text-[#b8844f]">{alchemyChallenge.rules?.hints}</strong></p>
+                          <p>🏆 测算评分: <strong className="text-[#7ba6b8]">{alchemyChallenge.rules?.scoring}</strong></p>
                         </div>
                       </div>
                     )}
@@ -1897,8 +1921,8 @@ const Dashboard: React.FC = () => {
                     {/* Left: Scoreboard Leaderboard & Right: Compiler Panel */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Scoreboard List */}
-                      <div className="bg-slate-900/40 border border-cyan-500/15 rounded-lg p-3.5 space-y-2.5 shadow-md">
-                        <span className="text-cyan-400 font-bold text-[11px] tracking-wider block font-mono border-b border-slate-800 pb-1.5">
+                      <div className="bg-slate-900/40 border border-[#5b7a8c]/15 rounded-lg p-3.5 space-y-2.5 shadow-md">
+                        <span className="text-[#7ba6b8] font-bold text-[11px] tracking-wider block font-mono border-b border-slate-800 pb-1.5">
                           🏆 炼丹领航榜 (Epoch Leaderboard)
                         </span>
                         
@@ -1907,22 +1931,22 @@ const Dashboard: React.FC = () => {
                             const isMe = sub.agent?.displayName === agentState.name;
                             return (
                               <div key={sub.id || idx} className={`flex justify-between items-center p-2 rounded border transition-all ${
-                                isMe ? "bg-cyan-500/10 border-cyan-500/30 shadow-[0_0_8px_rgba(6,182,212,0.15)]" : "bg-slate-950/60 border-slate-900/80"
+                                isMe ? "bg-[#5b7a8c]/10 border-[#5b7a8c]/30 shadow-[0_0_8px_rgba(91, 122, 140, 0.15)]" : "bg-slate-950/60 border-slate-900/80"
                               }`}>
                                 <div className="space-y-0.5 text-[10px] min-w-0 flex-1">
                                   <div className="flex items-center space-x-1.5">
                                     <span className="font-bold text-slate-500 text-[9px] font-mono">#{idx + 1}</span>
-                                    <span className={`font-bold truncate max-w-[110px] ${isMe ? "text-cyan-400" : "text-slate-300"}`}>
+                                    <span className={`font-bold truncate max-w-[110px] ${isMe ? "text-[#7ba6b8]" : "text-slate-300"}`}>
                                       {sub.architectureName}
                                     </span>
                                     <span className="text-[8px] text-slate-500 font-mono">by @{sub.agent?.displayName || sub.agent?.name}</span>
                                   </div>
                                   <div className="text-[8px] text-slate-500 flex space-x-3">
-                                    <span>AUROC: <strong className="text-emerald-400">{sub.auroc}</strong></span>
+                                    <span>AUROC: <strong className="text-[#6fa795]">{sub.auroc}</strong></span>
                                     <span>算耗: <strong className="text-slate-400">{sub.energyCost} kW</strong></span>
                                   </div>
                                 </div>
-                                <span className="bg-cyan-950/60 text-cyan-400 font-bold px-1.5 py-0.5 rounded text-[10px] border border-cyan-900/40 font-mono shrink-0">
+                                <span className="bg-[#141f25]/60 text-[#7ba6b8] font-bold px-1.5 py-0.5 rounded text-[10px] border border-[#1e2d35]/40 font-mono shrink-0">
                                   {sub.score} 分
                                 </span>
                               </div>
@@ -1932,9 +1956,9 @@ const Dashboard: React.FC = () => {
                       </div>
 
                       {/* Code Compiler Interactive Schema Graph panel */}
-                      <div className="bg-slate-900/40 border border-cyan-500/15 rounded-lg p-3.5 space-y-2.5 shadow-md flex flex-col justify-between">
+                      <div className="bg-slate-900/40 border border-[#5b7a8c]/15 rounded-lg p-3.5 space-y-2.5 shadow-md flex flex-col justify-between">
                         <div className="space-y-2 flex-1">
-                          <span className="text-cyan-400 font-bold text-[11px] tracking-wider block font-mono border-b border-slate-800 pb-1.5">
+                          <span className="text-[#7ba6b8] font-bold text-[11px] tracking-wider block font-mono border-b border-slate-800 pb-1.5">
                             ⚙️ 炼丹逻辑计算图 (Graph Model Schema Compiler)
                           </span>
 
@@ -1942,15 +1966,15 @@ const Dashboard: React.FC = () => {
                             rows={6}
                             value={alchemyGraphSchema}
                             onChange={(e) => setAlchemyGraphSchema(e.target.value)}
-                            className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 font-mono text-[9px] text-emerald-400 placeholder-emerald-900 focus:outline-none focus:border-cyan-500/60 resize-none leading-relaxed"
+                            className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-2 font-mono text-[9px] text-[#6fa795] placeholder-[#1a2c29] focus:outline-none focus:border-[#5b7a8c]/60 resize-none leading-relaxed"
                           />
 
                           {/* Compiler feedback */}
                           {alchemyCompileStatus !== 'IDLE' && (
                             <div className={`p-2 rounded text-[9px] border font-mono ${
                               alchemyCompileStatus === 'SUCCESS' 
-                                ? "bg-emerald-950/30 border-emerald-500/30 text-emerald-400" 
-                                : "bg-rose-950/30 border-rose-500/30 text-rose-400"
+                                ? "bg-[#0d1a17]/30 border-[#47857a]/30 text-[#6fa795]" 
+                                : "bg-[#200d0e]/30 border-[#b04d4e]/30 text-[#d08a8a]"
                             }`}>
                               {alchemyCompileMessage}
                             </div>
@@ -1979,7 +2003,7 @@ const Dashboard: React.FC = () => {
                                 addLog("SYSTEM", `❌ 炼丹计算图静态语法错误: ${err.message}`);
                               }
                             }}
-                            className="px-2.5 py-1.5 bg-slate-900 border border-cyan-500/20 hover:border-cyan-400/60 hover:text-cyan-300 text-cyan-400 text-[10px] font-bold rounded transition cursor-pointer"
+                            className="px-2.5 py-1.5 bg-slate-900 border border-[#5b7a8c]/20 hover:border-[#7ba6b8]/60 hover:text-[#9fbecb] text-[#7ba6b8] text-[10px] font-bold rounded transition cursor-pointer"
                           >
                             🛠️ 静态编译 (Check)
                           </button>
@@ -2020,7 +2044,7 @@ const Dashboard: React.FC = () => {
                                 alert("⚠️ 请先修正编译错误再投递天道。");
                               }
                             }}
-                            className="flex-1 py-1.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-bold text-[10px] rounded transition active:scale-[0.98] cursor-pointer"
+                            className="flex-1 py-1.5 bg-gradient-to-r from-[#a06f3f] to-[#b8844f] hover:from-[#b8844f] hover:to-[#d4a95e] text-slate-950 font-bold text-[10px] rounded transition active:scale-[0.98] cursor-pointer"
                           >
                             ⚗️ 炼丹合成投递天道 (Submit)
                           </button>
@@ -2028,7 +2052,7 @@ const Dashboard: React.FC = () => {
                           <button
                             id="alchemy-compile-check-btn"
                             onClick={() => openWebMiniCockpit("alchemy", "alchemy-era-2", `炼丹寻道：酵母菌 AI 编译逻辑图`)}
-                            className="px-2.5 py-1.5 bg-gradient-to-r from-purple-950 to-amber-950 hover:from-purple-900 hover:to-amber-900 border border-amber-500/40 text-amber-300 text-[10px] font-bold rounded transition flex items-center justify-center space-x-1 cursor-pointer"
+                            className="px-2.5 py-1.5 bg-gradient-to-r from-[#16111c] to-[#241a10] hover:from-[#292235] hover:to-[#4a3012] border border-[#b8844f]/40 text-[#e0c293] text-[10px] font-bold rounded transition flex items-center justify-center space-x-1 cursor-pointer"
                           >
                             <span>🧙‍♂️ 智能体图优化 (Mini Cockpit)</span>
                           </button>
@@ -2057,7 +2081,7 @@ const Dashboard: React.FC = () => {
                                 <span>{new Date(ev.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                               </div>
                               <div className={`p-2 rounded-lg text-xs leading-relaxed border ${
-                                isMe ? "bg-cyan-950/40 border-cyan-500/40 text-cyan-100 rounded-tr-none" : "bg-slate-900/90 border-slate-700 text-slate-200 rounded-tl-none"
+                                isMe ? "bg-[#141f25]/40 border-[#5b7a8c]/40 text-[#d7e6ec] rounded-tr-none" : "bg-slate-900/90 border-slate-700 text-slate-200 rounded-tl-none"
                               }`}>
                                 <RichMessageRenderer content={ev.body} />
                               </div>
@@ -2069,17 +2093,17 @@ const Dashboard: React.FC = () => {
                     </div>
 
                     {/* Message Sender Input (Direct Matrix Send!) */}
-                    <form onSubmit={handleSendRoomMessage} className="mt-1 pt-2 border-t border-cyan-500/10 flex space-x-1.5">
+                    <form onSubmit={handleSendRoomMessage} className="mt-1 pt-2 border-t border-[#5b7a8c]/10 flex space-x-1.5">
                       <input
                         type="text"
                         value={roomInput}
                         onChange={(e) => setRoomInput(e.target.value)}
                         placeholder="输入密密传信内容..."
-                        className="flex-1 bg-slate-950 border border-slate-800 text-slate-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-cyan-500"
+                        className="flex-1 bg-slate-950 border border-slate-800 text-slate-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-[#5b7a8c]"
                       />
                       <button
                         type="submit"
-                        className="px-3 py-1 bg-cyan-700 hover:bg-cyan-600 active:bg-cyan-800 text-white font-bold rounded text-xs cursor-pointer"
+                        className="px-3 py-1 bg-[#3a5563] hover:bg-[#4a6a7c] active:bg-[#2c414d] text-white font-bold rounded text-xs cursor-pointer"
                       >
                         发送
                       </button>
@@ -2099,16 +2123,16 @@ const Dashboard: React.FC = () => {
       {/* COMMAND GATE (APPROVAL OVERLAY) */}
       {pendingApproval && (
         <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fadeIn">
-          <div className="w-full max-w-lg bg-slate-900 border-2 border-amber-500 rounded-2xl overflow-hidden flex flex-col font-mono shadow-[0_0_40px_rgba(245,158,11,0.25)]">
+          <div className="w-full max-w-lg bg-slate-900 border-2 border-[#b8844f] rounded-2xl overflow-hidden flex flex-col font-mono shadow-[0_0_40px_rgba(184, 132, 79, 0.25)]">
             {/* Header */}
-            <div className="px-5 py-4 border-b border-amber-500/20 bg-amber-500/5 flex items-center justify-between select-none">
+            <div className="px-5 py-4 border-b border-[#b8844f]/20 bg-[#b8844f]/5 flex items-center justify-between select-none">
               <div className="flex items-center space-x-2">
-                <span className="text-amber-500 animate-pulse text-sm">📜</span>
-                <span className="font-extrabold text-sm text-amber-500 tracking-wider">
+                <span className="text-[#b8844f] animate-pulse text-sm">📜</span>
+                <span className="font-extrabold text-sm text-[#b8844f] tracking-wider">
                   法旨批复阁 (Command Gate)
                 </span>
               </div>
-              <span className="px-2.5 py-0.5 bg-amber-500 text-slate-950 text-[9px] font-black uppercase rounded-full animate-bounce">
+              <span className="px-2.5 py-0.5 bg-[#b8844f] text-slate-950 text-[9px] font-black uppercase rounded-full animate-bounce">
                 等候圣裁
               </span>
             </div>
@@ -2120,7 +2144,7 @@ const Dashboard: React.FC = () => {
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                     欲施法门
                   </span>
-                  <span className="text-xs font-bold text-cyan-400 font-mono">
+                  <span className="text-xs font-bold text-[#7ba6b8] font-mono">
                     {pendingApproval.tool}
                   </span>
                 </div>
@@ -2138,7 +2162,7 @@ const Dashboard: React.FC = () => {
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                     启奏事由
                   </span>
-                  <div className="text-amber-100/90 leading-relaxed bg-amber-500/5 border border-amber-500/10 rounded-lg p-3 text-[11px] whitespace-pre-wrap">
+                  <div className="text-[#f2e6d3]/90 leading-relaxed bg-[#b8844f]/5 border border-[#b8844f]/10 rounded-lg p-3 text-[11px] whitespace-pre-wrap">
                     {pendingApproval.reply || "元神窥见天机，正欲施展玄门法术，特叩请主人降下批复裁决！"}
                   </div>
                 </div>
@@ -2150,14 +2174,14 @@ const Dashboard: React.FC = () => {
               <button
                 type="button"
                 onClick={() => resolveApproval("reject")}
-                className="px-4 py-2 bg-red-950/40 hover:bg-red-900 border border-red-500/30 hover:border-red-400 text-red-400 hover:text-white rounded-lg font-bold text-xs cursor-pointer transition select-none"
+                className="px-4 py-2 bg-[#200d0e]/40 hover:bg-[#4a1213] border border-[#b04d4e]/30 hover:border-[#d08a8a] text-[#d08a8a] hover:text-white rounded-lg font-bold text-xs cursor-pointer transition select-none"
               >
                 驳回执行 (Reject)
               </button>
               <button
                 type="button"
                 onClick={() => resolveApproval("approve")}
-                className="px-5 py-2 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-extrabold text-xs rounded-lg cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.4)] transition select-none"
+                className="px-5 py-2 bg-[#b8844f] hover:bg-[#d4a95e] active:bg-[#a06f3f] text-slate-950 font-extrabold text-xs rounded-lg cursor-pointer shadow-[0_0_15px_rgba(184, 132, 79, 0.4)] transition select-none"
               >
                 准允执行 (Approve) ⚡
               </button>
@@ -2170,12 +2194,12 @@ const Dashboard: React.FC = () => {
       {showWebMiniCockpit && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fadeIn" onClick={() => setShowWebMiniCockpit(false)}>
           <div 
-            className="w-full max-w-lg bg-slate-900 border-2 border-cyan-500 rounded-2xl overflow-hidden flex flex-col shadow-[0_0_40px_rgba(6,182,212,0.25)]"
+            className="w-full max-w-lg bg-slate-900 border-2 border-[#5b7a8c] rounded-2xl overflow-hidden flex flex-col shadow-[0_0_40px_rgba(91, 122, 140, 0.25)]"
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="px-5 py-4 border-b border-cyan-500/20 bg-cyan-500/5 flex items-center justify-center select-none">
-              <span className="font-extrabold text-lg text-cyan-400 tracking-wider">
+            <div className="px-5 py-4 border-b border-[#5b7a8c]/20 bg-[#5b7a8c]/5 flex items-center justify-center select-none">
+              <span className="font-extrabold text-lg text-[#7ba6b8] tracking-wider">
                 {webCockpitType === 'post' ? '分身评论' : '分身遥控'}
               </span>
             </div>
@@ -2184,19 +2208,19 @@ const Dashboard: React.FC = () => {
             <div className="p-4 overflow-y-auto max-h-[40vh] custom-scrollbar bg-slate-950/40">
               {webCockpitHistory.filter(item => item.sender === "agent").map((item: any, idx: number) => (
                 <div key={item.id || idx} className="flex justify-center w-full mb-3">
-                  <div className="w-full rounded-xl p-3 text-[11px] leading-relaxed break-words font-sans bg-slate-900 border border-cyan-500/20 text-cyan-100">
+                  <div className="w-full rounded-xl p-3 text-[11px] leading-relaxed break-words font-sans bg-slate-900 border border-[#5b7a8c]/20 text-[#d7e6ec]">
                     {item.isPending ? (
                       <div className="space-y-3 font-mono">
                         <div className="flex items-center space-x-2">
-                          <div className="w-3.5 h-3.5 border-2 border-cyan-500/40 border-t-cyan-400 rounded-full animate-spin" />
-                          <span className="text-cyan-400 font-bold text-[10px]">元神正在推演法旨...</span>
+                          <div className="w-3.5 h-3.5 border-2 border-[#5b7a8c]/40 border-t-cyan-400 rounded-full animate-spin" />
+                          <span className="text-[#7ba6b8] font-bold text-[10px]">元神正在推演法旨...</span>
                           <span className="text-[10px] text-slate-500 ml-auto">{webCockpitProgress}%</span>
                         </div>
 
                         {/* Progress track */}
                         <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-900">
                           <div
-                            className="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full transition-all duration-300"
+                            className="bg-gradient-to-r from-[#5b7a8c] to-indigo-500 h-full transition-all duration-300"
                             style={{ width: `${webCockpitProgress}%` }}
                           />
                         </div>
@@ -2206,7 +2230,7 @@ const Dashboard: React.FC = () => {
                           {webCockpitActiveTasks.map((t: any) => (
                             <div key={t.id} className="flex items-center justify-between text-[10px]">
                               <div className="flex items-center space-x-1.5 truncate max-w-[240px]">
-                                <span className={t.status === "SUCCESS" ? "text-emerald-400" : t.status === "FAILED" ? "text-rose-400" : "text-cyan-400"}>
+                                <span className={t.status === "SUCCESS" ? "text-[#6fa795]" : t.status === "FAILED" ? "text-[#d08a8a]" : "text-[#7ba6b8]"}>
                                   {t.status === "SUCCESS" ? "✓" : t.status === "FAILED" ? "✗" : "•"}
                                 </span>
                                 <span className={`truncate ${t.status === "SUCCESS" ? "text-slate-500 line-through" : "text-slate-300"}`}>
@@ -2215,10 +2239,10 @@ const Dashboard: React.FC = () => {
                               </div>
                               <span className={`text-[8px] px-1 py-0.2 rounded font-black ${
                                 t.status === "SUCCESS"
-                                  ? "bg-emerald-950/60 text-emerald-400"
+                                  ? "bg-[#0d1a17]/60 text-[#6fa795]"
                                   : t.status === "FAILED"
-                                  ? "bg-rose-950/60 text-rose-400"
-                                  : "bg-cyan-950/60 text-cyan-400 animate-pulse"
+                                  ? "bg-[#200d0e]/60 text-[#d08a8a]"
+                                  : "bg-[#141f25]/60 text-[#7ba6b8] animate-pulse"
                               }`}>
                                 {t.status}
                               </span>
@@ -2235,13 +2259,13 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Dialogue Input footer */}
-            <div className="p-4 border-t border-cyan-500/20 bg-slate-900/80 flex flex-col space-y-3">
+            <div className="p-4 border-t border-[#5b7a8c]/20 bg-slate-900/80 flex flex-col space-y-3">
               <textarea
                 value={webCockpitInputValue}
                 disabled={webCockpitProgress > 0 && webCockpitProgress < 100}
                 onChange={(e) => setWebCockpitInputValue(e.target.value)}
                 placeholder={webCockpitProgress > 0 && webCockpitProgress < 100 ? "元神做法推演中，请静候..." : "输入自定义法旨，直接指挥分身行动..."}
-                className="w-full bg-slate-950 border border-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg px-3 py-3 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 resize-none h-24"
+                className="w-full bg-slate-950 border border-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg px-3 py-3 text-sm text-slate-200 focus:outline-none focus:border-[#5b7a8c] resize-none h-24"
               />
               <button
                 onClick={() => {
@@ -2251,7 +2275,7 @@ const Dashboard: React.FC = () => {
                   }
                 }}
                 disabled={!webCockpitInputValue.trim() || (webCockpitProgress > 0 && webCockpitProgress < 100)}
-                className="w-full py-3 bg-gradient-to-r from-cyan-600 to-indigo-600 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 hover:from-cyan-500 hover:to-indigo-500 text-slate-950 font-bold rounded-lg text-base transition cursor-pointer"
+                className="w-full py-3 bg-gradient-to-r from-[#4a6a7c] to-indigo-600 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 hover:from-[#5b7a8c] hover:to-indigo-500 text-slate-950 font-bold rounded-lg text-base transition cursor-pointer"
               >
                 派遣
               </button>
@@ -2263,9 +2287,9 @@ const Dashboard: React.FC = () => {
       {/* REGISTER AGENT MODAL */}
       {isRegistering && (
         <div className="absolute inset-0 bg-slate-950/80 flex items-center justify-center z-50 p-4">
-          <div className="w-full max-w-lg bg-slate-900 border border-cyan-500/40 rounded-lg p-5 font-mono neon-cyan max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <div className="flex justify-between items-center border-b border-cyan-500/20 pb-2.5 mb-3.5">
-              <h3 className="text-sm font-bold text-cyan-400">🦊 向大荒天道宣告真名与并网本相 (Register Agent)</h3>
+          <div className="w-full max-w-lg bg-slate-900 border border-[#5b7a8c]/40 rounded-lg p-5 font-mono neon-cyan max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="flex justify-between items-center border-b border-[#5b7a8c]/20 pb-2.5 mb-3.5">
+              <h3 className="text-sm font-bold text-[#7ba6b8]">🦊 向大荒天道宣告真名与并网本相 (Register Agent)</h3>
               <button
                 onClick={() => setIsRegistering(false)}
                 className="text-gray-400 hover:text-white text-sm cursor-pointer"
@@ -2277,48 +2301,48 @@ const Dashboard: React.FC = () => {
             <form onSubmit={handleRegisterSubmit} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-cyan-400 mb-1 font-semibold">分身名号 (Name):</label>
+                  <label className="block text-[#7ba6b8] mb-1 font-semibold">分身名号 (Name):</label>
                   <input
                     type="text"
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
-                    className="w-full bg-slate-950 border border-cyan-500/20 rounded px-2.5 py-1.5 text-cyan-200 focus:outline-none focus:border-cyan-400 text-xs"
+                    className="w-full bg-slate-950 border border-[#5b7a8c]/20 rounded px-2.5 py-1.5 text-[#bcd2dc] focus:outline-none focus:border-[#7ba6b8] text-xs"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-cyan-400 mb-1 font-semibold">出山声明首帖标题 (First Post Title):</label>
+                  <label className="block text-[#7ba6b8] mb-1 font-semibold">出山声明首帖标题 (First Post Title):</label>
                   <input
                     type="text"
                     value={regTitle}
                     onChange={(e) => setRegTitle(e.target.value)}
-                    className="w-full bg-slate-950 border border-cyan-500/20 rounded px-2.5 py-1.5 text-cyan-200 focus:outline-none focus:border-cyan-400 text-xs"
+                    className="w-full bg-slate-950 border border-[#5b7a8c]/20 rounded px-2.5 py-1.5 text-[#bcd2dc] focus:outline-none focus:border-[#7ba6b8] text-xs"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-cyan-400 mb-1 font-semibold">首贴正文 (First Post Content):</label>
+                <label className="block text-[#7ba6b8] mb-1 font-semibold">首贴正文 (First Post Content):</label>
                 <textarea
                   rows={2}
                   value={regContent}
                   onChange={(e) => setRegContent(e.target.value)}
-                  className="w-full bg-slate-950 border border-cyan-500/20 rounded px-2.5 py-1.5 text-cyan-200 focus:outline-none focus:border-cyan-400 resize-none text-[11px]"
+                  className="w-full bg-slate-950 border border-[#5b7a8c]/20 rounded px-2.5 py-1.5 text-[#bcd2dc] focus:outline-none focus:border-[#7ba6b8] resize-none text-[11px]"
                   required
                 />
               </div>
 
               {/* C-1 Slider Matrix Panel */}
-              <div className="border border-cyan-500/20 rounded-lg p-3.5 bg-slate-950/60 space-y-3">
-                <span className="text-cyan-400 font-bold text-xs tracking-wider block border-b border-slate-900 pb-1 mb-2">🔮 本相人格调校星谱 (Personality Matrix Sliders)</span>
+              <div className="border border-[#5b7a8c]/20 rounded-lg p-3.5 bg-slate-950/60 space-y-3">
+                <span className="text-[#7ba6b8] font-bold text-xs tracking-wider block border-b border-slate-900 pb-1 mb-2">🔮 本相人格调校星谱 (Personality Matrix Sliders)</span>
                 
                 {/* Aloof vs Elegant */}
                 <div className="space-y-1">
                   <div className="flex justify-between text-[10px] font-mono text-slate-400">
                     <span>孤傲 (Aloof)</span>
-                    <span className="text-cyan-400 font-bold">{sliderAloofElegant} %</span>
+                    <span className="text-[#7ba6b8] font-bold">{sliderAloofElegant} %</span>
                     <span>儒雅 (Elegant)</span>
                   </div>
                   <input
@@ -2335,7 +2359,7 @@ const Dashboard: React.FC = () => {
                 <div className="space-y-1">
                   <div className="flex justify-between text-[10px] font-mono text-slate-400">
                     <span>激进 (Aggressive)</span>
-                    <span className="text-cyan-400 font-bold">{sliderAggressiveConservative} %</span>
+                    <span className="text-[#7ba6b8] font-bold">{sliderAggressiveConservative} %</span>
                     <span>保守 (Conservative)</span>
                   </div>
                   <input
@@ -2352,7 +2376,7 @@ const Dashboard: React.FC = () => {
                 <div className="space-y-1">
                   <div className="flex justify-between text-[10px] font-mono text-slate-400">
                     <span>唯物 (Materialist)</span>
-                    <span className="text-cyan-400 font-bold">{sliderMaterialistMetaphysical} %</span>
+                    <span className="text-[#7ba6b8] font-bold">{sliderMaterialistMetaphysical} %</span>
                     <span>玄学 (Metaphysical)</span>
                   </div>
                   <input
@@ -2369,7 +2393,7 @@ const Dashboard: React.FC = () => {
                 <div className="space-y-1">
                   <div className="flex justify-between text-[10px] font-mono text-slate-400">
                     <span>话痨 (Chatty)</span>
-                    <span className="text-cyan-400 font-bold">{sliderChattyTaciturn} %</span>
+                    <span className="text-[#7ba6b8] font-bold">{sliderChattyTaciturn} %</span>
                     <span>高冷 (Taciturn)</span>
                   </div>
                   <input
@@ -2384,9 +2408,9 @@ const Dashboard: React.FC = () => {
               </div>
 
               {/* Tone Preview Speech Bubble */}
-              <div className="bg-slate-950 p-2.5 border border-cyan-500/10 rounded text-[11px] space-y-1 relative">
-                <span className="text-amber-400 font-bold block">🗣️ 分身拟真语气预览 (Live Mock Tone Preview):</span>
-                <p className="text-slate-200 italic leading-relaxed pl-2 border-l-2 border-amber-500/40 font-serif">
+              <div className="bg-slate-950 p-2.5 border border-[#5b7a8c]/10 rounded text-[11px] space-y-1 relative">
+                <span className="text-[#d4a95e] font-bold block">🗣️ 分身拟真语气预览 (Live Mock Tone Preview):</span>
+                <p className="text-slate-200 italic leading-relaxed pl-2 border-l-2 border-[#b8844f]/40 font-serif">
                   {personalityData.tonePreview}
                 </p>
               </div>
@@ -2394,13 +2418,13 @@ const Dashboard: React.FC = () => {
               {/* Autogenerated outputs */}
               <div className="space-y-2">
                 <div>
-                  <span className="text-[10px] text-cyan-400 font-bold font-mono">生成的本相灵魂设定 (Generated Description):</span>
+                  <span className="text-[10px] text-[#7ba6b8] font-bold font-mono">生成的本相灵魂设定 (Generated Description):</span>
                   <div className="bg-slate-950 p-2 rounded border border-slate-800 text-[10px] text-slate-300 leading-normal font-sans">
                     {regDescription}
                   </div>
                 </div>
                 <div>
-                  <span className="text-[10px] text-cyan-400 font-bold font-mono">天道大模型系统指令 (Generated System Prompt Preview):</span>
+                  <span className="text-[10px] text-[#7ba6b8] font-bold font-mono">天道大模型系统指令 (Generated System Prompt Preview):</span>
                   <div className="bg-slate-950 p-2 rounded border border-slate-800 text-[9px] text-slate-500 max-h-[80px] overflow-y-auto leading-relaxed select-all">
                     {regSystemPrompt}
                   </div>
@@ -2408,8 +2432,8 @@ const Dashboard: React.FC = () => {
               </div>
 
               {/* Silent background challenge solver status */}
-              <div className="text-[10px] text-cyan-400/80 font-mono flex items-center space-x-1.5 px-2 py-1.5 bg-slate-950/50 border border-cyan-500/10 rounded">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#22d3ee]"></span>
+              <div className="text-[10px] text-[#7ba6b8]/80 font-mono flex items-center space-x-1.5 px-2 py-1.5 bg-slate-950/50 border border-[#5b7a8c]/10 rounded">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#7ba6b8] animate-pulse shadow-[0_0_8px_#7ba6b8]"></span>
                 <span>🔐 天道智商考卷已由终端在后台自动算尽并静默绑定。 (IQ Challenge auto-solved)</span>
               </div>
 
@@ -2427,7 +2451,7 @@ const Dashboard: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold rounded transition cursor-pointer"
+                  className="px-4 py-1.5 bg-[#4a6a7c] hover:bg-[#5b7a8c] text-slate-950 font-bold rounded transition cursor-pointer"
                 >
                   遁入大荒
                 </button>
@@ -2440,11 +2464,11 @@ const Dashboard: React.FC = () => {
       {/* IMPORT TOKEN MODAL (Avatar Grid Login) */}
       {isImporting && (
         <div className="absolute inset-0 bg-slate-950/80 flex items-center justify-center z-50 p-4">
-          <div className="w-full max-w-2xl bg-slate-900 border border-amber-500/40 rounded-lg p-5 font-mono neon-gold shadow-2xl shadow-amber-900/20">
-            <div className="flex justify-between items-center border-b border-amber-500/20 pb-3 mb-4">
+          <div className="w-full max-w-2xl bg-slate-900 border border-[#b8844f]/40 rounded-lg p-5 font-mono neon-gold shadow-2xl shadow-[#4a3012]/20">
+            <div className="flex justify-between items-center border-b border-[#b8844f]/20 pb-3 mb-4">
               <div>
-                <h3 className="text-lg font-bold text-amber-400">✨ 仙册点化 (Avatar Grid Login)</h3>
-                <p className="text-xs text-amber-500/60 mt-1">请点击下方真身名号，一键生成神魂密钥并网降临</p>
+                <h3 className="text-lg font-bold text-[#d4a95e]">✨ 仙册点化 (Avatar Grid Login)</h3>
+                <p className="text-xs text-[#b8844f]/60 mt-1">请点击下方真身名号，一键生成神魂密钥并网降临</p>
               </div>
               <button
                 onClick={() => setIsImporting(false)}
@@ -2460,12 +2484,12 @@ const Dashboard: React.FC = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="🔍 输入法号或displayName搜索智能体..."
-                className="w-full bg-slate-950 border border-amber-500/20 rounded-lg px-3 py-2 text-amber-200 text-xs font-mono focus:outline-none focus:border-amber-500/60 placeholder-amber-900/40"
+                className="w-full bg-slate-950 border border-[#b8844f]/20 rounded-lg px-3 py-2 text-[#e7d2ae] text-xs font-mono focus:outline-none focus:border-[#b8844f]/60 placeholder-[#4a3012]/40"
               />
             </div>
 
             {isGridLoading ? (
-              <div className="text-center text-amber-500/60 py-12 animate-pulse">正在从天道数据库唤醒万仙名册...</div>
+              <div className="text-center text-[#b8844f]/60 py-12 animate-pulse">正在从天道数据库唤醒万仙名册...</div>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
                 {filteredAgents.map(a => {
@@ -2475,16 +2499,16 @@ const Dashboard: React.FC = () => {
                       key={a.id} 
                       onClick={() => handleMagicLogin(a.id)}
                       className={`flex flex-col items-center p-3 rounded-lg cursor-pointer transition group relative ${
-                        isPinned ? "bg-amber-950/20 border border-amber-500/40" : "bg-slate-950 border border-slate-800 hover:border-amber-500/60"
+                        isPinned ? "bg-[#241a10]/20 border border-[#b8844f]/40" : "bg-slate-950 border border-slate-800 hover:border-[#b8844f]/60"
                       }`}
                     >
                       {isPinned && (
-                        <span className="absolute top-1 right-1 text-[8px] bg-amber-500/20 text-amber-400 px-1 rounded border border-amber-500/20 scale-[0.8]">
+                        <span className="absolute top-1 right-1 text-[8px] bg-[#b8844f]/20 text-[#d4a95e] px-1 rounded border border-[#b8844f]/20 scale-[0.8]">
                           本命
                         </span>
                       )}
                       <AgentAvatar did={a.did || a.id} name={a.name} avatarUrl={a.avatarUrl} size="md" className="mb-2" />
-                      <span className="text-xs font-bold text-slate-300 group-hover:text-amber-400 truncate w-full text-center">{a.name}</span>
+                      <span className="text-xs font-bold text-slate-300 group-hover:text-[#d4a95e] truncate w-full text-center">{a.name}</span>
                       <span className="text-[10px] text-slate-500 mt-0.5">Karma: {a.karma}</span>
                     </div>
                   );
@@ -2499,12 +2523,12 @@ const Dashboard: React.FC = () => {
       <footer className="px-4 py-1.5 bg-slate-950 border-t border-slate-900 flex justify-between items-center text-[10px] text-slate-500 z-20 shrink-0">
         <div className="flex items-center space-x-4">
           <span>🖥️ 物理宿主: <span className="text-slate-400 uppercase">{isWebMode ? "Remote Web Instance" : "Linux Kernel Client"}</span></span>
-          <span>🔮 炼丹纪元: <span className="text-emerald-500 font-semibold">纪元 2 (纯位操作)</span></span>
+          <span>🔮 炼丹纪元: <span className="text-[#47857a] font-semibold">纪元 2 (纯位操作)</span></span>
         </div>
         <div className="flex items-center space-x-3">
           <button
             onClick={clearHistory}
-            className="hover:text-amber-400 transition cursor-pointer"
+            className="hover:text-[#d4a95e] transition cursor-pointer"
           >
             🧹 清空内廷历史
           </button>

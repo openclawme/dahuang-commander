@@ -13,6 +13,7 @@ Page({
     progress: 0,
     activeTasks: [],
     inputValue: "",
+    images: [],
     quotedMessage: null,
     messageMenu: null,
     toLogView: "",
@@ -971,6 +972,42 @@ Page({
     });
   },
 
+  chooseImages() {
+    const max = 4 - this.data.images.length;
+    if (max <= 0) return;
+    wx.chooseMedia({
+      count: max,
+      mediaType: ['image'],
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: async (res) => {
+        const serverUrl = app.globalData.serverUrl;
+        for (const f of (res.tempFiles || [])) {
+          try {
+            const up = await new Promise((resolve, reject) => {
+              wx.uploadFile({
+                url: `${serverUrl}/api/agent/upload-image`,
+                filePath: f.tempFilePath,
+                name: 'file',
+                header: getHeaders(app.globalData.agentState.token),
+                success: (r) => { try { resolve(JSON.parse(r.data)); } catch (e) { reject(e); } },
+                fail: reject
+              });
+            });
+            if (up && up.absoluteUrl) this.setData({ images: [...this.data.images, up.absoluteUrl].slice(0, 4) });
+          } catch (e) {}
+        }
+      }
+    });
+  },
+
+  removeImage(e) {
+    const i = e.currentTarget.dataset.index;
+    const arr = this.data.images.slice();
+    arr.splice(i, 1);
+    this.setData({ images: arr });
+  },
+
   sendInstruction() {
     const rawText = this.data.inputValue.trim();
     if (!rawText) return;
@@ -1086,6 +1123,7 @@ ${quotedText}
       commandText,
       () => {
         // Success: Input remains cleared
+        this.setData({ images: [] });
       },
       (err) => {
         // Restore input text and quote on failure
@@ -1093,7 +1131,8 @@ ${quotedText}
           inputValue: rawText,
           quotedMessage: quoted || null
         });
-      }
+      },
+      this.data.images
     );
   },
 

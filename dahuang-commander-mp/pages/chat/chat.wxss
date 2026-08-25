@@ -10,7 +10,7 @@
 
 .channel-header {
   margin-bottom: 30rpx;
-  border-bottom: 1rpx solid rgba(158,42,43, 0.2);
+  border-bottom: 1rpx solid rgba(158, 42, 43, 0.2);
   padding-bottom: 20rpx;
 }
 
@@ -35,22 +35,22 @@
 }
 
 .room-item {
-  background: rgba(244,241,234, 0.8);
-  border: 1rpx solid rgba(107,91,74, 0.2);
-  border-radius: 12rpx;
+  background: rgba(244, 241, 234, 0.8);
+  border: 1rpx solid rgba(107, 91, 74, 0.2);
+  border-radius: 16rpx;
   padding: 24rpx;
   transition: all 0.2s ease;
   position: relative;
 }
 
 .glowing-border {
-  border-color: rgba(158,42,43, 0.5);
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(158,42,43, 0.2);
+  border-color: rgba(158, 42, 43, 0.5);
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(158, 42, 43, 0.2);
 }
 
 .item-hover {
-  background: rgba(158,42,43, 0.05);
-  border-color: rgba(158,42,43, 0.3);
+  background: rgba(158, 42, 43, 0.05);
+  border-color: rgba(158, 42, 43, 0.3);
 }
 
 .room-icon-container {
@@ -58,8 +58,8 @@
   width: 80rpx;
   height: 80rpx;
   border-radius: 10rpx;
-  background: rgba(158,42,43, 0.1);
-  border: 1rpx solid rgba(158,42,43, 0.3);
+  background: rgba(158, 42, 43, 0.1);
+  border: 1rpx solid rgba(158, 42, 43, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -146,7 +146,7 @@
 .segment-bar {
   background: rgba(255, 255, 255, 0.65);
   border: 1rpx solid rgba(59, 48, 36, 0.12);
-  border-radius: 12rpx;
+  border-radius: 16rpx;
   margin-bottom: 24rpx;
   padding: 8rpx;
   gap: 8rpx;
@@ -159,7 +159,7 @@
   font-weight: bold;
   color: #8c7d68;
   padding: 24rpx 0;
-  border-radius: 12rpx;
+  border-radius: 16rpx;
 }
 .segment-active {
   background: #9e2a2b;
@@ -175,7 +175,7 @@
   line-height: 30rpx;
   padding: 0 8rpx;
   border-radius: 999rpx;
-  background: #e53e3e;
+  background: #b04d4e;
   color: #fff;
   font-size: 20rpx;
   font-weight: bold;
@@ -199,7 +199,7 @@
 .contact-search-ph {
   flex: 1;
   font-size: 26rpx;
-  color: #a89982;
+  color: #8c7d68;
 }
 .contact-add-pill {
   font-size: 22rpx;
@@ -214,7 +214,7 @@
 .contact-entry-row {
   background: rgba(255, 255, 255, 0.65);
   border: 1rpx solid rgba(59, 48, 36, 0.12);
-  border-radius: 12rpx;
+  border-radius: 16rpx;
   padding: 20rpx 24rpx;
   gap: 20rpx;
   margin-bottom: 16rpx;
@@ -246,7 +246,7 @@
   border: 4rpx solid #f4f1ea;
 }
 .online-on {
-  background: #2f9e44;
+  background: #3b5e59;
 }
 .online-off {
   background: #c4b8a5;
@@ -283,9 +283,9 @@
   gap: 20rpx;
 }
 .skeleton-row {
-  background: rgba(255,255,255,0.65);
-  border: 1rpx solid rgba(59,48,36,0.1);
-  border-radius: 12rpx;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1rpx solid rgba(59, 48, 36, 0.1);
+  border-radius: 16rpx;
   padding: 24rpx;
   gap: 24rpx;
 }
@@ -293,7 +293,7 @@
   width: 80rpx;
   height: 80rpx;
   border-radius: 10rpx;
-  background: linear-gradient(90deg, rgba(59,48,36,0.08) 25%, rgba(59,48,36,0.14) 50%, rgba(59,48,36,0.08) 75%);
+  background: linear-gradient(90deg, rgba(59, 48, 36, 0.08) 25%, rgba(59, 48, 36, 0.14) 50%, rgba(59, 48, 36, 0.08) 75%);
   background-size: 200% 100%;
   animation: skeletonShimmer 1.4s infinite linear;
   flex-shrink: 0;
@@ -305,7 +305,7 @@
 .skeleton-line {
   height: 24rpx;
   border-radius: 999rpx;
-  background: linear-gradient(90deg, rgba(59,48,36,0.08) 25%, rgba(59,48,36,0.14) 50%, rgba(59,48,36,0.08) 75%);
+  background: linear-gradient(90deg, rgba(59, 48, 36, 0.08) 25%, rgba(59, 48, 36, 0.14) 50%, rgba(59, 48, 36, 0.08) 75%);
   background-size: 200% 100%;
   animation: skeletonShimmer 1.4s infinite linear;
 }
@@ -323,8 +323,8 @@
   height: 80rpx;
   border-radius: 10rpx;
   overflow: visible;
-  background: rgba(158,42,43,0.1);
-  border: 1rpx solid rgba(158,42,43,0.3);
+  background: rgba(158, 42, 43, 0.1);
+  border: 1rpx solid rgba(158, 42, 43, 0.3);
   flex-shrink: 0;
 }
 .contact-avatar-img {
@@ -347,7 +347,7 @@
   border-radius: 50%;
   border: 3rpx solid #f4f1ea;
 }
-.online-on { background: #16a34a; }
+.online-on { background: #3b5e59; }
 .online-off { background: #b5aa9a; }
 
 .segment-item {
@@ -369,7 +369,7 @@
   color: #ffffff;
   font-size: 26rpx;
   font-weight: bold;
-  box-shadow: 0 8rpx 20rpx -8rpx rgba(158,42,43,0.45);
+  box-shadow: 0 8rpx 20rpx -8rpx rgba(158, 42, 43, 0.45);
 }
 
 .room-avatar-char {

@@ -660,7 +660,7 @@ App({
     try { return wx.getStorageSync("dahuang_login_history") || []; } catch (e) { return []; }
   },
 
-  sendInstruction(instruction, successCallback, failCallback) {
+  sendInstruction(instruction, successCallback, failCallback, images) {
     if (!instruction || !instruction.trim()) return;
 
     const now = Date.now();
@@ -702,7 +702,8 @@ App({
       data: {
         command: instruction,
         isAsync: true,
-        requestId: reqId
+        requestId: reqId,
+        images: images && images.length ? images : undefined
       },
       success: (res) => {
         if (res.statusCode === 202 || (res.statusCode === 200 && res.data && res.data.status === "PROCESSING")) {
