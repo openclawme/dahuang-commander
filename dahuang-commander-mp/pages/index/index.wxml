@@ -138,29 +138,29 @@
         <view class="wechat-image-remove" catchtap="removeImage" data-index="{{index}}">×</view>
       </view>
     </view>
-    <view class="wechat-input-bar flex-row align-center">
-      <view class="wechat-add-btn flex-row align-center justify-center" bindtap="chooseImages">
-        <text class="wechat-add-icon">＋</text>
+    <view class="wechat-input-bar">
+      <view class="wechat-field">
+        <textarea
+          class="wechat-textarea"
+          placeholder-class="wechat-placeholder"
+          placeholder="{{t.index.placeholder}}"
+          value="{{inputValue}}"
+          bindinput="onInputChange"
+          maxlength="1000"
+          auto-height="{{true}}"
+          show-confirm-bar="{{false}}"
+          disable-default-padding
+          adjust-position="{{false}}"
+          cursor-spacing="20"
+          bindfocus="onInputFocus"
+          bindblur="onInputBlur"
+          bindkeyboardheightchange="onKeyboardHeightChange"
+        />
+        <view class="wechat-add-btn" bindtap="chooseImages">
+          <text class="wechat-add-icon">＋</text>
+        </view>
       </view>
-      <view class="clear-icon-btn flex-row align-center justify-center" bindtap="clearInput" wx:if="{{inputValue}}">
-        <text class="clear-icon">✕</text>
-      </view>
-      <textarea 
-        class="wechat-textarea" 
-        placeholder="{{t.index.placeholder}}" 
-        value="{{inputValue}}" 
-        bindinput="onInputChange" 
-        maxlength="1000"
-        auto-height="{{true}}"
-        show-confirm-bar="{{false}}"
-        disable-default-padding
-        adjust-position="{{false}}"
-        cursor-spacing="20"
-        bindfocus="onInputFocus"
-        bindblur="onInputBlur"
-        bindkeyboardheightchange="onKeyboardHeightChange"
-      />
-      <view class="wechat-submit-btn {{inputValue ? 'active' : ''}}" bindtap="sendInstruction">{{t.index.send}}</view>
+      <view class="wechat-submit-btn" bindtap="sendInstruction">{{t.index.send}}</view>
     </view>
   </view>
 

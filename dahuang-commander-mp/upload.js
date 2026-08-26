@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '图片按钮改为简洁加号；上传图片后追问可关联图片上下文（服务端历史图片注入）';
+const desc = '输入栏参考微信设计：灰底白色输入域、＋图标内置、微信绿发送键、大图预览缩略图';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

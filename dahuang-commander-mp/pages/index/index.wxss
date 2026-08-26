@@ -1204,9 +1204,9 @@
    ========================================================================== */
 .wechat-footer {
   position: relative;
-  background-color: #f4f1ea;
-  border-top: 1rpx solid rgba(59, 48, 36, 0.12);
-  padding: 16rpx 24rpx;
+  background-color: #f7f7f7;
+  border-top: 1rpx solid #e3e3e3;
+  padding: 12rpx 20rpx;
   box-sizing: border-box;
   z-index: 1000;
   margin-left: -24rpx;
@@ -1304,79 +1304,61 @@
   flex-shrink: 0;
 }
 
+/* 参考微信聊天输入栏：灰底 + 白色圆角输入域（＋ 图标内置）+ 微信绿发送键 */
 .wechat-input-bar {
-  background-color: #fdfbf7;
-  border: 1rpx solid rgba(59, 48, 36, 0.15);
-  border-radius: 40rpx;
-  padding: 12rpx 24rpx;
+  display: flex;
+  align-items: flex-end;
   width: 100%;
   box-sizing: border-box;
+}
+
+.wechat-field {
+  flex: 1;
+  min-width: 0;
+  background: #ffffff;
+  border-radius: 10rpx;
+  padding: 0 16rpx;
   display: flex;
   align-items: center;
-  position: relative;
-}
-
-.clear-icon-btn {
-  width: 48rpx;
-  height: 48rpx;
-  padding: 0;
-  margin-right: 12rpx;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: rgba(59, 48, 36, 0.06);
-}
-
-.clear-icon {
-  font-size: 24rpx;
-  color: #8c7d68;
-  line-height: 1;
+  box-sizing: border-box;
 }
 
 .wechat-textarea {
   flex: 1;
-  min-height: 48rpx;
-  max-height: 180rpx;
+  min-height: 56rpx;
+  max-height: 200rpx;
+  padding: 8rpx 0;
   color: #1a1a1a;
-  font-size: 28rpx;
-  line-height: 1.5;
+  font-size: 30rpx;
+  line-height: 1.4;
   background: transparent;
-  padding: 0;
   margin: 0;
 }
 
 .wechat-placeholder {
-  color: #8c7d68;
-  font-size: 26rpx;
+  color: #b2b2b2;
+  font-size: 30rpx;
 }
 
 .wechat-submit-btn {
-  background: #fdfbf7;
-  color: #6b5b4a;
-  font-size: 28rpx;
-  font-weight: bold;
-  height: 88rpx;
-  line-height: 88rpx;
-  padding: 0 40rpx;
-  border-radius: 38rpx;
-  border: 1rpx solid rgba(59, 48, 36, 0.15);
-  margin: 0 0 0 16rpx;
+  background: #07c160;
+  color: #ffffff;
+  font-size: 30rpx;
+  height: 68rpx;
+  line-height: 68rpx;
+  padding: 0 28rpx;
+  border-radius: 10rpx;
+  margin-left: 16rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  min-width: 120rpx;
-  width: auto;
-  transition: all 0.2s ease;
+  min-width: 110rpx;
+  box-sizing: border-box;
 }
 
-.wechat-submit-btn::after {
-  border: none;
-}
-
-.wechat-submit-btn.active {
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
-  color: #ffffff;
-  box-shadow: 0 6rpx 16rpx -4rpx rgba(158, 42, 43, 0.4);
+.wechat-submit-btn:active {
+  background: #06ad56;
 }
 
 /* ==========================================================================
@@ -2563,22 +2545,20 @@
 
 /* 图片附件选择与预览 */
 .wechat-add-btn {
-  width: 56rpx;
-  height: 56rpx;
+  width: 48rpx;
+  height: 48rpx;
   flex-shrink: 0;
-  margin-right: 8rpx;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #9e2a2b, #6b1f20);
-  border: 1rpx solid rgba(158,42,43,0.3);
-  box-shadow: 0 4rpx 10rpx -4rpx rgba(158,42,43,0.4);
+  margin-left: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .wechat-add-icon {
-  font-size: 26rpx;
-  font-weight: bold;
-  color: #ffffff;
+  font-size: 38rpx;
+  color: #3c3c3c;
   line-height: 1;
 }
-.wechat-add-btn:active { opacity: 0.85; transform: scale(0.95); }
+.wechat-add-btn:active { opacity: 0.6; }
 .wechat-image-list {
   display: flex;
   flex-wrap: wrap;
@@ -2587,28 +2567,27 @@
 }
 .wechat-image-item {
   position: relative;
-  width: 120rpx;
-  height: 120rpx;
+  width: 160rpx;
+  height: 160rpx;
 }
 .wechat-image-thumb {
-  width: 120rpx;
-  height: 120rpx;
-  border-radius: 10rpx;
-  border: 1rpx solid rgba(59,48,36,0.2);
-  background: #fdfbf7;
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 8rpx;
+  background: #ffffff;
 }
 .wechat-image-remove {
   position: absolute;
-  top: -10rpx;
-  right: -10rpx;
-  width: 34rpx;
-  height: 34rpx;
-  line-height: 32rpx;
+  top: -8rpx;
+  right: -8rpx;
+  width: 32rpx;
+  height: 32rpx;
+  line-height: 30rpx;
   text-align: center;
   border-radius: 50%;
-  background: #9e2a2b;
+  background: rgba(60, 60, 60, 0.85);
   color: #fff;
-  font-size: 26rpx;
+  font-size: 22rpx;
   z-index: 5;
 }
 

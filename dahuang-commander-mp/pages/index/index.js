@@ -967,12 +967,6 @@ Page({
     this.setData({ quotedMessage: null });
   },
 
-  clearInput() {
-    this.setData({
-      inputValue: ""
-    });
-  },
-
   chooseImages() {
     const max = 4 - this.data.images.length;
     if (max <= 0) {
