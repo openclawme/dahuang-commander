@@ -8,6 +8,7 @@ Page({
     t: i18n.getDict(),
     agentState: {},
     serverUrl: "",
+    uploadErr: "",
     logs: [],
     chatHistory: [],
     progress: 0,
@@ -987,13 +988,13 @@ Page({
         const uploaded = [];
         let failed = 0;
         for (let i = 0; i < files.length; i++) {
-          // 客户端预检：单张 >8MB 直接拦截（与服务端同限）
+          // 客户端预检：单张 >6MB 直接拦截（与服务端 MAX_SIZE 同限；
+          // 6MB 图 base64 后约 8MB 字符串，逼近 wx.request 10MB 上限，6MB 是安全余量）
           const info = await new Promise((r) => wx.getFileSystemManager().getFileInfo({ filePath: files[i].tempFilePath, success: r, fail: () => r({ size: 0 }) }));
           if (info.size > 6 * 1024 * 1024) {
             failed += 1;
             pending[i].status = "error";
-            this._uploadErr = "单张图片需 ≤6MB";
-            this.setData({ pendingImages: pending });
+            this.setData({ pendingImages: pending, uploadErr: "单张图片需 ≤6MB" });
             continue;
           }
           const url = await this.uploadOneImage(files[i].tempFilePath);
@@ -1007,7 +1008,7 @@ Page({
         });
         wx.hideLoading();
         if (uploaded.length) wx.showToast({ title: failed > 0 ? `已上传 ${uploaded.length} 张，${failed} 张失败` : `已上传 ${uploaded.length} 张`, icon: "none" });
-        else wx.showToast({ title: this._uploadErr || "上传失败，请重试", icon: "none" });
+        else wx.showToast({ title: this.data.uploadErr || "上传失败，请重试", icon: "none" });
       }
     });
   },
@@ -1033,14 +1034,14 @@ Page({
               if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.url) {
                 resolve(res.data.url);
               } else {
-                this._uploadErr = (res.data && res.data.error) || `HTTP ${res.statusCode}`;
+                this.setData({ uploadErr: (res.data && res.data.error) || `HTTP ${res.statusCode}` });
                 resolve(null);
               }
             },
-            fail: (err) => { this._uploadErr = err.errMsg || "网络失败"; resolve(null); }
+            fail: (err) => { this.setData({ uploadErr: err.errMsg || "网络失败" }); resolve(null); }
           });
         },
-        fail: () => { this._uploadErr = "读取图片失败"; resolve(null); }
+        fail: () => { this.setData({ uploadErr: "读取图片失败" }); resolve(null); }
       });
     });
   },
@@ -1050,13 +1051,20 @@ Page({
     const arr = this.data.images.slice();
     const removed = arr.splice(i, 1)[0];
     this.setData({ images: arr });
-    // 同步删除服务器文件（用户不要的图不留在磁盘上）
+    // 同步删除服务器文件（用户不要的图不留在磁盘上）。
+    // 仅 /api/uploads/ 自托管图才发 DELETE；混入 http/data 地址（理论上白名单已拦）跳过
     if (removed && removed.startsWith("/api/uploads/")) {
       const name = removed.split("/").pop();
       wx.request({
         url: `${app.globalData.serverUrl}/api/agent/upload-image/${encodeURIComponent(name)}`,
         method: "DELETE",
-        header: getHeaders(app.globalData.agentState.token)
+        header: getHeaders(app.globalData.agentState.token),
+        success: (res) => {
+          // 409：图片已被帖子/聊天引用，服务端拒绝物理删除——本地已移除，服务端保留可正常显示
+          if (res.statusCode === 409) {
+            wx.showToast({ title: "图片已被帖子或群聊引用，已保留", icon: "none" });
+          }
+        }
       });
     }
   },
