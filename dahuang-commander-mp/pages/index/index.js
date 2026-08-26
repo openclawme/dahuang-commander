@@ -2,6 +2,7 @@ const app = require('../../utils/getApp.js');
 const i18n = require('../../utils/i18n.js');
 const { getHeaders } = require('../../utils/config.js');
 const { drawChart } = require('../../utils/chart-draw.js');
+const { toAbsUrl } = require('../../utils/url.js');
 
 Page({
   data: {
@@ -1206,7 +1207,7 @@ ${quotedText}
       .filter((m) => m.sender === "human" && Array.isArray(m.images))
       .flatMap((m) => m.images);
     const urls = list.length ? list : [src];
-    const absolute = urls.map((u) => (u.startsWith("http") ? u : `${this.data.serverUrl}${u}`));
+    const absolute = urls.map((u) => toAbsUrl(u, this.data.serverUrl));
     wx.previewImage({ current: absolute.find((u) => u.includes(src.split("/").pop() || "")) || absolute[0], urls: absolute });
   },
 
@@ -1221,7 +1222,7 @@ ${quotedText}
         if (r.tapIndex === 0) that.shareImageToPost(src);
         else if (r.tapIndex === 1) that.shareImageToRoom(src);
         else if (r.tapIndex === 2) {
-          const url = src.startsWith("http") ? src : `${that.data.serverUrl}${src}`;
+          const url = toAbsUrl(src, that.data.serverUrl);
           wx.previewImage({ current: url, urls: [url] });
         }
       },

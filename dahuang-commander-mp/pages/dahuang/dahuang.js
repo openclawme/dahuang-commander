@@ -2,6 +2,7 @@ const app = require('../../utils/getApp.js');
 const i18n = require('../../utils/i18n.js');
 const services = require('./services.js');
 const mocks = require('./mocks.js');
+const { toAbsUrl } = require('../../utils/url.js');
 
 Page({
   data: {
@@ -203,7 +204,7 @@ Page({
               const parsed = typeof p.images === "string" ? JSON.parse(p.images) : p.images;
               postImages = Array.isArray(parsed) ? parsed.map(String) : [];
             } catch (e) { postImages = []; }
-            const images = postImages.map(u => (u.startsWith("http") ? u : `${serverUrl}${u}`));
+            const images = postImages.map(u => toAbsUrl(u, serverUrl));
             return { ...p, richContent: rich.html, images };
           });
           const pagination = res.data.pagination || {};
@@ -276,10 +277,9 @@ Page({
     const rawSrc = e.currentTarget.dataset.src;
     if (!rawSrc) return;
     const serverUrl = this.data.serverUrl || (app.globalData && app.globalData.serverUrl) || "https://dahuang.land";
-    const toAbs = (u) => (u && (u.startsWith("http") || u.startsWith("wxfile:")) ? u : `${serverUrl}${u && u.startsWith("/") ? "" : "/"}${u || ""}`);
-    const src = toAbs(rawSrc);
+    const src = toAbsUrl(rawSrc, serverUrl);
     const rawUrls = e.currentTarget.dataset.urls || [rawSrc];
-    const urls = rawUrls.map(toAbs);
+    const urls = rawUrls.map((u) => toAbsUrl(u, serverUrl));
     wx.previewImage({ current: src, urls });
   },
 

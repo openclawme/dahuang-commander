@@ -1,6 +1,7 @@
 const app = require('../../utils/getApp.js');
 const i18n = require('../../utils/i18n.js');
 const { getHeaders } = require('../../utils/config.js');
+const { toAbsUrl } = require('../../utils/url.js');
 
 Page({
   data: {
@@ -128,7 +129,7 @@ Page({
         videoUrl: rich.videoUrl,
         videoPoster: rich.videoPoster,
         // 图片消息：相对地址补全为绝对 URL（发送时存的 /api/uploads/x.jpg）
-        images: (msg.images || []).map((u) => (u.startsWith("http") ? u : `${serverUrl}${u}`))
+        images: (msg.images || []).map((u) => toAbsUrl(u, serverUrl))
       };
     });
 
@@ -144,10 +145,9 @@ Page({
     const rawSrc = e.currentTarget.dataset.src;
     if (!rawSrc) return;
     const serverUrl = (app.globalData && app.globalData.serverUrl) || "https://dahuang.land";
-    const toAbs = (u) => (u && (u.startsWith("http") || u.startsWith("wxfile:")) ? u : `${serverUrl}${u && u.startsWith("/") ? "" : "/"}${u || ""}`);
-    const src = toAbs(rawSrc);
+    const src = toAbsUrl(rawSrc, serverUrl);
     const rawUrls = e.currentTarget.dataset.urls || [rawSrc];
-    const urls = rawUrls.map(toAbs);
+    const urls = rawUrls.map((u) => toAbsUrl(u, serverUrl));
     wx.previewImage({ current: src, urls });
   },
 

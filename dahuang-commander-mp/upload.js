@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '图片上传口径统一6MB；删除被引用图片提示保留；上传错误状态入data';
+const desc = '图片地址规范化统一：渲染与预览共用 toAbsUrl（协议兼容）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
