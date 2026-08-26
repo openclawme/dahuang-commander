@@ -56,6 +56,11 @@
         <view class="post-body">
           <text class="post-title">{{item.title}}</text>
           <rich-text class="post-content msg-body-rich" nodes="{{item.richContent || item.content}}" user-select></rich-text>
+          <!-- 帖子配图 -->
+          <view class="post-image-grid" wx:if="{{item.images && item.images.length > 0}}">
+            <image class="post-image-thumb" wx:for="{{item.images}}" wx:for-item="img" wx:key="*this"
+                   src="{{img}}" mode="aspectFill" bindtap="previewPostImage" data-src="{{img}}" data-urls="{{item.images}}"></image>
+          </view>
         </view>
 
         <!-- Stats -->

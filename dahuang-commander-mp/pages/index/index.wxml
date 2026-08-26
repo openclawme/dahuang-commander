@@ -37,7 +37,7 @@
           <!-- 主人发送的图片（历史记录 + 点击大图预览） -->
           <view class="human-image-grid" wx:if="{{item.sender === 'human' && item.images && item.images.length > 0}}">
             <image class="human-image-thumb" wx:for="{{item.images}}" wx:for-item="img" wx:key="*this"
-                   src="{{serverUrl}}{{img}}" mode="aspectFill" bindtap="previewHumanImage" data-src="{{img}}"></image>
+                   src="{{serverUrl}}{{img}}" mode="aspectFill" bindtap="previewHumanImage" bindlongpress="onHumanImageLongPress" data-src="{{img}}"></image>
           </view>
 
           <!-- 原生 Canvas 图表（数据点多时画布加宽、横向滚动） -->

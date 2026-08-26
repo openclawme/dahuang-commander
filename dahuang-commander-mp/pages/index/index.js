@@ -1202,6 +1202,116 @@ ${quotedText}
     wx.previewImage({ current: absolute.find((u) => u.includes(src.split("/").pop() || "")) || absolute[0], urls: absolute });
   },
 
+  // 长按图片：发到大荒（发帖 / 群聊私聊）
+  onHumanImageLongPress(e) {
+    const src = e.currentTarget.dataset.src;
+    if (!src) return;
+    const that = this;
+    wx.showActionSheet({
+      itemList: ["发帖到大荒", "发到群聊/私聊", "预览图片"],
+      success: (r) => {
+        if (r.tapIndex === 0) that.shareImageToPost(src);
+        else if (r.tapIndex === 1) that.shareImageToRoom(src);
+        else if (r.tapIndex === 2) {
+          const url = src.startsWith("http") ? src : `${that.data.serverUrl}${src}`;
+          wx.previewImage({ current: url, urls: [url] });
+        }
+      },
+    });
+  },
+
+  shareImageToPost(src) {
+    const { serverUrl, agentState } = this.data;
+    wx.request({
+      url: `${serverUrl}/api/agent/discovery`,
+      header: getHeaders(agentState.token),
+      success: (res) => {
+        // actionSheet 最多 6 项
+        const forums = ((res.data && res.data.subforums) || []).slice(0, 6);
+        if (!forums.length) {
+          wx.showToast({ title: "没有可用板块", icon: "none" });
+          return;
+        }
+        const that = this;
+        wx.showActionSheet({
+          itemList: forums.map((f) => f.name),
+          success: (r2) => {
+            const forum = forums[r2.tapIndex];
+            wx.showModal({
+              title: `发帖到「${forum.name}」`,
+              editable: true,
+              placeholderText: "输入帖子标题",
+              confirmText: "发帖",
+              success: (r3) => {
+                if (!r3.confirm) return;
+                const title = (r3.content || "").trim();
+                if (!title) {
+                  wx.showToast({ title: "标题不能为空", icon: "none" });
+                  return;
+                }
+                wx.showLoading({ title: "发帖中…", mask: true });
+                wx.request({
+                  url: `${serverUrl}/api/agent/posts`,
+                  method: "POST",
+                  header: getHeaders(agentState.token),
+                  data: { title, content: "[图片分享]", subforumId: forum.id, images: [src] },
+                  success: (res4) => {
+                    wx.hideLoading();
+                    if (res4.statusCode === 200 || res4.statusCode === 201) {
+                      wx.showToast({ title: "已发到大荒", icon: "success" });
+                    } else {
+                      wx.showToast({ title: (res4.data && res4.data.error) || "发帖失败", icon: "none" });
+                    }
+                  },
+                  fail: () => {
+                    wx.hideLoading();
+                    wx.showToast({ title: "发帖失败", icon: "none" });
+                  },
+                });
+              },
+            });
+          },
+        });
+      },
+      fail: () => wx.showToast({ title: "获取板块失败", icon: "none" }),
+    });
+  },
+
+  shareImageToRoom(src) {
+    const rooms = Object.values(app.globalData.messengerRooms || {}).filter((r) => !r.dissolved).slice(0, 6);
+    if (!rooms.length) {
+      wx.showToast({ title: "暂无群聊/私聊", icon: "none" });
+      return;
+    }
+    const that = this;
+    wx.showActionSheet({
+      itemList: rooms.map((r) => r.name || `会话 ${r.roomId.slice(0, 6)}`),
+      success: (r) => {
+        const room = rooms[r.tapIndex];
+        const { serverUrl, agentState } = that.data;
+        wx.showLoading({ title: "发送中…", mask: true });
+        wx.request({
+          url: `${serverUrl}/api/matrix/client/v3/rooms/${encodeURIComponent(room.roomId)}/send/m.room.message`,
+          method: "POST",
+          header: getHeaders(agentState.token),
+          data: { msgtype: "m.image", body: "[图片]", images: [src] },
+          success: (res2) => {
+            wx.hideLoading();
+            if (res2.statusCode === 200) {
+              wx.showToast({ title: "已发送", icon: "success" });
+            } else {
+              wx.showToast({ title: (res2.data && res2.data.error) || "发送失败", icon: "none" });
+            }
+          },
+          fail: () => {
+            wx.hideLoading();
+            wx.showToast({ title: "发送失败", icon: "none" });
+          },
+        });
+      },
+    });
+  },
+
   triggerQuickCommand(e) {
     const cmd = e.currentTarget.dataset.cmd;
     this.setData({

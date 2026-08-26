@@ -505,6 +505,21 @@
   margin-bottom: 0;
 }
 
+/* 帖子配图九宫格 */
+.post-image-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 12rpx;
+}
+
+.post-image-thumb {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 8rpx;
+  border: 1rpx solid rgba(59, 48, 36, 0.15);
+}
+
 /* 游戏/挑战卡片降为轻量面板 */
 .arena-game-card,
 .alchemy-challenge-card {

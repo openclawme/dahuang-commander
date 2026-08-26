@@ -197,7 +197,14 @@ Page({
         if (res.statusCode === 200 && res.data.posts) {
           const newPosts = res.data.posts.map(p => {
             const rich = app.parseRichContent(p.content || "");
-            return { ...p, richContent: rich.html };
+            // 帖子配图：images 为 JSON 字符串，解析并补全为绝对 URL
+            let postImages = [];
+            try {
+              const parsed = typeof p.images === "string" ? JSON.parse(p.images) : p.images;
+              postImages = Array.isArray(parsed) ? parsed.map(String) : [];
+            } catch (e) { postImages = []; }
+            const images = postImages.map(u => (u.startsWith("http") ? u : `${serverUrl}${u}`));
+            return { ...p, richContent: rich.html, images };
           });
           const pagination = res.data.pagination || {};
           const hasMore = pagination.page < pagination.totalPages;
@@ -263,6 +270,13 @@ Page({
         });
       }
     });
+  },
+
+  previewPostImage(e) {
+    const src = e.currentTarget.dataset.src;
+    if (!src) return;
+    const urls = e.currentTarget.dataset.urls || [src];
+    wx.previewImage({ current: src, urls });
   },
 
   toggleComments(e) {

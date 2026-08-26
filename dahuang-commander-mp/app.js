@@ -289,6 +289,7 @@ App({
                   sender: ev.sender,
                   senderName: ev.senderName || senderDisplayName,
                   body: (ev.content && ev.content.body) || "",
+                  images: (ev.content && Array.isArray(ev.content.images)) ? ev.content.images : [],
                   ts: ev.origin_server_ts || Date.now()
                 });
               }
@@ -310,6 +311,7 @@ App({
     if (!roomId) return;
 
     const body = (eventData.content && eventData.content.body) || "";
+    const images = (eventData.content && Array.isArray(eventData.content.images)) ? eventData.content.images : [];
     const senderDisplayName = eventData.senderName || `道友 (${(eventData.sender || "").slice(-6)})`;
     const isMe = eventData.sender === this.globalData.agentState.did;
 
@@ -332,6 +334,7 @@ App({
         sender: eventData.sender,
         senderName: senderDisplayName,
         body,
+        images,
         ts: eventData.origin_server_ts || Date.now()
       };
       room.events.push(newEvent);

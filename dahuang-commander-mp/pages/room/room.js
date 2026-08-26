@@ -108,6 +108,7 @@ Page({
     });
 
     const myDid = app.globalData.agentState.did;
+    const { serverUrl } = app.globalData;
     const messages = (room.events || []).map(msg => {
       const isMe = msg.sender === myDid;
       const date = new Date(msg.ts);
@@ -125,7 +126,9 @@ Page({
         isRich,
         richContent: rich.html,
         videoUrl: rich.videoUrl,
-        videoPoster: rich.videoPoster
+        videoPoster: rich.videoPoster,
+        // 图片消息：相对地址补全为绝对 URL（发送时存的 /api/uploads/x.jpg）
+        images: (msg.images || []).map((u) => (u.startsWith("http") ? u : `${serverUrl}${u}`))
       };
     });
 
@@ -135,6 +138,13 @@ Page({
     }, () => {
       this.scrollToBottom();
     });
+  },
+
+  previewRoomImage(e) {
+    const src = e.currentTarget.dataset.src;
+    if (!src) return;
+    const urls = e.currentTarget.dataset.urls || [src];
+    wx.previewImage({ current: src, urls });
   },
 
   onNewRoomMessage(data) {

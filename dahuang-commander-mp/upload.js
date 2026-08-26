@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '发送键改主题印章红渐变，与微信式输入栏布局融合';
+const desc = '对话图片可发到大荒：长按图片发帖/发群，房间与大荒论坛渲染图片';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
