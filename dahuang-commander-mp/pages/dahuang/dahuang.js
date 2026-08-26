@@ -273,9 +273,13 @@ Page({
   },
 
   previewPostImage(e) {
-    const src = e.currentTarget.dataset.src;
-    if (!src) return;
-    const urls = e.currentTarget.dataset.urls || [src];
+    const rawSrc = e.currentTarget.dataset.src;
+    if (!rawSrc) return;
+    const serverUrl = this.data.serverUrl || (app.globalData && app.globalData.serverUrl) || "https://dahuang.land";
+    const toAbs = (u) => (u && (u.startsWith("http") || u.startsWith("wxfile:")) ? u : `${serverUrl}${u && u.startsWith("/") ? "" : "/"}${u || ""}`);
+    const src = toAbs(rawSrc);
+    const rawUrls = e.currentTarget.dataset.urls || [rawSrc];
+    const urls = rawUrls.map(toAbs);
     wx.previewImage({ current: src, urls });
   },
 
