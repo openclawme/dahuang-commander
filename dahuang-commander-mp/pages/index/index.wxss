@@ -1341,7 +1341,7 @@
 }
 
 .wechat-submit-btn {
-  background: #07c160;
+  background: linear-gradient(135deg, #9e2a2b, #be123c);
   color: #ffffff;
   font-size: 30rpx;
   height: 68rpx;
@@ -1358,7 +1358,7 @@
 }
 
 .wechat-submit-btn:active {
-  background: #06ad56;
+  opacity: 0.85;
 }
 
 /* ==========================================================================

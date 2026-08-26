@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '输入栏参考微信设计：灰底白色输入域、＋图标内置、微信绿发送键、大图预览缩略图';
+const desc = '发送键改主题印章红渐变，与微信式输入栏布局融合';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
