@@ -258,6 +258,10 @@ Page({
         // （Canvas 图正常绘制，但源码文本漏在图上边）
         const hasChartMarkup = /<svg|application\/dahuang-chart/i.test(m.content || "") || (m.charts && m.charts.length > 0);
         if (hasChartMarkup) isRich = true;
+        // Markdown 标记（加粗/行内代码/列表符号）：走 rich-text 分支，
+        // 否则纯文本分支会把 **、- 等原始符号直出（视觉/推理模型回复常见）
+        const hasMdMarkers = /\*\*|`[^`]*`|^[-*+]\s+/m.test(m.content || "");
+        if (hasMdMarkers) isRich = true;
         richContent = rich.html;
       }
       

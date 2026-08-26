@@ -944,7 +944,12 @@ App({
       .replace(/<svg[\s\S]*?<\/svg>/gi, "");
 
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #d97706; font-weight: bold;">$1</strong>');
+    // 未配对的 **（模型偶尔输出不闭合的加粗）直接清掉，不残留原始符号
+    html = html.replace(/\*\*/g, "");
     html = html.replace(/`(.*?)`/g, '<code style="background: rgba(158,42,43, 0.06); color: #9e2a2b; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 22rpx; border: 1px solid rgba(158,42,43, 0.15);">$1</code>');
+    // Markdown 无序列表（行首 - / * / +）→ 圆点列表：视觉/推理模型回复常用 MD 列表，
+    // 不转换会原样显示 "- xxx" / "* xxx" 的原始符号
+    html = html.replace(/^(\s*)[-*+]\s+/gm, "$1• ");
 
     // 纯文本换行：未包含块级标签时，把 \n 转为 <br/>，避免文字挤成一行
     if (html.indexOf("<div") === -1 && html.indexOf("<p") === -1 && html.indexOf("<br") === -1 && html.indexOf("<table") === -1) {

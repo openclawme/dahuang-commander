@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '图片地址规范化统一：渲染与预览共用 toAbsUrl（协议兼容）';
+const desc = '视觉回复 Markdown 渲染：加粗/列表符号转换，不再显示原始 * 和 -';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
