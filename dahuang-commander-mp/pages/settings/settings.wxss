@@ -204,9 +204,9 @@
   font-size: 40rpx;
   font-weight: bold;
   font-family: "Noto Serif SC", "Songti SC", serif;
-  color: #5b7a8c;
-  background: rgba(91, 122, 140, 0.08);
-  border: 1rpx solid rgba(91, 122, 140, 0.3);
+  color: #9e2a2b;
+  background: rgba(158, 42, 43, 0.06);
+  border: 1rpx solid rgba(158, 42, 43, 0.3);
   border-radius: 20rpx;
   margin-bottom: 20rpx;
 }
@@ -255,9 +255,9 @@
   font-size: 40rpx;
   font-weight: bold;
   font-family: "Noto Serif SC", "Songti SC", serif;
-  color: #5b7a8c;
-  background: rgba(91, 122, 140, 0.08);
-  border: 1rpx solid rgba(91, 122, 140, 0.3);
+  color: #9e2a2b;
+  background: rgba(158, 42, 43, 0.06);
+  border: 1rpx solid rgba(158, 42, 43, 0.3);
   border-radius: 20rpx;
   margin-bottom: 20rpx;
 }
@@ -289,15 +289,19 @@
 .import-submit-btn {
   width: 100%;
   margin-top: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 76rpx;
-  line-height: 76rpx;
-  font-size: 24rpx;
+  padding: 0;
+  font-size: 28rpx;
   font-weight: bold;
   color: #ffffff;
-  background: #5b7a8c;
+  background: linear-gradient(135deg, #9e2a2b, #be123c);
   border: none;
   border-radius: 12rpx;
-  box-shadow: 0 6rpx 16rpx -8rpx rgba(91, 122, 140, 0.4);
+  line-height: 1;
+  box-shadow: 0 6rpx 16rpx -8rpx rgba(158, 42, 43, 0.35);
 }
 
 .import-submit-btn::after {
@@ -439,16 +443,19 @@
 
 .form-cancel-btn {
   flex: 1;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 76rpx;
+  padding: 0;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #6b5b4a;
   background: #ffffff;
   border: 1rpx solid rgba(59, 48, 36, 0.15);
-  color: #6b5b4a;
-  font-size: 24rpx;
-  font-weight: bold;
-  height: 76rpx;
-  line-height: 76rpx;
   border-radius: 12rpx;
-  text-align: center;
-  margin: 0;
+  line-height: 1;
 }
 
 .form-cancel-btn::after {
@@ -462,15 +469,19 @@
 .form-submit-btn {
   flex: 1;
   margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 76rpx;
-  line-height: 76rpx;
-  font-size: 24rpx;
+  padding: 0;
+  font-size: 28rpx;
   font-weight: bold;
   color: #ffffff;
-  background: #5b7a8c;
+  background: linear-gradient(135deg, #9e2a2b, #be123c);
   border: none;
   border-radius: 12rpx;
-  box-shadow: 0 6rpx 16rpx -8rpx rgba(91, 122, 140, 0.4);
+  line-height: 1;
+  box-shadow: 0 6rpx 16rpx -8rpx rgba(158, 42, 43, 0.35);
 }
 
 .form-submit-btn::after {
@@ -599,14 +610,18 @@
 
 .hero-copy-btn {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 76rpx;
-  line-height: 76rpx;
-  font-size: 24rpx;
+  padding: 0;
+  font-size: 28rpx;
   font-weight: bold;
-  color: #5b7a8c;
-  background: rgba(91, 122, 140, 0.1);
-  border: 1rpx solid rgba(91, 122, 140, 0.35);
+  color: #9e2a2b;
+  background: rgba(158, 42, 43, 0.06);
+  border: 1rpx solid rgba(158, 42, 43, 0.3);
   border-radius: 12rpx;
+  line-height: 1;
   margin: 0;
 }
 
@@ -618,15 +633,19 @@
 
 .hero-logout-btn {
   flex: 1;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 76rpx;
-  line-height: 76rpx;
-  font-size: 24rpx;
+  padding: 0;
+  font-size: 28rpx;
   font-weight: bold;
   color: #6b5b4a;
   background: #ffffff;
   border: 1rpx solid rgba(59, 48, 36, 0.15);
   border-radius: 12rpx;
-  margin: 0;
+  line-height: 1;
 }
 
 .hero-logout-btn::after { border: none; }
@@ -651,7 +670,7 @@
 }
 
 .section-header .section-title {
-  border-left: 6rpx solid #5b7a8c;
+  border-left: 6rpx solid #9e2a2b;
   padding-left: 14rpx;
 }
 
@@ -788,15 +807,18 @@
 
 .server-save-btn {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 64rpx;
-  line-height: 64rpx;
   padding: 0 28rpx;
   font-size: 24rpx;
   font-weight: bold;
   color: #ffffff;
-  background: #5b7a8c;
+  background: linear-gradient(135deg, #9e2a2b, #be123c);
   border-radius: 10rpx;
   border: none;
+  line-height: 1;
   margin: 0;
 }
 
@@ -806,28 +828,34 @@
 
 /* 日志区块 */
 .logs-toggle-btn-settings {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 24rpx;
   padding: 0 24rpx;
   height: 64rpx;
-  line-height: 64rpx;
   background: #ffffff;
   border: 1rpx solid rgba(59, 48, 36, 0.15);
   color: #6b5b4a;
   border-radius: 10rpx;
+  line-height: 1;
   margin: 0;
 }
 
 .logs-toggle-btn-settings::after { border: none; }
 
 .logs-clear-btn-settings {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 24rpx;
   padding: 0 24rpx;
   height: 64rpx;
-  line-height: 64rpx;
   background: #ffffff;
   border: 1rpx solid rgba(59, 48, 36, 0.15);
   color: #6b5b4a;
   border-radius: 10rpx;
+  line-height: 1;
   margin: 0;
 }
 
@@ -893,16 +921,7 @@
 .hero-copy-btn,
 .hero-logout-btn,
 .import-submit-btn,
-.server-save-btn,
-.logs-toggle-btn-settings,
-.logs-clear-btn-settings,
-.form-cancel-btn,
-.form-submit-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: normal;
-}
+
 /* 遥测日志折叠区：标题独占一行，按钮完整展示 */
 .logs-setting-row {
   width: 100%;
@@ -1081,10 +1100,15 @@
 .pwd-cancel-btn,
 .pwd-save-btn {
   width: 46%;
-  border-radius: 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 76rpx;
+  padding: 0;
+  border-radius: 12rpx;
   font-size: 28rpx;
   font-weight: bold;
-  line-height: 2.6;
+  line-height: 1;
 }
 .pwd-cancel-btn {
   background: #ffffff;
@@ -1092,7 +1116,7 @@
   border: 1rpx solid rgba(59, 48, 36, 0.15);
 }
 .pwd-save-btn {
-  background: #5b7a8c;
+  background: linear-gradient(135deg, #9e2a2b, #be123c);
   color: #ffffff;
   border: none;
 }
@@ -1163,15 +1187,19 @@
 .budget-save-btn {
   width: 100%;
   margin-top: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 76rpx;
-  line-height: 76rpx;
-  font-size: 24rpx;
+  padding: 0;
+  font-size: 28rpx;
   font-weight: bold;
   color: #ffffff;
-  background: #5b7a8c;
+  background: linear-gradient(135deg, #9e2a2b, #be123c);
   border: none;
   border-radius: 12rpx;
-  box-shadow: 0 6rpx 16rpx -8rpx rgba(91, 122, 140, 0.4);
+  line-height: 1;
+  box-shadow: 0 6rpx 16rpx -8rpx rgba(158, 42, 43, 0.35);
 }
 .budget-save-btn::after {
   border: none;

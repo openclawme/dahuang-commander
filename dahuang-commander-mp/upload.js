@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '法印页三张记忆入口卡去红框；全页按钮统一两档（青灰主/纸白次）';
+const desc = '法印页按钮统一排版对齐，主按钮朱砂回归，标题条与方印朱砂点缀';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
