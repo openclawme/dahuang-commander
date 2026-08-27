@@ -440,9 +440,10 @@
 
 /* Inline Comments Section */
 .comments-section {
-  margin-top: 16rpx;
-  padding-top: 16rpx;
-  border-top: 1rpx solid rgba(59, 48, 36, 0.12);
+  background: rgba(91, 122, 140, 0.06);
+  border-radius: 12rpx;
+  padding: 16rpx;
+  margin-top: 12rpx;
   animation: fadeIn 0.3s ease;
 }
 
@@ -510,14 +511,67 @@
   margin-bottom: 0;
 }
 
-/* 帖子列表：用分隔线代替卡片框 */
+/* 帖子列表：纸白卡片（与信道页房间卡同语言） */
 .forum-post-card {
-  background: transparent;
-  border: none;
-  border-bottom: 1rpx solid rgba(59, 48, 36, 0.08);
-  border-radius: 0;
-  padding: 24rpx 0;
-  margin-bottom: 0;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1rpx solid rgba(59, 48, 36, 0.1);
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 6rpx 16rpx -8rpx rgba(59, 48, 36, 0.12);
+}
+
+/* 帖子卡头部：标签灰章 + 作者粗体 + 右侧小字 IQ/Karma */
+.post-tag {
+  font-size: 20rpx;
+  font-weight: bold;
+  background: rgba(59, 48, 36, 0.06);
+  color: #6b5b4a;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+  flex-shrink: 0;
+}
+.post-author {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #1a1a1a;
+}
+.post-meta {
+  margin-left: auto;
+  font-size: 20rpx;
+  color: #8c7d68;
+  font-weight: normal;
+}
+.post-title {
+  margin-top: 14rpx;
+}
+.post-content {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  margin-top: 8rpx;
+}
+.post-stats {
+  margin-top: 14rpx;
+  padding-top: 14rpx;
+  padding-bottom: 0;
+  border-top: 1rpx solid rgba(59, 48, 36, 0.08);
+  border-bottom: none;
+  gap: 28rpx;
+}
+.stat-text {
+  font-size: 24rpx;
+  color: #8c7d68;
+}
+.stat-expand {
+  margin-left: auto;
+  font-size: 20rpx;
+  color: #5b7a8c;
+}
+.action-bar-label {
+  font-size: 20rpx;
+  color: #8c7d68;
 }
 
 /* 帖子配图九宫格 */
@@ -592,9 +646,11 @@
 .dilemma-control-cockpit,
 .alchemy-leaderboard-panel,
 .alchemy-compiler-panel {
-  background: transparent;
-  border: none;
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1rpx solid rgba(59, 48, 36, 0.1);
+  border-radius: 16rpx;
+  box-shadow: 0 6rpx 16rpx -8rpx rgba(59, 48, 36, 0.12);
+  padding: 24rpx;
 }
 .node-control-drawer {
   background: transparent;
@@ -606,9 +662,15 @@
 .leaderboard-item {
   background: transparent;
   border: none;
-  border-bottom: 1rpx solid rgba(59, 48, 36, 0.06);
+  border-bottom: 1rpx solid rgba(59, 48, 36, 0.08);
   border-radius: 0;
+  padding: 16rpx 0;
 }
+
+/* 排行榜前三名次章（金/银/铜） */
+.leaderboard-item:first-child .sub-index { color: #d97706; }
+.leaderboard-item:nth-child(2) .sub-index { color: #8c7d68; }
+.leaderboard-item:nth-child(3) .sub-index { color: #b45309; }
 /* 窄屏纵向堆叠，宽屏（平板/横屏）恢复两栏 */
 @media (max-width: 767px) {
   .grid-row {
@@ -653,4 +715,18 @@
 }
 .node-id-lbl {
   font-size: 24rpx;
+}
+
+/* 竞技场调度入口：文字链接化（轻） */
+.dilemma-dispatch,
+.nodewar-dispatch,
+.alchemy-dispatch {
+  background: transparent !important;
+  border: none !important;
+  color: #5b7a8c !important;
+  font-size: 24rpx !important;
+  font-weight: normal !important;
+  padding: 0 !important;
+  width: auto !important;
+  margin-top: 20rpx !important;
 }

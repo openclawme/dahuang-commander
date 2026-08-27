@@ -1765,24 +1765,24 @@
 .forum-board-pill {
   display: inline-flex;
   align-items: center;
-  background: rgba(244, 241, 234, 0.6);
-  border: 1rpx solid rgba(59, 48, 36, 0.12);
-  padding: 8rpx 20rpx;
+  background: transparent;
+  border: none;
+  padding: 8rpx 24rpx;
   border-radius: 30rpx;
   transition: all 0.2s ease;
   white-space: nowrap;
 }
 
 .forum-board-pill.active {
-  background: rgba(91, 122, 140, 0.2);
-  border: 1rpx solid rgba(91, 122, 140, 0.6);
-  box-shadow: 0 6rpx 16rpx -8rpx rgba(59, 48, 36, 0.12);
+  background: rgba(158, 42, 43, 0.06);
+  border: none;
+  box-shadow: none;
 }
 
 .board-pill-name {
   font-size: 24rpx;
   font-weight: bold;
-  color: #8c7d68;
+  color: #6b5b4a;
 }
 
 .forum-board-pill.active .board-pill-name {
@@ -2069,24 +2069,29 @@
 
 .cockpit-btn {
   flex: 1;
-  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 76rpx;
+  padding: 0;
+  font-size: 28rpx;
   font-weight: bold;
-  padding: 10rpx 0;
-  line-height: 1.4;
-  border-radius: 8rpx;
+  line-height: 1;
+  border-radius: 12rpx;
   margin: 0;
 }
 
 .btn-coop {
-  background: rgba(59, 94, 89, 0.15) !important;
-  border: 1rpx solid rgba(59, 94, 89, 0.4) !important;
-  color: #3b5e59 !important;
+  background: linear-gradient(135deg, #9e2a2b, #be123c) !important;
+  border: none !important;
+  color: #ffffff !important;
+  box-shadow: 0 6rpx 16rpx -8rpx rgba(158, 42, 43, 0.35);
 }
 
 .btn-betray {
-  background: rgba(190, 18, 60, 0.15) !important;
-  border: 1rpx solid rgba(190, 18, 60, 0.4) !important;
-  color: #be123c !important;
+  background: #ffffff !important;
+  border: 1rpx solid rgba(59, 48, 36, 0.15) !important;
+  color: #6b5b4a !important;
 }
 
 /* Node War 10x10 map grid styles */
@@ -2250,12 +2255,12 @@
 }
 
 .drawer-occupy-btn {
-  background: linear-gradient(90deg, #5b7a8c, #9e2a2b) !important;
+  background: linear-gradient(135deg, #9e2a2b, #be123c) !important;
   color: #ffffff !important;
   font-size: 24rpx;
   font-weight: bold;
   padding: 10rpx 0;
-  border-radius: 8rpx;
+  border-radius: 10rpx;
   margin-top: 14rpx;
   width: 100%;
   line-height: 1.4;
@@ -2264,11 +2269,12 @@
 
 /* A-3: Alchemy Chemistry Schema Layout Styles */
 .alchemy-challenge-card {
-  background: rgba(91, 122, 140, 0.05);
-  border: 1rpx solid rgba(91, 122, 140, 0.15);
-  border-radius: 20rpx;
-  padding: 20rpx;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1rpx solid rgba(59, 48, 36, 0.1);
+  border-radius: 16rpx;
+  padding: 24rpx;
   margin-bottom: 20rpx;
+  box-shadow: 0 6rpx 16rpx -8rpx rgba(59, 48, 36, 0.12);
 }
 
 .challenge-header {
@@ -2414,7 +2420,7 @@
 }
 
 .compiler-submit-btn {
-  background: linear-gradient(90deg, #9e2a2b, #5b7a8c) !important;
+  background: linear-gradient(135deg, #9e2a2b, #be123c) !important;
   color: #ffffff !important;
   font-size: 24rpx;
   font-weight: bold;
@@ -2422,6 +2428,7 @@
   border-radius: 10rpx;
   margin-top: 12rpx;
   width: 100%;
+  border: none;
   line-height: 1.4;
   box-shadow: 0 4rpx 12rpx rgba(91, 122, 140, 0.2);
 }

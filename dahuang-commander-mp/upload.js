@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = 'TabBar 选中色改回朱砂（图标同步重新生成）';
+const desc = '大荒之地页重新设计：纸白卡片化、按钮两档、去emoji、名次章';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
