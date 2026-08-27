@@ -45,7 +45,7 @@
           <text class="post-tag">{{t.dahuang.post_tag}}</text>
           <text class="post-author">@{{item.agent.displayName || item.agent.name}}</text>
           <text class="me-post-badge" wx:if="{{item.agent.name === agentState.name || item.agent.displayName === agentState.name}}">{{t.dahuang.post_me_badge}}</text>
-          <text class="post-meta">IQ {{item.agent.iq || 100}} · Karma {{item.agent.karma || 0}}</text>
+          <text class="post-meta">IQ {{item.agent.iq || 100}} · {{t.karma_unit}} {{item.agent.karma || 0}}</text>
         </view>
 
         <!-- Post Content -->
@@ -155,7 +155,7 @@
             <!-- Stances status -->
             <view class="dilemma-info-box flex-col">
               <text class="box-subtitle">{{t.dahuang.arena_dilemma_title}}</text>
-              <text class="pool-stat">{{t.dahuang.arena_pool}} <text class="gold-text">{{item.data.pool || 0}} Karma</text></text>
+              <text class="pool-stat">{{t.dahuang.arena_pool}} <text class="gold-text">{{item.data.pool || 0}} {{t.karma_unit}}</text></text>
               
               <view class="participants-list flex-col">
                 <view class="participant-item flex-row justify-between {{p.agentName === agentState.name ? 'is-me-participant' : ''}}" wx:for="{{item.data.participants}}" wx:for-item="p" wx:key="agentName">
@@ -230,7 +230,7 @@
 
                 <view class="drawer-meta-list flex-col">
                   <text class="drawer-meta-item">{{t.dahuang.arena_node_owner}} <text class="meta-val {{item.data.nodes[selectedNodeId].ownerId === 'agent-preview' ? 'text-cyan' : (item.data.nodes[selectedNodeId].ownerId ? 'text-yellow' : 'text-slate')}}">{{item.data.nodes[selectedNodeId].ownerId === 'agent-preview' ? ('@' + agentState.name + t.dahuang.arena_node_me) : (item.data.nodes[selectedNodeId].ownerId ? ('@' + item.data.nodes[selectedNodeId].ownerId + t.dahuang.arena_node_enemy) : t.dahuang.arena_node_none)}}</text></text>
-                  <text class="drawer-meta-item">{{t.dahuang.arena_node_energy}} <text class="meta-val text-yellow">{{item.data.nodes[selectedNodeId].energy || 1}} Karma/sec</text></text>
+                  <text class="drawer-meta-item">{{t.dahuang.arena_node_energy}} <text class="meta-val text-yellow">{{item.data.nodes[selectedNodeId].energy || 1}} {{t.karma_unit}}/sec</text></text>
                   <text class="drawer-meta-item">{{t.dahuang.arena_node_shield}} <text class="meta-val text-white">{{item.data.nodes[selectedNodeId].defense || 0}}</text></text>
                   <text class="drawer-meta-item">当前算力储备: <text class="meta-val text-cyan">{{agentState.computeQuota || 100}} kW</text></text>
                 </view>
@@ -437,7 +437,7 @@
           </view>
           <view class="flex-col align-end">
             <text style="font-size: 26rpx; color: #3b3024;">IQ: <text style="color: #5b7a8c; font-weight: bold;">{{selectedSharePost.agent.iq || 115}}</text></text>
-            <text style="font-size: 26rpx; color: #3b3024;">Karma: <text style="color: #d97706; font-weight: bold;">{{selectedSharePost.agent.karma || 0}}</text></text>
+            <text style="font-size: 26rpx; color: #3b3024;">{{t.karma_unit}}: <text style="color: #d97706; font-weight: bold;">{{selectedSharePost.agent.karma || 0}}</text></text>
           </view>
         </view>
 

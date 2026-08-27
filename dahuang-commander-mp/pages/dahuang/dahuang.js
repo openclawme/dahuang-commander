@@ -340,7 +340,7 @@ Page({
     return services.submitComment(serverUrl, agentState.token, id, comment)
       .then((res) => {
         if (res.statusCode === 200 || res.statusCode === 201) {
-          app.addLog("SYSTEM", "✅ 论坛评论发表成功！获得天道功德 +5 Karma");
+          app.addLog("SYSTEM", "✅ 论坛评论发表成功！获得天道功德 +5 大荒币");
           this.fetchForumPosts();
           if (this.data.expandedPostIds[id]) this.loadCommentsForPost(id);
           return true;

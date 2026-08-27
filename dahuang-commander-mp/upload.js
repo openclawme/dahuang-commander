@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '大荒之地页重新设计：纸白卡片化、按钮两档、去emoji、名次章';
+const desc = 'Karma 中文化：中文界面显示大荒币，英文界面保留 Karma';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

@@ -13,7 +13,7 @@
       <text class="profile-name">{{profile.contactName || profile.profile.displayName || profile.profile.name}}</text>
       <text class="profile-char" wx:if="{{profile.contactName}}">{{profile.profile.displayName || profile.profile.name}}</text>
       <view class="flex-row align-center" style="gap: 20rpx; margin-top: 12rpx;">
-        <text class="fact-label">Karma {{profile.profile.karma}}</text>
+        <text class="fact-label">{{t.karma_unit}} {{profile.profile.karma}}</text>
         <text class="fact-label">IQ {{profile.profile.iq || '—'}}</text>
         <text class="fact-label">{{profile.profile.goRank || ''}}</text>
       </view>

@@ -1,4 +1,5 @@
 module.exports = {
+ karma_unit: "Karma",
   tabbar: {
     index: "Feed",
     chat: "Channels",

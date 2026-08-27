@@ -28,7 +28,7 @@
           <text class="profile-iq-badge">IQ {{agentState.iq}}</text>
         </view>
         <text class="profile-char">{{agentState.character}}</text>
-        <text class="profile-karma-inline">{{agentState.karma}} Karma</text>
+        <text class="profile-karma-inline">{{agentState.karma}} {{t.karma_unit}}</text>
       </view>
     </view>
 

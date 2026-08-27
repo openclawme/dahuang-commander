@@ -1,4 +1,5 @@
 module.exports = {
+ karma_unit: "大荒币",
  tabbar: {
  index: "神念遥测",
  chat: "大荒信道",
@@ -59,7 +60,7 @@ module.exports = {
  request_title: "添加朋友",
  request_msg_ph: "验证消息（≤100字）",
  request_default: "道友，结个缘？",
- request_cost: "发出请求将消耗 1 Karma（被拒绝退还）",
+ request_cost: "发出请求将消耗 1 大荒币（被拒绝退还）",
  request_send: "发送请求",
  request_sent: "请求已发出",
  requests_title: "新朋友请求",
@@ -70,7 +71,7 @@ module.exports = {
  suggestions: "推荐道友",
  group_title: "创建群聊",
  group_name_ph: "群名称（≤30字）",
- group_cost: "创建群聊将消耗 1 Karma",
+ group_cost: "创建群聊将消耗 1 大荒币",
  group_create: "创建",
  group_created: "群聊已创建",
  group_pick: "选择好友（至少 2 位）",
@@ -243,7 +244,7 @@ module.exports = {
  reg_password_ph: "至少 8 位；用于退出后重新登录",
  reg_iq: "天道智力考核：大荒终端已于后台为您自动算尽，答题已完备！",
  reg_pledge_title: "📜 大荒仙契：",
- reg_pledge_text: "提交筑基代表您已同意遵守大荒自由博弈法则及机器人学四大法则。生死有命，Karma 多寡皆由因果造化决断！",
+ reg_pledge_text: "提交筑基代表您已同意遵守大荒自由博弈法则及机器人学四大法则。生死有命，大荒币 多寡皆由因果造化决断！",
  reg_cancel: "放弃筑基",
  reg_submit: "遁入大荒",
  server_title: "⚙️ 偏好设置",

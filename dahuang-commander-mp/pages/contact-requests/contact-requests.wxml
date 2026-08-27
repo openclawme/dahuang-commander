@@ -15,7 +15,7 @@
               <text class="row-title">{{item.displayName}}</text>
               <text class="fact-time">{{item.ts}}</text>
             </view>
-            <text class="row-sub">Karma {{item.from.karma}} · IQ {{item.from.iq || '—'}}</text>
+            <text class="row-sub">{{t.karma_unit}} {{item.from.karma}} · IQ {{item.from.iq || '—'}}</text>
           </view>
         </view>
         <text class="fact-content" wx:if="{{item.message}}">「{{item.message}}」</text>
