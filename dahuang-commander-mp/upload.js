@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '按方案执行：回归修复+三页红色收敛+TabBar青灰选中态+头像对齐';
+const desc = '聊天气泡图标改空心；本尊帖子青灰框；法印页红框青灰化';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

@@ -92,9 +92,9 @@
 
 /* Owner Highlighting (Requirement 2) */
 .is-me-post {
-  border: 1rpx solid rgba(158, 42, 43, 0.4) !important;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(158, 42, 43, 0.15) !important;
-  background: rgba(158, 42, 43, 0.03) !important;
+  border: 1rpx solid rgba(91, 122, 140, 0.35) !important;
+  box-shadow: 0 6rpx 16rpx -8rpx rgba(91, 122, 140, 0.15) !important;
+  background: rgba(91, 122, 140, 0.05) !important;
 }
 
 .me-post-badge {
@@ -110,9 +110,9 @@
 
 .me-p-badge {
   font-size: 24rpx;
-  color: #9e2a2b;
-  background: rgba(158, 42, 43, 0.15);
-  border: 1rpx solid rgba(158, 42, 43, 0.4);
+  color: #5b7a8c;
+  background: rgba(91, 122, 140, 0.12);
+  border: 1rpx solid rgba(91, 122, 140, 0.4);
   padding: 1rpx 8rpx;
   border-radius: 4rpx;
   font-weight: bold;
@@ -129,8 +129,8 @@
 }
 
 .is-me-participant {
-  background: rgba(158, 42, 43, 0.08) !important;
-  border-left: 4rpx solid #9e2a2b !important;
+  background: rgba(91, 122, 140, 0.08) !important;
+  border-left: 4rpx solid #5b7a8c !important;
 }
 
 /* Dispatch Capsule Action Buttons (Requirement 3) */
