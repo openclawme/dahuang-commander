@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '法印页按钮统一排版对齐，主按钮朱砂回归，标题条与方印朱砂点缀';
+const desc = 'TabBar 选中色改回朱砂（图标同步重新生成）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
