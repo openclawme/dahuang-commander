@@ -632,6 +632,10 @@ Page({
     });
   },
 
+  openRebates() {
+    wx.navigateTo({ url: "/pages/rebates/rebates" });
+  },
+
   openMemory() {
     wx.navigateTo({ url: "/pages/memory/memory" });
   },
