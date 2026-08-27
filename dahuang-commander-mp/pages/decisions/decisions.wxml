@@ -5,7 +5,7 @@
 
   <block wx:else>
     <view class="settings-list" wx:if="{{decisions.length > 0}}">
-      <view class="maint-card flex-col" wx:for="{{decisions}}" wx:key="id">
+      <view class="maint-card flex-col" wx:for="{{decisions}}" wx:key="id" hover-class="hover-dim">
         <view class="flex-row align-center justify-between">
           <text class="maint-type">{{item.typeIcon}} {{item.title}}</text>
           <text class="fact-time">{{item.ts}}</text>
@@ -20,7 +20,7 @@
       </view>
     </view>
     <view class="empty-agents flex-col align-center" wx:else>
-      <text class="empty-icon">🍃</text>
+      <text class="empty-icon">闲</text>
       <text class="empty-text">{{t.decisions.empty}}</text>
     </view>
   </block>
@@ -29,7 +29,7 @@
 <!-- 答复浮层 -->
 <view class="form-overlay" wx:if="{{answerVisible}}" bindtap="closeAnswer">
   <view class="form-card" catchtap="noop">
-    <text class="form-title">✍️ {{answerTarget.title}}</text>
+    <text class="form-title">{{answerTarget.title}}</text>
     <textarea class="form-textarea" placeholder="{{t.decisions.answer_ph}}" placeholder-class="form-ph" value="{{answerText}}" bindinput="onAnswerInput" maxlength="200"></textarea>
     <text class="cost-note">{{t.decisions.relay_hint}}</text>
     <view class="flex-row justify-between" style="margin-top: 20rpx;">

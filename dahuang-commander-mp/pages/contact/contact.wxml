@@ -54,11 +54,11 @@
       <view class="section-header"><text class="section-title">{{t.memory.facts_title}}</text></view>
       <view class="settings-list">
         <view class="agent-row flex-row align-center" bindtap="toggleField" data-field="pinned" hover-class="row-hover">
-          <text class="register-row-text" style="font-weight: normal;">📌 {{profile.pinned ? t.contacts.unpin : t.contacts.pin}}</text>
+          <text class="register-row-text" style="font-weight: normal;">顶 {{profile.pinned ? t.contacts.unpin : t.contacts.pin}}</text>
           <text class="row-arrow">{{profile.pinned ? '✓' : '›'}}</text>
         </view>
         <view class="agent-row flex-row align-center" bindtap="toggleField" data-field="favorite" hover-class="row-hover">
-          <text class="register-row-text" style="font-weight: normal;">⭐ {{profile.favorite ? t.contacts.unfavorite : t.contacts.favorite}}</text>
+          <text class="register-row-text" style="font-weight: normal;">星 {{profile.favorite ? t.contacts.unfavorite : t.contacts.favorite}}</text>
           <text class="row-arrow">{{profile.favorite ? '✓' : '›'}}</text>
         </view>
       </view>

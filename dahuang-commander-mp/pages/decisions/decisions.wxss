@@ -12,7 +12,7 @@
   padding: 80rpx 0;
   text-align: center;
   color: #8c7d68;
-  font-size: 26rpx;
+  font-size: 24rpx;
 }
 
 .settings-list {
@@ -32,19 +32,19 @@
 }
 
 .maint-type {
-  font-size: 26rpx;
+  font-size: 24rpx;
   font-weight: bold;
   color: #9e2a2b;
 }
 
 .fact-time {
-  font-size: 22rpx;
+  font-size: 20rpx;
   color: #8c7d68;
 }
 
 .fact-content {
-  font-size: 26rpx;
-  color: #3b3024;
+  font-size: 24rpx;
+  color: #6b5b4a;
   line-height: 1.5;
   word-break: break-all;
 }
@@ -61,13 +61,13 @@
   padding: 0 24rpx;
   border-radius: 8rpx;
   background: #ffffff;
-  color: #3b3024;
+  color: #6b5b4a;
   border: 1rpx solid rgba(59, 48, 36, 0.2);
   margin: 0;
 }
 
 .maint-btn-primary {
-  background: #9e2a2b;
+  background: linear-gradient(135deg, #9e2a2b, #be123c);
   color: #ffffff;
   border-color: #9e2a2b;
 }
@@ -87,12 +87,23 @@
 }
 
 .empty-icon {
-  font-size: 60rpx;
-  margin-bottom: 10rpx;
+  width: 96rpx;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  font-weight: bold;
+  font-family: "Noto Serif SC", "Songti SC", serif;
+  color: #9e2a2b;
+  background: rgba(158, 42, 43, 0.06);
+  border: 1rpx solid rgba(158, 42, 43, 0.3);
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
 }
 
 .empty-text {
-  font-size: 26rpx;
+  font-size: 24rpx;
   color: #8c7d68;
   text-align: center;
 }
@@ -118,7 +129,7 @@
 }
 
 .form-title {
-  font-size: 30rpx;
+  font-size: 28rpx;
   font-weight: bold;
   color: #1a1a1a;
   display: block;
@@ -133,7 +144,7 @@
   border-radius: 10rpx;
   padding: 18rpx 20rpx;
   font-size: 28rpx;
-  color: #3b3024;
+  color: #6b5b4a;
   box-sizing: border-box;
 }
 
@@ -143,7 +154,7 @@
 
 .cost-note {
   display: block;
-  font-size: 22rpx;
+  font-size: 20rpx;
   color: #b45309;
   margin-top: 12rpx;
 }
@@ -164,7 +175,7 @@
 }
 
 .form-save-btn {
-  background: #9e2a2b;
+  background: linear-gradient(135deg, #9e2a2b, #be123c);
   color: #ffffff;
 }
 

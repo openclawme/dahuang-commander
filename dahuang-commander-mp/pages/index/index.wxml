@@ -3,7 +3,7 @@
   <view class="cyber-panel glow-cyan tab-pane-container chat-panel" style="{{keyboardHeight > 0 ? 'margin-bottom: ' + keyboardHeight + 'px;' : ''}}">
     <!-- 待主人决策横幅 -->
     <view class="decision-banner flex-row align-center" wx:if="{{pendingCount > 0}}" bindtap="openDecisions">
-      <text class="decision-banner-icon">📋</text>
+      <text class="decision-banner-icon">决</text>
       <text class="decision-banner-text">{{t.index.decisions_banner.replace('{count}', pendingCount)}}</text>
       <text class="decision-banner-arrow">›</text>
     </view>
@@ -21,7 +21,7 @@
           </view>
           <view class="error-banner flex-row align-center" wx:if="{{item.isError}}" style="margin-bottom: 8rpx; color: #be123c; font-size: 26rpx; font-weight: bold;">
             <icon type="warn" size="12" color="#be123c" style="margin-right: 8rpx;"></icon>
-            <text>⚠️ 天道推演中断 / 执行异常</text>
+            <text>天道推演中断 / 执行异常</text>
           </view>
           <block wx:if="{{item.isPending && (!item.tasks || item.tasks.length === 0) && (!item.content || item.content === '（智能体处理中...）')}}">
             <view class="pending-loader-container flex-row align-center">
@@ -92,14 +92,14 @@
             </view>
 
             <view class="fallback-action-box flex-row align-center justify-between" wx:if="{{item.autoFallbackTriggered}}" style="margin-top: 12rpx; padding: 10rpx 14rpx; background: rgba(217,119,6, 0.08); border: 1px solid rgba(217,119,6, 0.3); border-radius: 8rpx;">
-              <text style="font-size: 26rpx; color: #d97706;">⚡ 看门狗已自动归档超时任务（后台结果产出后会自动回填）</text>
+              <text style="font-size: 24rpx; color: #d97706;">看门狗已自动归档超时任务（后台结果产出后会自动回填）</text>
             </view>
           </view>
         </view>
       </view>
       
       <view class="empty-tasks flex-col align-center" wx:if="{{chatHistory.length === 0}}">
-        <text class="empty-icon">🧘</text>
+        <text class="empty-icon">言</text>
         <text class="empty-text">{{t.index.empty}}</text>
       </view>
     </scroll-view>
@@ -108,11 +108,11 @@
   <view class="message-menu-overlay" wx:if="{{messageMenu}}" bindtap="closeMessageMenu"></view>
   <view class="message-menu" wx:if="{{messageMenu}}" style="left: {{messageMenu.x}}px; top: {{messageMenu.y}}px;">
     <view class="message-menu-item" bindtap="quoteSelectedMessage">
-      <text class="message-menu-icon">↩️</text>
+      <text class="message-menu-icon">引</text>
       <text class="message-menu-text">引用</text>
     </view>
     <view class="message-menu-item" bindtap="copySelectedMessage">
-      <text class="message-menu-icon">📋</text>
+      <text class="message-menu-icon">复</text>
       <text class="message-menu-text">复制</text>
     </view>
   </view>
@@ -199,10 +199,10 @@
 
       <view class="modal-footer flex-row">
         <button class="modal-btn glow-red-btn" bindtap="resolveApproval" data-action="reject">
-          <text class="btn-icon">❌</text> {{t.index.approval_reject}}
+          {{t.index.approval_reject}}
         </button>
         <button class="modal-btn glow-emerald-btn" bindtap="resolveApproval" data-action="approve">
-          <text class="btn-icon">✅</text> {{t.index.approval_approve}}
+          {{t.index.approval_approve}}
         </button>
       </view>
     </view>

@@ -7,12 +7,12 @@
 
   <!-- 三段式分段器：会话 / 联系人 / 群组 -->
   <view class="segment-bar flex-row">
-    <view class="segment-item {{segment === 'chats' ? 'segment-active' : ''}}" bindtap="onSegmentTap" data-segment="chats">{{t.contacts.seg_chats}}</view>
-    <view class="segment-item {{segment === 'contacts' ? 'segment-active' : ''}}" bindtap="onSegmentTap" data-segment="contacts">
+    <view class="segment-item {{segment === 'chats' ? 'segment-active' : ''}}" bindtap="onSegmentTap" hover-class="hover-dim" data-segment="chats">{{t.contacts.seg_chats}}</view>
+    <view class="segment-item {{segment === 'contacts' ? 'segment-active' : ''}}" bindtap="onSegmentTap" hover-class="hover-dim" data-segment="contacts">
       {{t.contacts.seg_contacts}}
       <view class="segment-badge" wx:if="{{requestCount > 0}}">{{requestCount}}</view>
     </view>
-    <view class="segment-item {{segment === 'groups' ? 'segment-active' : ''}}" bindtap="onSegmentTap" data-segment="groups">{{t.contacts.seg_groups}}</view>
+    <view class="segment-item {{segment === 'groups' ? 'segment-active' : ''}}" bindtap="onSegmentTap" hover-class="hover-dim" data-segment="groups">{{t.contacts.seg_groups}}</view>
   </view>
 
   <!-- ===== 会话分段（原房间列表） ===== -->
@@ -48,7 +48,7 @@
       </view>
     </view>
     <view class="empty-state flex-col align-center" wx:else>
-      <text class="empty-art">🛰️</text>
+      <text class="empty-art">信</text>
       <text class="empty-title">{{t.chat.empty_title}}</text>
       <text class="empty-text">{{t.chat.empty_text}}</text>
       <view class="empty-action" bindtap="openAddFriend">＋ {{t.contacts.add_friend}}</view>
@@ -96,8 +96,8 @@
         <view class="room-info flex-col">
           <view class="flex-row align-center" style="gap: 10rpx;">
             <text class="room-name">{{item.displayName}}</text>
-            <text class="contact-pin-icon" wx:if="{{item.pinned}}">📌</text>
-            <text class="contact-fav-icon" wx:if="{{item.favorite}}">⭐</text>
+            <text class="contact-pin-icon" wx:if="{{item.pinned}}">顶</text>
+            <text class="contact-fav-icon" wx:if="{{item.favorite}}">星</text>
           </view>
           <text class="room-last-msg">{{item.lastMessagePreview || item.profile.description || ''}}</text>
         </view>
@@ -111,7 +111,7 @@
       </view>
     </view>
     <view class="empty-state flex-col align-center" wx:else>
-      <text class="empty-art">🈳</text>
+      <text class="empty-art">友</text>
       <text class="empty-text">{{t.contacts.contacts_empty}}</text>
       <view class="empty-action" bindtap="openAddFriend">＋ {{t.contacts.add_friend}}</view>
     </view>

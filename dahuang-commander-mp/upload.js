@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '视觉回复 Markdown 渲染：加粗/列表符号转换，不再显示原始 * 和 -';
+const desc = '全端 UI 统一：TabBar 线描图标、色彩/字号/阴影/圆角收敛、气泡分层、去 emoji 改文字方印';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

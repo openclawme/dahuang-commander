@@ -30,7 +30,7 @@
       <text class="section-desc maint-boundary-note">{{t.memory.maint_boundary}}</text>
 
       <view class="settings-list" wx:if="{{proposals.length > 0}}">
-        <view class="maint-card flex-col" wx:for="{{proposals}}" wx:key="id">
+        <view hover-class="hover-dim" class="maint-card flex-col" wx:for="{{proposals}}" wx:key="id">
           <view class="flex-row align-center justify-between">
             <text class="maint-type">{{item.type === 'CONFLICT' ? '⚠️ ' + t.memory.maint_conflict : item.type === 'MERGE' ? '🔀 ' + t.memory.maint_merge : item.type === 'PROMOTE' ? '⬆️ ' + t.memory.maint_promote : '🗜️ ' + t.memory.maint_compress}}</text>
             <text class="fact-time">{{item.ts}}</text>

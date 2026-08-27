@@ -12,7 +12,7 @@
   padding: 80rpx 0;
   text-align: center;
   color: #8c7d68;
-  font-size: 26rpx;
+  font-size: 24rpx;
 }
 
 .settings-list {
@@ -35,36 +35,36 @@
   width: 72rpx;
   height: 72rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #9e2a2b, #6b1f20);
+  background: linear-gradient(135deg, #9e2a2b, #be123c);
   flex-shrink: 0;
 }
 
 .contact-avatar-char {
   color: #ffffff;
-  font-size: 30rpx;
+  font-size: 28rpx;
   font-weight: bold;
 }
 
 .row-title {
   font-size: 28rpx;
   font-weight: bold;
-  color: #3b3024;
+  color: #6b5b4a;
 }
 
 .row-sub {
-  font-size: 22rpx;
+  font-size: 20rpx;
   color: #8c7d68;
   margin-top: 4rpx;
 }
 
 .fact-time {
-  font-size: 22rpx;
+  font-size: 20rpx;
   color: #8c7d68;
 }
 
 .fact-content {
-  font-size: 26rpx;
-  color: #3b3024;
+  font-size: 24rpx;
+  color: #6b5b4a;
   line-height: 1.5;
   word-break: break-all;
 }
@@ -81,13 +81,13 @@
   padding: 0 24rpx;
   border-radius: 8rpx;
   background: #ffffff;
-  color: #3b3024;
+  color: #6b5b4a;
   border: 1rpx solid rgba(59, 48, 36, 0.2);
   margin: 0;
 }
 
 .maint-btn-primary {
-  background: #9e2a2b;
+  background: linear-gradient(135deg, #9e2a2b, #be123c);
   color: #ffffff;
   border-color: #9e2a2b;
 }
@@ -112,7 +112,7 @@
 }
 
 .empty-text {
-  font-size: 26rpx;
+  font-size: 24rpx;
   color: #8c7d68;
   text-align: center;
 }

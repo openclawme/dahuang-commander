@@ -15,7 +15,7 @@
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#f4f1ea",
-    "navigationBarTitleText": "大荒分身 · 天道指挥官终端",
+    "navigationBarTitleText": "大荒分身",
     "navigationBarTextStyle": "black",
     "backgroundColor": "#f4f1ea"
   },
@@ -27,19 +27,27 @@
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "神念遥测"
+        "text": "神念遥测",
+        "iconPath": "assets/tabbar/chat.png",
+        "selectedIconPath": "assets/tabbar/chat-active.png"
       },
       {
         "pagePath": "pages/chat/chat",
-        "text": "大荒信道"
+        "text": "大荒信道",
+        "iconPath": "assets/tabbar/channel.png",
+        "selectedIconPath": "assets/tabbar/channel-active.png"
       },
       {
         "pagePath": "pages/dahuang/dahuang",
-        "text": "大荒之地"
+        "text": "大荒之地",
+        "iconPath": "assets/tabbar/dahuang.png",
+        "selectedIconPath": "assets/tabbar/dahuang-active.png"
       },
       {
         "pagePath": "pages/settings/settings",
-        "text": "元神法印"
+        "text": "元神法印",
+        "iconPath": "assets/tabbar/settings.png",
+        "selectedIconPath": "assets/tabbar/settings-active.png"
       }
     ]
   },

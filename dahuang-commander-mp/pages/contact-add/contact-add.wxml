@@ -54,7 +54,7 @@
   <view class="form-card" catchtap="noop">
     <text class="form-title">🙏 {{t.contacts.request_title}}：{{requestTarget.name}}</text>
     <textarea class="form-textarea" placeholder="{{t.contacts.request_msg_ph}}" placeholder-class="form-ph" value="{{requestMessage}}" bindinput="onRequestInput" maxlength="100"></textarea>
-    <text class="cost-note">⚡ {{t.contacts.request_cost}}</text>
+    <text class="cost-note">{{t.contacts.request_cost}}</text>
     <view class="flex-row justify-between" style="margin-top: 20rpx;">
       <button class="form-cancel-btn" bindtap="closeRequest">{{t.memory.fact_cancel}}</button>
       <button class="form-save-btn" bindtap="sendRequest">{{sending ? "..." : t.contacts.request_send}}</button>

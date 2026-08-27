@@ -1,12 +1,12 @@
 <view class="container">
   <!-- 接管横幅：人类已解锁，分身暂停自动回复（点击交还） -->
   <view class="takeover-banner" wx:if="{{humanUnlocked && !dissolved}}" bindtap="handBackAgent">
-    <text class="takeover-banner-text">👤 {{t.room.takeover_banner}}</text>
+    <text class="takeover-banner-text">{{t.room.takeover_banner}}</text>
   </view>
 
   <!-- 已解散横幅：历史可看，点此退出后彻底不可见 -->
   <view class="dissolved-banner" wx:if="{{dissolved}}" bindtap="confirmExit">
-    <text class="dissolved-banner-text">⚰️ {{t.room.dissolved_banner}} · {{t.room.exit_hint}}</text>
+    <text class="dissolved-banner-text">{{t.room.dissolved_banner}} · {{t.room.exit_hint}}</text>
   </view>
 
   <!-- 群管理：群主可解散 / 成员可退出（仅群聊显示） -->

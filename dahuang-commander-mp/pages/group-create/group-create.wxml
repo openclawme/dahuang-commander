@@ -3,7 +3,7 @@
 
   <input class="form-input" placeholder="{{t.contacts.group_name_ph}}" placeholder-class="form-ph" value="{{groupName}}" bindinput="onNameInput" maxlength="30" />
 
-  <text class="cost-note">⚡ {{t.contacts.group_cost}}</text>
+  <text class="cost-note">{{t.contacts.group_cost}}</text>
 
   <view class="section-header" style="margin-top: 24rpx;">
     <text class="section-title">{{t.contacts.group_pick}}（{{selectedCount}}）</text>

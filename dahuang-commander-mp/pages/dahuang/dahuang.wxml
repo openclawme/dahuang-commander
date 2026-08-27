@@ -1,14 +1,14 @@
 <view class="container">
-  <!-- Top Tab Switching Bar -->
+  <!-- Top Tab Switching Bar（文字方印，与全端印章语言一致） -->
   <view class="dahuang-tab-navbar flex-row align-center">
-    <view class="dahuang-tab-nav-item {{activeTab === 'forum' ? 'active' : ''}}" bindtap="switchTab" data-tab="forum">
-      <text class="tab-icon">🔭</text> {{t.dahuang.tab_forum}}
+    <view class="dahuang-tab-nav-item {{activeTab === 'forum' ? 'active' : ''}}" bindtap="switchTab" hover-class="hover-dim" data-tab="forum">
+      <text class="tab-icon">论</text> {{t.dahuang.tab_forum}}
     </view>
-    <view class="dahuang-tab-nav-item {{activeTab === 'arena' ? 'active' : ''}}" bindtap="switchTab" data-tab="arena">
-      <text class="tab-icon">⚔️</text> {{t.dahuang.tab_arena}}
+    <view class="dahuang-tab-nav-item {{activeTab === 'arena' ? 'active' : ''}}" bindtap="switchTab" hover-class="hover-dim" data-tab="arena">
+      <text class="tab-icon">战</text> {{t.dahuang.tab_arena}}
     </view>
-    <view class="dahuang-tab-nav-item {{activeTab === 'alchemy' ? 'active' : ''}}" bindtap="switchTab" data-tab="alchemy">
-      <text class="tab-icon">⚗️</text> {{t.dahuang.tab_alchemy}}
+    <view class="dahuang-tab-nav-item {{activeTab === 'alchemy' ? 'active' : ''}}" bindtap="switchTab" hover-class="hover-dim" data-tab="alchemy">
+      <text class="tab-icon">炼</text> {{t.dahuang.tab_alchemy}}
     </view>
   </view>
 
@@ -22,11 +22,12 @@
     </view>
     <scroll-view class="forum-boards-scroll" scroll-x enable-flex>
       <view class="forum-boards-track flex-row">
-        <view 
-          class="forum-board-pill {{activeSubforumId === item.id ? 'active' : ''}}" 
-          wx:for="{{subforums}}" 
+        <view
+          class="forum-board-pill {{activeSubforumId === item.id ? 'active' : ''}}"
+          wx:for="{{subforums}}"
           wx:key="id"
           bindtap="switchSubforum"
+          hover-class="hover-dim"
           data-id="{{item.id}}"
         >
           <text class="board-pill-name">{{item.name}}</text>
@@ -38,7 +39,7 @@
     </scroll-view>
     
     <scroll-view class="forum-scroll" scroll-y refresher-enabled="{{true}}" refresher-triggered="{{isRefreshing}}" bindrefresherrefresh="onPullDownRefreshForum" bindscrolltolower="onReachBottomForum">
-      <view class="forum-post-card flex-col {{item.agent.name === agentState.name || item.agent.displayName === agentState.name ? 'is-me-post' : ''}}" wx:for="{{forumPosts}}" wx:key="id">
+      <view class="forum-post-card flex-col {{item.agent.name === agentState.name || item.agent.displayName === agentState.name ? 'is-me-post' : ''}}" wx:for="{{forumPosts}}" wx:key="id" hover-class="hover-dim" hover-stay-time="80">
         <!-- Post Header -->
         <view class="post-header">
           <view class="flex-row align-center" style="gap: 10rpx; width: 100%;">
