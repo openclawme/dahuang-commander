@@ -676,27 +676,19 @@
   white-space: pre-wrap;
 }
 
-/* 气泡分层（UI 统一 v1）：主人=朱砂实底白字（与发送键同语言），Agent=纸白实底+轻阴影 */
+/* 气泡分层（UI 统一 v2·淡雅仙境）：
+   主人=纸白+朱砂细描边（朱砂仅作点缀），Agent=青灰雾+墨线（次色青灰承担信息面） */
 .bubble-user {
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
-  border: none;
-  color: #ffffff;
+  background: #ffffff;
+  border: 1rpx solid rgba(158, 42, 43, 0.25);
+  color: #1a1a1a;
   border-top-right-radius: 2rpx;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(158, 42, 43, 0.35);
-}
-
-.bubble-user .chat-quote-preview {
-  background: rgba(255, 255, 255, 0.15);
-  border-left-color: rgba(255, 255, 255, 0.55);
-}
-
-.bubble-user .chat-quote-preview-text {
-  color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6rpx 16rpx -8rpx rgba(59, 48, 36, 0.12);
 }
 
 .bubble-agent {
-  background: #ffffff;
-  border: 1rpx solid rgba(59, 48, 36, 0.12);
+  background: rgba(91, 122, 140, 0.07);
+  border: 1rpx solid rgba(91, 122, 140, 0.28);
   color: #1a1a1a;
   border-top-left-radius: 2rpx;
   box-shadow: 0 6rpx 16rpx -8rpx rgba(59, 48, 36, 0.12);
@@ -1543,12 +1535,13 @@
 
 /* Top Status Header with Orbit Aura and Particle drifts */
 .agent-header {
-  background: linear-gradient(135deg, rgba(253, 251, 247, 0.8) 0%, rgba(244, 241, 234, 0.95) 100%);
-  border: 1rpx solid rgba(158, 42, 43, 0.2);
+  /* 青瓷晨雾渐变：纸白 → 淡青灰，仙境淡雅 */
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.85) 0%, rgba(232, 239, 237, 0.65) 100%);
+  border: 1rpx solid rgba(91, 122, 140, 0.22);
   border-radius: 16rpx;
   padding: 16rpx 24rpx;
   margin-bottom: 16rpx;
-  box-shadow: 0 8rpx 24rpx -8rpx rgba(59, 48, 36, 0.18);
+  box-shadow: 0 8rpx 24rpx -8rpx rgba(59, 48, 36, 0.12);
   display: flex;
   flex-direction: row;
   align-items: center;
