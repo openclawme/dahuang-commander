@@ -196,8 +196,19 @@
 
 /* Unlogged card styles */
 .unlogin-icon {
-  font-size: 100rpx;
-  margin-bottom: 16rpx;
+  width: 96rpx;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  font-weight: bold;
+  font-family: "Noto Serif SC", "Songti SC", serif;
+  color: #9e2a2b;
+  background: rgba(158, 42, 43, 0.06);
+  border: 1rpx solid rgba(158, 42, 43, 0.3);
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
 }
 
 .unlogin-title {
@@ -360,15 +371,15 @@
 }
 
 .iq-challenge-badge {
-  background: rgba(158, 42, 43, 0.08);
-  border: 1rpx solid rgba(158, 42, 43, 0.3);
+  background: rgba(91, 122, 140, 0.08);
+  border: 1rpx solid rgba(91, 122, 140, 0.3);
   border-radius: 6rpx;
   padding: 14rpx 20rpx;
   margin-top: 10rpx;
 }
 
 .iq-badge-dot {
-  color: #9e2a2b;
+  color: #5b7a8c;
   font-size: 24rpx;
   margin-right: 12rpx;
   animation: pulse-cyan 1.5s infinite alternate;
@@ -576,7 +587,8 @@
 .profile-hero-card {
   background: rgba(255, 255, 255, 0.65);
   border: 1rpx solid rgba(59, 48, 36, 0.12);
-  border-top: 6rpx solid #9e2a2b;
+  /* 强调线改青灰（淡雅），朱砂不再上卡面 */
+  border-top: 6rpx solid #5b7a8c;
   border-radius: 16rpx;
   box-shadow: 0 10rpx 30rpx -10rpx rgba(59, 48, 36, 0.15);
   padding: 32rpx;
@@ -600,9 +612,9 @@
   line-height: 76rpx;
   font-size: 24rpx;
   font-weight: bold;
-  color: #9e2a2b;
-  background: rgba(158, 42, 43, 0.06);
-  border: 1rpx solid rgba(158, 42, 43, 0.3);
+  color: #6b5b4a;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1rpx solid rgba(59, 48, 36, 0.15);
   border-radius: 38rpx;
   margin: 0;
 }
@@ -610,7 +622,7 @@
 .hero-copy-btn::after { border: none; }
 
 .hero-copy-btn:active {
-  background: rgba(158, 42, 43, 0.12);
+  background: rgba(59, 48, 36, 0.1);
 }
 
 .hero-logout-btn {
@@ -630,6 +642,16 @@
 
 .hero-logout-btn:active {
   background: rgba(59, 48, 36, 0.1);
+}
+
+/* 朱文印章：列表/注册头像用白底朱字细描边（朱砂退居字面，不再整枚红章） */
+.seal-zhuwen {
+  background: #ffffff !important;
+  border: 1rpx solid rgba(158, 42, 43, 0.4) !important;
+  box-shadow: none !important;
+}
+.seal-zhuwen .seal-character {
+  color: #9e2a2b;
 }
 
 /* 设置区块：标题 + 行式列表 */
@@ -1004,7 +1026,7 @@
   border-radius: 16rpx;
 }
 .memory-entry-hover {
-  background: rgba(158, 42, 43, 0.12);
+  background: rgba(91, 122, 140, 0.1);
 }
 .memory-entry-icon-box {
   width: 72rpx;
@@ -1014,7 +1036,7 @@
   align-items: center;
   justify-content: center;
   font-size: 38rpx;
-  background: rgba(158, 42, 43, 0.12);
+  background: rgba(91, 122, 140, 0.08);
   border-radius: 16rpx;
 }
 .memory-entry-title {

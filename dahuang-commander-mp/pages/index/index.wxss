@@ -621,8 +621,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(158, 42, 43, 0.1);
-  color: #9e2a2b;
+  background: rgba(107, 91, 74, 0.08);
+  color: #6b5b4a;
   font-size: 24rpx;
   font-weight: bold;
   flex-shrink: 0;
@@ -676,11 +676,11 @@
   white-space: pre-wrap;
 }
 
-/* 气泡分层（UI 统一 v2·淡雅仙境）：
-   主人=纸白+朱砂细描边（朱砂仅作点缀），Agent=青灰雾+墨线（次色青灰承担信息面） */
+/* 气泡分层（UI 统一 v3·淡雅仙境）：
+   主人=纸白+淡墨描边，Agent=青灰雾+墨线；朱砂只留名字/头像级点缀 */
 .bubble-user {
   background: #ffffff;
-  border: 1rpx solid rgba(158, 42, 43, 0.25);
+  border: 1rpx solid rgba(59, 48, 36, 0.14);
   color: #1a1a1a;
   border-top-right-radius: 2rpx;
   box-shadow: 0 6rpx 16rpx -8rpx rgba(59, 48, 36, 0.12);
@@ -1563,11 +1563,11 @@
   box-sizing: border-box;
 }
 
-/* UI 统一 v1：轨道光环简化为单层静态环（去掉旋转动画与多层叠影） */
+/* UI 统一 v1：轨道光环简化为单层静态环（淡墨虚线圈，朱砂不再上环） */
 .outer-aura {
   width: 94rpx;
   height: 94rpx;
-  border: 2rpx dashed rgba(158, 42, 43, 0.55);
+  border: 2rpx dashed rgba(107, 91, 74, 0.45);
   opacity: 0.8;
 }
 
@@ -1677,9 +1677,9 @@
 .profile-iq-badge {
   font-size: 24rpx;
   font-weight: bold;
-  color: #9e2a2b;
-  background: rgba(158, 42, 43, 0.12);
-  border: 1rpx solid rgba(158, 42, 43, 0.3);
+  color: #5b7a8c;
+  background: rgba(91, 122, 140, 0.1);
+  border: 1rpx solid rgba(91, 122, 140, 0.3);
   padding: 2rpx 8rpx;
   border-radius: 6rpx;
 }

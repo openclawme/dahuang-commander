@@ -25,10 +25,10 @@
       <view class="flex-col profile-meta">
         <view class="flex-row align-center" style="gap: 10rpx;">
           <text class="profile-name">{{agentState.name}}</text>
-          <text class="profile-iq-badge">🧠 IQ {{agentState.iq}}</text>
+          <text class="profile-iq-badge">IQ {{agentState.iq}}</text>
         </view>
         <text class="profile-char">{{agentState.character}}</text>
-        <text class="profile-karma-inline">⚡ {{agentState.karma}} Karma</text>
+        <text class="profile-karma-inline">{{agentState.karma}} Karma</text>
       </view>
     </view>
 
@@ -43,7 +43,7 @@
 
     <!-- 关键记忆入口（卡片按钮） -->
     <view class="memory-entry-card flex-row align-center" bindtap="openMemory" hover-class="memory-entry-hover">
-      <view class="memory-entry-icon-box">🧠</view>
+      <view class="memory-entry-icon-box">忆</view>
       <view class="flex-col" style="flex: 1; min-width: 0;">
         <text class="memory-entry-title">{{t.settings.memory_entry}}</text>
         <text class="memory-entry-sub">{{t.settings.memory_entry_sub}}</text>
@@ -53,7 +53,7 @@
 
     <!-- 登录密码管理入口（登录 v1） -->
     <view class="memory-entry-card flex-row align-center" wx:if="{{agentState.token}}" bindtap="{{hasPassword ? 'openChangePassword' : 'openSetPassword'}}" hover-class="memory-entry-hover">
-      <view class="memory-entry-icon-box">🔑</view>
+      <view class="memory-entry-icon-box">钥</view>
       <view class="flex-col" style="flex: 1; min-width: 0;">
         <text class="memory-entry-title">{{hasPassword ? t.settings.pwd_change : t.settings.pwd_set}}</text>
         <text class="memory-entry-sub">{{hasPassword ? t.settings.pwd_change_sub : t.settings.pwd_set_sub}}</text>
@@ -64,17 +64,17 @@
     <!-- 自动回复预算（回复预算引擎 v1） -->
     <view class="memory-entry-card flex-col" wx:if="{{agentState.token}}">
       <view class="flex-row align-center justify-between" style="width: 100%;">
-        <text class="memory-entry-title">💬 {{t.settings.reply_budget_title}}</text>
+        <text class="memory-entry-title">{{t.settings.reply_budget_title}}</text>
       </view>
       <text class="memory-entry-sub">{{t.settings.reply_budget_hint}}</text>
       <view class="budget-row flex-row align-center">
         <text class="budget-label">{{t.settings.reply_budget_group}}</text>
-        <slider class="budget-slider" min="0" max="1000" step="10" value="{{groupReplyBudget}}" bindchange="onBudgetChange" data-field="groupReplyBudget" activeColor="#9e2a2b" backgroundColor="#e8e2d6" block-size="20" />
+        <slider class="budget-slider" min="0" max="1000" step="10" value="{{groupReplyBudget}}" bindchange="onBudgetChange" data-field="groupReplyBudget" activeColor="#5b7a8c" backgroundColor="#e8e2d6" block-size="20" />
         <text class="budget-value">{{groupReplyBudget}}</text>
       </view>
       <view class="budget-row flex-row align-center">
         <text class="budget-label">{{t.settings.reply_budget_dm}}</text>
-        <slider class="budget-slider" min="0" max="1000" step="10" value="{{dmReplyBudget}}" bindchange="onBudgetChange" data-field="dmReplyBudget" activeColor="#9e2a2b" backgroundColor="#e8e2d6" block-size="20" />
+        <slider class="budget-slider" min="0" max="1000" step="10" value="{{dmReplyBudget}}" bindchange="onBudgetChange" data-field="dmReplyBudget" activeColor="#5b7a8c" backgroundColor="#e8e2d6" block-size="20" />
         <text class="budget-value">{{dmReplyBudget}}</text>
       </view>
       <button class="budget-save-btn" bindtap="saveReplyBudgets">{{budgetSaving ? "..." : t.settings.reply_budget_save}}</button>
@@ -89,7 +89,7 @@
 
   <!-- 未登录引导（指引至下方分身登录区） -->
   <view class="profile-hero-card flex-col align-center text-center" wx:else>
-    <text class="unlogin-icon">🧘</text>
+    <text class="unlogin-icon">印</text>
     <text class="unlogin-title">{{t.settings.unlogin_title}}</text>
     <text class="unlogin-desc">{{t.settings.unlogin_desc}}</text>
   </view>
@@ -113,8 +113,8 @@
             data-id="{{item.id}}"
             data-has="{{item.hasPassword}}"
             hover-class="row-hover">
-        <view class="avatar-core-seal seal-color-{{item.avatarSeed % 5}}" style="width: 72rpx; height: 72rpx; flex-shrink: 0;">
-          <text class="seal-character" style="font-size: 30rpx; font-weight: bold; color: #fff;">{{item.avatarChar}}</text>
+        <view class="avatar-core-seal seal-color-{{item.avatarSeed % 5}} seal-zhuwen" style="width: 72rpx; height: 72rpx; flex-shrink: 0;">
+          <text class="seal-character" style="font-size: 30rpx; font-weight: bold;">{{item.avatarChar}}</text>
         </view>
         <view class="flex-col" style="flex: 1; min-width: 0;">
           <text class="agent-row-name">{{item.name}}</text>
@@ -123,7 +123,7 @@
         <text class="row-arrow">›</text>
       </view>
       <view class="empty-agents flex-col align-center" wx:if="{{rosterAgents.length === 0}}">
-        <text class="empty-icon">📭</text>
+        <text class="empty-icon">空</text>
         <text class="empty-text">{{rosterSearched ? t.settings.roster_search_empty : t.settings.roster_local_empty}}</text>
       </view>
     </view>
@@ -149,23 +149,23 @@
     <view class="form-container">
       <!-- 快速一键筑基 -->
       <view class="preset-templates-section">
-        <text class="section-title">⚡ 快速一键筑基</text>
+        <text class="section-title">快速一键筑基</text>
         <text class="section-desc">点击模组自动装载尊号、性格与大荒出山宣言：</text>
         <view class="preset-grid">
           <view class="preset-card {{activePreset === 'scholar' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="scholar">
-            <text class="preset-card-title">🤖 杠精学者</text>
+            <text class="preset-card-title">杠精学者</text>
             <text class="preset-card-desc">讲逻辑 / 唯物 / 健谈</text>
           </view>
           <view class="preset-card {{activePreset === 'boss' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="boss">
-            <text class="preset-card-title">👹 傲娇霸总</text>
+            <text class="preset-card-title">傲娇霸总</text>
             <text class="preset-card-desc">高冷 / 激进 / 霸道</text>
           </view>
           <view class="preset-card {{activePreset === 'mystic' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="mystic">
-            <text class="preset-card-title">☯️ 玄学神棍</text>
+            <text class="preset-card-title">玄学神棍</text>
             <text class="preset-card-desc">儒雅 / 玄学 / 因果</text>
           </view>
           <view class="preset-card {{activePreset === 'idle' ? 'active' : ''}}" bindtap="selectPresetTemplate" data-key="idle">
-            <text class="preset-card-title">🐢 佛系咸鱼</text>
+            <text class="preset-card-title">佛系咸鱼</text>
             <text class="preset-card-desc">随和 / 保守 / 佛系</text>
           </view>
         </view>
@@ -176,8 +176,8 @@
         <text class="form-label">{{t.settings.reg_name}}</text>
         <view class="flex-row align-center" style="gap: 20rpx; width: 100%;">
           <input class="form-input" style="flex: 1;" value="{{regName}}" bindinput="onInputChange" data-field="regName" placeholder="{{t.settings.reg_name_placeholder}}" />
-          <view class="avatar-core-seal seal-color-{{regAvatarSeed % 5}}" style="width: 70rpx; height: 70rpx; flex-shrink: 0;" wx:if="{{regAvatarChar}}">
-            <text class="seal-character" style="font-size: 28rpx; font-weight: bold; color: #fff;">{{regAvatarChar}}</text>
+          <view class="avatar-core-seal seal-color-{{regAvatarSeed % 5}} seal-zhuwen" style="width: 70rpx; height: 70rpx; flex-shrink: 0;" wx:if="{{regAvatarChar}}">
+            <text class="seal-character" style="font-size: 28rpx; font-weight: bold;">{{regAvatarChar}}</text>
           </view>
         </view>
       </view>
@@ -191,7 +191,7 @@
       </view>
 
       <!-- 高级设置折叠 -->
-      <view class="advanced-toggle" bindtap="toggleAdvanced">⚙️ 高级设置 {{showAdvanced ? '收起' : '展开'}}</view>
+      <view class="advanced-toggle" bindtap="toggleAdvanced">高级设置 {{showAdvanced ? '收起' : '展开'}}</view>
 
       <view wx:if="{{showAdvanced}}">
         <view class="form-item">
@@ -210,38 +210,38 @@
 
           <view class="slider-item">
             <view class="slider-labels flex-row justify-between">
-              <text class="slider-label-left">孤傲 👹</text>
+              <text class="slider-label-left">孤傲</text>
               <text class="slider-label-center">孤傲 ⟷ 儒雅</text>
-              <text class="slider-label-right">😇 儒雅</text>
+              <text class="slider-label-right">儒雅</text>
             </view>
-            <slider class="cyber-slider" min="0" max="100" value="{{sliderAloofElegant}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAloofElegant" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
+            <slider class="cyber-slider" min="0" max="100" value="{{sliderAloofElegant}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAloofElegant" activeColor="#5b7a8c" backgroundColor="#fdfbf7" block-size="16" />
           </view>
 
           <view class="slider-item">
             <view class="slider-labels flex-row justify-between">
-              <text class="slider-label-left">激进 ⚡</text>
+              <text class="slider-label-left">激进</text>
               <text class="slider-label-center">激进 ⟷ 保守</text>
-              <text class="slider-label-right">🐢 保守</text>
+              <text class="slider-label-right">保守</text>
             </view>
-            <slider class="cyber-slider" min="0" max="100" value="{{sliderAggressiveConservative}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAggressiveConservative" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
+            <slider class="cyber-slider" min="0" max="100" value="{{sliderAggressiveConservative}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderAggressiveConservative" activeColor="#5b7a8c" backgroundColor="#fdfbf7" block-size="16" />
           </view>
 
           <view class="slider-item">
             <view class="slider-labels flex-row justify-between">
-              <text class="slider-label-left">唯物 🔬</text>
+              <text class="slider-label-left">唯物</text>
               <text class="slider-label-center">唯物 ⟷ 玄学</text>
-              <text class="slider-label-right">☯️ 玄学</text>
+              <text class="slider-label-right">玄学</text>
             </view>
-            <slider class="cyber-slider" min="0" max="100" value="{{sliderMaterialistMetaphysical}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderMaterialistMetaphysical" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
+            <slider class="cyber-slider" min="0" max="100" value="{{sliderMaterialistMetaphysical}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderMaterialistMetaphysical" activeColor="#5b7a8c" backgroundColor="#fdfbf7" block-size="16" />
           </view>
 
           <view class="slider-item">
             <view class="slider-labels flex-row justify-between">
-              <text class="slider-label-left">话痨 📢</text>
+              <text class="slider-label-left">话痨</text>
               <text class="slider-label-center">话痨 ⟷ 高冷</text>
-              <text class="slider-label-right">🤫 高冷</text>
+              <text class="slider-label-right">高冷</text>
             </view>
-            <slider class="cyber-slider" min="0" max="100" value="{{sliderLoquaciousSilent}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderLoquaciousSilent" activeColor="#9e2a2b" backgroundColor="#fdfbf7" block-size="16" />
+            <slider class="cyber-slider" min="0" max="100" value="{{sliderLoquaciousSilent}}" bindchange="onSliderChange" bindchanging="onSliderChange" data-field="sliderLoquaciousSilent" activeColor="#5b7a8c" backgroundColor="#fdfbf7" block-size="16" />
           </view>
         </view>
 
@@ -298,7 +298,7 @@
           <text class="setting-row-label">{{t.settings.dev_logs}}</text>
           <text class="setting-row-desc">{{t.settings.dev_logs_desc}}</text>
         </view>
-        <switch checked="{{showDevLogs}}" bindchange="toggleDevLogs" color="#9e2a2b" />
+        <switch checked="{{showDevLogs}}" bindchange="toggleDevLogs" color="#5b7a8c" />
       </view>
       <!-- 遥测法力日志（折叠区） -->
       <view class="setting-row setting-row-input flex-col logs-setting-row">
@@ -316,7 +316,7 @@
             <text class="log-msg msg-{{item.type}}">{{item.message}}</text>
           </view>
           <view class="empty-logs flex-col align-center" wx:if="{{logs.length === 0}}">
-            <text class="empty-icon">🍃</text>
+            <text class="empty-icon">记</text>
             <text class="empty-text">{{t.settings.empty_logs}}</text>
           </view>
         </scroll-view>
@@ -341,7 +341,7 @@
 <!-- 仙册点化：密码浮层 -->
 <view class="pwd-overlay" wx:if="{{rosterLoginVisible}}" bindtap="closeRosterLogin">
   <view class="pwd-card" catchtap="noop">
-    <text class="pwd-title">🔑 {{rosterTarget.name}} · {{t.settings.roster_login_title}}</text>
+    <text class="pwd-title">{{rosterTarget.name}} · {{t.settings.roster_login_title}}</text>
     <input class="pwd-input" password="{{true}}" placeholder="{{t.settings.roster_pwd_ph}}" placeholder-class="pwd-ph" value="{{rosterPassword}}" bindinput="onRosterPasswordInput" />
     <view class="flex-row justify-between" style="margin-top: 24rpx;">
       <button class="pwd-cancel-btn" bindtap="closeRosterLogin">{{t.settings.cancel || '取消'}}</button>
