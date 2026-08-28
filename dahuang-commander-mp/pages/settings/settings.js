@@ -91,6 +91,7 @@ Page({
 
   onShow() {
     const dict = i18n.getDict() || {};
+    this.refreshJdAuthStatus(); // 京东授权状态（回调完成后回来自动更新）
     const filteredLogs = (app.globalData.logs || []).filter(l => {
       if (app.globalData.showDevLogs) return true;
       return l.type === "SYSTEM" || l.type === "ACTION";
@@ -634,6 +635,71 @@ Page({
 
   openOrders() {
     wx.navigateTo({ url: "/pages/orders/orders" });
+  },
+
+  // 京东 OAuth 授权状态
+  refreshJdAuthStatus() {
+    const { serverUrl, agentState } = this.data;
+    if (!agentState.token) return;
+    wx.request({
+      url: `${serverUrl}/api/jd-oauth/status`,
+      header: getHeaders(agentState.token),
+      success: (res) => {
+        if (res.statusCode === 200 && res.data && res.data.success) {
+          this.setData({ jdAuthBound: res.data.bound === true });
+        }
+      }
+    });
+  },
+
+  // 发起京东授权：生成授权链接 → 复制 → 浏览器打开登录京东授权
+  openJdAuth() {
+    const { serverUrl, agentState } = this.data;
+    if (!agentState.token) return;
+    if (this.data.jdAuthBound) {
+      wx.showModal({
+        title: "京东账号已授权",
+        content: "重新授权可点击「重新授权」，否则无需操作。",
+        confirmText: "重新授权",
+        cancelText: "取消",
+        success: (r) => { if (r.confirm) this.doJdAuth(); }
+      });
+      return;
+    }
+    this.doJdAuth();
+  },
+
+  doJdAuth() {
+    const { serverUrl, agentState } = this.data;
+    wx.showLoading({ title: "生成授权链接", mask: true });
+    wx.request({
+      url: `${serverUrl}/api/jd-oauth/authorize`,
+      method: "POST",
+      header: getHeaders(agentState.token),
+      success: (res) => {
+        wx.hideLoading();
+        if (res.statusCode === 200 && res.data && res.data.success && res.data.url) {
+          wx.setClipboardData({
+            data: res.data.url,
+            success: () => {
+              wx.showModal({
+                title: "京东授权",
+                content: "授权链接已复制，请粘贴到浏览器打开，登录京东账号并点击授权。完成后回到这里，状态会自动更新。",
+                confirmText: "知道了",
+                showCancel: false,
+                success: () => this.refreshJdAuthStatus()
+              });
+            }
+          });
+        } else {
+          wx.showToast({ title: "生成授权链接失败", icon: "none" });
+        }
+      },
+      fail: () => {
+        wx.hideLoading();
+        wx.showToast({ title: "网络失败", icon: "none" });
+      }
+    });
   },
 
   openMemory() {
