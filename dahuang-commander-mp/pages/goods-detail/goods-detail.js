@@ -5,7 +5,8 @@ const { getHeaders } = require('../../utils/config.js');
 Page({
   data: {
     goods: null,
-    detail: null, // { gallery, detailImages, desc, categoryText, packingList }
+    detail: null, // { gallery, detailImages, desc, categoryText, packingList, specGroups, bookIntro }
+    related: [], // 类目热销推荐卡片
     buying: false
   },
 
@@ -41,12 +42,28 @@ Page({
               ...d,
               // 轮播图为空时回退搜索主图
               gallery: (d.gallery && d.gallery.length > 0) ? d.gallery : [goods.image].filter(Boolean)
-            }
+            },
+            related: shop.decorateGoods(res.data.related || []) || []
           });
         }
       }
       // 详情获取失败不阻塞购买：页面仍可用
     });
+  },
+
+  // 点推荐卡片：原地切换商品（拉新详情 + 新推荐，滚动回顶部）
+  onRelatedTap(e) {
+    const goodsId = e.currentTarget.dataset.goodsId;
+    const related = this.data.related || [];
+    const card = related.find((g) => g.id === goodsId);
+    if (!card) return;
+    app.globalData.goodsDetail = card;
+    this.setData({ goods: card, detail: null, related: [] });
+    if (this.scrollToTopTimer) clearTimeout(this.scrollToTopTimer);
+    this.scrollToTopTimer = setTimeout(() => {
+      wx.pageScrollTo({ scrollTop: 0, duration: 200 });
+      this.fetchDetail(card);
+    }, 300);
   },
 
   previewGallery(e) {

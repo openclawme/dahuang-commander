@@ -92,6 +92,27 @@
       <text class="detail-desc-text" wx:elif="{{detail.desc}}">{{detail.desc}}</text>
     </view>
 
+    <!-- 类目热销推荐（京东榜单，无佣金字段） -->
+    <view class="detail-section" wx:if="{{related.length > 0}}">
+      <view class="detail-section-header flex-row align-center">
+        <view class="detail-section-line"></view>
+        <text class="detail-section-title">热销推荐</text>
+        <view class="detail-section-line"></view>
+      </view>
+      <view class="related-grid">
+        <view class="related-card flex-col" wx:for="{{related}}" wx:key="id"
+              bindtap="onRelatedTap" data-goods-id="{{item.id}}" hover-class="hover-dim">
+          <image class="related-img" src="{{item.image}}" mode="aspectFill" lazy-load></image>
+          <text class="related-title text-ellipsis-2">{{item.title}}</text>
+          <view class="related-price-row flex-row align-center">
+            <text class="related-symbol">¥</text>
+            <text class="related-price">{{item.priceText}}</text>
+            <text class="related-origin" wx:if="{{item.couponYuan > 0}}">¥{{item.originText}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
     <view class="detail-spacer"></view>
   </scroll-view>
 
