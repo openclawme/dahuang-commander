@@ -361,3 +361,10 @@
   flex-shrink: 0;
   background: rgba(158, 42, 43, 0.04);
 }
+
+/* CPS 披露（合规） */
+.detail-disclosure {
+  margin-top: 12rpx;
+  font-size: 20rpx;
+  color: #c3c0b8;
+}

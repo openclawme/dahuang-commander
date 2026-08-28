@@ -188,3 +188,13 @@
   -webkit-line-clamp: 2;
   overflow: hidden;
 }
+
+/* CPS 披露（合规） */
+.orders-disclosure {
+  margin-top: 30rpx;
+  font-size: 20rpx;
+  color: #c3c0b8;
+  text-align: center;
+  line-height: 1.7;
+  padding: 0 60rpx;
+}

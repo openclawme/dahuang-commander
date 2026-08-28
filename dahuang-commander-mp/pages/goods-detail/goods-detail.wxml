@@ -41,11 +41,12 @@
         <text>该商品已下架或不可购买，请看看下方热销推荐</text>
       </view>
 
-      <!-- 结算说明（不出现任何佣金/金额信息） -->
+      <!-- 结算说明（不出现任何佣金/金额信息；含 CPS 披露义务） -->
       <view class="detail-note flex-row align-center">
         <text class="detail-note-icon">币</text>
         <text class="detail-note-text">通过本商品购买入口下单，订单完成后大荒币自动入账</text>
       </view>
+      <view class="detail-disclosure">通过分身购买入口下单，平台会获得推广收益</view>
     </view>
 
     <!-- 规格参数（京东商详 propGroups） -->

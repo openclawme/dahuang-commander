@@ -45,4 +45,7 @@
     <view class="loading-ring"></view>
     <text class="empty-hint">正在同步订单…</text>
   </view>
+
+  <!-- CPS 披露义务 -->
+  <view class="orders-disclosure">通过分身购买入口下单，平台会获得推广收益；订单结算后大荒币自动入账</view>
 </view>
