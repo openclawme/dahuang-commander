@@ -26,7 +26,7 @@ function decorateGoods(goods) {
 
 /**
  * 去购买：调服务端生成购买链接。
- * 成功 → { ok: true, url }；拼多多未授权 → { ok: true, needsAuthority: true, url, hint }
+ * 成功 → { ok: true, url, weAppInfo? }；拼多多未授权 → { ok: true, needsAuthority: true, url, hint }
  * 失败 → { ok: false, msg }
  */
 function requestRebateLink(platform, goodsId) {
@@ -41,7 +41,13 @@ function requestRebateLink(platform, goodsId) {
       success: (res) => {
         const d = res.data || {};
         if (res.statusCode === 200 && d.success) {
-          resolve({ ok: true, url: d.url, needsAuthority: d.needsAuthority === true, hint: d.authorityHint });
+          resolve({
+            ok: true,
+            url: d.url,
+            needsAuthority: d.needsAuthority === true,
+            hint: d.authorityHint,
+            weAppInfo: d.weAppInfo || null
+          });
         } else if (res.statusCode === 410) {
           resolve({ ok: false, msg: '商品缓存已过期，请重新搜索后再试' });
         } else {
@@ -53,41 +59,53 @@ function requestRebateLink(platform, goodsId) {
   });
 }
 
-/** 展示购买结果：弹窗 + 复制链接（小程序 webview 受业务域名限制，复制引导去官方 App 打开最稳） */
+/**
+ * 展示购买结果：
+ * 1. 默认自动复制链接 + toast 提醒"已复制"（不再要求用户多点一次复制）
+ * 2. 拼多多附带小程序直跳信息 → 弹「打开拼多多」按钮，一键进官方小程序（归属保留）
+ */
 function showBuyResult(result) {
   if (!result.ok) {
     wx.showToast({ title: result.msg, icon: 'none' });
     return;
   }
   if (result.needsAuthority) {
-    wx.showModal({
-      title: '拼多多首次授权',
-      content: `${result.hint || '拼多多首次使用需授权备案'}，复制链接后在拼多多内确认一次即可`,
-      confirmText: '复制授权链接',
-      cancelText: '取消',
-      success: (r) => {
-        if (r.confirm) {
-          wx.setClipboardData({
-            data: result.url,
-            success: () => wx.showToast({ title: '已复制，去拼多多确认授权', icon: 'none' })
-          });
-        }
+    wx.setClipboardData({
+      data: result.url,
+      success: () => {
+        wx.showToast({ title: '授权链接已复制', icon: 'none' });
+        wx.showModal({
+          title: '拼多多首次授权',
+          content: result.hint || '拼多多首次使用需授权备案，链接已复制，打开拼多多确认一次即可',
+          confirmText: '知道了',
+          showCancel: false
+        });
       }
     });
     return;
   }
-  wx.showModal({
-    title: '购买链接已生成',
-    content: result.url,
-    confirmText: '复制链接',
-    cancelText: '关闭',
-    success: (r) => {
-      if (r.confirm) {
-        wx.setClipboardData({
-          data: result.url,
-          success: () => wx.showToast({ title: '已复制，去官方 App 打开下单', icon: 'none' })
+  wx.setClipboardData({
+    data: result.url,
+    success: () => {
+      wx.showToast({ title: '购买链接已复制', icon: 'none' });
+      if (result.weAppInfo && result.weAppInfo.appId && result.weAppInfo.path) {
+        wx.showModal({
+          title: '已复制购买链接',
+          content: '也可以直接打开拼多多小程序下单',
+          confirmText: '打开拼多多',
+          cancelText: '关闭',
+          success: (r) => {
+            if (r.confirm) {
+              wx.navigateToMiniProgram({
+                appId: result.weAppInfo.appId,
+                path: result.weAppInfo.path,
+                fail: () => wx.showToast({ title: '打开失败，已复制链接，可手动打开拼多多', icon: 'none' })
+              });
+            }
+          }
         });
       }
+      // 京东等无直跳信息：仅 toast 已复制（链接在微信内打开会自动进京东官方小程序）
     }
   });
 }
