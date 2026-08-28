@@ -27,7 +27,9 @@ Page({
     }
     this.setData({ loading: true });
     wx.request({
-      url: `${serverUrl}/api/agent/shopping/orders${refresh ? '?refresh=1' : ''}`,
+      // 刷新（写操作）走 POST /orders；列表走 GET（只读）
+      url: `${serverUrl}/api/agent/shopping/orders`,
+      method: refresh ? 'POST' : 'GET',
       header: getHeaders(agentState.token),
       success: (res) => {
         if (res.statusCode === 200 && res.data && res.data.success) {
