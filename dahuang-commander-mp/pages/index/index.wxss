@@ -2780,3 +2780,14 @@
   border-radius: 24rpx;
   box-shadow: 0 4rpx 10rpx -4rpx rgba(158, 42, 43, 0.5);
 }
+
+/* 活动角标（秒杀/百亿补贴）：朱砂描边小徽章点缀 */
+.goods-tag {
+  font-size: 18rpx;
+  color: #9e2a2b;
+  border: 1rpx solid rgba(158, 42, 43, 0.45);
+  border-radius: 6rpx;
+  padding: 1rpx 8rpx;
+  flex-shrink: 0;
+  background: rgba(158, 42, 43, 0.04);
+}

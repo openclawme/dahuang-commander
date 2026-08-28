@@ -77,6 +77,7 @@
                   <text class="goods-card-coupon" wx:if="{{g.couponYuan > 0}}">券{{g.couponText}}元</text>
                 </view>
                 <view class="goods-card-meta flex-row align-center">
+                  <text class="goods-tag" wx:for="{{g.tags}}" wx:for-item="tag" wx:key="*this">{{tag}}</text>
                   <text class="goods-card-platform platform-{{g.platform}}">{{g.platformText}}</text>
                   <text class="goods-card-sales" wx:if="{{g.salesTip}}">{{g.salesTip}}</text>
                   <text class="goods-card-shop text-ellipsis" wx:if="{{g.shopName}}">{{g.shopName}}</text>

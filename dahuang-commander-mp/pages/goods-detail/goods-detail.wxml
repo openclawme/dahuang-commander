@@ -27,6 +27,7 @@
 
       <!-- 平台 / 销量 / 店铺 -->
       <view class="detail-meta flex-row align-center">
+        <text class="goods-tag" wx:for="{{goods.tags}}" wx:for-item="tag" wx:key="*this">{{tag}}</text>
         <text class="goods-card-platform platform-{{goods.platform}}">{{goods.platformText}}</text>
         <text class="detail-sales" wx:if="{{goods.salesTip}}">{{goods.salesTip}}</text>
         <text class="detail-shop text-ellipsis" wx:if="{{goods.shopName}}">{{goods.shopName}}</text>
