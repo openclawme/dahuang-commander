@@ -11,7 +11,8 @@
     "pages/contact-requests/contact-requests",
     "pages/group-create/group-create",
     "pages/decisions/decisions",
-    "pages/rebates/rebates"
+    "pages/goods-detail/goods-detail",
+    "pages/orders/orders"
   ],
   "window": {
     "backgroundTextStyle": "light",

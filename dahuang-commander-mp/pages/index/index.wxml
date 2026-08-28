@@ -60,7 +60,33 @@
               ></canvas>
             </scroll-view>
           </view>
-          
+
+          <!-- 商品购物卡片（搜索结果原生渲染：图片/券后价/销量 + 去购买） -->
+          <view class="bubble-goods-list" wx:if="{{item.goods && item.goods.length > 0}}">
+            <view class="goods-card flex-row"
+                  wx:for="{{item.goods}}" wx:for-item="g" wx:key="id"
+                  bindtap="onGoodsTap"
+                  data-msg-id="{{item.id}}" data-goods-id="{{g.id}}" data-platform="{{g.platform}}">
+              <image class="goods-card-img" src="{{g.image}}" mode="aspectFill"></image>
+              <view class="goods-card-body flex-col">
+                <text class="goods-card-title text-ellipsis-2">{{g.title}}</text>
+                <view class="goods-card-price-row flex-row align-center">
+                  <text class="goods-card-symbol">¥</text>
+                  <text class="goods-card-price">{{g.priceText}}</text>
+                  <text class="goods-card-origin" wx:if="{{g.couponYuan > 0}}">¥{{g.originText}}</text>
+                  <text class="goods-card-coupon" wx:if="{{g.couponYuan > 0}}">券{{g.couponText}}元</text>
+                </view>
+                <view class="goods-card-meta flex-row align-center">
+                  <text class="goods-card-platform platform-{{g.platform}}">{{g.platformText}}</text>
+                  <text class="goods-card-sales" wx:if="{{g.salesTip}}">{{g.salesTip}}</text>
+                  <text class="goods-card-shop text-ellipsis" wx:if="{{g.shopName}}">{{g.shopName}}</text>
+                </view>
+              </view>
+              <view class="goods-card-buy" catchtap="onGoodsBuy"
+                    data-goods-id="{{g.id}}" data-platform="{{g.platform}}">去购买</view>
+            </view>
+          </view>
+
           <view class="bubble-task-container" wx:if="{{item.sender === 'agent' && (item.isPending || (item.progress > 0 && item.progress < 100))}}">
             <view class="bubble-progress-row flex-row align-center justify-between">
               <text class="bubble-progress-lbl">{{t.index.progress}}</text>

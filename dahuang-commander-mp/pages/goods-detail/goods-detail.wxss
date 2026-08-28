@@ -1,0 +1,184 @@
+/* 商品详情页：宣纸底 + 纸白面板 + 朱砂价格/按钮反色（古风淡雅体系） */
+.container {
+  min-height: 100vh;
+  background: #f4f1ea;
+}
+
+.detail-scroll {
+  height: calc(100vh - 120rpx);
+}
+
+.detail-image-wrap {
+  position: relative;
+  background: #f4f1ea;
+  height: 640rpx;
+}
+
+.detail-image {
+  width: 100%;
+  height: 100%;
+}
+
+.detail-image-hint {
+  position: absolute;
+  right: 20rpx;
+  bottom: 20rpx;
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(27, 27, 27, 0.45);
+  border-radius: 20rpx;
+  padding: 6rpx 18rpx;
+}
+
+.detail-panel {
+  background: #ffffff;
+  margin: 20rpx;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  border: 1rpx solid rgba(59, 48, 36, 0.08);
+  box-shadow: 0 6rpx 18rpx -10rpx rgba(59, 48, 36, 0.16);
+}
+
+.detail-price-row {
+  margin-bottom: 18rpx;
+}
+
+.detail-symbol {
+  font-size: 28rpx;
+  color: #9e2a2b;
+  font-weight: bold;
+}
+
+.detail-price {
+  font-size: 56rpx;
+  color: #9e2a2b;
+  font-weight: bold;
+  margin-right: 16rpx;
+}
+
+.detail-origin {
+  font-size: 26rpx;
+  color: #9aa3a8;
+  text-decoration: line-through;
+  margin-right: 14rpx;
+}
+
+.detail-coupon {
+  font-size: 22rpx;
+  color: #9e2a2b;
+  border: 1rpx solid rgba(158, 42, 43, 0.4);
+  border-radius: 6rpx;
+  padding: 4rpx 12rpx;
+}
+
+.detail-title {
+  font-size: 30rpx;
+  color: #2b2b2b;
+  line-height: 1.5;
+  margin-bottom: 18rpx;
+}
+
+.detail-meta {
+  gap: 12rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx dashed rgba(59, 48, 36, 0.12);
+}
+
+.goods-card-platform {
+  font-size: 20rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+  flex-shrink: 0;
+}
+
+.platform-pdd {
+  color: #ffffff;
+  background: rgba(158, 42, 43, 0.85);
+}
+
+.platform-jd {
+  color: #9e2a2b;
+  background: rgba(158, 42, 43, 0.08);
+  border: 1rpx solid rgba(158, 42, 43, 0.3);
+}
+
+.detail-sales {
+  font-size: 22rpx;
+  color: #5b7a8c;
+  flex-shrink: 0;
+}
+
+.detail-shop {
+  font-size: 22rpx;
+  color: #9aa3a8;
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-note {
+  margin-top: 20rpx;
+  gap: 12rpx;
+}
+
+.detail-note-icon {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 8rpx;
+  background: #5b7a8c;
+  color: #ffffff;
+  font-size: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.detail-note-text {
+  font-size: 22rpx;
+  color: #5b7a8c;
+}
+
+.detail-spacer {
+  height: 40rpx;
+}
+
+.detail-bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #ffffff;
+  border-top: 1rpx solid rgba(59, 48, 36, 0.1);
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
+}
+
+.detail-bottom-price {
+  align-items: flex-end;
+}
+
+.detail-buy-btn {
+  background: #9e2a2b;
+  color: #ffffff;
+  font-size: 30rpx;
+  font-weight: bold;
+  padding: 20rpx 80rpx;
+  border-radius: 40rpx;
+  box-shadow: 0 6rpx 16rpx -6rpx rgba(158, 42, 43, 0.5);
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-text {
+  color: #9aa3a8;
+  font-size: 26rpx;
+}
+
+.flex-row { display: flex; flex-direction: row; }
+.flex-col { display: flex; flex-direction: column; }
+.align-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.text-ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

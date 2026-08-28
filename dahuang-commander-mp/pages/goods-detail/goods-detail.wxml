@@ -1,0 +1,50 @@
+<view class="container" wx:if="{{goods}}">
+  <scroll-view class="detail-scroll" scroll-y>
+    <!-- 商品主图（点击可全屏预览） -->
+    <view class="detail-image-wrap" bindtap="previewImage">
+      <image class="detail-image" src="{{goods.image}}" mode="aspectFill"></image>
+      <text class="detail-image-hint">点击查看大图</text>
+    </view>
+
+    <view class="detail-panel">
+      <!-- 价格区 -->
+      <view class="detail-price-row flex-row align-center">
+        <text class="detail-symbol">¥</text>
+        <text class="detail-price">{{goods.priceText}}</text>
+        <text class="detail-origin" wx:if="{{goods.couponYuan > 0}}">¥{{goods.originText}}</text>
+        <text class="detail-coupon" wx:if="{{goods.couponYuan > 0}}">券{{goods.couponText}}元</text>
+      </view>
+
+      <!-- 标题 -->
+      <view class="detail-title">{{goods.title}}</view>
+
+      <!-- 平台 / 销量 / 店铺 -->
+      <view class="detail-meta flex-row align-center">
+        <text class="goods-card-platform platform-{{goods.platform}}">{{goods.platformText}}</text>
+        <text class="detail-sales" wx:if="{{goods.salesTip}}">{{goods.salesTip}}</text>
+        <text class="detail-shop text-ellipsis" wx:if="{{goods.shopName}}">{{goods.shopName}}</text>
+      </view>
+
+      <!-- 结算说明（不出现任何佣金/金额信息） -->
+      <view class="detail-note flex-row align-center">
+        <text class="detail-note-icon">币</text>
+        <text class="detail-note-text">通过本商品购买入口下单，订单完成后大荒币自动入账</text>
+      </view>
+    </view>
+
+    <view class="detail-spacer"></view>
+  </scroll-view>
+
+  <!-- 底部购买栏 -->
+  <view class="detail-bottom-bar flex-row align-center justify-between">
+    <view class="detail-bottom-price flex-row align-center">
+      <text class="detail-symbol">¥</text>
+      <text class="detail-price">{{goods.priceText}}</text>
+    </view>
+    <view class="detail-buy-btn" bindtap="onBuy" hover-class="hover-dim">{{buying ? '生成中…' : '去购买'}}</view>
+  </view>
+</view>
+
+<view class="container empty" wx:else>
+  <text class="empty-text">商品信息已失效，请回到聊天重新搜索</text>
+</view>

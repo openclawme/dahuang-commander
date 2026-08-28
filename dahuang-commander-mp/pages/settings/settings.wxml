@@ -80,12 +80,12 @@
       <button class="budget-save-btn" bindtap="saveReplyBudgets">{{budgetSaving ? "..." : t.settings.reply_budget_save}}</button>
     </view>
 
-    <!-- 我的返利（购物 v1） -->
-    <view class="memory-entry-card flex-row align-center" wx:if="{{agentState.token}}" bindtap="openRebates" hover-class="memory-entry-hover">
+    <!-- 购买记录（购物） -->
+    <view class="memory-entry-card flex-row align-center" wx:if="{{agentState.token}}" bindtap="openOrders" hover-class="memory-entry-hover">
       <view class="memory-entry-icon-box">购</view>
       <view class="flex-col" style="flex: 1; min-width: 0;">
-        <text class="memory-entry-title">我的返利</text>
-        <text class="memory-entry-sub">通过分身返利链接下单的佣金与大荒币折算</text>
+        <text class="memory-entry-title">购买记录</text>
+        <text class="memory-entry-sub">通过分身购买入口下单的订单状态</text>
       </view>
       <text class="memory-entry-arrow">›</text>
     </view>

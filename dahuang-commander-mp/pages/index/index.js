@@ -3,6 +3,7 @@ const i18n = require('../../utils/i18n.js');
 const { getHeaders } = require('../../utils/config.js');
 const { drawChart } = require('../../utils/chart-draw.js');
 const { toAbsUrl } = require('../../utils/url.js');
+const shop = require('../../utils/shop.js');
 
 Page({
   data: {
@@ -1213,6 +1214,27 @@ ${quotedText}
     const urls = list.length ? list : [src];
     const absolute = urls.map((u) => toAbsUrl(u, this.data.serverUrl));
     wx.previewImage({ current: absolute.find((u) => u.includes(src.split("/").pop() || "")) || absolute[0], urls: absolute });
+  },
+
+  // 点商品卡片 → 独立详情页
+  onGoodsTap(e) {
+    const { msgId, goodsId } = e.currentTarget.dataset;
+    const msg = (this.data.chatHistory || []).find((m) => m.id === msgId);
+    const goods = msg && Array.isArray(msg.goods) ? msg.goods.find((g) => g.id === goodsId) : null;
+    if (!goods) return;
+    app.globalData.goodsDetail = goods;
+    wx.navigateTo({ url: "/pages/goods-detail/goods-detail" });
+  },
+
+  // 卡片上「去购买」小按钮：直接生成购买链接
+  onGoodsBuy(e) {
+    const { goodsId, platform } = e.currentTarget.dataset;
+    if (!goodsId || !platform) return;
+    wx.showLoading({ title: "生成链接中", mask: true });
+    shop.requestRebateLink(platform, goodsId).then((result) => {
+      wx.hideLoading();
+      shop.showBuyResult(result);
+    });
   },
 
   // 长按图片：发到大荒（发帖 / 群聊私聊）

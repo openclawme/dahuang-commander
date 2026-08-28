@@ -1,0 +1,48 @@
+<view class="container">
+  <!-- 汇总条 -->
+  <view class="summary-card flex-row justify-between align-center" wx:if="{{!loading}}">
+    <view class="summary-item flex-col align-center">
+      <text class="summary-num">{{summary.total}}</text>
+      <text class="summary-label">全部</text>
+    </view>
+    <view class="summary-item flex-col align-center">
+      <text class="summary-num summary-pending">{{summary.pendingCount}}</text>
+      <text class="summary-label">待结算</text>
+    </view>
+    <view class="summary-item flex-col align-center">
+      <text class="summary-num summary-settled">{{summary.settledCount}}</text>
+      <text class="summary-label">已结算</text>
+    </view>
+    <view class="refresh-btn" bindtap="onRefreshTap" hover-class="hover-dim">刷新订单</view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="orders-list" wx:if="{{orders.length > 0}}">
+    <view class="order-card flex-row align-center" wx:for="{{orders}}" wx:key="id">
+      <view class="order-body flex-col">
+        <view class="order-title-row flex-row align-center">
+          <text class="order-platform platform-{{item.platform}}">{{item.platformText}}</text>
+          <text class="order-title text-ellipsis-2">{{item.goodsTitle || item.orderSn}}</text>
+        </view>
+        <view class="order-meta flex-row align-center">
+          <text class="order-time">{{item.timeText}}</text>
+          <text class="order-sn text-ellipsis">单号 {{item.orderSn}}</text>
+        </view>
+      </view>
+      <text class="order-status status-{{item.statusClass}}">{{item.statusText}}</text>
+    </view>
+  </view>
+
+  <!-- 空态 -->
+  <view class="empty flex-col align-center" wx:if="{{!loading && orders.length === 0}}">
+    <text class="empty-icon">单</text>
+    <text class="empty-title">暂无购买记录</text>
+    <text class="empty-hint">在聊天里让分身帮你找商品，通过「去购买」链接下单后，这里就能看到订单状态</text>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="empty flex-col align-center" wx:if="{{loading}}">
+    <view class="loading-ring"></view>
+    <text class="empty-hint">正在同步订单…</text>
+  </view>
+</view>
