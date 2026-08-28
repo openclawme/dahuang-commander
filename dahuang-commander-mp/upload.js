@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '购物 v1：分身比价返利 + 我的返利中心（法印页入口）';
+const desc = '购物 v2：聊天商品卡片（图片/券后价/去购买）+ 商品详情页 + 购买记录（替代返利中心）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
