@@ -46,7 +46,8 @@ function requestRebateLink(platform, goodsId) {
             url: d.url,
             needsAuthority: d.needsAuthority === true,
             hint: d.authorityHint,
-            weAppInfo: d.weAppInfo || null
+            weAppInfo: d.weAppInfo || null,
+            weixinShortLink: d.weixinShortLink || null
           });
         } else if (res.statusCode === 410) {
           resolve({ ok: false, msg: '商品缓存已过期，请重新搜索后再试' });
@@ -84,8 +85,10 @@ function showBuyResult(result) {
     });
     return;
   }
+  // 复制优先用微信小程序短链（#小程序://…，微信内点击直唤起拼多多小程序），无则用网页短链
+  const copyUrl = result.weixinShortLink || result.url;
   wx.setClipboardData({
-    data: result.url,
+    data: copyUrl,
     success: () => {
       wx.showToast({ title: '购买链接已复制', icon: 'none' });
       if (result.weAppInfo && result.weAppInfo.appId && result.weAppInfo.path) {
