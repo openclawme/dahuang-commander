@@ -42,6 +42,32 @@
       </view>
     </view>
 
+    <!-- 规格参数（京东商详 propGroups） -->
+    <view class="detail-section" wx:if="{{detail && detail.specGroups && detail.specGroups.length > 0}}">
+      <view class="detail-section-header flex-row align-center">
+        <view class="detail-section-line"></view>
+        <text class="detail-section-title">规格参数</text>
+        <view class="detail-section-line"></view>
+      </view>
+      <block wx:for="{{detail.specGroups}}" wx:for-item="group" wx:key="index">
+        <view class="spec-group-name" wx:if="{{group.group}}">{{group.group}}</view>
+        <view class="spec-row flex-row" wx:for="{{group.attrs}}" wx:for-item="attr" wx:key="name">
+          <text class="spec-name">{{attr.name}}</text>
+          <text class="spec-value">{{attr.value}}</text>
+        </view>
+      </block>
+    </view>
+
+    <!-- 内容简介（京东图书） -->
+    <view class="detail-section" wx:if="{{detail && detail.bookIntro}}">
+      <view class="detail-section-header flex-row align-center">
+        <view class="detail-section-line"></view>
+        <text class="detail-section-title">内容简介</text>
+        <view class="detail-section-line"></view>
+      </view>
+      <text class="detail-desc-text">{{detail.bookIntro}}</text>
+    </view>
+
     <!-- 包装清单（京东商详） -->
     <view class="detail-section" wx:if="{{detail && detail.packingList}}">
       <view class="detail-section-header flex-row align-center">

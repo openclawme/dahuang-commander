@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '购物 v2.2：商品详情页接入商详大字段（轮播图 + 图文详情 + 包装清单）';
+const desc = '购物 v2.3：详情页新增规格参数 + 图书内容简介（京东商详大字段）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
