@@ -35,6 +35,11 @@
       <!-- 类目 · 品牌（商详返回） -->
       <view class="detail-category" wx:if="{{detail && detail.categoryText}}">{{detail.categoryText}}</view>
 
+      <!-- 下架提示（京东 skuStatus） -->
+      <view class="off-sale-banner" wx:if="{{detail && detail.onSale === false}}">
+        <text>该商品已下架或不可购买，请看看下方热销推荐</text>
+      </view>
+
       <!-- 结算说明（不出现任何佣金/金额信息） -->
       <view class="detail-note flex-row align-center">
         <text class="detail-note-icon">币</text>
@@ -58,7 +63,7 @@
       </block>
     </view>
 
-    <!-- 内容简介（京东图书） -->
+    <!-- 内容简介（京东图书/音像） -->
     <view class="detail-section" wx:if="{{detail && detail.bookIntro}}">
       <view class="detail-section-header flex-row align-center">
         <view class="detail-section-line"></view>
@@ -66,6 +71,26 @@
         <view class="detail-section-line"></view>
       </view>
       <text class="detail-desc-text">{{detail.bookIntro}}</text>
+    </view>
+
+    <!-- 编辑推荐（京东图书） -->
+    <view class="detail-section" wx:if="{{detail && detail.editorRec}}">
+      <view class="detail-section-header flex-row align-center">
+        <view class="detail-section-line"></view>
+        <text class="detail-section-title">编辑推荐</text>
+        <view class="detail-section-line"></view>
+      </view>
+      <text class="detail-desc-text">{{detail.editorRec}}</text>
+    </view>
+
+    <!-- 目录（京东图书/音像） -->
+    <view class="detail-section" wx:if="{{detail && detail.catalogue}}">
+      <view class="detail-section-header flex-row align-center">
+        <view class="detail-section-line"></view>
+        <text class="detail-section-title">目录</text>
+        <view class="detail-section-line"></view>
+      </view>
+      <text class="detail-desc-text">{{detail.catalogue}}</text>
     </view>
 
     <!-- 包装清单（京东商详） -->
@@ -122,7 +147,7 @@
       <text class="detail-symbol">¥</text>
       <text class="detail-price">{{goods.priceText}}</text>
     </view>
-    <view class="detail-buy-btn" bindtap="onBuy" hover-class="hover-dim">{{buying ? '生成中…' : '去购买'}}</view>
+    <view class="detail-buy-btn {{detail && detail.onSale === false ? 'buy-disabled' : ''}}" bindtap="onBuy" hover-class="hover-dim">{{buying ? '生成中…' : (detail && detail.onSale === false ? '已下架' : '去购买')}}</view>
   </view>
 </view>
 

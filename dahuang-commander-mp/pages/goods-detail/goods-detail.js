@@ -83,6 +83,10 @@ Page({
   onBuy() {
     const g = this.data.goods;
     if (!g || this.data.buying) return;
+    if (this.data.detail && this.data.detail.onSale === false) {
+      wx.showToast({ title: '该商品已下架，无法购买', icon: 'none' });
+      return;
+    }
     this.setData({ buying: true });
     wx.showLoading({ title: '生成链接中', mask: true });
     shop.requestRebateLink(g.platform, g.id).then((result) => {

@@ -334,3 +334,19 @@
   color: #9aa3a8;
   text-decoration: line-through;
 }
+
+/* ==================== 下架提示 ==================== */
+.off-sale-banner {
+  margin-top: 16rpx;
+  background: rgba(91, 122, 140, 0.08);
+  border: 1rpx solid rgba(91, 122, 140, 0.25);
+  border-radius: 8rpx;
+  padding: 12rpx 16rpx;
+  font-size: 22rpx;
+  color: #5b7a8c;
+}
+
+.buy-disabled {
+  background: #b9b2a6 !important;
+  box-shadow: none !important;
+}
