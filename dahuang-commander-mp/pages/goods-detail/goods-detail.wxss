@@ -182,3 +182,67 @@
 .align-center { align-items: center; }
 .justify-between { justify-content: space-between; }
 .text-ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ==================== 商详大字段（轮播图 + 图文详情） ==================== */
+.detail-swiper {
+  height: 640rpx;
+  background: #f4f1ea;
+}
+
+.detail-swiper-img {
+  width: 100%;
+  height: 100%;
+}
+
+.detail-category {
+  margin-top: 16rpx;
+  font-size: 22rpx;
+  color: #9aa3a8;
+}
+
+.detail-section {
+  background: #ffffff;
+  margin: 0 20rpx 20rpx;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  border: 1rpx solid rgba(59, 48, 36, 0.08);
+  box-shadow: 0 6rpx 18rpx -10rpx rgba(59, 48, 36, 0.16);
+}
+
+.detail-section-header {
+  justify-content: center;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.detail-section-line {
+  width: 48rpx;
+  height: 2rpx;
+  background: rgba(59, 48, 36, 0.15);
+}
+
+.detail-section-title {
+  font-size: 24rpx;
+  color: #5b7a8c;
+  letter-spacing: 4rpx;
+}
+
+.detail-packing-text {
+  font-size: 24rpx;
+  color: #2b2b2b;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+.detail-long-img {
+  width: 100%;
+  border-radius: 8rpx;
+  margin-bottom: 12rpx;
+  background: #f4f1ea;
+}
+
+.detail-desc-text {
+  font-size: 24rpx;
+  color: #2b2b2b;
+  line-height: 1.7;
+}

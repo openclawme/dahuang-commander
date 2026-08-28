@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '购物 v2.1：去购买自动复制链接 + 拼多多小程序一键直跳（归属保留）';
+const desc = '购物 v2.2：商品详情页接入商详大字段（轮播图 + 图文详情 + 包装清单）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

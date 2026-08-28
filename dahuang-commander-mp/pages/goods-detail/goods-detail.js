@@ -1,9 +1,11 @@
 const app = require('../../utils/getApp.js');
 const shop = require('../../utils/shop.js');
+const { getHeaders } = require('../../utils/config.js');
 
 Page({
   data: {
     goods: null,
+    detail: null, // { gallery, detailImages, desc, categoryText, packingList }
     buying: false
   },
 
@@ -11,7 +13,9 @@ Page({
     const goods = app.globalData.goodsDetail;
     if (goods) {
       // 防御：历史卡片可能未经过 decorate 格式化
-      this.setData({ goods: shop.decorateGoods([goods])[0] });
+      const decorated = shop.decorateGoods([goods])[0];
+      this.setData({ goods: decorated });
+      this.fetchDetail(decorated);
     }
   },
 
@@ -20,9 +24,43 @@ Page({
     if (app.globalData.goodsDetail) app.globalData.goodsDetail = null;
   },
 
-  previewImage() {
-    const g = this.data.goods;
-    if (g && g.image) wx.previewImage({ current: g.image, urls: [g.image] });
+  // 商详大字段：轮播图 + 图文详情（佣金数据服务端已白名单过滤，不下发）
+  fetchDetail(goods) {
+    const { serverUrl, agentState } = app.globalData;
+    if (!agentState.token || !goods) return;
+    wx.request({
+      url: `${serverUrl}/api/agent/shopping/goods-detail`,
+      method: 'POST',
+      data: { platform: goods.platform, goodsId: goods.id },
+      header: getHeaders(agentState.token),
+      success: (res) => {
+        if (res.statusCode === 200 && res.data && res.data.success && res.data.detail) {
+          const d = res.data.detail;
+          this.setData({
+            detail: {
+              ...d,
+              // 轮播图为空时回退搜索主图
+              gallery: (d.gallery && d.gallery.length > 0) ? d.gallery : [goods.image].filter(Boolean)
+            }
+          });
+        }
+      }
+      // 详情获取失败不阻塞购买：页面仍可用
+    });
+  },
+
+  previewGallery(e) {
+    const urls = (this.data.detail && this.data.detail.gallery) || [];
+    if (!urls.length) return;
+    const current = urls[e.currentTarget.dataset.index || 0] || urls[0];
+    wx.previewImage({ current, urls });
+  },
+
+  previewDetailImage(e) {
+    const urls = (this.data.detail && this.data.detail.detailImages) || [];
+    const src = e.currentTarget.dataset.src;
+    if (!urls.length || !src) return;
+    wx.previewImage({ current: src, urls });
   },
 
   onBuy() {

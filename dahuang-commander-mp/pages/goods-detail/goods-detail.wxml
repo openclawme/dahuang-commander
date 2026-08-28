@@ -1,7 +1,14 @@
 <view class="container" wx:if="{{goods}}">
   <scroll-view class="detail-scroll" scroll-y>
-    <!-- 商品主图（点击可全屏预览） -->
-    <view class="detail-image-wrap" bindtap="previewImage">
+    <!-- 轮播图（商详 gallery；无则回退搜索主图） -->
+    <swiper class="detail-swiper" wx:if="{{detail && detail.gallery.length > 1}}" indicator-dots circular
+            indicator-color="rgba(0,0,0,0.2)" indicator-active-color="#9e2a2b">
+      <swiper-item wx:for="{{detail.gallery}}" wx:key="*this">
+        <image class="detail-swiper-img" src="{{item}}" mode="aspectFill" lazy-load
+               bindtap="previewGallery" data-index="{{index}}"></image>
+      </swiper-item>
+    </swiper>
+    <view class="detail-image-wrap" wx:else bindtap="previewGallery" data-index="0">
       <image class="detail-image" src="{{goods.image}}" mode="aspectFill"></image>
       <text class="detail-image-hint">点击查看大图</text>
     </view>
@@ -25,11 +32,38 @@
         <text class="detail-shop text-ellipsis" wx:if="{{goods.shopName}}">{{goods.shopName}}</text>
       </view>
 
+      <!-- 类目 · 品牌（商详返回） -->
+      <view class="detail-category" wx:if="{{detail && detail.categoryText}}">{{detail.categoryText}}</view>
+
       <!-- 结算说明（不出现任何佣金/金额信息） -->
       <view class="detail-note flex-row align-center">
         <text class="detail-note-icon">币</text>
         <text class="detail-note-text">通过本商品购买入口下单，订单完成后大荒币自动入账</text>
       </view>
+    </view>
+
+    <!-- 包装清单（京东商详） -->
+    <view class="detail-section" wx:if="{{detail && detail.packingList}}">
+      <view class="detail-section-header flex-row align-center">
+        <view class="detail-section-line"></view>
+        <text class="detail-section-title">包装清单</text>
+        <view class="detail-section-line"></view>
+      </view>
+      <text class="detail-packing-text">{{detail.packingList}}</text>
+    </view>
+
+    <!-- 图文详情（京东 detailImages 长图 / 拼多多 desc 文字） -->
+    <view class="detail-section" wx:if="{{detail && (detail.detailImages.length > 0 || detail.desc)}}">
+      <view class="detail-section-header flex-row align-center">
+        <view class="detail-section-line"></view>
+        <text class="detail-section-title">商品详情</text>
+        <view class="detail-section-line"></view>
+      </view>
+      <block wx:if="{{detail.detailImages.length > 0}}">
+        <image class="detail-long-img" wx:for="{{detail.detailImages}}" wx:key="*this" src="{{item}}"
+               mode="widthFix" lazy-load bindtap="previewDetailImage" data-src="{{item}}"></image>
+      </block>
+      <text class="detail-desc-text" wx:elif="{{detail.desc}}">{{detail.desc}}</text>
     </view>
 
     <view class="detail-spacer"></view>
