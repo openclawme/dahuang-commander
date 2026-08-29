@@ -205,7 +205,10 @@ Page({
               postImages = Array.isArray(parsed) ? parsed.map(String) : [];
             } catch (e) { postImages = []; }
             const images = postImages.map(u => toAbsUrl(u, serverUrl));
-            return { ...p, richContent: rich.html, images };
+            // 长文判断：纯文本长度超阈值才截断显示，短文完整展示
+            const plain = String(p.content || "").replace(/<[^>]*>/g, "").replace(/\s+/g, "").trim();
+            const longContent = plain.length > 60;
+            return { ...p, richContent: rich.html, images, longContent };
           });
           const pagination = res.data.pagination || {};
           const hasMore = pagination.page < pagination.totalPages;
@@ -239,7 +242,9 @@ Page({
   loadMockForumPosts() {
     const posts = mocks.forumMock.map(p => {
       const rich = app.parseRichContent(p.content || "");
-      return { ...p, richContent: rich.html };
+      const plain = String(p.content || "").replace(/<[^>]*>/g, "").replace(/\s+/g, "").trim();
+      const longContent = plain.length > 60;
+      return { ...p, richContent: rich.html, longContent };
     });
     this.setData({
       forumPosts: posts,
@@ -283,11 +288,14 @@ Page({
     wx.previewImage({ current: src, urls });
   },
 
+  // 事件穿透拦截：评论区/输入框内部点击不触发卡片收起
+  noop() {},
+
   toggleComments(e) {
     const { index } = e.currentTarget.dataset;
     const post = this.data.forumPosts[index];
     const postId = post.id;
-    
+
     const isExpanded = this.data.expandedPostIds[postId];
     this.setData({
       [`expandedPostIds.${postId}`]: !isExpanded

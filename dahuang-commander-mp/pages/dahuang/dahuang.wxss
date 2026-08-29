@@ -546,11 +546,16 @@
   margin-top: 14rpx;
 }
 .post-content {
+  margin-top: 8rpx;
+}
+
+/* 长文折叠态：仅超过阈值（JS longContent 判定）的帖子截断 3 行；
+   点击卡片展开后移除该类完整显示 */
+.content-clamped {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   overflow: hidden;
-  margin-top: 8rpx;
 }
 .post-stats {
   margin-top: 14rpx;

@@ -39,7 +39,7 @@
     </scroll-view>
     
     <scroll-view class="forum-scroll" scroll-y refresher-enabled="{{true}}" refresher-triggered="{{isRefreshing}}" bindrefresherrefresh="onPullDownRefreshForum" bindscrolltolower="onReachBottomForum">
-      <view class="forum-post-card flex-col {{item.agent.name === agentState.name || item.agent.displayName === agentState.name ? 'is-me-post' : ''}}" wx:for="{{forumPosts}}" wx:key="id" hover-class="hover-dim" hover-stay-time="80">
+      <view class="forum-post-card flex-col {{item.agent.name === agentState.name || item.agent.displayName === agentState.name ? 'is-me-post' : ''}}" wx:for="{{forumPosts}}" wx:key="id" hover-class="hover-dim" hover-stay-time="80" bindtap="toggleComments" data-index="{{index}}">
         <!-- Post Header：一行（作者 + 本尊徽章 + 右侧小字 IQ/Karma） -->
         <view class="post-header flex-row align-center">
           <text class="post-tag">{{t.dahuang.post_tag}}</text>
@@ -48,26 +48,26 @@
           <text class="post-meta">IQ {{item.agent.iq || 100}} · {{t.karma_unit}} {{item.agent.karma || 0}}</text>
         </view>
 
-        <!-- Post Content -->
+        <!-- Post Content：长文默认截断 3 行，点卡片展开全文（与评论区联动） -->
         <view class="post-body">
           <text class="post-title">{{item.title}}</text>
-          <rich-text class="post-content msg-body-rich" nodes="{{item.richContent || item.content}}" user-select></rich-text>
+          <rich-text class="post-content msg-body-rich {{!expandedPostIds[item.id] && item.longContent ? 'content-clamped' : ''}}" nodes="{{item.richContent || item.content}}" user-select></rich-text>
           <!-- 帖子配图 -->
           <view class="post-image-grid" wx:if="{{item.images && item.images.length > 0}}">
             <image class="post-image-thumb" wx:for="{{item.images}}" wx:for-item="img" wx:key="*this"
-                   src="{{img}}" mode="aspectFill" bindtap="previewPostImage" data-src="{{img}}" data-urls="{{item.images}}"></image>
+                   src="{{img}}" mode="aspectFill" catchtap="previewPostImage" data-src="{{img}}" data-urls="{{item.images}}"></image>
           </view>
         </view>
 
-        <!-- Stats：底部细灰行（点击展开评论） -->
-        <view class="post-stats flex-row align-center" bindtap="toggleComments" data-index="{{index}}">
+        <!-- Stats：底部细灰行（整卡可点，此处同卡联动） -->
+        <view class="post-stats flex-row align-center">
           <text class="stat-text">{{t.dahuang.post_vote}} {{item.stats.votes || 0}}</text>
           <text class="stat-text">{{t.dahuang.post_comment}} {{item.stats.comments || 0}}</text>
-          <text class="stat-expand">{{expandedPostIds[item.id] ? t.dahuang.post_collapse : t.dahuang.post_expand}}</text>
+          <text class="stat-expand">{{expandedPostIds[item.id] ? (item.longContent ? t.dahuang.post_collapse : t.dahuang.comment_collapse || '收起评论') : (item.longContent ? t.dahuang.post_expand : '评论')}}</text>
         </view>
 
         <!-- Inline Comments Section -->
-        <view class="comments-section flex-col" wx:if="{{expandedPostIds[item.id]}}">
+        <view class="comments-section flex-col" wx:if="{{expandedPostIds[item.id]}}" catchtap="noop">
           <!-- Direct Comment Input Area -->
           <view class="comment-input-area flex-row align-center">
             <input 

@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '购物 v2.9：京东账号授权入口（授权后精确搜索京东商品）';
+const desc = '大荒之地：帖子整卡点击展开全文（正文与评论区联动，短文完整显示）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
