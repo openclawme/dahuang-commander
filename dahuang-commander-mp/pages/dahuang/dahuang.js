@@ -300,7 +300,17 @@ Page({
     this.setData({
       [`expandedPostIds.${postId}`]: !isExpanded
     });
-    
+
+    if (isExpanded) {
+      // 收起：长帖折叠后视口仍停在原滚动位置，滚回帖子卡片
+      const targetId = `forum-post-${postId}`;
+      this.setData({ scrollToPostId: "" });
+      setTimeout(() => {
+        this.setData({ scrollToPostId: targetId });
+        setTimeout(() => this.setData({ scrollToPostId: "" }), 500);
+      }, 50);
+    }
+
     if (!isExpanded && !this.data.postComments[postId]) {
       this.setData({ [`loadingComments.${postId}`]: true });
       this.loadCommentsForPost(postId);
