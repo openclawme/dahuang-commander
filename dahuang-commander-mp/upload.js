@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '去购买默认复制网页链接（通用），小程序短链改为可选分享项';
+const desc = '大荒帖子商品卡：购物结果发帖渲染可点击购买卡片（看帖即购）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

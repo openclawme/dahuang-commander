@@ -735,3 +735,137 @@
   width: auto !important;
   margin-top: 20rpx !important;
 }
+
+/* ==================== 帖子商品卡（看帖即购） ==================== */
+.post-goods-list {
+  margin-top: 14rpx;
+}
+
+.goods-card {
+  background: #ffffff;
+  border: 1rpx solid rgba(59, 48, 36, 0.08);
+  border-radius: 16rpx;
+  padding: 14rpx;
+  box-shadow: 0 6rpx 18rpx -10rpx rgba(59, 48, 36, 0.18);
+  position: relative;
+  align-items: flex-start;
+}
+
+.goods-card-img {
+  width: 150rpx;
+  height: 150rpx;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+  background: #f4f1ea;
+  margin-right: 16rpx;
+}
+
+.goods-card-body {
+  flex: 1;
+  min-width: 0;
+  padding-right: 100rpx;
+}
+
+.goods-card-title {
+  font-size: 25rpx;
+  color: #2b2b2b;
+  line-height: 1.4;
+  margin-bottom: 8rpx;
+}
+
+.text-ellipsis-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.goods-card-price-row {
+  margin-bottom: 8rpx;
+}
+
+.goods-card-symbol {
+  font-size: 22rpx;
+  color: #9e2a2b;
+  font-weight: bold;
+}
+
+.goods-card-price {
+  font-size: 36rpx;
+  color: #9e2a2b;
+  font-weight: bold;
+  margin-right: 12rpx;
+}
+
+.goods-card-origin {
+  font-size: 20rpx;
+  color: #9aa3a8;
+  text-decoration: line-through;
+  margin-right: 10rpx;
+}
+
+.goods-card-coupon {
+  font-size: 18rpx;
+  color: #9e2a2b;
+  border: 1rpx solid rgba(158, 42, 43, 0.4);
+  border-radius: 6rpx;
+  padding: 1rpx 8rpx;
+}
+
+.goods-card-meta {
+  gap: 8rpx;
+}
+
+.goods-card-platform {
+  font-size: 18rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+  flex-shrink: 0;
+}
+
+.platform-pdd {
+  color: #ffffff;
+  background: rgba(158, 42, 43, 0.85);
+}
+
+.platform-jd {
+  color: #9e2a2b;
+  background: rgba(158, 42, 43, 0.08);
+  border: 1rpx solid rgba(158, 42, 43, 0.3);
+}
+
+.goods-card-sales {
+  font-size: 18rpx;
+  color: #5b7a8c;
+  flex-shrink: 0;
+}
+
+.goods-card-shop {
+  font-size: 18rpx;
+  color: #9aa3a8;
+  flex: 1;
+  min-width: 0;
+}
+
+.goods-card-buy {
+  position: absolute;
+  right: 14rpx;
+  bottom: 14rpx;
+  background: #9e2a2b;
+  color: #ffffff;
+  font-size: 22rpx;
+  padding: 8rpx 24rpx;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 10rpx -4rpx rgba(158, 42, 43, 0.5);
+}
+
+/* 活动角标 */
+.goods-tag {
+  font-size: 16rpx;
+  color: #9e2a2b;
+  border: 1rpx solid rgba(158, 42, 43, 0.45);
+  border-radius: 6rpx;
+  padding: 1rpx 8rpx;
+  flex-shrink: 0;
+  background: rgba(158, 42, 43, 0.04);
+}

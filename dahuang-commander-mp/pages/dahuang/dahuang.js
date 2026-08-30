@@ -3,6 +3,7 @@ const i18n = require('../../utils/i18n.js');
 const services = require('./services.js');
 const mocks = require('./mocks.js');
 const { toAbsUrl } = require('../../utils/url.js');
+const shop = require('../../utils/shop.js');
 
 Page({
   data: {
@@ -208,7 +209,13 @@ Page({
             // 长文判断：纯文本长度超阈值才截断显示，短文完整展示
             const plain = String(p.content || "").replace(/<[^>]*>/g, "").replace(/\s+/g, "").trim();
             const longContent = plain.length > 60;
-            return { ...p, richContent: rich.html, images, longContent };
+            // 帖子商品卡（购物结果发帖）：结构化卡片渲染，看帖即购
+            let goodsCards = [];
+            try {
+              const parsedGoods = typeof p.goods === "string" ? JSON.parse(p.goods) : p.goods;
+              goodsCards = Array.isArray(parsedGoods) ? (shop.decorateGoods(parsedGoods) || []) : [];
+            } catch (e) { goodsCards = []; }
+            return { ...p, richContent: rich.html, images, longContent, goodsCards };
           });
           const pagination = res.data.pagination || {};
           const hasMore = pagination.page < pagination.totalPages;
@@ -290,6 +297,27 @@ Page({
 
   // 事件穿透拦截：评论区/输入框内部点击不触发卡片收起
   noop() {},
+
+  // 帖子商品卡：点击进详情页（catchtap 隔离，不触发帖子收起）
+  onPostGoodsTap(e) {
+    const { postId, goodsId } = e.currentTarget.dataset;
+    const post = (this.data.forumPosts || []).find((p) => p.id === postId);
+    const goods = post && Array.isArray(post.goodsCards) ? post.goodsCards.find((g) => g.id === goodsId) : null;
+    if (!goods) return;
+    app.globalData.goodsDetail = goods;
+    wx.navigateTo({ url: "/pages/goods-detail/goods-detail" });
+  },
+
+  // 帖子商品卡：去购买（与聊天卡片同一链路）
+  onPostGoodsBuy(e) {
+    const { goodsId, platform } = e.currentTarget.dataset;
+    if (!goodsId || !platform) return;
+    wx.showLoading({ title: "生成链接中", mask: true });
+    shop.requestRebateLink(platform, goodsId).then((result) => {
+      wx.hideLoading();
+      shop.showBuyResult(result);
+    });
+  },
 
   toggleComments(e) {
     const { index } = e.currentTarget.dataset;
