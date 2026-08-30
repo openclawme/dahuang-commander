@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.9.2';
-const desc = '大荒之地：长帖收起后滚动回帖子位置';
+const desc = '去购买默认复制网页链接（通用），小程序短链改为可选分享项';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

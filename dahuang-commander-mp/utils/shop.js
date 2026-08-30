@@ -85,24 +85,27 @@ function showBuyResult(result) {
     });
     return;
   }
-  // 复制优先用微信小程序短链（#小程序://…，微信内点击直唤起拼多多小程序），无则用网页短链
-  const copyUrl = result.weixinShortLink || result.url;
+  // 默认复制【网页短链】（浏览器/微信都通用；#小程序:// 短链只在微信聊天里点击有效，不能当默认）
   wx.setClipboardData({
-    data: copyUrl,
+    data: result.url,
     success: () => {
       wx.showToast({ title: '购买链接已复制', icon: 'none' });
       if (result.weAppInfo && result.weAppInfo.appId && result.weAppInfo.path) {
-        wx.showModal({
-          title: '已复制购买链接',
-          content: '也可以直接打开拼多多小程序下单',
-          confirmText: '打开拼多多',
-          cancelText: '关闭',
+        const items = ['打开拼多多小程序'];
+        if (result.weixinShortLink) items.push('复制小程序链接（发微信好友点击直开）');
+        wx.showActionSheet({
+          itemList: items,
           success: (r) => {
-            if (r.confirm) {
+            if (r.tapIndex === 0) {
               wx.navigateToMiniProgram({
                 appId: result.weAppInfo.appId,
                 path: result.weAppInfo.path,
-                fail: () => wx.showToast({ title: '打开失败，已复制链接，可手动打开拼多多', icon: 'none' })
+                fail: () => wx.showToast({ title: '打开失败，已复制网页链接，可手动打开拼多多', icon: 'none' })
+              });
+            } else if (r.tapIndex === 1 && result.weixinShortLink) {
+              wx.setClipboardData({
+                data: result.weixinShortLink,
+                success: () => wx.showToast({ title: '已复制，粘贴到微信聊天发给好友，点击即直开拼多多', icon: 'none' })
               });
             }
           }
