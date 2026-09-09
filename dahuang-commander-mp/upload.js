@@ -12,8 +12,8 @@ const project = new ci.Project({
 });
 
 const pkg = require('./package.json');
-const version = pkg.version || '1.9.2';
-const desc = '大荒帖子商品卡：购物结果发帖渲染可点击购买卡片（看帖即购）';
+const version = pkg.version || '1.11.17';
+const desc = '优化新进入建议单例收敛、任务后快捷下一步与高危写操作确认';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
