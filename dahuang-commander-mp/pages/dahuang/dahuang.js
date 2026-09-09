@@ -57,10 +57,26 @@ Page({
     miniProgress: 0,
     miniActiveTasks: [],
     toMiniMsg: "",
-    miniKeyboardHeight: 0
+    miniKeyboardHeight: 0,
+    miniKeyboardShift: 0,
+    bottomOffset: 0
+  },
+
+  initPageBottomOffset() {
+    try {
+      const windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+      const screenHeight = windowInfo.screenHeight || 0;
+      const windowHeight = windowInfo.windowHeight || 0;
+      const windowTop = windowInfo.windowTop || 0;
+      const bottomOffset = Math.max(0, screenHeight - windowHeight - windowTop);
+      this.setData({ bottomOffset });
+    } catch (e) {
+      this.setData({ bottomOffset: 0 });
+    }
   },
 
   onLoad() {
+    this.initPageBottomOffset();
     const dict = i18n.getDict() || {};
     this.setData({
       t: dict,
@@ -77,6 +93,7 @@ Page({
   },
 
   onShow() {
+    this.initPageBottomOffset();
     const dict = i18n.getDict() || {};
     this.setData({
       t: dict,
@@ -728,13 +745,27 @@ Page({
     });
   },
 
-  onMiniInputFocus() {},
-
-  onMiniInputBlur() {
-    this.setData({ miniKeyboardHeight: 0 });
+  onMiniInputFocus(e) {
+    const rawHeight = (e && e.detail && typeof e.detail.height === 'number') ? e.detail.height : 0;
+    if (rawHeight > 0) {
+      const shift = Math.max(0, rawHeight - (this.data.bottomOffset || 0));
+      this.setData({ miniKeyboardShift: shift });
+    }
   },
 
-  onMiniKeyboardHeightChange() {},
+  onMiniInputBlur() {
+    this.setData({ miniKeyboardShift: 0 });
+  },
+
+  onMiniKeyboardHeightChange(e) {
+    const rawHeight = (e && e.detail && typeof e.detail.height === 'number') ? e.detail.height : 0;
+    if (rawHeight > 0) {
+      const shift = Math.max(0, rawHeight - (this.data.bottomOffset || 0));
+      this.setData({ miniKeyboardShift: shift });
+    } else {
+      this.setData({ miniKeyboardShift: 0 });
+    }
+  },
 
   selectQuickOption(e) {
     const option = e.currentTarget.dataset.option;

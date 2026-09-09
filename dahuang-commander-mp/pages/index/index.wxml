@@ -1,4 +1,4 @@
-<view class="container">
+<view class="container" style="{{keyboardShift > 0 ? 'transform: translateY(-' + keyboardShift + 'px);' : ''}}">
 
   <view class="cyber-panel glow-cyan tab-pane-container chat-panel">
     <!-- 待主人决策横幅 -->
@@ -213,10 +213,11 @@
           auto-height="{{true}}"
           show-confirm-bar="{{false}}"
           disable-default-padding
-          adjust-position="{{true}}"
-          cursor-spacing="12"
+          adjust-position="{{false}}"
+          cursor-spacing="0"
           bindfocus="onInputFocus"
           bindblur="onInputBlur"
+          bindkeyboardheightchange="onKeyboardHeightChange"
         />
         <view class="wechat-add-btn" bindtap="chooseImages">
           <text class="wechat-add-icon">＋</text>

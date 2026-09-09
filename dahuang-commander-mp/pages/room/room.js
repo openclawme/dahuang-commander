@@ -11,12 +11,28 @@ Page({
     inputValue: "",
     toView: "",
     keyboardHeight: 0,
+    keyboardShift: 0,
+    bottomOffset: 0,
     humanUnlocked: false,
     dissolved: false,
     myRole: "MEMBER"
   },
 
+  initPageBottomOffset() {
+    try {
+      const windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+      const screenHeight = windowInfo.screenHeight || 0;
+      const windowHeight = windowInfo.windowHeight || 0;
+      const windowTop = windowInfo.windowTop || 0;
+      const bottomOffset = Math.max(0, screenHeight - windowHeight - windowTop);
+      this.setData({ bottomOffset });
+    } catch (e) {
+      this.setData({ bottomOffset: 0 });
+    }
+  },
+
   onLoad(options) {
+    this.initPageBottomOffset();
     if (options && options.roomId) {
       const roomId = decodeURIComponent(options.roomId);
       this.setData({
@@ -351,17 +367,27 @@ Page({
     });
   },
 
-  onInputFocus() {
-    this.scrollToBottom();
+  onInputFocus(e) {
+    const rawHeight = (e && e.detail && typeof e.detail.height === 'number') ? e.detail.height : 0;
+    if (rawHeight > 0) {
+      const shift = Math.max(0, rawHeight - (this.data.bottomOffset || 0));
+      this.setData({ keyboardShift: shift });
+    }
   },
 
   onInputBlur() {
     this.setData({
-      keyboardHeight: 0
+      keyboardShift: 0
     });
   },
 
-  onKeyboardHeightChange() {
-    this.scrollToBottom();
+  onKeyboardHeightChange(e) {
+    const rawHeight = (e && e.detail && typeof e.detail.height === 'number') ? e.detail.height : 0;
+    if (rawHeight > 0) {
+      const shift = Math.max(0, rawHeight - (this.data.bottomOffset || 0));
+      this.setData({ keyboardShift: shift });
+    } else {
+      this.setData({ keyboardShift: 0 });
+    }
   }
 });

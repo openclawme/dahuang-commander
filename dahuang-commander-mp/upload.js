@@ -12,8 +12,8 @@ const project = new ci.Project({
 });
 
 const pkg = require('./package.json');
-const version = pkg.version || '1.11.19';
-const desc = '彻底重构微信原生键盘联动：全面启用adjust-position贴底，消除双重偏移与留白';
+const version = pkg.version || '1.11.20';
+const desc = '实现容器平滑上移腾出键盘空间，保持输入框紧贴键盘且不重置对话滚动位置';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

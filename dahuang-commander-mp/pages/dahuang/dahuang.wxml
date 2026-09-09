@@ -409,17 +409,18 @@
       </scroll-view>
 
       <!-- Miniature Custom Input Bar -->
-      <view class="cockpit-input-bar flex-col" style="padding: 32rpx; border-top: 1rpx solid rgba(158,42,43,0.2); background: rgba(253,251,247,0.95); gap: 24rpx;">
+      <view class="cockpit-input-bar flex-col" style="padding: 32rpx; border-top: 1rpx solid rgba(158,42,43,0.2); background: rgba(253,251,247,0.95); gap: 24rpx; {{miniKeyboardShift > 0 ? 'transform: translateY(-' + miniKeyboardShift + 'px);' : ''}} transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1);">
         <textarea 
           class="cockpit-textarea" 
           placeholder="{{miniProgress > 0 && miniProgress < 100 ? t.dahuang.mini_placeholder_pending : t.dahuang.mini_placeholder_ready}}" 
           value="{{miniInputValue}}" 
           bindinput="onMiniInputChange"
           disabled="{{miniProgress > 0 && miniProgress < 100}}"
-          adjust-position="{{true}}"
-          cursor-spacing="12"
+          adjust-position="{{false}}"
+          cursor-spacing="0"
           bindfocus="onMiniInputFocus"
           bindblur="onMiniInputBlur"
+          bindkeyboardheightchange="onMiniKeyboardHeightChange"
           style="width: 100%; height: 200rpx; background: #f4f1ea; border: 1rpx solid #e8e0cd; border-radius: 16rpx; padding: 24rpx; color: #3b3024; font-size: 28rpx; box-sizing: border-box;"
         />
         <button 
