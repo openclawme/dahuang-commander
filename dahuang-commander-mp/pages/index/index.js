@@ -1077,15 +1077,8 @@ Page({
     });
   },
 
-  onInputFocus(e) {
-    const keyboardHeight = e.detail.height || this.data.keyboardHeight || 0;
-    if (keyboardHeight > 0) {
-      this.setData({
-        keyboardHeight: keyboardHeight
-      }, () => {
-        this.scrollToBottom();
-      });
-    }
+  onInputFocus() {
+    this.scrollToBottom();
   },
 
   onInputBlur() {
@@ -1094,13 +1087,8 @@ Page({
     });
   },
 
-  onKeyboardHeightChange(e) {
-    const keyboardHeight = e.detail.height || 0;
-    this.setData({
-      keyboardHeight: keyboardHeight
-    }, () => {
-      this.scrollToBottom();
-    });
+  onKeyboardHeightChange() {
+    this.scrollToBottom();
   },
 
   onMessageLongPress(e) {

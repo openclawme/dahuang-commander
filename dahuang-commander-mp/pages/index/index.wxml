@@ -181,7 +181,7 @@
   </view>
 
   <!-- 5. Bottom fixed terminal input -->
-  <view class="wechat-footer" style="padding-bottom: {{keyboardHeight > 0 ? (keyboardHeight + 8) + 'px' : 'calc(16rpx + env(safe-area-inset-bottom))'}};">
+  <view class="wechat-footer">
     <view class="quote-banner" wx:if="{{quotedMessage}}">
       <view class="quote-banner-left">
         <text class="quote-banner-label">引用消息</text>
@@ -213,11 +213,10 @@
           auto-height="{{true}}"
           show-confirm-bar="{{false}}"
           disable-default-padding
-          adjust-position="{{false}}"
-          cursor-spacing="0"
+          adjust-position="{{true}}"
+          cursor-spacing="12"
           bindfocus="onInputFocus"
           bindblur="onInputBlur"
-          bindkeyboardheightchange="onKeyboardHeightChange"
         />
         <view class="wechat-add-btn" bindtap="chooseImages">
           <text class="wechat-add-icon">＋</text>

@@ -728,21 +728,13 @@ Page({
     });
   },
 
-  onMiniInputFocus(e) {
-    const miniKeyboardHeight = e.detail.height || this.data.miniKeyboardHeight || 0;
-    if (miniKeyboardHeight > 0) {
-      this.setData({ miniKeyboardHeight });
-    }
-  },
+  onMiniInputFocus() {},
 
   onMiniInputBlur() {
     this.setData({ miniKeyboardHeight: 0 });
   },
 
-  onMiniKeyboardHeightChange(e) {
-    const miniKeyboardHeight = e.detail.height || 0;
-    this.setData({ miniKeyboardHeight });
-  },
+  onMiniKeyboardHeightChange() {},
 
   selectQuickOption(e) {
     const option = e.currentTarget.dataset.option;
