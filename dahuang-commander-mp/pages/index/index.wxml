@@ -25,7 +25,19 @@
           </view>
           <block wx:if="{{item.isPending && (!item.tasks || item.tasks.length === 0) && (!item.content || item.content === '（智能体处理中...）')}}">
             <view class="pending-loader-container flex-row align-center">
-              <view class="cyber-spinner"></view>
+              <!-- Claude "Imagining..." 同款：暖珊瑚放射星芒（8 条不等长光芒 + 缓慢旋转 + 呼吸） -->
+              <view class="claude-starburst-breathe">
+                <view class="claude-starburst">
+                  <view class="claude-ray r0"></view>
+                  <view class="claude-ray r1"></view>
+                  <view class="claude-ray r2"></view>
+                  <view class="claude-ray r3"></view>
+                  <view class="claude-ray r4"></view>
+                  <view class="claude-ray r5"></view>
+                  <view class="claude-ray r6"></view>
+                  <view class="claude-ray r7"></view>
+                </view>
+              </view>
               <text class="pending-loader-text">{{t.index.pending}}</text>
             </view>
           </block>
@@ -88,35 +100,59 @@
             </view>
           </view>
 
-          <view class="bubble-task-container" wx:if="{{item.sender === 'agent' && (item.isPending || (item.progress > 0 && item.progress < 100))}}">
-            <view class="bubble-progress-row flex-row align-center justify-between">
-              <text class="bubble-progress-lbl">{{t.index.progress}}</text>
-              <view class="flex-row align-center" style="gap: 10rpx;">
-                <text class="bubble-progress-pct">{{item.progress || 0}}%</text>
+          <!-- 步骤级失败但整体完成：轻量提示（非红色错误横幅） -->
+          <view class="partial-fail-note" wx:if="{{item.hasFailedSteps}}">⚠️ 个别步骤未成功，已自动换方案完成</view>
+
+          <!-- 回复后的下一步建议（点击即执行） -->
+          <view class="suggestion-list" wx:if="{{item.sender === 'agent' && item.suggestions && item.suggestions.length > 0 && !item.isPending}}">
+            <view class="suggestion-chip" wx:for="{{item.suggestions}}" wx:for-item="s" wx:key="id"
+                  bindtap="tapSuggestion" data-command="{{s.command}}">
+              <text class="suggestion-chip-text">{{s.label}}</text>
+              <text class="suggestion-chip-arrow">›</text>
+            </view>
+          </view>
+          <!-- 实时进度区：状态行 + 分段进度条 + 可展开步骤列表（agent_progress 事件流驱动） -->
+          <view class="bubble-task-container" wx:if="{{item.sender === 'agent' && item.psDisplay}}">
+            <view class="ps-status-row flex-row align-center">
+              <!-- 放射状脉冲等待图标（Claude 风格：波纹从中心向外扩散） -->
+              <view class="radar-pulse">
+                <view class="radar-ring"></view>
+                <view class="radar-ring"></view>
+                <view class="radar-ring"></view>
+                <view class="radar-core"></view>
+              </view>
+              <text class="ps-status-text text-ellipsis">{{item.psDisplay.statusLine}}</text>
+              <text class="ps-elapsed">⏱ {{item.psDisplay.elapsedText}}</text>
+            </view>
+
+            <!-- 分段进度条：步骤数已知（plan 首帧到达后） -->
+            <view class="ps-bar" wx:if="{{item.psDisplay.hasSteps}}">
+              <view
+                class="ps-seg {{seg.status === 'SUCCESS' ? 'seg-done' : (seg.status === 'FAILED' ? 'seg-failed' : (seg.active ? 'seg-active' : 'seg-pending'))}}"
+                wx:for="{{item.psDisplay.segments}}" wx:for-item="seg" wx:key="id"
+                style="width: {{100 / item.psDisplay.segments.length}}%;"
+              ></view>
+            </view>
+            <!-- 无步骤信息时的整条流动动画（理解指令阶段） -->
+            <view class="ps-bar ps-bar-indeterminate" wx:else>
+              <view class="ps-ind-fill"></view>
+            </view>
+
+            <view class="ps-meta-row flex-row align-center">
+              <text class="ps-pct">{{item.psDisplay.pct}}%</text>
+              <text class="ps-stall" wx:if="{{item.psDisplay.stalled}}">仍在推进中…</text>
+              <text class="ps-toggle" wx:if="{{item.psDisplay.hasSteps}}" bindtap="togglePsSteps" data-msg-id="{{item.id}}">{{item.psDisplay.expanded ? '收起步骤' : '展开 ' + item.psDisplay.steps.length + ' 个步骤'}}</text>
+            </view>
+
+            <view class="ps-steps" wx:if="{{item.psDisplay.expanded && item.psDisplay.hasSteps}}">
+              <view class="ps-step flex-row align-center" wx:for="{{item.psDisplay.steps}}" wx:for-item="s" wx:key="id">
+                <text class="ps-step-mark {{s.status === 'SUCCESS' ? 'mark-done' : (s.status === 'FAILED' ? 'mark-failed' : (s.active ? 'mark-running' : 'mark-pending'))}}">{{s.status === 'SUCCESS' ? '✓' : (s.status === 'FAILED' ? '✗' : (s.active ? '⟳' : '○'))}}</text>
+                <text class="ps-step-desc text-ellipsis">{{s.desc}}</text>
+                <text class="ps-step-time" wx:if="{{s.durationText}}">{{s.durationText}}</text>
               </view>
             </view>
-            <view class="bubble-progress-track">
-              <view class="bubble-progress-fill" style="width: {{item.progress || 0}}%;"></view>
-            </view>
-            <view class="bubble-task-list" wx:if="{{showDetailedTasks && item.tasks && item.tasks.length > 0}}">
-              <view class="bubble-task-item flex-col" wx:for="{{item.tasks}}" wx:for-item="task" wx:key="id" style="{{task.status === 'PROCESSING' ? 'border-color: rgba(158,42,43, 0.25); background: rgba(158,42,43, 0.04);' : ''}}">
-                <view class="bubble-task-item-header flex-row align-center justify-between">
-                  <view class="flex-row align-center" style="flex: 1; min-width: 0;">
-                    <icon type="{{task.status === 'SUCCESS' ? 'success' : (task.status === 'FAILED' ? 'warn' : 'waiting')}}" size="10" color="{{task.status === 'SUCCESS' ? '#3b5e59' : (task.status === 'FAILED' ? '#be123c' : '#9e2a2b')}}" style="margin-right: 8rpx; flex-shrink: 0;"></icon>
-                    <text class="bubble-task-title {{task.status === 'SUCCESS' ? 'bubble-task-done' : ''}} text-ellipsis">{{task.desc || task.title || t.index.step}}</text>
-                  </view>
-                  <text class="bubble-task-status-badge status-{{task.status}}">{{task.status}}</text>
-                </view>
 
-                <view class="bubble-step-progress-track">
-                  <view class="bubble-step-progress-fill fill-{{task.status}}" style="width: {{task.status === 'SUCCESS' ? '100%' : (task.status === 'PROCESSING' ? '60%' : (task.status === 'FAILED' ? '100%' : '0%'))}};"></view>
-                </view>
-
-                <view class="bubble-task-detail" wx:if="{{task.detail}}">
-                  <text>↳ {{task.detail}}</text>
-                </view>
-              </view>
-            </view>
+            <view class="ps-detail" wx:if="{{item.psDisplay.lastDetail}}">↳ {{item.psDisplay.lastDetail}}</view>
 
             <view class="fallback-action-box flex-row align-center justify-between" wx:if="{{item.autoFallbackTriggered}}" style="margin-top: 12rpx; padding: 10rpx 14rpx; background: rgba(217,119,6, 0.08); border: 1px solid rgba(217,119,6, 0.3); border-radius: 8rpx;">
               <text style="font-size: 24rpx; color: #d97706;">看门狗已自动归档超时任务（后台结果产出后会自动回填）</text>

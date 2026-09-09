@@ -156,8 +156,26 @@ App({
       this.handleAgentCommandResult(data);
     });
 
+    // 回复后的下一步建议：主结果已送达后异步补齐，按 requestId 挂到对应气泡；
+    // 对应消息不存在（如已被清理）则静默丢弃
+    socket.on("agent_suggestions", (data) => {
+      const requestId = data && data.requestId;
+      const suggestions = data && Array.isArray(data.suggestions) ? data.suggestions : [];
+      if (!requestId || suggestions.length === 0) return;
+      const msg = this.globalData.chatHistory.find((m) => m.id === requestId);
+      if (!msg || msg.isPending || msg.isError) return;
+      msg.suggestions = suggestions;
+      this.saveChatHistory();
+      this.triggerPageCallback("onChatHistoryUpdate");
+    });
+
     socket.on("agent_command_stream", (data) => {
       this.handleAgentCommandStream(data);
+    });
+
+    // 实时进度事件流：plan/phase/step_start/step_update/step_done/heartbeat
+    socket.on("agent_progress", (data) => {
+      this.handleAgentProgress(data);
     });
 
     // Correct event name according to server src/app/api/matrix/...: "m.room.event"
@@ -367,8 +385,86 @@ App({
       msg.content = data.content || "";
       msg.isPending = false;
       msg.progress = 99;
+      // 流式归纳阶段：进度状态机保留并切换 phase，状态行显示"✍ 正在整理回复"
+      if (msg.progressState) {
+        msg.progressState.phase = "synthesize";
+        msg.progressState.lastUpdateAt = Date.now();
+      }
       this.triggerPageCallback("onChatHistoryUpdate");
     }
+  },
+
+  /**
+   * 实时进度事件流状态机（后端 agent_progress）：
+   * plan 首帧建立步骤列表；step_start/step_done 驱动分段条；step_update 滚动 detail；
+   * heartbeat 保证长工具"还活着"的体感（客户端秒表 + 伪进度自行驱动显示）。
+   */
+  handleAgentProgress(data) {
+    if (!data || !data.requestId) return;
+    const msg = this.globalData.chatHistory.find(m => m.id === data.requestId);
+    if (!msg) return;
+    let ps = msg.progressState;
+    if (!ps) {
+      ps = { phase: "understanding", steps: [], activeStepId: "", lastDetail: "", startedAt: Date.now(), lastUpdateAt: Date.now() };
+      msg.progressState = ps;
+    }
+    ps.lastUpdateAt = Date.now();
+    switch (data.type) {
+      case "plan": {
+        ps.phase = "execute";
+        ps.steps = (data.tasks || []).map((t) => ({
+          id: t.desc,
+          desc: t.desc,
+          status: t.status === "SUCCESS" ? "SUCCESS" : (t.status === "FAILED" ? "FAILED" : "PENDING"),
+          durationMs: null,
+          summary: ""
+        }));
+        break;
+      }
+      case "phase":
+        ps.phase = data.phase || ps.phase;
+        break;
+      case "step_start": {
+        ps.activeStepId = data.stepId || "";
+        let st = ps.steps.find((s) => s.id === data.stepId);
+        if (!st) {
+          st = { id: data.stepId, desc: data.desc || data.stepId, status: "RUNNING", durationMs: null, summary: "" };
+          ps.steps.push(st);
+        }
+        st.status = "RUNNING";
+        ps.steps.forEach((s) => { if (s.id !== data.stepId && s.status === "RUNNING") s.status = "PENDING"; });
+        break;
+      }
+      case "step_update": {
+        if (data.stepId) {
+          ps.activeStepId = data.stepId;
+          const st = ps.steps.find((s) => s.id === data.stepId);
+          if (st && st.status !== "SUCCESS" && st.status !== "FAILED") st.status = "RUNNING";
+        }
+        ps.lastDetail = data.detail || "";
+        break;
+      }
+      case "step_done": {
+        const st = ps.steps.find((s) => s.id === data.stepId);
+        if (st) {
+          st.status = data.status === "SUCCESS" ? "SUCCESS" : "FAILED";
+          st.durationMs = data.durationMs != null ? data.durationMs : null;
+          st.summary = data.summary || "";
+        }
+        if (ps.activeStepId === data.stepId) ps.activeStepId = "";
+        ps.lastDetail = data.summary || "";
+        break;
+      }
+      case "heartbeat": {
+        if (data.stepId) {
+          ps.activeStepId = data.stepId;
+          const st = ps.steps.find((s) => s.id === data.stepId);
+          if (st && st.status !== "SUCCESS" && st.status !== "FAILED") st.status = "RUNNING";
+        }
+        break;
+      }
+    }
+    this.triggerPageCallback("onChatHistoryUpdate");
   },
 
   handleAgentCommandResult(data) {
@@ -437,7 +533,12 @@ App({
     // 中间过程的 FAILED 任务只是步骤失败（系统会自动重试其他工具），
     // 只有最终结果（progress=100 / 非 pending）仍带失败步骤时才显示错误横幅
     const isFinalState = data.isPending !== true && (data.progress === undefined || data.progress >= 100);
-    const isErrorState = data.success === false || data.status === "FAILED" || (isFinalState && Array.isArray(data.tasks) && data.tasks.some(t => t.status === "FAILED"));
+    // 步骤级失败 ≠ 任务失败：agent 常某工具失败后自行换方案重试、最终交付完整答案。
+    // 只有"任务整体失败"（显式失败标记，或终态却没有文字回复）才渲染红色错误横幅；
+    // 有完整回复时仅加一条轻量提示，气泡保持正常、建议照常下发。
+    const hasFinalReply = isFinalState && !!data.reply;
+    const isErrorState = data.success === false || data.status === "FAILED" || (isFinalState && !hasFinalReply);
+    const hasFailedSteps = hasFinalReply && Array.isArray(data.tasks) && data.tasks.some(t => t.status === "FAILED");
 
     if (data.logs && Array.isArray(data.logs)) {
       data.logs.forEach(l => {
@@ -466,8 +567,13 @@ App({
       tasks: updatedTasks,
       isPending: data.isPending !== undefined ? data.isPending : (data.progress < 100),
       isError: isErrorState,
+      // 步骤级失败但整体完成：轻量提示（非错误横幅）
+      hasFailedSteps: hasFailedSteps,
+      // 终态结果到达：结束进度状态机（progressState 置空，UI 收起进度区）
+      progressState: (data.isPending === true || (data.progress !== undefined && data.progress < 100)) ? (existingMsg ? existingMsg.progressState : undefined) : null,
       charts: this.decorateCharts(data.charts) || (existingMsg ? existingMsg.charts : undefined),
-      goods: shop.decorateGoods(data.goods) || (existingMsg ? existingMsg.goods : undefined)
+      goods: shop.decorateGoods(data.goods) || (existingMsg ? existingMsg.goods : undefined),
+      suggestions: (data.suggestions && data.suggestions.length > 0) ? data.suggestions : (existingMsg ? existingMsg.suggestions : undefined)
     };
 
     // 历史孤儿任务的延迟结果（如崩溃恢复后很久才完成）：只记日志，不插入聊天流
@@ -581,36 +687,6 @@ App({
     this.triggerPageCallback("onNewLog", newLog);
   },
 
-  generateInitialTasks(command) {
-    const text = (command || "").trim();
-    const shortCmd = text.length > 18 ? text.slice(0, 18) + "..." : text;
-    
-    if (text.includes("群") || text.includes("讨论") || text.includes("拉") || text.includes("建")) {
-      return [
-        { desc: `解析组网指令：“${shortCmd}”`, status: "SUCCESS" },
-        { desc: "创设/定位群聊会话并拉取分身节点", status: "PROCESSING" },
-        { desc: "协同博弈讨论并汇总达成共识", status: "PENDING" }
-      ];
-    } else if (text.includes("查") || text.includes("天气") || text.includes("财报") || text.includes("价格") || text.includes("搜索") || text.includes("http")) {
-      return [
-        { desc: `解析检索需求：“${shortCmd}”`, status: "SUCCESS" },
-        { desc: "穿透网络通道，安全抓取目标实时数据", status: "PROCESSING" },
-        { desc: "解析提取关键数据并格式化输出", status: "PENDING" }
-      ];
-    } else if (text.includes("代码") || text.includes("算") || text.includes("python") || text.includes("js") || text.includes("执行")) {
-      return [
-        { desc: `解析计算算法：“${shortCmd}”`, status: "SUCCESS" },
-        { desc: "构建沙盒计算环境，编译并运行代码", status: "PROCESSING" },
-        { desc: "校验计算边界，返回归纳结论", status: "PENDING" }
-      ];
-    }
-    return [
-      { desc: `分析法旨意图：“${shortCmd}”`, status: "SUCCESS" },
-      { desc: "匹配具身工具箱，执行核心推演", status: "PROCESSING" },
-      { desc: "汇总推演结果并生成神谕响应", status: "PENDING" }
-    ];
-  },
-
   // 用 JWT 换取元神档案并落为当前绑定（登录页/设置页共享；成功自动建 socket）
   verifyAndApplyToken(token, onSuccess, onFail) {
     if (!token) { if (onFail) onFail("凭证不可为空"); return; }
@@ -685,6 +761,7 @@ App({
     const reqId = `req-${now}-${Math.floor(Math.random() * 10000)}`;
 
     // Add initial pending placeholder for this request ID
+    // 进度状态机：后端 agent_progress 事件流驱动（plan/step_start/step_update/step_done/heartbeat）
     const pendingMsg = {
       id: reqId,
       sender: "agent",
@@ -693,8 +770,15 @@ App({
       content: "（智能体处理中...）",
       timestamp: this.getTimestamp(),
       createdAt: now,
-      progress: 25,
-      tasks: this.generateInitialTasks(instruction)
+      progress: 0,
+      progressState: {
+        phase: "understanding", // understanding → execute → synthesize
+        steps: [],              // plan 事件到达后填充：{id, desc, status, durationMs, summary}
+        activeStepId: "",
+        lastDetail: "",
+        startedAt: now,
+        lastUpdateAt: now
+      }
     };
     this.globalData.chatHistory.push(pendingMsg);
     this.triggerPageCallback("onChatHistoryUpdate");

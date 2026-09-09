@@ -90,6 +90,137 @@ function TaskVisualizer({ tasks, progress }: { tasks?: any[]; progress?: number 
   );
 }
 // --- Rich HTML-Like Dialogue Renderer ---
+// --- Claude "Imagining..." 同款放射星芒：暖珊瑚色 8 条不等长光芒，缓慢旋转 + 呼吸 ---
+function ImaginingStarburst() {
+  const rays = [
+    { h: 17, a: 0 }, { h: 11, a: 45 }, { h: 14, a: 90 }, { h: 9, a: 135 },
+    { h: 16, a: 180 }, { h: 10, a: 225 }, { h: 13, a: 270 }, { h: 8, a: 315 },
+  ];
+  return (
+    <>
+      <style>{`
+        @keyframes starburstbreathe { 0%, 100% { transform: scale(1); opacity: 0.85; } 50% { transform: scale(1.12); opacity: 1; } }
+        @keyframes starburstspin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      `}</style>
+      <span className="inline-block w-4 h-4 shrink-0 animate-[starburstbreathe_2.4s_ease-in-out_infinite]">
+        <span className="relative block w-full h-full animate-[starburstspin_6s_linear_infinite]">
+          {rays.map((r) => (
+            <span
+              key={r.a}
+              className="absolute rounded-full"
+              style={{
+                left: "50%",
+                top: "50%",
+                width: 2.5,
+                marginLeft: -1.25,
+                height: r.h,
+                marginTop: -r.h,
+                background: "linear-gradient(to top, rgba(217,119,87,0.95), rgba(217,119,87,0.2))",
+                transformOrigin: "50% 100%",
+                transform: `rotate(${r.a}deg)`,
+              }}
+            />
+          ))}
+        </span>
+      </span>
+    </>
+  );
+}
+
+// --- 实时进度气泡（agent_progress 状态机驱动；秒表 + 伪进度爬升，画面永远在动） ---
+function LiveProgressBubble({ ps }: { ps: NonNullable<import("../context/CommanderContext").ChatMessage["progressState"]> }) {
+  const [, setTick] = useState(0);
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => {
+    const t = setInterval(() => setTick((x) => x + 1), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const now = Date.now();
+  const elapsedSec = Math.max(0, Math.floor((now - ps.startedAt) / 1000));
+  const steps = ps.steps || [];
+  const doneCount = steps.filter((s) => s.status === "SUCCESS" || s.status === "FAILED").length;
+  const realPct = steps.length ? Math.round((doneCount / steps.length) * 100) : 0;
+  const idleSec = Math.max(0, (now - ps.lastUpdateAt) / 1000);
+  const creep = Math.max(0, Math.min(2 * Math.floor(idleSec / 5), 90 - Math.min(realPct, 90)));
+  const pct = Math.min(90, Math.max(realPct + creep, steps.length ? 2 : 0));
+  const active = steps.find((s) => s.id === ps.activeStepId || s.status === "RUNNING");
+  let statusLine = "正在理解你的指令…";
+  if (ps.phase === "synthesize") statusLine = "正在整理回复…";
+  else if (ps.phase !== "understanding" && active) statusLine = active.desc;
+  else if (ps.phase !== "understanding") statusLine = "正在推进…";
+  const stalled = idleSec > 30 && ps.phase !== "synthesize";
+  const mm = Math.floor(elapsedSec / 60);
+  const ss = String(elapsedSec % 60).padStart(2, "0");
+
+  return (
+    <div className="w-full pt-1.5 border-t border-[#5b7a8c]/10 space-y-1.5 select-none">
+      <style>{`
+        @keyframes pssegflow { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        @keyframes psindslide { 0% { left: -40%; } 100% { left: 100%; } }
+        @keyframes psradar { 0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0.85; } 100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; } }
+      `}</style>
+      <div className="flex items-center gap-1.5">
+        {/* 放射状脉冲等待图标（Claude 风格：波纹从中心向外扩散；translate 定位保证严格同心） */}
+        <div className="relative w-4 h-4 shrink-0">
+          <span className="absolute left-1/2 top-1/2 w-3 h-3 rounded-full border border-cyan-400 opacity-0 animate-[psradar_1.8s_ease-out_infinite]"></span>
+          <span className="absolute left-1/2 top-1/2 w-3 h-3 rounded-full border border-cyan-400 opacity-0 animate-[psradar_1.8s_ease-out_infinite]" style={{ animationDelay: "0.6s" }}></span>
+          <span className="absolute left-1/2 top-1/2 w-3 h-3 rounded-full border border-cyan-400 opacity-0 animate-[psradar_1.8s_ease-out_infinite]" style={{ animationDelay: "1.2s" }}></span>
+          <span className="absolute left-1/2 top-1/2 w-1.5 h-1.5 rounded-full bg-cyan-400 -translate-x-1/2 -translate-y-1/2"></span>
+        </div>
+        <span className="flex-1 min-w-0 truncate text-[11px] font-medium text-[#9fbecb]">{statusLine}</span>
+        <span className="text-[10px] text-[#7ba6b8]/70 tabular-nums">⏱ {mm}:{ss}</span>
+      </div>
+      {steps.length > 0 ? (
+        <div className="flex gap-1 h-1.5">
+          {steps.map((s) => (
+            <div
+              key={s.id}
+              style={{ width: `${100 / steps.length}%` }}
+              className={`h-full rounded-full ${
+                s.status === "SUCCESS"
+                  ? "bg-[#3b5e59]"
+                  : s.status === "FAILED"
+                  ? "bg-[#be123c]"
+                  : s.status === "RUNNING"
+                  ? "bg-gradient-to-r from-[#3b5e59]/30 via-[#3b5e59] to-[#3b5e59]/30 bg-[length:200%_100%] animate-[pssegflow_1.2s_linear_infinite]"
+                  : "bg-[#5b7a8c]/15"
+              }`}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="relative h-1.5 bg-[#5b7a8c]/10 rounded-full overflow-hidden">
+          <div className="absolute top-0 bottom-0 w-2/5 rounded-full bg-gradient-to-r from-[#3b5e59]/25 via-[#3b5e59]/85 to-[#3b5e59]/25 animate-[psindslide_1.6s_ease-in-out_infinite]"></div>
+        </div>
+      )}
+      <div className="flex items-center gap-2 text-[10px] text-[#7ba6b8]/70">
+        <span>{pct}%</span>
+        {stalled && <span className="text-amber-600">仍在推进中…</span>}
+        {steps.length > 0 && (
+          <button type="button" onClick={() => setExpanded(!expanded)} className="ml-auto text-[#5b7a8c] hover:text-[#9fbecb] cursor-pointer">
+            {expanded ? "收起步骤" : `展开 ${steps.length} 个步骤`}
+          </button>
+        )}
+      </div>
+      {expanded && (
+        <div className="space-y-0.5">
+          {steps.map((s) => (
+            <div key={s.id} className="flex items-center gap-1.5 text-[10px]">
+              <span className={`w-3 text-center shrink-0 ${s.status === "SUCCESS" ? "text-[#3b5e59]" : s.status === "FAILED" ? "text-[#be123c]" : s.status === "RUNNING" ? "text-[#b8844f]" : "text-[#5b7a8c]/40"}`}>
+                {s.status === "SUCCESS" ? "✓" : s.status === "FAILED" ? "✗" : s.status === "RUNNING" ? "⟳" : "○"}
+              </span>
+              <span className="flex-1 min-w-0 truncate text-[#d7e6ec]/80">{s.desc}</span>
+              {s.durationMs != null && <span className="text-[#7ba6b8]/60 tabular-nums">{(s.durationMs / 1000).toFixed(1)}s</span>}
+            </div>
+          ))}
+        </div>
+      )}
+      {ps.lastDetail && <div className="text-[10px] text-[#7ba6b8]/60 break-all">↳ {ps.lastDetail}</div>}
+    </div>
+  );
+}
+
 function RichMessageRenderer({ content }: { content: string }) {
   if (!content) return null;
 
@@ -1158,7 +1289,7 @@ const Dashboard: React.FC = () => {
                 >
                   {msg.isPending && (!msg.tasks || msg.tasks.length === 0) && (!msg.content || msg.content === "（元神入定推演中...）") ? (
                     <div className="flex items-center space-x-2.5 py-1 select-none">
-                      <div className="w-3.5 h-3.5 border-2 border-[#5b7a8c]/20 border-t-cyan-400 rounded-full animate-spin"></div>
+                      <ImaginingStarburst />
                       <span className="text-[#7ba6b8] font-medium animate-pulse">元神正在推演法旨...</span>
                     </div>
                   ) : (
@@ -1166,8 +1297,18 @@ const Dashboard: React.FC = () => {
                       {msg.content && msg.content !== "（元神入定推演中...）" && (
                         <RichMessageRenderer content={msg.content.replace(/🛸【大荒分身·天道任务分解大阵】🛸[\s\S]*?==================================================/, "").replace(/📊 进度:[\s\S]*?算力大亮/, "").trim()} />
                       )}
+                      {msg.sender === "agent" && msg.progressState && (
+                        <LiveProgressBubble ps={msg.progressState} />
+                      )}
                       {msg.tasks && msg.tasks.length > 0 && (
                         <TaskVisualizer tasks={msg.tasks} progress={msg.progress} />
+                      )}
+                      {msg.sender === "agent" && msg.suggestions && msg.suggestions.length > 0 && !msg.isPending && (
+                        <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-[#5b7a8c]/10">
+                          {msg.suggestions.map((s) => (
+                            <button key={s.id} type="button" onClick={() => sendInstruction(s.command)} className="min-w-0 px-2 py-1 bg-[#5b7a8c]/10 border border-[#5b7a8c]/25 text-[#9fbecb] rounded-full text-[10px] hover:bg-[#5b7a8c]/20 transition cursor-pointer truncate">{s.label} ›</button>
+                          ))}
+                        </div>
                       )}
                       {msg.isPending && (
                         <div className="flex items-center space-x-2 pt-1 border-t border-[#5b7a8c]/10 text-[10px] text-[#7ba6b8]/80 select-none">
