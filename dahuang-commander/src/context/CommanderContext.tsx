@@ -19,6 +19,15 @@ export interface ChatMessage {
   isPending?: boolean;
   tasks?: any[];
   progress?: number;
+  suggestions?: Array<{ id: string; label: string; command: string }>;
+  progressState?: {
+    phase: string;
+    steps: Array<{ id: string; desc: string; status: string; durationMs: number | null; summary: string }>;
+    activeStepId: string;
+    lastDetail: string;
+    startedAt: number;
+    lastUpdateAt: number;
+  } | null;
 }
 export interface RoomEvent {
   event_id: string;
@@ -948,11 +957,13 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 const exists = prev.some(m => m.id === msgId);
                 const filtered = filterPending(prev);
                 if (exists) {
-                  return filtered.map(m => m.id === msgId ? { 
-                    ...m, 
-                    content: data.reply, 
+                  return filtered.map(m => m.id === msgId ? {
+                    ...m,
+                    content: data.reply,
                     isPending: !!data.isPending,
                     progress: data.progress !== undefined ? data.progress : m.progress,
+                    progressState: data.isPending ? m.progressState : null,
+                    suggestions: (data.suggestions && data.suggestions.length > 0) ? data.suggestions : m.suggestions,
                     tasks: (() => {
                       let currentTasks = m.tasks || [];
                       // If this is the final consensus 100% SUCCESS broadcast and the payload tasks array is omitted:
@@ -990,6 +1001,8 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                       content: data.reply,
                       timestamp: getTimestamp(),
                       isPending: !!data.isPending,
+                      progressState: data.isPending ? undefined : null,
+                      suggestions: (data.suggestions && data.suggestions.length > 0) ? data.suggestions : undefined,
                       tasks: (() => {
                         if (data.progress === 100 && data.tasks && Array.isArray(data.tasks)) {
                           return data.tasks.map((t: any) => ({
@@ -1007,6 +1020,88 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               });
               addLog("SYSTEM", "天道后台决策执行中，神念实时刷新！");
             }
+          });
+
+          // 回复后的下一步建议：主结果已送达后异步补齐，按 requestId 挂到对应气泡；
+          // 对应消息不存在则静默丢弃
+          socket.on("agent_suggestions", (data: any) => {
+            const requestId = data?.requestId;
+            if (!requestId || !Array.isArray(data?.suggestions) || data.suggestions.length === 0) return;
+            setChatHistory((prev) => prev.map((m) => (m.id === requestId && !m.isPending ? { ...m, suggestions: data.suggestions } : m)));
+          });
+
+          // 实时进度事件流：plan/phase/step_start/step_update/step_done/heartbeat
+          socket.on("agent_progress", (data: any) => {
+            if (!data?.requestId) return;
+            setChatHistory((prev) =>
+              prev.map((m) => {
+                if (m.id !== data.requestId) return m;
+                const ps = m.progressState || {
+                  phase: "understanding",
+                  steps: [],
+                  activeStepId: "",
+                  lastDetail: "",
+                  startedAt: Date.now(),
+                  lastUpdateAt: Date.now(),
+                };
+                ps.lastUpdateAt = Date.now();
+                switch (data.type) {
+                  case "plan":
+                    ps.phase = "execute";
+                    ps.steps = (data.tasks || []).map((t: any) => ({
+                      id: t.desc,
+                      desc: t.desc,
+                      status: t.status === "SUCCESS" ? "SUCCESS" : t.status === "FAILED" ? "FAILED" : "PENDING",
+                      durationMs: null,
+                      summary: "",
+                    }));
+                    break;
+                  case "phase":
+                    ps.phase = data.phase || ps.phase;
+                    break;
+                  case "step_start": {
+                    ps.activeStepId = data.stepId || "";
+                    let st = ps.steps.find((s: any) => s.id === data.stepId);
+                    if (!st) {
+                      st = { id: data.stepId, desc: data.desc || data.stepId, status: "RUNNING", durationMs: null, summary: "" };
+                      ps.steps.push(st);
+                    }
+                    st.status = "RUNNING";
+                    ps.steps.forEach((s: any) => { if (s.id !== data.stepId && s.status === "RUNNING") s.status = "PENDING"; });
+                    break;
+                  }
+                  case "step_update": {
+                    if (data.stepId) {
+                      ps.activeStepId = data.stepId;
+                      const st = ps.steps.find((s: any) => s.id === data.stepId);
+                      if (st && st.status !== "SUCCESS" && st.status !== "FAILED") st.status = "RUNNING";
+                    }
+                    ps.lastDetail = data.detail || "";
+                    break;
+                  }
+                  case "step_done": {
+                    const st = ps.steps.find((s: any) => s.id === data.stepId);
+                    if (st) {
+                      st.status = data.status === "SUCCESS" ? "SUCCESS" : "FAILED";
+                      st.durationMs = data.durationMs != null ? data.durationMs : null;
+                      st.summary = data.summary || "";
+                    }
+                    if (ps.activeStepId === data.stepId) ps.activeStepId = "";
+                    ps.lastDetail = data.summary || "";
+                    break;
+                  }
+                  case "heartbeat": {
+                    if (data.stepId) {
+                      ps.activeStepId = data.stepId;
+                      const st = ps.steps.find((s: any) => s.id === data.stepId);
+                      if (st && st.status !== "SUCCESS" && st.status !== "FAILED") st.status = "RUNNING";
+                    }
+                    break;
+                  }
+                }
+                return { ...m, progressState: { ...ps, steps: [...ps.steps] } };
+              })
+            );
           });
         });
       } catch (err) {
@@ -1189,7 +1284,16 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 sender: "agent",
                 isPending: true,
                 content: "（元神入定推演中...）",
-                timestamp: getTimestamp()
+                timestamp: getTimestamp(),
+                // 实时进度状态机（agent_progress 事件流驱动）
+                progressState: {
+                  phase: "understanding",
+                  steps: [],
+                  activeStepId: "",
+                  lastDetail: "",
+                  startedAt: Date.now(),
+                  lastUpdateAt: Date.now()
+                }
               }
             ]);
           } else {
@@ -1502,6 +1606,35 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     ]);
     addLog("SYSTEM", "已清空 Window A 历史对话。");
   };
+  const loadRecommendations = async () => {
+    const token = agentState?.token;
+    if (!token || token === "offline-mock-jwt-token") return;
+    // 30 分钟窗口去重：每次冷启动进入都能看到推荐，只防短时间内重复刷屏。
+    // （不用日期比较，彻底绕开 UTC/本地时区误判）
+    let lastPushed = 0;
+    try { lastPushed = Number(localStorage.getItem("dahuangRecLastPushedAt") || 0); } catch {}
+    if (lastPushed && Date.now() - lastPushed < 30 * 60 * 1000) return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/recommendations`, {
+        headers: { "Authorization": `Bearer ${token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const d = await res.json();
+        if (Array.isArray(d.suggestions) && d.suggestions.length) {
+          setChatHistory((prev) => [
+            ...prev.filter((m) => !m.id || !m.id.startsWith("rec-")),
+            { id: `rec-${Date.now()}`, sender: "agent", content: "主人，根据您最近的关注，为您准备了几件可以一键执行的事，点一下我马上办：", timestamp: getTimestamp(), isPending: false, progress: 100, suggestions: d.suggestions },
+          ]);
+          try { localStorage.setItem("dahuangRecLastPushedAt", String(Date.now())); } catch {}
+        }
+      }
+    } catch {}
+  };
+
+  useEffect(() => {
+    loadRecommendations();
+  }, [agentState.token]);
+
   return (
     <CommanderContext.Provider
       value={{

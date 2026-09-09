@@ -702,6 +702,125 @@
   width: 100%;
 }
 
+/* ==================== 实时进度区（agent_progress 状态机） ==================== */
+.ps-status-row {
+  gap: 10rpx;
+  margin-bottom: 10rpx;
+}
+.ps-status-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 24rpx;
+  color: #4a6a7c;
+  font-weight: bold;
+}
+.ps-elapsed {
+  font-size: 20rpx;
+  color: #9aa3a8;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* 分段进度条 */
+.ps-bar {
+  display: flex;
+  gap: 6rpx;
+  height: 10rpx;
+  margin-bottom: 8rpx;
+}
+.ps-seg {
+  height: 100%;
+  border-radius: 999rpx;
+  transition: background 0.3s ease;
+}
+.seg-done { background: #3b5e59; }
+.seg-failed { background: #be123c; }
+.seg-pending { background: rgba(91, 122, 140, 0.15); }
+.seg-active {
+  background: linear-gradient(90deg, rgba(59, 94, 89, 0.3) 25%, rgba(59, 94, 89, 0.95) 50%, rgba(59, 94, 89, 0.3) 75%);
+  background-size: 200% 100%;
+  animation: seg-flow 1.2s linear infinite;
+}
+@keyframes seg-flow {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 无步骤信息时的整条流动动画（理解指令阶段） */
+.ps-bar-indeterminate {
+  position: relative;
+  background: rgba(91, 122, 140, 0.12);
+  border-radius: 999rpx;
+  overflow: hidden;
+}
+.ps-ind-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, rgba(59, 94, 89, 0.25), rgba(59, 94, 89, 0.85), rgba(59, 94, 89, 0.25));
+  animation: ind-slide 1.6s ease-in-out infinite;
+}
+@keyframes ind-slide {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}
+
+.ps-meta-row {
+  gap: 12rpx;
+}
+.ps-pct {
+  font-size: 20rpx;
+  color: #9aa3a8;
+}
+.ps-stall {
+  font-size: 20rpx;
+  color: #d97706;
+}
+.ps-toggle {
+  font-size: 20rpx;
+  color: #5b7a8c;
+  margin-left: auto;
+  padding: 4rpx 8rpx;
+}
+
+.ps-steps {
+  margin-top: 8rpx;
+}
+.ps-step {
+  gap: 10rpx;
+  padding: 6rpx 0;
+}
+.ps-step-mark {
+  font-size: 22rpx;
+  width: 28rpx;
+  text-align: center;
+  flex-shrink: 0;
+}
+.mark-done { color: #3b5e59; }
+.mark-failed { color: #be123c; }
+.mark-running { color: #9e2a2b; }
+.mark-pending { color: #b9c4ca; }
+.ps-step-desc {
+  flex: 1;
+  min-width: 0;
+  font-size: 22rpx;
+  color: #2b2b2b;
+}
+.ps-step-time {
+  font-size: 20rpx;
+  color: #9aa3a8;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.ps-detail {
+  font-size: 20rpx;
+  color: #7a8a93;
+  margin-top: 6rpx;
+  word-break: break-all;
+}
+
 .bubble-progress-row {
   display: flex;
   flex-direction: row;
@@ -1500,6 +1619,83 @@
   align-items: center;
   gap: 16rpx;
   padding: 8rpx 4rpx;
+}
+
+/* Claude "Imagining..." 同款放射星芒：暖珊瑚色 8 条不等长光芒，缓慢旋转 + 呼吸 */
+.claude-starburst-breathe {
+  width: 40rpx;
+  height: 40rpx;
+  flex-shrink: 0;
+  animation: starburst-breathe 2.4s ease-in-out infinite;
+}
+@keyframes starburst-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.12); opacity: 1; }
+}
+.claude-starburst {
+  position: relative;
+  width: 40rpx;
+  height: 40rpx;
+  animation: starburst-spin 6s linear infinite;
+}
+@keyframes starburst-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.claude-ray {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5rpx;
+  margin-left: -2.5rpx;
+  border-radius: 3rpx;
+  background: linear-gradient(to top, rgba(217, 119, 87, 0.95), rgba(217, 119, 87, 0.2));
+  transform-origin: 50% 100%;
+}
+/* 各光芒长度不等，更接近手绘星芒的有机感 */
+.r0 { height: 17rpx; margin-top: -17rpx; transform: rotate(0deg); }
+.r1 { height: 11rpx; margin-top: -11rpx; transform: rotate(45deg); }
+.r2 { height: 14rpx; margin-top: -14rpx; transform: rotate(90deg); }
+.r3 { height: 9rpx;  margin-top: -9rpx;  transform: rotate(135deg); }
+.r4 { height: 16rpx; margin-top: -16rpx; transform: rotate(180deg); }
+.r5 { height: 10rpx; margin-top: -10rpx; transform: rotate(225deg); }
+.r6 { height: 13rpx; margin-top: -13rpx; transform: rotate(270deg); }
+.r7 { height: 8rpx;  margin-top: -8rpx;  transform: rotate(315deg); }
+
+/* 放射状脉冲等待图标（Claude 风格）：波纹从中心向外扩散 + 中心实心点。
+   translate(-50%,-50%) 精确定位，保证中心点与波纹严格同心 */
+.radar-pulse {
+  position: relative;
+  width: 32rpx;
+  height: 32rpx;
+  flex-shrink: 0;
+}
+.radar-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: #5b7a8c;
+  transform: translate(-50%, -50%);
+}
+.radar-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22rpx;
+  height: 22rpx;
+  border-radius: 50%;
+  border: 2rpx solid #5b7a8c;
+  opacity: 0;
+  animation: radar-expand 1.8s ease-out infinite;
+}
+.radar-ring:nth-child(2) { animation-delay: 0.6s; }
+.radar-ring:nth-child(3) { animation-delay: 1.2s; }
+@keyframes radar-expand {
+  0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0.85; }
+  100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
 }
 
 .cyber-spinner {
@@ -2790,4 +2986,68 @@
   padding: 1rpx 8rpx;
   flex-shrink: 0;
   background: rgba(158, 42, 43, 0.04);
+}
+
+/* 登录推荐条 + 回复建议 chips */
+.recommendation-strip {
+  padding: 12rpx 16rpx;
+  background: rgba(253,251,247,0.9);
+  border: 1rpx solid rgba(158,42,43,0.18);
+  border-radius: 16rpx;
+  margin-bottom: 12rpx;
+}
+.recommendation-header { margin-bottom: 10rpx; }
+.recommendation-title { font-size: 26rpx; font-weight: bold; color: #6b5b4a; }
+.recommendation-dismiss {
+  width: 40rpx; height: 40rpx; line-height: 38rpx; text-align: center;
+  border-radius: 50%; color: #6b5b4a; font-size: 26rpx; background: rgba(107,91,74,0.06);
+}
+.recommendation-list { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.recommendation-chip {
+  display: flex; align-items: center; gap: 4rpx;
+  padding: 12rpx 20rpx; border-radius: 30rpx;
+  background: rgba(158,42,43,0.06); border: 1rpx solid rgba(158,42,43,0.22);
+  font-size: 26rpx; color: #6b3a2f; font-weight: bold;
+}
+.recommendation-chip-text { max-width: 300rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.recommendation-chip-arrow { color: #9e2a2b; }
+.recommendation-chip:active { background: rgba(158,42,43,0.14); }
+
+/* 步骤级失败但整体完成的轻量提示（区别于红色错误横幅） */
+.partial-fail-note {
+  margin-top: 12rpx;
+  padding: 8rpx 14rpx;
+  background: rgba(217, 119, 6, 0.08);
+  border: 1rpx solid rgba(217, 119, 6, 0.3);
+  border-radius: 8rpx;
+  font-size: 22rpx;
+  color: #b07d3c;
+}
+
+/* 建议/推荐 chips：两列网格，等宽对齐，一行两个两行四条 */
+.suggestion-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+.suggestion-chip {
+  display: flex; align-items: center; justify-content: center; gap: 6rpx;
+  min-width: 0;
+  padding: 12rpx 14rpx; border-radius: 999rpx;
+  background: rgba(91,122,140,0.08); border: 1rpx solid rgba(91,122,140,0.25);
+  font-size: 26rpx; color: #4a6a7c; font-weight: bold;
+  box-sizing: border-box;
+}
+.suggestion-chip-text {
+  flex: 0 1 auto;
+  max-width: 100%;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  text-align: center;
+}
+.suggestion-chip-arrow { color: #5b7a8c; flex-shrink: 0; }
+.suggestion-chip:active {
+  background: rgba(91,122,140,0.18);
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
 }

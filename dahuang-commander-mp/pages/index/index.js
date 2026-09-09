@@ -5,6 +5,50 @@ const { drawChart } = require('../../utils/chart-draw.js');
 const { toAbsUrl } = require('../../utils/url.js');
 const shop = require('../../utils/shop.js');
 
+/**
+ * 进度气泡展示数据（纯函数）：由 progressState + 当前时间计算。
+ * 伪进度：5 秒无后端事件后每 5s 缓慢 +2%，封顶 90%——进度条永远在动；
+ * 秒表由客户端 500ms ticker 驱动，不依赖后端事件。
+ */
+function buildPsDisplay(ps, expanded) {
+  const now = Date.now();
+  const elapsedSec = Math.max(0, Math.floor(((now - (ps.startedAt || now)) / 1000)));
+  const steps = ps.steps || [];
+  const doneCount = steps.filter((s) => s.status === "SUCCESS" || s.status === "FAILED").length;
+  const realPct = steps.length ? Math.round((doneCount / steps.length) * 100) : 0;
+  const idleSec = Math.max(0, (now - (ps.lastUpdateAt || now)) / 1000);
+  const creep = Math.max(0, Math.min(2 * Math.floor(idleSec / 5), 90 - Math.min(realPct, 90)));
+  const pct = Math.min(90, Math.max(realPct + creep, steps.length ? 2 : 0));
+  const active = steps.find((s) => s.id === ps.activeStepId || s.status === "RUNNING");
+  let statusLine = "";
+  if (ps.phase === "synthesize") statusLine = "正在整理回复…";
+  else if (ps.phase === "understanding" && steps.length === 0) statusLine = "正在理解你的指令…";
+  else if (active) statusLine = active.desc;
+  else if (steps.length > 0) statusLine = "正在推进…";
+  else statusLine = "正在理解你的指令…";
+  const stalled = idleSec > 30 && ps.phase !== "synthesize";
+  const mm = Math.floor(elapsedSec / 60);
+  const ss = String(elapsedSec % 60).padStart(2, "0");
+  return {
+    phase: ps.phase,
+    statusLine,
+    stalled,
+    elapsedText: `${mm}:${ss}`,
+    pct,
+    hasSteps: steps.length > 0,
+    expanded: !!expanded,
+    segments: steps.map((s) => ({ id: s.id, status: s.status, active: s.id === ps.activeStepId || s.status === "RUNNING" })),
+    steps: steps.map((s) => ({
+      id: s.id,
+      desc: s.desc,
+      status: s.status,
+      active: s.id === ps.activeStepId || s.status === "RUNNING",
+      durationText: s.durationMs != null ? `${(s.durationMs / 1000).toFixed(1)}s` : ""
+    })),
+    lastDetail: ps.lastDetail || ""
+  };
+}
+
 Page({
   data: {
     t: i18n.getDict(),
@@ -67,9 +111,13 @@ Page({
 
   onLoad() {
     const dict = i18n.getDict() || {};
+    // 步骤列表展开偏好记忆（跨会话沿用）
+    let rememberedExpanded = {};
+    try { rememberedExpanded = wx.getStorageSync("dahuangPsExpanded") || {}; } catch (e) {}
     this.setData({
       t: dict,
-      serverUrl: app.globalData.serverUrl
+      serverUrl: app.globalData.serverUrl,
+      expandedTasks: rememberedExpanded
     });
     if (dict.index && dict.index.nav_title) {
       try { wx.setNavigationBarTitle({ title: dict.index.nav_title }); } catch(e) {}
@@ -101,6 +149,7 @@ Page({
     }
     // 待决策：拉取数量；登录后若有待办，插入摘要提醒
     this.refreshPendingDecisions();
+    this.loadRecommendations();
   },
 
   refreshPendingDecisions() {
@@ -114,6 +163,80 @@ Page({
         app.pushSystemChat(`📋 待办摘要：有 ${count} 件事需要主人决策：${titles}${count > 3 ? "…" : ""}（点击顶部横幅处理）`);
       }
     });
+  },
+
+  loadRecommendations() {
+    const token = app.globalData.agentState && app.globalData.agentState.token;
+    if (!token || token === "offline-mock-jwt-token") return;
+    if (this._recLoading) return; // 防并发重复推送（onShow 频繁触发）
+    // 30 分钟窗口去重：每次冷启动进入都能看到推荐，只防短时间内重复刷屏。
+    // （不用日期比较，彻底绕开 UTC/本地时区误判）
+    let lastPushed = 0;
+    try { lastPushed = Number(wx.getStorageSync("dahuangRecLastPushedAt") || 0); } catch (e) {}
+    if (lastPushed && Date.now() - lastPushed < 30 * 60 * 1000) return;
+    this._recLoading = true;
+    wx.request({
+      url: `${app.globalData.serverUrl}/api/agent/recommendations`,
+      header: getHeaders(token),
+      success: (res) => {
+        // 请求期间可能已有其他入口推送过（并发触发）→ 复查时间戳，避免重复
+        let pushedAgain = 0;
+        try { pushedAgain = Number(wx.getStorageSync("dahuangRecLastPushedAt") || 0); } catch (e) {}
+        if (pushedAgain && Date.now() - pushedAgain < 30 * 60 * 1000) return;
+        if (res.statusCode === 200 && res.data && Array.isArray(res.data.suggestions) && res.data.suggestions.length) {
+          // 单例收敛：清理掉历史中旧的入场推荐气泡，保证聊天流中只保留最新的一条活跃推荐，不重复刷屏
+          app.globalData.chatHistory = (app.globalData.chatHistory || []).filter(
+            (m) => !m.id || !String(m.id).startsWith("rec-")
+          );
+
+          const msg = {
+            id: `rec-${Date.now()}`,
+            sender: "agent",
+            content: "主人，根据您最近的关注，为您准备了几件可以一键执行的事，点一下我马上办：",
+            timestamp: app.getTimestamp ? app.getTimestamp() : "",
+            isPending: false,
+            progress: 100,
+            suggestions: res.data.suggestions
+          };
+          app.globalData.chatHistory.push(msg);
+          if (app.saveChatHistory) app.saveChatHistory();
+          if (app.triggerPageCallback) app.triggerPageCallback("onChatHistoryUpdate");
+          try { wx.setStorageSync("dahuangRecLastPushedAt", Date.now()); } catch (e) {}
+        }
+      },
+      complete: () => { this._recLoading = false; }
+    });
+  },
+
+  tapSuggestion(e) {
+    const cmd = (e.currentTarget.dataset.command || "").trim();
+    if (!cmd) return;
+
+    // 800ms 防抖保护：防止用户连续狂点发起多次相同任务
+    const now = Date.now();
+    if (this._lastSuggestTapAt && now - this._lastSuggestTapAt < 800) return;
+    this._lastSuggestTapAt = now;
+
+    // 写操作/高敏感意图判定（发帖、解散、删除、购买、转账等）：填入输入框，让主人做最终审阅与确认
+    const isWriteIntent = /^(发帖|发表|发布|发到|解散|删除|购买|转账|下单|扣除|清空|注销|退出群)/.test(cmd) ||
+                          /(发表到|发到大荒|解散群|删除好友|立即购买|确认支付)/.test(cmd);
+
+    if (isWriteIntent) {
+      this.setData({
+        inputValue: cmd,
+      });
+      wx.showToast({
+        title: "已填入输入框，请主人审阅后发送",
+        icon: "none",
+        duration: 2000,
+      });
+      this.scrollToBottom();
+      return;
+    }
+
+    // 只读/分析/查询类指令：直接执行
+    app.sendInstruction(cmd);
+    this.scrollToBottom();
   },
 
   onPendingDecision(data) {
@@ -283,13 +406,15 @@ Page({
           ...m,
           content: cleanContent || m.content,
           isRich,
-          richContent
+          richContent,
+          psDisplay: m.progressState ? buildPsDisplay(m.progressState, this.data.expandedTasks && this.data.expandedTasks[m.id]) : null
         };
       }
       return {
         ...m,
         isRich,
-        richContent
+        richContent,
+        psDisplay: m.progressState ? buildPsDisplay(m.progressState, this.data.expandedTasks && this.data.expandedTasks[m.id]) : null
       };
     });
 
@@ -373,6 +498,54 @@ Page({
     this.setData(updates, () => {
       this.redrawCharts();
     });
+
+    // 进度秒表：存在进行中的进度状态机时启动 500ms ticker（驱动秒表/伪进度/停滞提示）
+    const hasLiveProgress = chatHistory.some((m) => m.progressState);
+    if (hasLiveProgress) this.startProgressTicker();
+    else this.stopProgressTicker();
+  },
+
+  // ==================== 实时进度 ticker（秒表 + 伪进度爬升） ====================
+  startProgressTicker() {
+    if (!this.progressTimer) {
+      this.progressTimer = setInterval(() => this.tickProgress(), 500);
+    }
+  },
+
+  stopProgressTicker() {
+    if (this.progressTimer) {
+      clearInterval(this.progressTimer);
+      this.progressTimer = null;
+    }
+  },
+
+  tickProgress() {
+    const src = app.globalData.chatHistory;
+    const list = this.data.chatHistory || [];
+    const updates = {};
+    let dirty = false;
+    for (let i = 0; i < list.length; i++) {
+      const sm = src[i];
+      if (sm && sm.progressState && list[i] && list[i].progressState) {
+        const psd = buildPsDisplay(sm.progressState, this.data.expandedTasks && this.data.expandedTasks[sm.id]);
+        if (JSON.stringify(psd) !== JSON.stringify(list[i].psDisplay)) {
+          updates[`chatHistory[${i}].psDisplay`] = psd;
+          dirty = true;
+        }
+      }
+    }
+    if (dirty) this.setData(updates);
+  },
+
+  togglePsSteps(e) {
+    const id = e.currentTarget.dataset.msgId;
+    if (!id) return;
+    const expandedTasks = { ...(this.data.expandedTasks || {}) };
+    expandedTasks[id] = !expandedTasks[id];
+    this.setData({ expandedTasks });
+    // 记忆展开偏好：下次默认沿用
+    try { wx.setStorageSync("dahuangPsExpanded", expandedTasks); } catch (err) {}
+    this.syncGlobalData();
   },
 
   // 原生 Canvas 绘制 Agent 图表（图表数据块 → canvas 2d）
