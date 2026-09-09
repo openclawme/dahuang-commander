@@ -12,8 +12,8 @@ const project = new ci.Project({
 });
 
 const pkg = require('./package.json');
-const version = pkg.version || '1.11.17';
-const desc = '优化新进入建议单例收敛、任务后快捷下一步与高危写操作确认';
+const version = pkg.version || '1.11.18';
+const desc = '修复键盘弹起时输入框与键盘间空白过大及遮挡对话内容的问题';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

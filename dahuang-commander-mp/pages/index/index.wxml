@@ -1,6 +1,6 @@
 <view class="container">
 
-  <view class="cyber-panel glow-cyan tab-pane-container chat-panel" style="{{keyboardHeight > 0 ? 'margin-bottom: ' + keyboardHeight + 'px;' : ''}}">
+  <view class="cyber-panel glow-cyan tab-pane-container chat-panel">
     <!-- 待主人决策横幅 -->
     <view class="decision-banner flex-row align-center" wx:if="{{pendingCount > 0}}" bindtap="openDecisions">
       <text class="decision-banner-icon">决</text>
@@ -181,7 +181,7 @@
   </view>
 
   <!-- 5. Bottom fixed terminal input -->
-  <view class="wechat-footer" style="transform: translateY(-{{keyboardHeight}}px); padding-bottom: {{keyboardHeight > 0 ? '16rpx' : 'calc(16rpx + env(safe-area-inset-bottom))'}}; transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);">
+  <view class="wechat-footer" style="padding-bottom: {{keyboardHeight > 0 ? (keyboardHeight + 8) + 'px' : 'calc(16rpx + env(safe-area-inset-bottom))'}};">
     <view class="quote-banner" wx:if="{{quotedMessage}}">
       <view class="quote-banner-left">
         <text class="quote-banner-label">引用消息</text>
@@ -214,7 +214,7 @@
           show-confirm-bar="{{false}}"
           disable-default-padding
           adjust-position="{{false}}"
-          cursor-spacing="20"
+          cursor-spacing="0"
           bindfocus="onInputFocus"
           bindblur="onInputBlur"
           bindkeyboardheightchange="onKeyboardHeightChange"

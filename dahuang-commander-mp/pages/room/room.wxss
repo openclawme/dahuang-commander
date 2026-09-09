@@ -141,6 +141,7 @@
   padding: 16rpx 20rpx;
   box-shadow: 0 -10rpx 30rpx -8rpx rgba(59, 48, 36, 0.2);
   z-index: 100;
+  flex-shrink: 0;
 }
 
 .chat-footer .input-container {
