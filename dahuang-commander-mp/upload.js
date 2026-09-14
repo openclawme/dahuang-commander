@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '修复宽图滑动冲突：宽图滑动还原生滚动，窄图滑动跟气泡';
+const desc = '修复宽图滚动后气泡位置偏移：每次手势实时查询画布坐标';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

@@ -1045,16 +1045,21 @@ Page({
     const id = e.currentTarget.dataset.id;
     const touch = (e.touches && e.touches[0]) || null;
     if (!id || !touch) return;
-    const cacheKey = "_chartRect_" + id;
-    const cached = this[cacheKey];
-    if (cached && cached.at > (this._chartRectCacheAt || 0)) {
-      this._applyChartHover(id, touch, cached.rect);
-      return;
-    }
+    // 每次手势都实时查询画布位置：宽图容器内部横向滚动后 rect 会变，
+    // 跨手势复用旧缓存会导致气泡落在错误的数据点上
+    this["_chartLastTouch_" + id] = touch;
+    this._queryChartRect(id, touch);
+  },
+
+  _queryChartRect(id, touch) {
+    if (this["_chartRectPending_" + id]) return; // 同一次手势只查一次
+    this["_chartRectPending_" + id] = true;
     wx.createSelectorQuery().in(this).select("#" + id).boundingClientRect((rect) => {
+      this["_chartRectPending_" + id] = false;
       if (!rect) return;
-      this[cacheKey] = { rect, at: Date.now() };
-      this._applyChartHover(id, touch, rect);
+      this["_chartRect_" + id] = { rect, at: Date.now() };
+      const t = touch || this["_chartLastTouch_" + id];
+      if (t) this._applyChartHover(id, t, rect);
     }).exec();
   },
 
@@ -1073,6 +1078,7 @@ Page({
     }
     const cached = this["_chartRect_" + id];
     if (cached) this._applyChartHover(id, touch, cached.rect);
+    else this._queryChartRect(id, touch);
   },
 
   onChartTouchEnd(e) {
