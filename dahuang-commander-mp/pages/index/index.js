@@ -886,17 +886,24 @@ Page({
     updates.auraSpeed = Math.max(1.5, 40 - ((agentState.iq || 100) - 50) * 0.2);
 
     // Incremental updates for chat history and logs
+    // 图表消息被重渲染时（进度秒表每 500ms 会更新 psDisplay 触发重建 canvas），
+    // 必须强制重绘——canvas 节点重建后内容会清空，而签名不变会被跳过
+    let chartTouched = false;
+    const hasCharts = (m) => Boolean(m && ((m.charts && m.charts.length) || (m.chartsOrdered && m.chartsOrdered.length)));
     const currentChatHistory = this.data.chatHistory || [];
     if (processedChatHistory.length < currentChatHistory.length) {
       updates.chatHistory = processedChatHistory;
+      chartTouched = processedChatHistory.some(hasCharts);
     } else {
       for (let i = 0; i < currentChatHistory.length; i++) {
         if (JSON.stringify(processedChatHistory[i]) !== JSON.stringify(currentChatHistory[i])) {
           updates[`chatHistory[${i}]`] = processedChatHistory[i];
+          if (hasCharts(processedChatHistory[i])) chartTouched = true;
         }
       }
       for (let i = currentChatHistory.length; i < processedChatHistory.length; i++) {
         updates[`chatHistory[${i}]`] = processedChatHistory[i];
+        if (hasCharts(processedChatHistory[i])) chartTouched = true;
       }
     }
 
@@ -917,7 +924,7 @@ Page({
     // 注意：输出到达时【不】自动滚动聊天窗口（用户明确要求去掉该行为），
     // 避免阅读时被进度更新反复拉回。仅发送消息等用户主动动作时滚动。
     this.setData(updates, () => {
-      this.redrawCharts();
+      this.redrawCharts(chartTouched ? -1 : 0);
     });
 
     // 进度秒表：存在进行中的进度状态机时启动 500ms ticker（驱动秒表/伪进度/停滞提示）
@@ -971,7 +978,10 @@ Page({
   },
 
   // 原生 Canvas 绘制 Agent 图表（图表数据块 → canvas 2d）
+  // retry=-1 表示强制重绘（消息重渲染会重建 canvas 节点但签名不变，必须重画）
   redrawCharts(retry) {
+    const forced = retry === -1;
+    const attempt = forced ? 0 : (retry || 0);
     const history = this.data.chatHistory || [];
     const chartsOf = (m) => (m.chartsOrdered && m.chartsOrdered.length ? m.chartsOrdered : m.charts);
 
@@ -985,7 +995,7 @@ Page({
     if (targets.length === 0) return;
 
     const signature = JSON.stringify(targets.map((t) => [t.id, (t.spec && t.spec.title) || ""]));
-    if (!retry && signature === this._chartSignature) return;
+    if (!forced && !attempt && signature === this._chartSignature) return;
     this._chartSignature = signature;
 
     const query = wx.createSelectorQuery().in(this);
@@ -1008,9 +1018,9 @@ Page({
         }
       });
       if (skipped > 0) {
-        console.warn(`[CHART] ${skipped} canvas(es) not ready, attempt ${retry || 0}`);
-        if ((retry || 0) < 4) {
-          setTimeout(() => this.redrawCharts((retry || 0) + 1), 400);
+        console.warn(`[CHART] ${skipped} canvas(es) not ready, attempt ${attempt}`);
+        if (attempt < 4) {
+          setTimeout(() => this.redrawCharts(attempt + 1), 400);
         } else if (badMsgIds.length) {
           // 兜底：重试仍为 0 尺寸 → 该消息的图表改为末尾渲染（已验证可用的路径）
           this._chartNoInline = this._chartNoInline || {};

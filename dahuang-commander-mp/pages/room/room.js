@@ -171,13 +171,16 @@ Page({
       messages
     }, () => {
       this.scrollToBottom();
-      this.redrawCharts();
+      this.redrawCharts(-1);
     });
   },
 
-  /** 群聊/私聊图表绘制：按画布 ID 精确查询（与主对话同方案） */
+  /** 群聊/私聊图表绘制：按画布 ID 精确查询（与主对话同方案）。
+   *  retry=-1 强制重绘（消息列表整体重建会清空 canvas，签名不变也必须重画） */
   redrawCharts(retry) {
     if (this._destroyed) return;
+    const forced = retry === -1;
+    const attempt = forced ? 0 : (retry || 0);
     const messages = this.data.messages || [];
     const targets = [];
     messages.forEach((m) => {
@@ -186,7 +189,7 @@ Page({
     });
     if (targets.length === 0) return;
     const signature = JSON.stringify(targets.map((t) => t.id));
-    if (!retry && signature === this._chartSignature) return;
+    if (!forced && !attempt && signature === this._chartSignature) return;
     this._chartSignature = signature;
     const query = wx.createSelectorQuery().in(this);
     targets.forEach((t) => query.select('#' + t.id).fields({ node: true, size: true }));
@@ -199,7 +202,7 @@ Page({
           try { drawChart(info.node, t.spec, info.width, info.height); } catch (e) { console.error('[ROOM CHART] draw failed:', e); }
         } else { skipped += 1; }
       });
-      if (skipped > 0 && (retry || 0) < 4) setTimeout(() => this.redrawCharts((retry || 0) + 1), 400);
+      if (skipped > 0 && attempt < 4) setTimeout(() => this.redrawCharts(attempt + 1), 400);
     });
   },
 

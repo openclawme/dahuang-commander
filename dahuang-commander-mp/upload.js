@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '领券按钮改古风淡金样式：朱砂券印+金色描边';
+const desc = '图表稳定性修复：消息重渲染后强制重绘canvas，杜绝空白区';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
