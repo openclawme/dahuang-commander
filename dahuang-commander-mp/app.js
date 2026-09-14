@@ -1090,10 +1090,11 @@ App({
     const { html, videoUrl, videoPoster } = this.parseRichContent(content);
     const hasRichHtml = /<[a-z][\s\S]*>/i.test(content) || content.includes("**") || content.includes("`") || content.includes("<table") || content.includes("<div") || content.includes("<p") || content.includes("<badge") || content.includes("<card") || content.includes("<blockquote") || content.includes("<span");
 
-    // 图表数据块：<script type="application/dahuang-chart">JSON</script>
-    // 提取后在原生 Canvas 上绘制（微信 rich-text 不支持 svg/canvas）
-    const charts = [];
-    if (typeof content === "string") {
+    // 图表优先用消息自带的结构化 charts 字段（服务端已把数据块从正文剥离）。
+    // 此前这里只看正文 <script> 块，导致"重新进入小程序后历史消息的图表全部丢失"。
+    let charts = Array.isArray(safeMsg.charts) ? safeMsg.charts.slice(0, 4) : [];
+    if (charts.length === 0 && typeof content === "string") {
+      // 旧消息/旧通知兜底：<script type="application/dahuang-chart">JSON</script>
       const chartRe = /<script\s+type=["']application\/dahuang-chart["']>([\s\S]*?)<\/script>/gi;
       let cm;
       while ((cm = chartRe.exec(content))) {
