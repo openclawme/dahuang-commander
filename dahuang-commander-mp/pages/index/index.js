@@ -62,6 +62,13 @@ Page({
     inputValue: "",
     images: [],
     pendingImages: [],
+    imageQuickActions: [
+      { icon: "识", label: "这是什么？", command: "这是什么？请识别图片中的主要内容。" },
+      { icon: "文", label: "提取文字", command: "请提取图片中的文字。" },
+      { icon: "物", label: "识别植物/动物", command: "请识别图片中的植物或动物，并给出候选和判定依据。" },
+      { icon: "译", label: "翻译图中文字", command: "请翻译图片中的文字。" },
+      { icon: "总", label: "总结图片", command: "请总结这张图片的内容。" }
+    ],
     quotedMessage: null,
     messageMenu: null,
     toLogView: "",
@@ -70,15 +77,31 @@ Page({
     activeTab: "chat", // chat, forum, arena, alchemy
     pendingApproval: null, 
     showLogsPopup: false, 
-    expandedTasks: {}, 
-    keyboardHeight: 0,
-    keyboardShift: 0,
-    bottomOffset: 0,
+    expandedTasks: {},
+    keyboardShift: 0, // 键盘弹起时整个界面上移的补偿高度（px，事件时刻实测偏移计算）
     showDetailedTasks: true,
     liveStatusText: "",
     liveStatusTexts: [],
     liveStatusTick: 0,
     pendingCount: 0,
+
+    // 主人快捷面板：常用指令 / 当前任务 / 推荐指令
+    showQuickPanel: false,
+    quickPanelPos: { left: 0, top: 0 }, // 面板位置（打开时锚定 FAB；可拖动头调整）
+    fabIdle: false, // FAB 30 秒未操作降透明度
+    fabJumping: false, // 松手后篮球式起跳弹落
+    fabGliding: false, // 起跳后滑向边缘
+    quickCommands: [],
+    quickCommandCursor: 0,
+    quickRecommendations: [],
+    quickRecommendationPool: [],
+    quickRecCursor: 0,
+    quickTasks: [],
+    quickFabProgress: 0,
+    quickPanelLoading: false,
+    quickFabX: 0,
+    quickFabY: 0,
+    quickFabReady: false,
 
     // B-1 Orbit Aura & Particles
     avatarChar: "靈",
@@ -111,19 +134,6 @@ Page({
     alchemyCompileMessage: ""
   },
 
-  initPageBottomOffset() {
-    try {
-      const windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
-      const screenHeight = windowInfo.screenHeight || 0;
-      const windowHeight = windowInfo.windowHeight || 0;
-      const windowTop = windowInfo.windowTop || 0;
-      const bottomOffset = Math.max(0, screenHeight - windowHeight - windowTop);
-      this.setData({ bottomOffset });
-    } catch (e) {
-      this.setData({ bottomOffset: 0 });
-    }
-  },
-
   onLoad() {
     const dict = i18n.getDict() || {};
     // 步骤列表展开偏好记忆（跨会话沿用）
@@ -138,8 +148,8 @@ Page({
       try { wx.setNavigationBarTitle({ title: dict.index.nav_title }); } catch(e) {}
     }
     i18n.updateTabBar();
-    this.initPageBottomOffset();
     this.syncGlobalData();
+    this.initQuickFabPosition();
     this.startLiveStatusTicker();
   },
 
@@ -156,8 +166,14 @@ Page({
       try { wx.setNavigationBarTitle({ title: dict.index.nav_title }); } catch(e) {}
     }
     i18n.updateTabBar();
-    this.initPageBottomOffset();
     this.syncGlobalData();
+    this.refreshQuickFabProgress();
+    // 预加载快捷面板指令池（10 分钟节流；面板打开时秒出内容）
+    let lastQuickRec = 0;
+    try { lastQuickRec = Number(wx.getStorageSync("dahuangQuickRecAt") || 0); } catch (e) {}
+    if (!this.data.quickRecommendationPool.length && Date.now() - lastQuickRec > 10 * 60 * 1000) {
+      this.loadQuickRecommendations();
+    }
     this.scrollToBottom();
     this.startLiveStatusTicker();
     // 回到前台时补拉离线期间完成的任务结果
@@ -166,7 +182,6 @@ Page({
     }
     // 待决策：拉取数量；登录后若有待办，插入摘要提醒
     this.refreshPendingDecisions();
-    this.loadRecommendations();
   },
 
   refreshPendingDecisions() {
@@ -182,47 +197,355 @@ Page({
     });
   },
 
-  loadRecommendations() {
+  pickBatch(pool, cursor, size) {
+    const list = Array.isArray(pool) ? pool : [];
+    if (!list.length) return { batch: [], cursor: 0 };
+    const safeSize = Math.max(1, size || 6);
+    const start = (cursor || 0) % list.length;
+    const batch = [];
+    for (let i = 0; i < safeSize; i++) {
+      batch.push(list[(start + i) % list.length]);
+    }
+    return { batch, cursor: (start + safeSize) % list.length };
+  },
+
+  openQuickPanel() {
+    const aiPool = this.data.quickRecommendationPool || [];
+    const cmdBatch = this.pickBatch(aiPool, 0, 4);
+    const recBatch = this.pickBatch(aiPool, 4, 4);
+    const tasks = this.buildQuickTasks();
+    this.setData({
+      showQuickPanel: true,
+      quickPanelLoading: !aiPool.length,
+      quickPanelPos: this.computeQuickPanelPos(),
+      quickCommands: cmdBatch.batch,
+      quickCommandCursor: cmdBatch.cursor,
+      quickRecommendations: recBatch.batch,
+      quickRecCursor: recBatch.cursor,
+      quickTasks: tasks,
+      quickFabProgress: (tasks[0] && tasks[0].progress) || 0
+    });
+    // 池子为空才请求（onShow 已预加载；失败时这里是兜底）
+    if (!aiPool.length) this.loadQuickRecommendations();
+  },
+
+  noop() {},
+
+  /** 面板锚定 FAB 弹出：左半屏左对齐、右半屏右对齐；FAB 在下半屏则面板弹到其上方 */
+  computeQuickPanelPos() {
+    const win = this._quickFabWindow || {};
+    const w = win.w || 375;
+    const h = win.h || 667;
+    const fab = win.fab || 48;
+    const fabX = this.data.quickFabX || 0;
+    const fabY = this.data.quickFabY || 0;
+    const panelW = Math.min((610 / 750) * w, w - 16);
+    const estH = Math.min(Math.round(0.62 * h), 440); // 面板高度估计（max-height 64vh）
+    const margin = 10;
+    const fabCx = fabX + fab / 2;
+    const fabCy = fabY + fab / 2;
+    let left;
+    if (fabCx < w / 2) {
+      left = Math.min(Math.max(fabX - margin, 8), w - panelW - 8);
+    } else {
+      left = Math.min(Math.max(fabX + fab - panelW + margin, 8), w - panelW - 8);
+    }
+    let top;
+    if (fabCy > h * 0.5) {
+      top = fabY - estH - margin;
+      if (top < 8) top = Math.min(fabY + fab + margin, h - estH - 8);
+    } else {
+      top = fabY + fab + margin;
+      if (top + estH > h - 8) top = Math.max(8, h - estH - 8);
+    }
+    return { left, top };
+  },
+
+  /** 面板头拖动：按住"主人法旨"标题栏可自由调整面板位置 */
+  onPanelHeadStart(e) {
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    this._panelDrag = {
+      sx: t.clientX,
+      sy: t.clientY,
+      left: this.data.quickPanelPos.left || 0,
+      top: this.data.quickPanelPos.top || 0
+    };
+  },
+
+  onPanelHeadMove(e) {
+    const t = e.touches && e.touches[0];
+    const d = this._panelDrag;
+    if (!t || !d) return;
+    // 6px 阈值：点击 ✕ 时的轻微手抖不算拖动，保证关闭按钮可靠生效
+    const dx = t.clientX - d.sx;
+    const dy = t.clientY - d.sy;
+    if (!d.moved && Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+    d.moved = true;
+    const win = this._quickFabWindow || {};
+    const w = win.w || 375;
+    const h = win.h || 667;
+    const panelW = Math.min((610 / 750) * w, w - 16);
+    const left = Math.min(Math.max(d.left + dx, 0), w - panelW);
+    const top = Math.min(Math.max(d.top + dy, 0), h - 60);
+    this.setData({ quickPanelPos: { left, top } });
+  },
+
+  onPanelHeadEnd() {
+    this._panelDrag = null;
+  },
+
+  toggleQuickPanel() {
+    if (this.data.showQuickPanel) {
+      this.setData({ showQuickPanel: false });
+    } else {
+      this.openQuickPanel();
+    }
+  },
+
+  closeQuickPanel() {
+    this.setData({ showQuickPanel: false });
+  },
+
+  openTasksFromPanel() {
+    this.setData({ showQuickPanel: false });
+    wx.navigateTo({ url: "/pages/tasks/tasks" });
+  },
+
+  openScheduleFromPanel() {
+    this.setData({ showQuickPanel: false });
+    wx.navigateTo({ url: "/pages/schedule/schedule" });
+  },
+
+  // 日程到点实时推送：在对话流里留痕（系统消息已由 app 层写入，这里只做轻提示）
+  onScheduleReminder() {
+    this.scrollToBottom();
+  },
+
+  refreshQuickCommands() {
+    const pool = this.data.quickRecommendationPool || [];
+    if (pool.length <= 4) {
+      // 池子耗尽：重新请求服务端换新一批
+      wx.showToast({ title: "正在换新一批…", icon: "none" });
+      this.loadQuickRecommendations();
+      return;
+    }
+    const batch = this.pickBatch(pool, this.data.quickCommandCursor, 4);
+    this.setData({ quickCommands: batch.batch, quickCommandCursor: batch.cursor });
+  },
+
+  refreshQuickRecommendations() {
+    const pool = this.data.quickRecommendationPool || [];
+    if (pool.length <= 4) {
+      wx.showToast({ title: "正在换新一批…", icon: "none" });
+      this.loadQuickRecommendations();
+      return;
+    }
+    const batch = this.pickBatch(pool, this.data.quickRecCursor, 4);
+    this.setData({ quickRecommendations: batch.batch, quickRecCursor: batch.cursor });
+  },
+
+  initQuickFabPosition() {
+    try {
+      const info = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+      const w = info.windowWidth || 375;
+      const h = info.windowHeight || 667;
+      const fab = (96 / 750) * w;
+      let pos = null;
+      try { pos = wx.getStorageSync("dahuangQuickFabPos"); } catch (e) {}
+      const maxX = Math.max(0, w - fab - 8);
+      const maxY = Math.max(0, h - fab - 8);
+      let x = pos && typeof pos.x === "number" ? pos.x : maxX - 8;
+      let y = pos && typeof pos.y === "number" ? pos.y : maxY - 120;
+      x = Math.min(Math.max(0, x), maxX);
+      y = Math.min(Math.max(0, y), maxY);
+      this._quickFabWindow = { w, h, fab, maxX, maxY };
+      this.setData({ quickFabX: x, quickFabY: y, quickFabReady: true });
+    } catch (e) {
+      this.setData({ quickFabX: 300, quickFabY: 420, quickFabReady: true });
+    }
+  },
+
+  onQuickFabStart(e) {
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    this.resetFabIdleTimer();
+    // 打断进行中的起跳/滑行动画（重新抓住浮钮）
+    if (this._fabSnapTimer) { clearTimeout(this._fabSnapTimer); this._fabSnapTimer = null; }
+    if (this._fabJumpEndTimer) { clearTimeout(this._fabJumpEndTimer); this._fabJumpEndTimer = null; }
+    if (this.data.fabJumping || this.data.fabGliding) {
+      this.setData({ fabJumping: false, fabGliding: false });
+    }
+    this._fabStart = { x: t.clientX, y: t.clientY, left: this.data.quickFabX, top: this.data.quickFabY };
+    this._fabMoved = false;
+  },
+
+  onQuickFabMove(e) {
+    const t = e.touches && e.touches[0];
+    const start = this._fabStart;
+    if (!t || !start) return;
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (Math.abs(dx) > 6 || Math.abs(dy) > 6) this._fabMoved = true;
+    const win = this._quickFabWindow || {};
+    const maxX = typeof win.maxX === "number" ? win.maxX : 9999;
+    const maxY = typeof win.maxY === "number" ? win.maxY : 9999;
+    this.setData({
+      quickFabX: Math.min(Math.max(0, start.left + dx), maxX),
+      quickFabY: Math.min(Math.max(0, start.top + dy), maxY)
+    });
+  },
+
+  onQuickFabEnd() {
+    this._fabStart = null;
+    if (this._fabMoved) {
+      // 松手：篮球式"蓄力→起跳→落地弹起"，跳向最近的左右边缘、
+      // 落点比松手处略高（约 36px），像积蓄力量后轻巧落位
+      const win = this._quickFabWindow || {};
+      const maxX = typeof win.maxX === "number" ? win.maxX : 0;
+      const maxY = typeof win.maxY === "number" ? win.maxY : 0;
+      const snapX = this.data.quickFabX < maxX / 2 ? 0 : maxX;
+      const targetY = Math.min(Math.max(this.data.quickFabY - 36, 8), maxY);
+      const dist = Math.abs(this.data.quickFabX - snapX);
+      this.setData({ fabJumping: true });
+      // 起跳顶点附近（320ms）开始向目标滑行，落地时正好落在边缘偏上处
+      this._fabSnapTimer = setTimeout(() => {
+        this.setData({ fabGliding: true, quickFabX: snapX, quickFabY: targetY });
+        try { wx.setStorageSync("dahuangQuickFabPos", { x: snapX, y: targetY }); } catch (e) {}
+      }, dist < 20 ? 260 : 320);
+      this._fabJumpEndTimer = setTimeout(() => {
+        this.setData({ fabJumping: false, fabGliding: false });
+        this.resetFabIdleTimer();
+      }, 1250);
+      return;
+    }
+    this.resetFabIdleTimer();
+    this.toggleQuickPanel();
+  },
+
+  /** 30 秒未操作后 FAB 降透明度（呼吸态），触摸即恢复 */
+  resetFabIdleTimer() {
+    if (this.data.fabIdle) this.setData({ fabIdle: false });
+    if (this._fabIdleTimer) clearTimeout(this._fabIdleTimer);
+    this._fabIdleTimer = setTimeout(() => {
+      this.setData({ fabIdle: true });
+    }, 30000);
+  },
+
+  refreshQuickFabProgress() {
+    const tasks = this.buildQuickTasks();
+    const top = tasks && tasks[0];
+    this.setData({ quickFabProgress: top && top.progress ? top.progress : 0 });
+  },
+
+  buildQuickTasks() {
+    const history = app.globalData.chatHistory || [];
+    const tasks = [];
+    for (let i = history.length - 1; i >= 0 && tasks.length < 3; i--) {
+      const m = history[i];
+      if (!m || m.sender !== "agent") continue;
+      let title = "";
+      let pct = 0;
+      if (m.progressState) {
+        // 新进度系统：以 progressState 为准（状态行 + 伪进度爬升后的百分比），与气泡显示一致
+        const disp = buildPsDisplay(m.progressState, this.data.expandedTasks && this.data.expandedTasks[m.id]);
+        title = disp.statusLine;
+        pct = disp.pct;
+      } else {
+        // 旧字段兜底（历史消息）
+        const hasProcessing = m.tasks && m.tasks.some((t) => t.status === "PROCESSING" || t.status === "RUNNING");
+        const isPending = m.isPending || (typeof m.progress === "number" && m.progress > 0 && m.progress < 100);
+        if (!hasProcessing && !isPending) continue;
+        if (m.tasks && m.tasks.length) {
+          const active = m.tasks.find((t) => t.status === "PROCESSING" || t.status === "RUNNING") || m.tasks[0];
+          title = (active && active.title) || m.tasks[0].title || "";
+        }
+        if (!title) title = "正在推演指令";
+        pct = typeof m.progress === "number" ? m.progress : 0;
+      }
+      if (!title) continue;
+      tasks.push({ id: m.id, title, progress: pct });
+    }
+    return tasks;
+  },
+
+  loadQuickRecommendations() {
     const token = app.globalData.agentState && app.globalData.agentState.token;
-    if (!token || token === "offline-mock-jwt-token") return;
-    if (this._recLoading) return; // 防并发重复推送（onShow 频繁触发）
-    // 30 分钟窗口去重：每次冷启动进入都能看到推荐，只防短时间内重复刷屏。
-    // （不用日期比较，彻底绕开 UTC/本地时区误判）
-    let lastPushed = 0;
-    try { lastPushed = Number(wx.getStorageSync("dahuangRecLastPushedAt") || 0); } catch (e) {}
-    if (lastPushed && Date.now() - lastPushed < 30 * 60 * 1000) return;
-    this._recLoading = true;
+    if (!token || token === "offline-mock-jwt-token") {
+      this.setData({ quickPanelLoading: false });
+      return;
+    }
+    if (this._quickRecLoading) return;
+    this._quickRecLoading = true;
     wx.request({
       url: `${app.globalData.serverUrl}/api/agent/recommendations`,
       header: getHeaders(token),
+      fail: (err) => {
+        console.error("[QUICK_REC] 请求失败:", err);
+        // 失败静默（面板显示空态），下次进入/换一批再试
+      },
       success: (res) => {
-        // 请求期间可能已有其他入口推送过（并发触发）→ 复查时间戳，避免重复
-        let pushedAgain = 0;
-        try { pushedAgain = Number(wx.getStorageSync("dahuangRecLastPushedAt") || 0); } catch (e) {}
-        if (pushedAgain && Date.now() - pushedAgain < 30 * 60 * 1000) return;
-        if (res.statusCode === 200 && res.data && Array.isArray(res.data.suggestions) && res.data.suggestions.length) {
-          // 单例收敛：清理掉历史中旧的入场推荐气泡，保证聊天流中只保留最新的一条活跃推荐，不重复刷屏
-          app.globalData.chatHistory = (app.globalData.chatHistory || []).filter(
-            (m) => !m.id || !String(m.id).startsWith("rec-")
-          );
-
-          const msg = {
-            id: `rec-${Date.now()}`,
-            sender: "agent",
-            content: "主人，根据您最近的关注，为您准备了几件可以一键执行的事，点一下我马上办：",
-            timestamp: app.getTimestamp ? app.getTimestamp() : "",
-            isPending: false,
-            progress: 100,
-            suggestions: res.data.suggestions
-          };
-          app.globalData.chatHistory.push(msg);
-          if (app.saveChatHistory) app.saveChatHistory();
-          if (app.triggerPageCallback) app.triggerPageCallback("onChatHistoryUpdate");
-          try { wx.setStorageSync("dahuangRecLastPushedAt", Date.now()); } catch (e) {}
+        if (res.statusCode === 200 && res.data && Array.isArray(res.data.suggestions)) {
+          const rawPool = res.data.suggestions || [];
+          const seen = new Set();
+          const pool = rawPool.filter((a) => {
+            const cmd = String(a && a.command || "").trim();
+            const label = String(a && a.label || "").trim();
+            if (!cmd || !label || cmd.length < 4 || label === cmd) return false;
+            if (/[?？]$/.test(cmd) || /^(请问|为什么|什么是|怎么样|是否|有没有|能不能|可以吗)/.test(cmd)) return false;
+            const key = label + "|" + cmd;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+          const cmdBatch = this.pickBatch(pool, 0, 4);
+          const recBatch = this.pickBatch(pool, 4, 4);
+          this.setData({
+            quickRecommendationPool: pool,
+            quickCommands: cmdBatch.batch,
+            quickCommandCursor: cmdBatch.cursor,
+            quickRecommendations: recBatch.batch,
+            quickRecCursor: recBatch.cursor
+          });
+          try { wx.setStorageSync("dahuangQuickRecAt", Date.now()); } catch (e) {}
+          console.log("[QUICK_REC] 池子刷新:", pool.length, "条");
         }
       },
-      complete: () => { this._recLoading = false; }
+      complete: () => {
+        this._quickRecLoading = false;
+        this.setData({ quickPanelLoading: false });
+      }
     });
+  },
+
+  tapQuickCommand(e) {
+    const cmd = e.currentTarget.dataset.command || "";
+    if (!cmd) return;
+    // 点过的指令立即从池中移除（与"当天点击不再推"的服务端去重对齐）
+    this.removeFromQuickPool(cmd);
+    this.setData({ showQuickPanel: false });
+    this.tapSuggestion({ currentTarget: { dataset: { command: cmd } } });
+  },
+
+  removeFromQuickPool(cmd) {
+    const norm = (s) => String(s || "").trim();
+    const pool = (this.data.quickRecommendationPool || []).filter((a) => norm(a.command) !== norm(cmd));
+    const cmdBatch = this.pickBatch(pool, 0, 4);
+    const recBatch = this.pickBatch(pool, 4, 4);
+    this.setData({
+      quickRecommendationPool: pool,
+      quickCommands: cmdBatch.batch,
+      quickCommandCursor: cmdBatch.cursor,
+      quickRecommendations: recBatch.batch,
+      quickRecCursor: recBatch.cursor
+    });
+  },
+
+  tapQuickTask(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id) return;
+    this.setData({ showQuickPanel: false, toChatView: `chat-${id}` });
+    this.scrollToBottom();
   },
 
   tapSuggestion(e) {
@@ -271,7 +594,15 @@ Page({
   },
 
   onUnload() {
+    this._destroyed = true;
     this.stopLiveStatusTicker();
+    this.stopProgressTicker();
+    // 清理 FAB/滚动相关定时器，避免页面销毁后继续 setData
+    clearTimeout(this._fabIdleTimer);
+    clearTimeout(this._fabSnapTimer);
+    clearTimeout(this._fabJumpEndTimer);
+    clearTimeout(this._scrollBottomTimer);
+    clearTimeout(this._programmaticScrollTimer);
   },
 
   startLiveStatusTicker() {
@@ -356,9 +687,29 @@ Page({
     }, 2500);
   },
 
+  /** segments 渲染缓存键：渲染内容/图表/图片 URL（转存后 URL 变化必须重建）/块数/noInline 保险丝状态 */
+  segmentCacheKey(m, renderedContent) {
+    const noInline = Boolean(this._chartNoInline && this._chartNoInline[m.id]);
+    let h = 0;
+    const s = String(renderedContent !== undefined ? renderedContent : (m.content || ""));
+    for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    const imgSig = (m.images || m.agentImages || []).join(",");
+    return `${m.id}|${h}|${(m.charts || []).length}|${imgSig}|${(m.blocks || []).length}|${noInline ? 1 : 0}`;
+  },
+
+  putSegCache(key, layout) {
+    if (!this._segCache) this._segCache = new Map();
+    if (this._segCache.size > 60) {
+      const firstKey = this._segCache.keys().next().value;
+      if (firstKey !== undefined) this._segCache.delete(firstKey);
+    }
+    this._segCache.set(key, layout);
+  },
+
   syncGlobalData() {
     const { agentState, logs, chatHistory } = app.globalData;
-    
+    if (!this._segCache) this._segCache = new Map();
+
     let progress = 0;
     let activeTasks = [];
     let latestCommand = "";
@@ -388,6 +739,7 @@ Page({
     const liveStatusTexts = taskFeed.length > 0 ? taskFeed : ["正在分析指令", "正在调用工具", "正在整理结果"];
     const liveStatusText = liveStatusTexts[this.data.liveStatusTick % Math.max(liveStatusTexts.length, 1)] || (activeTask ? short(activeTask.desc || activeTask.title || "正在推演...") : (progress > 0 && progress < 100 ? "正在推演..." : ""));
 
+    const msgServerUrl = this.data.serverUrl || app.globalData.serverUrl || "";
     const processedChatHistory = chatHistory.map(m => {
       let isRich = false;
       let richContent = "";
@@ -419,18 +771,53 @@ Page({
           cleanContent = `分身正在推演法旨，任务演化进度：${m.progress || 0}%`;
         }
 
+        const cacheKey = this.segmentCacheKey(m, cleanContent || m.content);
+        let layout = this._segCache.get(cacheKey);
+        if (!layout) {
+          try {
+            const segs = app.buildMessageSegments(cleanContent || m.content || "", m.images || m.agentImages || [], msgServerUrl, m.blocks);
+            const l = app.buildChartLayout(m.charts, segs, m.id, this._chartNoInline);
+            layout = { segments: l.segments, chartsOrdered: l.chartsOrdered, unplacedCharts: l.unplacedCharts };
+          } catch (segErr) {
+            // 兜底：segments 管道异常绝不冻结整个聊天 UI——降级为纯文本段（剥标签）
+            console.error("[SEGMENTS] build failed, fallback to plain text:", segErr);
+            const plain = String(cleanContent || m.content || "").replace(/<[^>]*>/g, "").trim();
+            layout = { segments: [{ type: "text", richContent: plain, index: 0 }], chartsOrdered: [], unplacedCharts: [] };
+          }
+          this.putSegCache(cacheKey, layout);
+        }
         return {
           ...m,
           content: cleanContent || m.content,
           isRich,
           richContent,
+          segments: layout.segments,
+          chartsOrdered: layout.chartsOrdered,
+          unplacedCharts: layout.unplacedCharts,
           psDisplay: m.progressState ? buildPsDisplay(m.progressState, this.data.expandedTasks && this.data.expandedTasks[m.id]) : null
         };
+      }
+      const cacheKey2 = this.segmentCacheKey(m);
+      let layout2 = this._segCache.get(cacheKey2);
+      if (!layout2) {
+        try {
+          const segs2 = app.buildMessageSegments(m.content || "", m.images || m.agentImages || [], msgServerUrl, m.blocks);
+          const l2 = app.buildChartLayout(m.charts, segs2, m.id, this._chartNoInline);
+          layout2 = { segments: l2.segments, chartsOrdered: l2.chartsOrdered, unplacedCharts: l2.unplacedCharts };
+        } catch (segErr2) {
+          console.error("[SEGMENTS] build failed (fallback), fallback to plain text:", segErr2);
+          const plain2 = String(m.content || "").replace(/<[^>]*>/g, "").trim();
+          layout2 = { segments: [{ type: "text", richContent: plain2, index: 0 }], chartsOrdered: [], unplacedCharts: [] };
+        }
+        this.putSegCache(cacheKey2, layout2);
       }
       return {
         ...m,
         isRich,
         richContent,
+        segments: layout2.segments,
+        chartsOrdered: layout2.chartsOrdered,
+        unplacedCharts: layout2.unplacedCharts,
         psDisplay: m.progressState ? buildPsDisplay(m.progressState, this.data.expandedTasks && this.data.expandedTasks[m.id]) : null
       };
     });
@@ -537,6 +924,7 @@ Page({
   },
 
   tickProgress() {
+    if (this._destroyed) return;
     const src = app.globalData.chatHistory;
     const list = this.data.chatHistory || [];
     const updates = {};
@@ -566,35 +954,54 @@ Page({
   },
 
   // 原生 Canvas 绘制 Agent 图表（图表数据块 → canvas 2d）
-  redrawCharts() {
+  redrawCharts(retry) {
     const history = this.data.chatHistory || [];
-    const hasCharts = history.some((m) => m.charts && m.charts.length > 0);
-    if (!hasCharts) return;
+    const chartsOf = (m) => (m.chartsOrdered && m.chartsOrdered.length ? m.chartsOrdered : m.charts);
 
-    // 签名去重：进度刷新等无关更新不重画（避免 canvas 闪烁）
-    const signature = JSON.stringify(
-      history.filter((m) => m.charts && m.charts.length > 0).map((m) => [m.id, m.charts.length])
-    );
-    if (signature === this._chartSignature) return;
+    // 收集「画布 ID → 图表规格」的确定性映射（按内容，不按 DOM 顺序）
+    const targets = [];
+    history.forEach((msg) => {
+      const specs = chartsOf(msg);
+      if (!specs || specs.length === 0) return;
+      specs.forEach((spec, i) => targets.push({ id: app.chartCanvasId(msg.id, i), spec, msgId: msg.id }));
+    });
+    if (targets.length === 0) return;
+
+    const signature = JSON.stringify(targets.map((t) => [t.id, (t.spec && t.spec.title) || ""]));
+    if (!retry && signature === this._chartSignature) return;
     this._chartSignature = signature;
 
     const query = wx.createSelectorQuery().in(this);
-    query.selectAll('.bubble-chart-canvas').fields({ node: true, size: true }).exec((res) => {
-      const nodes = (res && res[0]) || [];
-      let idx = 0;
-      history.forEach((msg) => {
-        if (!msg.charts || msg.charts.length === 0) return;
-        msg.charts.forEach((spec) => {
-          const info = nodes[idx++];
-          if (info && info.node && info.width > 0 && info.height > 0) {
-            try {
-              drawChart(info.node, spec, info.width, info.height);
-            } catch (e) {
-              console.error('[CHART] canvas draw failed:', e);
-            }
+    targets.forEach((t) => query.select('#' + t.id).fields({ node: true, size: true }));
+    query.exec((res) => {
+      const list = res || [];
+      let skipped = 0;
+      const badMsgIds = [];
+      targets.forEach((t, i) => {
+        const info = list[i];
+        if (info && info.node && info.width > 0 && info.height > 0) {
+          try {
+            drawChart(info.node, t.spec, info.width, info.height);
+          } catch (e) {
+            console.error('[CHART] canvas draw failed:', e);
           }
-        });
+        } else {
+          skipped += 1;
+          if (badMsgIds.indexOf(t.msgId) === -1) badMsgIds.push(t.msgId);
+        }
       });
+      if (skipped > 0) {
+        console.warn(`[CHART] ${skipped} canvas(es) not ready, attempt ${retry || 0}`);
+        if ((retry || 0) < 4) {
+          setTimeout(() => this.redrawCharts((retry || 0) + 1), 400);
+        } else if (badMsgIds.length) {
+          // 兜底：重试仍为 0 尺寸 → 该消息的图表改为末尾渲染（已验证可用的路径）
+          this._chartNoInline = this._chartNoInline || {};
+          let changed = false;
+          badMsgIds.forEach((id) => { if (!this._chartNoInline[id]) { this._chartNoInline[id] = true; changed = true; } });
+          if (changed) { this._chartSignature = ""; this.syncGlobalData(); }
+        }
+      }
     });
   },
 
@@ -981,6 +1388,15 @@ Page({
   onChatHistoryUpdate() {
     this.syncGlobalData();
     this.startLiveStatusTicker();
+    // 任务执行中：主人没主动上滑看历史时，视图跟随最新执行位置；
+    // 任务刚结束：把最终答复也带到可见位置
+    const history = app.globalData.chatHistory || [];
+    const pendingMsg = history.find((m) => m && m.isPending);
+    const prevPendingId = this._pendingMsgId;
+    this._pendingMsgId = pendingMsg ? pendingMsg.id : "";
+    if (this._chatFollow === false) return;
+    if (pendingMsg) this.scrollToBottom();
+    else if (prevPendingId) this.scrollToBottom();
   },
 
   onAgentStateUpdate(data) {
@@ -1069,6 +1485,19 @@ Page({
   },
 
   scrollToBottom() {
+    this._doScrollToBottom();
+    // 二次补滚：图片/任务进度卡渲染完成后消息高度会再变，再对齐一次最新位置
+    clearTimeout(this._scrollBottomTimer);
+    this._scrollBottomTimer = setTimeout(() => this._doScrollToBottom(), 420);
+  },
+
+  _doScrollToBottom() {
+    if (this._destroyed) return;
+    // 程序化滚动期间屏蔽 onChatScroll 的"离开底部"判断，
+    // 否则滚动动画中途的 scroll 事件会把 _chatFollow 锁死为 false
+    this._programmaticScroll = true;
+    clearTimeout(this._programmaticScrollTimer);
+    this._programmaticScrollTimer = setTimeout(() => { this._programmaticScroll = false; }, 800);
     this.setData({
       toLogView: "",
       toChatView: ""
@@ -1079,13 +1508,33 @@ Page({
           const lastLog = this.data.logs[this.data.logs.length - 1];
           updates.toLogView = `log-${lastLog.id}`;
         }
-        if (this.data.chatHistory.length > 0) {
-          const lastChat = this.data.chatHistory[this.data.chatHistory.length - 1];
-          updates.toChatView = `chat-${lastChat.id}`;
+        // 以全局最新历史为准（setData 异步，this.data 可能还是上一帧）
+        const chat = (app.globalData.chatHistory && app.globalData.chatHistory.length)
+          ? app.globalData.chatHistory
+          : (this.data.chatHistory || []);
+        if (chat.length > 0) {
+          updates.toChatView = `chat-${chat[chat.length - 1].id}`;
         }
         this.setData(updates);
       }, 100);
     });
+  },
+
+  // 记录主人是否停留在底部：主动上滑看历史时暂停自动跟随
+  onChatScroll(e) {
+    const d = (e && e.detail) || {};
+    const st = d.scrollTop || 0;
+    const sh = d.scrollHeight || 0;
+    if (!this._chatViewportH) {
+      wx.createSelectorQuery()
+        .select(".chat-scroll")
+        .boundingClientRect((r) => { if (r && r.height) this._chatViewportH = r.height; })
+        .exec();
+    }
+    const h = this._chatViewportH;
+    if (!h) return;
+    if (this._programmaticScroll) return;
+    this._chatFollow = (sh - st - h) < 80;
   },
 
   onInputChange(e) {
@@ -1094,28 +1543,52 @@ Page({
     });
   },
 
-  onInputFocus(e) {
-    const rawHeight = (e && e.detail && typeof e.detail.height === 'number') ? e.detail.height : 0;
-    if (rawHeight > 0) {
-      const shift = Math.max(0, rawHeight - (this.data.bottomOffset || 0));
-      this.setData({ keyboardShift: shift });
+  // 键盘处理（adjust-position=false，transform 位移输入栏——实测可靠的机制）：
+  // e.detail.height 从屏幕物理底部算起；页面 Webview 底边在 TabBar 之上（50~90px）。
+  // 事件时刻实时测量该偏移并相减；偏移封顶 90px——测量异常时宁可小缝隙、绝不遮挡输入框。
+  // 位移用 transform（不改布局，flex 裁剪问题与它无关），聊天面板同步 margin-bottom 腾位。
+  measureKeyboardShift(h) {
+    // 键盘高度 h 是从【物理屏幕底部】算起的；页面底部在 TabBar 之上。
+    // 需要减掉的只有“页面底部到屏幕底部”这一段 = 状态栏 + 导航栏 + TabBar + 底部安全区。
+    // windowTop 在部分安卓机型上报 0/不准，导致窗口信息估算偏差，这里改用：
+    //   offset = screenHeight - windowHeight - 状态栏高度 - 导航栏高度
+    // windowHeight 已不含状态栏/导航栏/TabBar，因此上式等于 TabBar + 底部安全区，精确贴齐。
+    if (!h || h <= 0) {
+      this.setData({ keyboardShift: 0 });
+      return;
     }
+    let offset = 0;
+    try {
+      const info = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+      const statusBar = info.statusBarHeight || 0;
+      let navBar = 44; // 微信默认导航栏高度
+      try {
+        const menu = wx.getMenuButtonBoundingClientRect();
+        if (menu && menu.height) navBar = (menu.top - statusBar) * 2 + menu.height;
+      } catch (e) {}
+      offset = Math.max(0, (info.screenHeight || 0) - (info.windowHeight || 0) - statusBar - navBar);
+    } catch (err) {
+      offset = 0;
+    }
+    this.setData({ keyboardShift: Math.max(0, h - offset) });
+  },
+
+  onInputFocus(e) {
+    // focus 事件兜底：keyboardheightchange 偶发不触发时也保证输入框可见
+    const h = (e && e.detail && typeof e.detail.height === "number") ? e.detail.height : 0;
+    if (h > 0) {
+      this.measureKeyboardShift(h);
+    }
+    // 注意：聚焦/打字时【不】滚动对话（用户明确要求），只有发送等主动动作才滚
   },
 
   onInputBlur() {
-    this.setData({
-      keyboardShift: 0
-    });
+    this.setData({ keyboardShift: 0 });
   },
 
   onKeyboardHeightChange(e) {
-    const rawHeight = (e && e.detail && typeof e.detail.height === 'number') ? e.detail.height : 0;
-    if (rawHeight > 0) {
-      const shift = Math.max(0, rawHeight - (this.data.bottomOffset || 0));
-      this.setData({ keyboardShift: shift });
-    } else {
-      this.setData({ keyboardShift: 0 });
-    }
+    const h = (e && e.detail && typeof e.detail.height === "number") ? e.detail.height : 0;
+    this.measureKeyboardShift(h);
   },
 
   onMessageLongPress(e) {
@@ -1263,6 +1736,17 @@ Page({
     }
   },
 
+  onImageQuickAction(e) {
+    const cmd = (e.currentTarget.dataset.command || "").trim();
+    if (!cmd) return;
+    const uploading = (this.data.pendingImages || []).some((img) => img.status === "uploading");
+    if (uploading) {
+      wx.showToast({ title: "图片上传中，请稍候", icon: "none" });
+      return;
+    }
+    this.setData({ inputValue: cmd }, () => this.sendInstruction());
+  },
+
   sendInstruction() {
     const rawText = this.data.inputValue.trim();
     if (!rawText) return;
@@ -1279,11 +1763,17 @@ ${quotedText}
 
     if (!this.data.agentState.token) {
       // 1. Add user message locally
+      const offlineImages = (this.data.images || []).slice();
       const humanMsg = {
         id: `human-${Date.now()}`,
         sender: "human",
         content: rawText,
         quote: quotedText || null,
+        images: offlineImages,
+        blocks: [
+          ...(rawText && rawText.trim() ? [{ type: "text", text: rawText }] : []),
+          ...offlineImages.map((u) => ({ type: "image", url: u })),
+        ],
         timestamp: app.getTimestamp ? app.getTimestamp() : new Date().toLocaleTimeString()
       };
       app.globalData.chatHistory.push(humanMsg);
@@ -1391,6 +1881,17 @@ ${quotedText}
       },
       sentImages
     );
+
+    // 发送后立刻把视图带到最新位置（主人消息 + 分身执行进度），并恢复自动跟随
+    this._chatFollow = true;
+    this.scrollToBottom();
+  },
+
+  previewAgentImage(e) {
+    const src = e.currentTarget.dataset.src;
+    if (!src) return;
+    const urls = e.currentTarget.dataset.urls || [src];
+    wx.previewImage({ current: src, urls });
   },
 
   previewHumanImage(e) {

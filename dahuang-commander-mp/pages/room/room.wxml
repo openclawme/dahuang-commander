@@ -35,10 +35,39 @@
           
           <!-- 气泡 -->
           <view class="msg-bubble {{item.isMe ? 'bubble-me-glow' : 'bubble-other-glow'}} {{item.isRich ? 'bubble-rich' : ''}}">
-            <rich-text wx:if="{{item.body && item.body !== '[图片]'}}" class="msg-body-rich" nodes="{{item.richContent || item.body}}" user-select></rich-text>
-            <view class="msg-image-grid" wx:if="{{item.images && item.images.length > 0}}">
+            <block wx:if="{{item.segments && item.segments.length > 0}}">
+              <view class="msg-segments">
+                <block wx:for="{{item.segments}}" wx:for-item="seg" wx:key="index">
+                  <rich-text wx:if="{{seg.type === 'text'}}" class="msg-body-rich" nodes="{{seg.richContent}}" user-select></rich-text>
+                  <image wx:elif="{{seg.type === 'image'}}" class="msg-segment-image" src="{{seg.url}}" mode="widthFix" bindtap="previewRoomImage" data-src="{{seg.url}}" data-urls="{{item.images}}"></image>
+                  <view wx:elif="{{seg.type === 'chart'}}" class="bubble-chart-inline">
+                    <canvas type="2d" class="bubble-chart-canvas bubble-chart-canvas-inline" id="{{seg.canvasId}}"></canvas>
+                  </view>
+                  <view wx:elif="{{seg.type === 'table'}}" class="msg-segment-table">
+                    <text class="msg-table-title" wx:if="{{seg.table.title}}">{{seg.table.title}}</text>
+                    <scroll-view scroll-x class="msg-table-scroll" show-scrollbar="{{false}}">
+                      <view class="msg-table">
+                        <view class="msg-table-row msg-table-head flex-row">
+                          <view class="msg-table-cell msg-table-th" wx:for="{{seg.table.headers}}" wx:for-item="h" wx:key="i">{{h.text}}</view>
+                        </view>
+                        <view class="msg-table-row flex-row" wx:for="{{seg.table.rows}}" wx:for-item="row" wx:key="ri">
+                          <view class="msg-table-cell" wx:for="{{row.cells}}" wx:for-item="cell" wx:key="i">{{cell.text}}</view>
+                        </view>
+                      </view>
+                    </scroll-view>
+                  </view>
+                </block>
+              </view>
+            </block>
+            <rich-text wx:elif="{{item.body && item.body !== '[图片]'}}" class="msg-body-rich" nodes="{{item.richContent || item.body}}" user-select></rich-text>
+            <view class="msg-image-grid" wx:if="{{item.images && item.images.length > 0 && !(item.segments && item.segments.length > 0)}}">
               <image class="msg-image-thumb" wx:for="{{item.images}}" wx:for-item="img" wx:key="*this"
                      src="{{img}}" mode="aspectFill" bindtap="previewRoomImage" data-src="{{img}}" data-urls="{{item.images}}"></image>
+            </view>
+            <view class="bubble-chart-list" wx:if="{{item.unplacedCharts && item.unplacedCharts.length > 0}}">
+              <view class="bubble-chart-inline" wx:for="{{item.unplacedCharts}}" wx:for-item="uc" wx:key="canvasId">
+                <canvas type="2d" class="bubble-chart-canvas bubble-chart-canvas-inline" id="{{uc.canvasId}}"></canvas>
+              </view>
             </view>
             <video wx:if="{{item.videoUrl}}" class="msg-rich-video" src="{{item.videoUrl}}" poster="{{item.videoPoster}}" controls style="width: 100%; border-radius: 8rpx; margin-top: 12rpx; border: 1rpx solid rgba(158,42,43,0.3); max-height: 360rpx;"></video>
           </view>
@@ -52,7 +81,24 @@
 
   <!-- 底部对话输入框：默认锁定（分身对话），人类需先解锁接管；已解散的群无输入区 -->
   <view class="chat-footer" wx:if="{{!dissolved}}">
+    <!-- 待上传图片（上传中/失败态） -->
+    <view class="room-image-list" wx:if="{{pendingImages && pendingImages.length > 0}}">
+      <view class="room-image-item" wx:for="{{pendingImages}}" wx:key="path">
+        <image src="{{item.path}}" mode="aspectFill" class="room-image-thumb"></image>
+        <view class="room-image-status {{item.status}}">{{item.status === 'uploading' ? '上传中…' : '失败'}}</view>
+      </view>
+    </view>
+    <!-- 已选图片（可删除） -->
+    <view class="room-image-list" wx:if="{{images && images.length > 0}}">
+      <view class="room-image-item" wx:for="{{images}}" wx:key="*this">
+        <image src="{{serverUrl}}{{item}}" mode="aspectFill" class="room-image-thumb"></image>
+        <view class="room-image-remove" catchtap="removeImage" data-index="{{index}}">×</view>
+      </view>
+    </view>
     <view class="input-container flex-row align-center" wx:if="{{humanUnlocked}}">
+      <view class="room-add-btn" bindtap="chooseImages">
+        <text class="room-add-icon">＋</text>
+      </view>
       <input
         class="chat-input"
         placeholder="{{t.room.placeholder}}"

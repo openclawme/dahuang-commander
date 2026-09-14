@@ -1,0 +1,119 @@
+<view class="container">
+  <view class="hero-card flex-col">
+    <view class="flex-row align-center justify-between">
+      <text class="hero-title">提醒与订阅</text>
+      <text class="hero-unread">{{unread}} 条未读</text>
+    </view>
+    <text class="hero-desc">分身替你盯着任务、决策和关键变化，重要的事会在这里汇总。</text>
+    <view class="hero-actions flex-row">
+      <view class="mini-btn" bindtap="markAllRead">全部已读</view>
+      <view class="mini-btn" bindtap="clearAll">清空提醒</view>
+    </view>
+  </view>
+
+  <view class="section">
+    <text class="section-title">订阅设置</text>
+    <view class="setting-row flex-row align-center justify-between">
+      <view class="flex-col"><text class="setting-name">任务完成</text><text class="setting-sub">任务成功结束时提醒我</text></view>
+      <switch checked="{{settings.taskDone}}" color="#9e2a2b" data-key="taskDone" bindchange="toggleSetting" />
+    </view>
+    <view class="setting-row flex-row align-center justify-between">
+      <view class="flex-col"><text class="setting-name">任务失败</text><text class="setting-sub">任务失败或超时立即提醒</text></view>
+      <switch checked="{{settings.taskFailed}}" color="#9e2a2b" data-key="taskFailed" bindchange="toggleSetting" />
+    </view>
+    <view class="setting-row flex-row align-center justify-between">
+      <view class="flex-col"><text class="setting-name">待我决策</text><text class="setting-sub">有事情需要主人拍板时提醒</text></view>
+      <switch checked="{{settings.decisions}}" color="#9e2a2b" data-key="decisions" bindchange="toggleSetting" />
+    </view>
+    <view class="setting-row flex-row align-center justify-between">
+      <view class="flex-col"><text class="setting-name">帖子回复</text><text class="setting-sub">我发的帖或我评论过的帖有新回复时提醒</text></view>
+      <switch checked="{{settings.postReply}}" color="#9e2a2b" data-key="postReply" bindchange="toggleSetting" />
+    </view>
+    <view class="setting-row flex-row align-center justify-between">
+      <view class="flex-col"><text class="setting-name">每日摘要</text><text class="setting-sub">每天汇总一次分身的工作进展</text></view>
+      <switch checked="{{settings.dailyDigest}}" color="#9e2a2b" data-key="dailyDigest" bindchange="toggleSetting" />
+    </view>
+  </view>
+
+  <view class="section">
+    <text class="section-title">日程提醒</text>
+    <view class="setting-row flex-row align-center justify-between">
+      <view class="flex-col"><text class="setting-name">到点实时推送</text><text class="setting-sub">关闭后仍会记录到提醒中心，只是不打扰你</text></view>
+      <switch checked="{{settings.schedulePush}}" color="#9e2a2b" data-key="schedulePush" bindchange="toggleSetting" />
+    </view>
+    <view class="setting-row flex-row align-center justify-between">
+      <view class="flex-col"><text class="setting-name">每日推送上限</text><text class="setting-sub">超出后只落站内，不再实时打扰（0 = 不限制）</text></view>
+      <picker range="{{capOptions}}" value="{{capOptions.indexOf(settings.dailyCap) < 0 ? 3 : capOptions.indexOf(settings.dailyCap)}}" bindchange="onCapChange">
+        <view class="setting-value">{{settings.dailyCap === 0 ? '不限' : settings.dailyCap + ' 条'}} ›</view>
+      </picker>
+    </view>
+    <view class="setting-row flex-row align-center justify-between">
+      <view class="flex-col"><text class="setting-name">免打扰开始</text><text class="setting-sub">这个时间之后到次日结束前不打扰，到点提醒会顺延</text></view>
+      <picker mode="time" value="{{settings.quietStart || '22:00'}}" bindchange="onQuietStart">
+        <view class="setting-value">{{settings.quietStart || '未设置'}} ›</view>
+      </picker>
+    </view>
+    <view class="setting-row flex-row align-center justify-between">
+      <view class="flex-col"><text class="setting-name">免打扰结束</text><text class="setting-sub">顺延的提醒会在这个时间之后补发</text></view>
+      <picker mode="time" value="{{settings.quietEnd || '08:00'}}" bindchange="onQuietEnd">
+        <view class="setting-value">{{settings.quietEnd || '未设置'}} ›</view>
+      </picker>
+    </view>
+    <view class="setting-row flex-row align-center justify-between">
+      <view class="flex-col"><text class="setting-name">每日摘要时刻</text><text class="setting-sub">每天这个点汇总今天要做的事</text></view>
+      <picker mode="time" value="{{settings.digestAt}}" bindchange="onDigestAt">
+        <view class="setting-value">{{settings.digestAt}} ›</view>
+      </picker>
+    </view>
+    <view class="setting-row flex-row align-center justify-between" wx:if="{{settings.quietStart || settings.quietEnd}}">
+      <view class="flex-col"><text class="setting-name">重置免打扰</text><text class="setting-sub">恢复为全天可提醒</text></view>
+      <view class="mini-btn" bindtap="clearQuiet">重置</view>
+    </view>
+    <view class="notice-card flex-row align-center" bindtap="openSchedule">
+      <view class="notice-dot pending"></view>
+      <view class="flex-col notice-main">
+        <text class="notice-title">打开我的日程</text>
+        <text class="notice-sub">今天、本周和收件箱都在这儿</text>
+      </view>
+      <text class="notice-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="section" wx:if="{{pendingCount > 0}}">
+    <text class="section-title">待我决策</text>
+    <view class="notice-card flex-row align-center" bindtap="openDecisions">
+      <view class="notice-dot pending"></view>
+      <view class="flex-col notice-main">
+        <text class="notice-title">有 {{pendingCount}} 件事需要主人决策</text>
+        <text class="notice-sub">点击进入决策中心处理</text>
+      </view>
+      <text class="notice-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="section" wx:if="{{failedTasks.length > 0}}">
+    <text class="section-title">失败任务</text>
+    <view class="notice-card flex-row align-center" wx:for="{{failedTasks}}" wx:key="id" bindtap="openTask" data-id="{{item.id}}">
+      <view class="notice-dot failed"></view>
+      <view class="flex-col notice-main">
+        <text class="notice-title">{{item.title}}</text>
+        <text class="notice-sub">{{item.error || '任务失败，可重新执行'}} · {{item.timeText}}</text>
+      </view>
+      <text class="notice-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <text class="section-title">提醒记录</text>
+    <view class="notice-card flex-row align-center" wx:for="{{notifications}}" wx:key="id"
+          bindtap="{{item.type === 'schedule_reminder' || item.type === 'schedule_digest' ? 'openSchedule' : ''}}">
+      <view class="notice-dot {{item.read ? 'read' : 'unread'}}"></view>
+      <view class="flex-col notice-main">
+        <text class="notice-title">{{item.title}}</text>
+        <text class="notice-sub">{{item.body}} · {{item.timeText}}</text>
+      </view>
+      <text class="notice-arrow" wx:if="{{item.type === 'schedule_reminder' || item.type === 'schedule_digest'}}">›</text>
+    </view>
+    <text class="empty-text" wx:if="{{notifications.length === 0}}">暂无提醒记录</text>
+  </view>
+</view>

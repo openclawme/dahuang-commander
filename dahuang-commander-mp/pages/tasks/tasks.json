@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "任务中心",
+  "navigationBarBackgroundColor": "#f4f1ea",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#f4f1ea",
+  "enablePullDownRefresh": true
+}

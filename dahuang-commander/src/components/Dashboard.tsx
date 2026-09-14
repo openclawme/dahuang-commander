@@ -127,6 +127,104 @@ function ImaginingStarburst() {
   );
 }
 
+// --- 浅色古风 SVG 图表（与小程序 Canvas 同款视觉，修复网页端图表丢失） ---
+function ChartSvg({ spec }: { spec: any }) {
+  if (!spec || !Array.isArray(spec.series)) return null;
+  const W = 520;
+  const H = 300;
+  const padL = 44, padR = 14, padT = spec.title ? 58 : 42, padB = 34;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+  const series = (spec.series || [])
+    .map((s: any) => (s && Array.isArray(s.values) ? { ...s, values: s.values.filter((v: any) => typeof v === "number" && Number.isFinite(v)) } : null))
+    .filter((s: any) => s && s.values.length > 0);
+  if (!series.length) return null;
+  const colors = ["#5b7a8c", "#c9a34c", "#8ba678", "#b0543f", "#7a8fb8", "#a8825f"];
+  const colorOf = (si: number) => (/^#[0-9a-fA-F]{6}$/.test(spec.colors?.[si] || "") ? spec.colors[si] : colors[si % colors.length]);
+  const all: number[] = [];
+  series.forEach((s: any) => { all.push(...s.values); });
+  let min = Math.min(...all);
+  let max = Math.max(...all);
+  if (min === max) { min -= 1; max += 1; }
+  const pad = (max - min) * 0.08;
+  min -= pad; max += pad;
+  const n = Math.max(...series.map((s: any) => s.values.length));
+  const xAt = (i: number) => (n === 1 ? padL + plotW / 2 : padL + (plotW * i) / (n - 1));
+  const yAt = (v: number) => padT + plotH - ((v - min) / (max - min)) * plotH;
+  const fmt = (v: number) => {
+    const a = Math.abs(v);
+    if (a >= 10000) return String(Math.round(v));
+    if (a >= 1) return String(Math.round(v * 10) / 10);
+    return String(Math.round(v * 100) / 100);
+  };
+  const ell = (s: unknown, m: number) => (String(s || "").length > m ? String(s).slice(0, m) + "…" : String(s || ""));
+  const labelStep = plotW / n >= 48 ? 1 : Math.max(1, Math.ceil((n * 48) / plotW));
+  let legendX = padL;
+  const legendY = spec.title ? 40 : 24;
+  return (
+    <div className="w-full my-1 rounded-xl bg-[#fbf8f1] border border-[#3b3024]/10 p-1">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto block" role="img" aria-label={spec.title || "图表"}>
+        {Array.from({ length: 6 }, (_, t) => {
+          const v = min + ((max - min) * t) / 5;
+          const y = yAt(v);
+          return (
+            <g key={`g${t}`}>
+              <line x1={padL} y1={y} x2={W - padR} y2={y} stroke="#e8e2d5" strokeDasharray="4 4" />
+              <text x={padL - 6} y={y + 3} textAnchor="end" fontSize={10} fill="#8a7f6d">{fmt(v)}</text>
+            </g>
+          );
+        })}
+        {Array.from({ length: n }, (_, i) =>
+          i % labelStep === 0 ? (
+            <text key={`x${i}`} x={xAt(i)} y={H - 10} textAnchor="middle" fontSize={10} fill="#8a7f6d">{ell((spec.labels || [])[i], 10)}</text>
+          ) : null
+        )}
+        {series.map((s: any, si: number) => {
+          const name = ell(s.name || `序列${si + 1}`, 6);
+          const item = (
+            <g key={`l${si}`} transform={`translate(${legendX}, ${legendY})`}>
+              <rect width={14} height={4} rx={2} fill={colorOf(si)} />
+              <text x={18} y={4} fontSize={10} fill="#4a4438">{name}</text>
+            </g>
+          );
+          // 固定步进 + 短名截断：多序列图例不再因宽度估算溢出被裁
+          legendX += 96;
+          return item;
+        })}
+        {series.map((s: any, si: number) => {
+          const c = colorOf(si);
+          if (spec.type === "bar") {
+            const groupW = n === 1 ? plotW * 0.4 : (plotW / n) * 0.7;
+            const barW = groupW / series.length;
+            const baseline = Math.min(Math.max(0, min), max);
+            const bY = yAt(baseline);
+            return (
+              <g key={`b${si}`} fill={c} fillOpacity={0.92}>
+                {s.values.map((v: number, i: number) => {
+                  const x = xAt(i) - groupW / 2 + barW * si + barW * 0.1;
+                  const top = Math.min(yAt(v), bY);
+                  const h = Math.max(2, Math.abs(yAt(v) - bY));
+                  return <rect key={`b${si}-${i}`} x={x} y={top} width={barW * 0.8} height={h} rx={3} />;
+                })}
+              </g>
+            );
+          }
+          const pts = s.values.map((v: number, i: number) => `${xAt(i)},${yAt(v)}`).join(" ");
+          return (
+            <g key={`p${si}`}>
+              <polyline points={pts} fill="none" stroke={c} strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
+              {s.values.map((v: number, i: number) => (
+                <circle key={`p${si}-${i}`} cx={xAt(i)} cy={yAt(v)} r={3} fill={c} />
+              ))}
+            </g>
+          );
+        })}
+        {spec.title && <text x={W / 2} y={26} textAnchor="middle" fontSize={15} fontWeight="bold" fill="#2f3a3f">{ell(spec.title, 20)}</text>}
+      </svg>
+    </div>
+  );
+}
+
 // --- 实时进度气泡（agent_progress 状态机驱动；秒表 + 伪进度爬升，画面永远在动） ---
 function LiveProgressBubble({ ps }: { ps: NonNullable<import("../context/CommanderContext").ChatMessage["progressState"]> }) {
   const [, setTick] = useState(0);
@@ -226,19 +324,21 @@ function RichMessageRenderer({ content }: { content: string }) {
 
   let html = content;
 
-  // A. Unescape HTML entities robustly with a recursive loop (handles multiple escape layers like &amp;amp;lt;)
-  let lastHtml: string;
-  do {
-    lastHtml = html;
-    html = html
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&quot;/g, '"')
-      .replace(/&#039;/g, "'")
-      .replace(/&#39;/g, "'")
-      .replace(/&apos;/g, "'");
-  } while (html !== lastHtml);
+  // A. 单层反转义（与小程序端对齐）：双重转义内容保持转义态，防止还原成真实标签注入
+  html = html.replace(/&(amp|lt|gt|quot|#0?39|apos);/gi, (_m: string, name: string): string => {
+    switch (String(name).toLowerCase()) {
+      case "amp": return "&";
+      case "lt": return "<";
+      case "gt": return ">";
+      case "quot": return '"';
+      default: return "'";
+    }
+  });
+
+  // B0. 清理服务端位置标记：{{表格N}} / {{图表N}}
+  //     （小程序端会把这些标记渲染成表格/图表，网页端没有对应渲染能力，
+  //      留着就会原样显示成 {{图表1}} 这种字面量）
+  html = html.replace(/\{\{\s*(?:表格|table|图表|chart)\s*[:：]?\s*\d*\s*\}\}/gi, "");
 
   // B. Clean up triple-backtick markdown blocks robustly
   html = html
@@ -331,6 +431,34 @@ function RichMessageRenderer({ content }: { content: string }) {
     }
     return `<td style="padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.04); font-size: 11px; ${cellColor} ${existingStyle}" ${cleanedAttrs}>`;
   });
+
+  // 0. 图片内联渲染：把图片地址渲染成真图（含平台相对路径 /api/uploads/x.jpg），不再显示裸地址
+  {
+    const base =
+      typeof window !== "undefined" &&
+      window.location.hostname !== "localhost" &&
+      window.location.hostname !== "127.0.0.1"
+        ? window.location.origin
+        : "http://localhost:3000";
+    const resolve = (u: string): string => (/^\//.test(u) ? `${base}${u}` : u);
+    // 0.1 Markdown 图片语法 ![alt](url)
+    html = html.replace(
+      /!\[([^\]]*)\]\(([^)\s]+)\)/g,
+      (_m: string, alt: string, url: string): string => `<img src="${resolve(url)}" alt="${alt || "图"}" />`
+    );
+    // 0.2 暂存已有 <img>，避免被 0.3 二次替换
+    const stash: string[] = [];
+    html = html.replace(/<img\b[^>]*>/gi, (m: string): string => {
+      stash.push(m);
+      return `\u0000IMG${stash.length - 1}\u0000`;
+    });
+    // 0.3 裸图片地址（可被反引号或括号包裹）
+    html = html.replace(
+      /`?((?:https?:\/\/|\/)[^\s"'<>`]*?\.(?:png|jpe?g|gif|webp)(?:\?[^\s"'<>`]*)?)`?/gi,
+      (_m: string, url: string): string => `<img src="${resolve(url)}" alt="图" />`
+    );
+    html = html.replace(/\u0000IMG(\d+)\u0000/g, (_m: string, i: string): string => stash[Number(i)] || "");
+  }
 
   // 1. Markdowns: **bold** -> <strong>
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#d4a95e] font-bold font-sans">$1</strong>');
@@ -1296,6 +1424,11 @@ const Dashboard: React.FC = () => {
                     <div className="space-y-2 w-full">
                       {msg.content && msg.content !== "（元神入定推演中...）" && (
                         <RichMessageRenderer content={msg.content.replace(/🛸【大荒分身·天道任务分解大阵】🛸[\s\S]*?==================================================/, "").replace(/📊 进度:[\s\S]*?算力大亮/, "").trim()} />
+                      )}
+                      {msg.sender === "agent" && msg.charts && msg.charts.length > 0 && (
+                        <div className="space-y-1.5">
+                          {msg.charts.map((c: any, i: number) => <ChartSvg key={i} spec={c} />)}
+                        </div>
                       )}
                       {msg.sender === "agent" && msg.progressState && (
                         <LiveProgressBubble ps={msg.progressState} />

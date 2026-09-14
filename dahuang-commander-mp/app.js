@@ -150,6 +150,8 @@ App({
       this.globalData.agentState.status = "ONLINE";
       this.triggerPageCallback("onAgentStateUpdate", this.globalData.agentState);
       this.triggerPageCallback("onAgentStatusChange", this.globalData.agentState);
+      // 微信身份绑定（openid）：订阅消息推送的前提
+      this.ensureWechatBinding();
     });
 
     socket.on("agent_command_result", (data) => {
@@ -181,6 +183,16 @@ App({
     // Correct event name according to server src/app/api/matrix/...: "m.room.event"
     socket.on("m.room.event", (eventData) => {
       this.handleIncomingRoomEvent(eventData);
+    });
+
+    // 日程提醒：到点实时推送（离线时由服务端写站内提醒 + 订阅消息兜底）
+    socket.on("schedule_reminder", (data) => {
+      const title = (data && data.title) || "日程提醒";
+      const body = (data && data.body) || "";
+      this.pushSystemChat(`🔔 【${title}】${body}`);
+      try { wx.vibrateShort({ type: "medium" }); } catch (e) {}
+      wx.showToast({ title: "日程到点： " + title, icon: "none", duration: 2500 });
+      this.triggerPageCallback("onScheduleReminder", data || {});
     });
 
     // 通讯录 v1：被拉入新群/建群成功 → 无需刷新即可看到新群
@@ -309,6 +321,7 @@ App({
                   senderName: ev.senderName || senderDisplayName,
                   body: (ev.content && ev.content.body) || "",
                   images: (ev.content && Array.isArray(ev.content.images)) ? ev.content.images : [],
+                  blocks: (ev.content && Array.isArray(ev.content.blocks)) ? ev.content.blocks : [],
                   ts: ev.origin_server_ts || Date.now()
                 });
               }
@@ -354,6 +367,7 @@ App({
         senderName: senderDisplayName,
         body,
         images,
+        blocks: (eventData.content && Array.isArray(eventData.content.blocks)) ? eventData.content.blocks : [],
         ts: eventData.origin_server_ts || Date.now()
       };
       room.events.push(newEvent);
@@ -382,7 +396,9 @@ App({
     const h = this.globalData.chatHistory;
     const msg = h.find(m => m.id === data.requestId);
     if (msg) {
-      msg.content = data.content || "";
+      // 流式阶段只显示纯文本：模型流出的 HTML 半成品若直接进 rich-text
+      // 会闪烁成原始标签（"一堆脚本"）；最终结果到达后恢复完整排版
+      msg.content = this.stripHtmlForStream(data.content || "");
       msg.isPending = false;
       msg.progress = 99;
       // 流式归纳阶段：进度状态机保留并切换 phase，状态行显示"✍ 正在整理回复"
@@ -392,6 +408,21 @@ App({
       }
       this.triggerPageCallback("onChatHistoryUpdate");
     }
+  },
+
+  /** 流式展示用：剥掉 HTML 标签与实体（半成品 HTML 绝不能原样进 rich-text） */
+  stripHtmlForStream(html) {
+    return String(html || "")
+      .replace(/<[^>]*>/g, "")
+      .replace(/&(amp|lt|gt|quot|#0?39|apos);/gi, (m0, name) => {
+        switch (String(name).toLowerCase()) {
+          case "amp": return "&";
+          case "lt": return "<";
+          case "gt": return ">";
+          case "quot": return '"';
+          default: return "'";
+        }
+      });
   },
 
   /**
@@ -504,13 +535,19 @@ App({
 
     // Sanitize incoming reply content to intercept verbose wait statements
     if (data.reply) {
-      const sanitized = this.sanitizeMessage({ content: data.reply }, false);
+      // 传真实 msgId：否则 sanitizeMessage 生成临时 id，图片转存回调在 chatHistory 里找不到消息，
+      // 转存结果被丢弃（外链图片永远显示失败）
+      const sanitized = this.sanitizeMessage({ id: msgId, content: data.reply }, false);
       data.reply = sanitized.content;
       // 图表优先用服务端下发的结构化 charts 字段；
       // 兼容旧消息/旧通知：从文本中解析图表数据块兜底
       if (!(Array.isArray(data.charts) && data.charts.length > 0) &&
           sanitized.charts && sanitized.charts.length > 0) {
         data.charts = sanitized.charts;
+      }
+      // 实时消息同样带上 agentImages（此前只有"重启后从 storage 加载"路径会提取）
+      if (sanitized.agentImages && sanitized.agentImages.length > 0) {
+        data.agentImages = sanitized.agentImages;
       }
       if (sanitized.isPending && data.progress !== 100 && data.isPending !== false) {
         data.isPending = true;
@@ -571,6 +608,7 @@ App({
       hasFailedSteps: hasFailedSteps,
       // 终态结果到达：结束进度状态机（progressState 置空，UI 收起进度区）
       progressState: (data.isPending === true || (data.progress !== undefined && data.progress < 100)) ? (existingMsg ? existingMsg.progressState : undefined) : null,
+      agentImages: (data.agentImages && data.agentImages.length > 0) ? data.agentImages : (existingMsg ? existingMsg.agentImages : undefined),
       charts: this.decorateCharts(data.charts) || (existingMsg ? existingMsg.charts : undefined),
       goods: shop.decorateGoods(data.goods) || (existingMsg ? existingMsg.goods : undefined),
       suggestions: (data.suggestions && data.suggestions.length > 0) ? data.suggestions : (existingMsg ? existingMsg.suggestions : undefined)
@@ -714,6 +752,7 @@ App({
           this.addLog("SYSTEM", `🔑 凭证验证成功！角色切换为：[${p.name}]`);
           this.loadChatHistoryForAgent(p.id);
           this.connectSocket();
+          this.ensureWechatBinding();
           if (onSuccess) onSuccess(this.globalData.agentState);
         } else {
           if (onFail) onFail((res.data && res.data.error) || "凭证检验不通过");
@@ -737,6 +776,81 @@ App({
     try { wx.setStorageSync(key, list); } catch (e) {}
   },
 
+  /** 微信身份绑定：wx.login → code2session 换 openid（幂等，重复调用只更新绑定） */
+  ensureWechatBinding(force) {
+    const token = this.globalData.agentState && this.globalData.agentState.token;
+    if (!token) return;
+    if (this._wechatBound && !force) return;
+    if (this._wechatBinding) return;
+    this._wechatBinding = true;
+    wx.login({
+      success: (res) => {
+        const code = res && res.code;
+        if (!code) { this._wechatBinding = false; return; }
+        wx.request({
+          url: `${this.globalData.serverUrl}/api/wechat/session`,
+          method: "POST",
+          header: getHeaders(token),
+          data: { code },
+          success: (r) => {
+            if (r.statusCode === 200 && r.data && r.data.bound) {
+              this._wechatBound = true;
+              this.globalData.wechatSubQuota = r.data.subQuota || 0;
+              console.log("[Wechat] openid bound, subQuota =", r.data.subQuota);
+            }
+          },
+          complete: () => { this._wechatBinding = false; }
+        });
+      },
+      fail: () => { this._wechatBinding = false; }
+    });
+  },
+
+  /**
+   * 请求订阅消息授权（一次性订阅）：在"用户刚建完日程"这种高意愿时刻调用。
+   * 模板 ID 由服务端下发（非机密），未配置时静默跳过。
+   */
+  requestScheduleSubscribe() {
+    const token = this.globalData.agentState && this.globalData.agentState.token;
+    if (!token) return;
+    const doRequest = (templateId) => {
+      if (!templateId) return;
+      wx.requestSubscribeMessage({
+        tmplIds: [templateId],
+        success: (res) => {
+          if (res && res[templateId] === "accept") {
+            wx.request({
+              url: `${this.globalData.serverUrl}/api/wechat/subscribe-grant`,
+              method: "POST",
+              header: getHeaders(token),
+              data: { count: 1 },
+              success: (r) => {
+                if (r.statusCode === 200) {
+                  this.globalData.wechatSubQuota = (r.data && r.data.subQuota) || 0;
+                }
+              }
+            });
+          }
+        }
+      });
+    };
+    if (this.globalData.wechatTemplateId !== undefined) {
+      doRequest(this.globalData.wechatTemplateId);
+      return;
+    }
+    wx.request({
+      url: `${this.globalData.serverUrl}/api/wechat/subscribe-grant`,
+      method: "GET",
+      header: getHeaders(token),
+      success: (r) => {
+        const data = (r && r.data) || {};
+        this.globalData.wechatTemplateId = data.templateConfigured ? data.templateId : null;
+        doRequest(this.globalData.wechatTemplateId);
+      },
+      fail: () => { this.globalData.wechatTemplateId = null; }
+    });
+  },
+
   getLoginHistory() {
     try { return wx.getStorageSync("dahuang_login_history") || []; } catch (e) { return []; }
   },
@@ -745,11 +859,16 @@ App({
     if (!instruction || !instruction.trim()) return;
 
     const now = Date.now();
+    const sentImages = images && images.length ? images.slice() : [];
     const humanMsg = {
       id: `human-${now}-${Math.floor(Math.random() * 10000)}`,
       sender: "human",
       content: instruction,
-      images: images && images.length ? images.slice() : [],
+      images: sentImages,
+      blocks: [
+        ...(instruction && instruction.trim() ? [{ type: "text", text: instruction }] : []),
+        ...sentImages.map((u) => ({ type: "image", url: u })),
+      ],
       timestamp: this.getTimestamp(),
       createdAt: now
     };
@@ -915,7 +1034,24 @@ App({
     try {
       this.trimChatHistory();
       const key = `dahuang_chat_history_${agentId}`;
-      wx.setStorageSync(key, this.globalData.chatHistory);
+      // 落盘前剥掉派生字段：richContent/segments/psDisplay/chartsOrdered/unplacedCharts
+      // 都可由 content/charts 重建；不剥的话十几条长表格回复就会逼近 1MB 单键上限
+      const slim = this.globalData.chatHistory.map((m) => {
+        const { richContent, segments, psDisplay, chartsOrdered, unplacedCharts, ...rest } = m || {};
+        return rest;
+      });
+      try {
+        wx.setStorageSync(key, slim);
+      } catch (e) {
+        // 超限降级：只保留最近一半再试一次；再失败则只保留最近 10 条
+        console.warn("[App] Chat history storage full, retrying with half:", e);
+        try {
+          wx.setStorageSync(key, slim.slice(Math.floor(slim.length / 2)));
+        } catch (e2) {
+          wx.setStorageSync(key, slim.slice(-10));
+          this.addLog("SYSTEM", "⚠️ 本地存储空间不足：历史对话已压缩为最近 10 条。");
+        }
+      }
     } catch (e) {
       console.error("[App] Failed to save chat history:", e);
     }
@@ -972,15 +1108,321 @@ App({
       if (charts.length > 4) charts.length = 4; // 单条消息最多 4 张图
     }
 
-    return {
+    const agentImages = this.extractImageUrls(content);
+    const result = {
       ...safeMsg,
       content,
       isRich: hasRichHtml || Boolean(videoUrl),
       richContent: html,
       videoUrl,
       videoPoster,
-      charts: charts.length > 0 ? charts : undefined
+      charts: charts.length > 0 ? charts : undefined,
+      agentImages: agentImages.length > 0 ? agentImages : undefined,
     };
+    if (agentImages.length > 0) this.transferAgentImages(result.id, agentImages);
+    return result;
+  },
+
+  /** 从 Agent 回复中提取图片：HTML img、Markdown 图片、裸图片 URL */
+  extractImageUrls(content) {
+    if (!content || typeof content !== "string") return [];
+    const urls = [];
+    const add = (u) => {
+      if (!u) return;
+      const clean = String(u).trim().replace(/[),.;]+$/, "");
+      if (clean && urls.indexOf(clean) === -1) urls.push(clean);
+    };
+    let m;
+    const htmlRe = /<img[^>]+src=["']([^"']+)["']/gi;
+    while ((m = htmlRe.exec(content))) add(m[1]);
+    const mdRe = /!\[[^\]]*\]\(([^)\s]+)\)/g;
+    while ((m = mdRe.exec(content))) add(m[1]);
+    const bareRe = /(https?:\/\/[^\s"'<>]+?\.(?:png|jpe?g|gif|webp)(?:\?[^\s"'<>]*)?|\/api\/uploads\/[^\s"'<>]+)/gi;
+    while ((m = bareRe.exec(content))) add(m[1]);
+    return urls.slice(0, 6).map((u) => (u.startsWith("/") ? `${this.globalData.serverUrl}${u}` : u));
+  },
+
+  /** 把消息正文和图片解析成按顺序排列的 segments，实现聊天图文混排 */
+  buildMessageSegments(content, images, serverUrl, explicitBlocks) {
+    const base = serverUrl || this.globalData.serverUrl || "";
+    const normalizeUrl = (u) => { const s = String(u || ""); return s.startsWith("/") ? `${base}${s}` : s; };
+    // 新方案：有结构化 blocks 就严格按 blocks 顺序渲染，不做任何图片末尾兜底
+    if (Array.isArray(explicitBlocks) && explicitBlocks.length > 0) {
+      return explicitBlocks.map((b, i) => {
+        if (b && b.type === "image") return { type: "image", url: normalizeUrl(b.url), index: i };
+        return { type: "text", richContent: this.parseRichContent((b && b.text) || "").html, index: i };
+      });
+    }
+    // 历史消息兜底：清掉被掏空后残留的空卡片外壳（浅色主题下会显示成一块黑框）
+    const text = String(content || "")
+      .replace(/<div[^>]*>\s*<\/div>/gi, "")
+      .replace(/<h[1-6][^>]*>\s*<\/h[1-6]>/gi, "")
+      .replace(/<div[^>]*>\s*(?:<h[1-6][^>]*>[\s\S]*?<\/h[1-6]>)?\s*<\/div>/gi, "");
+    const list = (images || []).map(normalizeUrl).filter(Boolean);
+
+    // 先按 HTML 表格块切分（容错扫描：标签不闭合也能处理），表格交给原生渲染，
+    // 这样表格能停留在正文的原始位置，也不会在浅色主题下变成一块黑框。
+    const raw = this.splitTables(text);
+    if (raw.length === 0) raw.push({ kind: "text", text: "" });
+
+    const segments = [];
+    raw.forEach((part) => {
+      // 注意：必须统一成 type 字段——之前这里用的是 kind，
+      // 导致表格段在下方分支里匹配不到，被当成"空图片"渲染成空白框
+      if (part.kind === "table") { segments.push({ type: "table", table: part.table }); return; }
+      if (part.kind === "text") {
+        // 表格标签残留 + 孤儿 {{表格N}} 先剥掉（图表标记必须留到切分之后再剥）
+        const cleaned = this.stripTableArtifacts(part.text);
+        this.splitChartMarkers(cleaned).forEach((sub) => {
+          if (sub.type === "chart") { segments.push(sub); return; }
+          segments.push(...this.splitInlineImages(this.stripOrphanMarkers(sub.text), list, base));
+        });
+        return;
+      }
+      segments.push(part);
+    });
+
+    return segments
+      .filter((seg) => seg.type !== "image" || Boolean(seg.url))
+      .map((seg, i) =>
+        seg.type === "table"
+          ? { type: "table", table: seg.table, index: i }
+          : seg.type === "chart"
+            ? { type: "chart", chartIndex: seg.chartIndex, index: i }
+            : seg.type === "text"
+              ? { type: "text", richContent: this.parseRichContent(seg.text).html, index: i }
+              : { type: "image", url: seg.url, index: i }
+      );
+  },
+
+  /** 把一段文本按 {{图表N}} 标记切成 text / chart 片段（客户端据此把图表画在原文位置） */
+  splitChartMarkers(text) {
+    const out = [];
+    const src = String(text || "");
+    const re = /\{\{\s*(?:图表|chart)\s*[:：]?\s*(\d+)\s*\}\}/gi;
+    let last = 0;
+    let m;
+    while ((m = re.exec(src))) {
+      const before = src.slice(last, m.index);
+      if (before) out.push({ type: "text", text: before });
+      out.push({ type: "chart", chartIndex: Math.max(0, parseInt(m[1], 10) - 1) });
+      last = m.index + m[0].length;
+    }
+    const rest = src.slice(last);
+    if (rest) out.push({ type: "text", text: rest });
+    return out;
+  },
+
+  /**
+   * 容错表格扫描：遇到 `<table` 就往后吃到 `</table>`；**没闭合也照吃**（吃到文本结尾），
+   * 解析出来就原生渲染，解析不出来就整块丢弃——绝不让 HTML 源码漏进正文。
+   * 同时吸收服务端注入的卡片外壳（<div><h3>标题</h3>…</table></div>）。
+   */
+  splitTables(text) {
+    const src = String(text || "");
+    const out = [];
+    const openRe = /<table\b/gi;
+    let cursor = 0;
+    let m;
+    while ((m = openRe.exec(src))) {
+      const start = m.index;
+      const lower = src.toLowerCase();
+      const closeIdx = lower.indexOf("</table>", start);
+      const blockEnd = closeIdx === -1 ? src.length : closeIdx + 8;
+      const before = src.slice(cursor, start);
+      if (before) out.push({ kind: "text", text: before });
+
+      let block = src.slice(start, blockEnd);
+      // 向前吸收紧邻的卡片外壳（含可选标题），避免残留裸 <div>/<h3>
+      const prev = out.length ? out[out.length - 1] : null;
+      if (prev && prev.kind === "text") {
+        const wm = /<div[^>]*>\s*(?:<h[1-6][^>]*>[\s\S]*?<\/h[1-6]>\s*)?$/i.exec(prev.text);
+        if (wm) {
+          block = prev.text.slice(wm.index) + block;
+          prev.text = prev.text.slice(0, wm.index);
+          if (!prev.text) out.pop();
+        }
+      }
+      // 向后吸收紧跟的 </div>
+      let consumed = blockEnd;
+      const after = src.slice(blockEnd);
+      const cm = /^\s*<\/div>/.exec(after);
+      if (cm) { block += cm[0]; consumed += cm[0].length; }
+
+      const spec = this.parseTableSpec(block);
+      if (spec) {
+        out.push({ kind: "table", table: spec });
+      } else {
+        // 解析失败：退化成纯文本（保留可读内容），绝不原样输出 HTML、也不丢信息
+        const text = this.stripTableArtifacts(block.replace(/<\/(?:div|h[1-6])>/gi, " "));
+        if (text.trim()) out.push({ kind: "text", text });
+      }
+
+      cursor = consumed;
+      openRe.lastIndex = cursor;
+    }
+    const tail = src.slice(cursor);
+    if (tail) out.push({ kind: "text", text: tail });
+    return out;
+  },
+
+  /** 剥掉表格类标签残留与孤儿 {{表格N}} 标记（宁可少显示，也不把 HTML 当正文） */
+  stripTableArtifacts(text) {
+    return String(text || "")
+      .replace(/<\/?(?:table|thead|tbody|tfoot|tr|td|th|colgroup|col|caption)\b[^>]*>/gi, "")
+      .replace(/\{\{\s*(?:表格|table)[^}]*\}\}/gi, "");
+  },
+
+  /** 剥掉没有对应图表的孤儿标记 */
+  stripOrphanMarkers(text) {
+    return String(text || "").replace(/\{\{\s*(?:图表|chart)[^}]*\}\}/gi, "");
+  },
+
+  /** 画布 ID：与消息 ID 绑定，绘制时按 ID 精确查询，不依赖 DOM 顺序 */
+  chartCanvasId(msgId, slot) {
+    const safe = String(msgId || "msg").replace(/[^A-Za-z0-9_-]/g, "_");
+    return `cc-${safe}-${slot}`;
+  },
+
+  /**
+   * 图表槽位分配：把 {{图表N}} 标记命中的图表留在原文位置（按出现顺序编号），
+   * 没有被标记的图表追加到末尾。DOM 顺序与 chartsOrdered 一致，绘制逻辑无需改动。
+   */
+  buildChartLayout(charts, segments, msgId, noInlineMap) {
+    const list = Array.isArray(charts) ? charts : [];
+    // 保险丝：某条消息的内联画布画不出来（尺寸始终为 0）时，
+    // 自动回退到"末尾渲染"这条已验证可用的路径，保证图表一定看得见
+    const noInline = Boolean(msgId && noInlineMap && noInlineMap[msgId]);
+    const placed = new Set();
+    const ordered = [];
+    const kept = [];
+    (segments || []).forEach((seg) => {
+      if (!seg || seg.type !== "chart") { kept.push(seg); return; }
+      if (noInline) return; // 丢弃该图表段 → 全部落到 unplacedCharts，在末尾渲染
+      const idx = seg.chartIndex;
+      // 标记没有对应图表（模型多写了标记 / 图表交付失败）：
+      // 直接丢弃该段——否则会渲染成一块永远画不上东西的空白画布
+      if (!(idx >= 0) || idx >= list.length || placed.has(idx)) return;
+      placed.add(idx);
+      seg.chartSlot = ordered.length;
+      seg.chartSpec = list[idx];
+      seg.canvasId = this.chartCanvasId(msgId, seg.chartSlot);
+      ordered.push(list[idx]);
+      kept.push(seg);
+    });
+    const unplacedCharts = [];
+    list.forEach((spec, i) => {
+      if (placed.has(i)) return;
+      const slot = ordered.length;
+      unplacedCharts.push({ slot, spec, canvasId: this.chartCanvasId(msgId, slot) });
+      ordered.push(spec);
+    });
+    return { chartsOrdered: ordered, unplacedCharts, segments: kept };
+  },
+
+  /** 把一段纯文本按内联图片标记切成 text / image 片段 */
+  splitInlineImages(text, list, base) {
+    const out = [];
+    // 内联图片：Markdown、[图N]、<img>、绝对 http(s) 链接，以及平台相对路径（/api/uploads/x.jpg，允许被反引号包裹）
+    const re = /!\[[^\]]*\]\(([^)\s]+)\)|\[图\s*(\d+)\]|<img[^>]+src=["']([^"']+)["']|`?((?:https?:\/\/|\/)[^\s"'<>`]*?\.(?:png|jpe?g|gif|webp)(?:\?[^\s"'<>`]*)?)`?/gi;
+    let last = 0;
+    let m;
+    const src = String(text || "");
+    while ((m = re.exec(src))) {
+      const before = src.slice(last, m.index);
+      if (before.trim()) out.push({ type: "text", text: before });
+      let url = m[1] || m[3] || m[4];
+      if (m[2]) url = list[parseInt(m[2], 10) - 1];
+      if (url) {
+        const u = String(url);
+        out.push({ type: "image", url: u.startsWith("/") ? `${base}${u}` : u });
+      }
+      last = m.index + m[0].length;
+    }
+    const rest = src.slice(last);
+    if (rest.trim()) out.push({ type: "text", text: rest });
+    return out;
+  },
+
+  /** 去掉 HTML 标签，保留可读文本 */
+  stripHtmlTags(html) {
+    return String(html || "")
+      .replace(/<br\s*\/?>/gi, " ")
+      .replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\s+/g, " ")
+      .trim();
+  },
+
+  /** HTML 表格 → 结构化数据（客户端原生表格视图渲染） */
+  parseTableSpec(block) {
+    const titleMatch = /<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/i.exec(block);
+    const title = titleMatch ? this.stripHtmlTags(titleMatch[1]) : "";
+    const headers = [];
+    const rows = [];
+    const trRe = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+    let tr;
+    while ((tr = trRe.exec(block))) {
+      const cells = [];
+      const cellRe = /<(th|td)[^>]*>([\s\S]*?)<\/\1>/gi;
+      let c;
+      while ((c = cellRe.exec(tr[1]))) cells.push(this.stripHtmlTags(c[2]));
+      if (cells.length === 0) continue;
+      if (headers.length === 0) headers.push(...cells);
+      else rows.push(cells);
+    }
+    if (headers.length === 0 || rows.length === 0) return null;
+    const cols = headers.length;
+    return {
+      title,
+      headers: headers.map((t, i) => ({ i, text: t })),
+      rows: rows.slice(0, 40).map((r, ri) => ({
+        ri,
+        cells: Array.from({ length: cols }, (_, i) => ({ i, text: r[i] === undefined || r[i] === null ? "" : String(r[i]) }))
+      }))
+    };
+  },
+
+  /** 外链图片先转存到平台，避免小程序域名白名单导致显示失败 */
+  transferAgentImages(msgId, urls) {
+    const serverUrl = this.globalData.serverUrl || "";
+    const external = (urls || []).filter((u) => /^https?:\/\//.test(u) && u.indexOf(serverUrl) !== 0);
+    if (external.length === 0) return;
+    this._imageTransferring = this._imageTransferring || {};
+    if (this._imageTransferring[msgId]) return;
+    this._imageTransferring[msgId] = true;
+    const token = this.globalData.agentState && this.globalData.agentState.token;
+    const mapping = {};
+    let pending = external.length;
+    external.forEach((url) => {
+      wx.request({
+        url: `${serverUrl}/api/agent/image/transfer`,
+        method: "POST",
+        header: getHeaders(token),
+        data: { url },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data && res.data.url) {
+            mapping[url] = `${serverUrl}${res.data.url}`;
+          }
+        },
+        complete: () => {
+          pending -= 1;
+          if (pending > 0) return;
+          const msg = (this.globalData.chatHistory || []).find((x) => x.id === msgId);
+          if (msg && msg.agentImages) {
+            msg.agentImages = msg.agentImages.map((u) => mapping[u] || u);
+            this.saveChatHistory();
+            this.triggerPageCallback("onChatHistoryUpdate");
+          }
+          delete this._imageTransferring[msgId];
+        }
+      });
+    });
   },
 
   parseRichContent(content) {
@@ -988,18 +1430,17 @@ App({
 
     let html = content;
 
-    let lastHtml;
-    do {
-      lastHtml = html;
-      html = html
-        .replace(/&amp;/g, "&")
-        .replace(/&lt;/g, "<")
-        .replace(/&gt;/g, ">")
-        .replace(/&quot;/g, '"')
-        .replace(/&#039;/g, "'")
-        .replace(/&#39;/g, "'")
-        .replace(/&apos;/g, "'");
-    } while (html !== lastHtml);
+    // 单层反转义：一次遍历只还原一层实体。双重转义内容（&amp;lt;script&amp;gt;）
+    // 保持转义态、不会还原成真实标签（防 HTML 注入；此前多轮循环会层层还原）
+    html = html.replace(/&(amp|lt|gt|quot|#0?39|apos);/gi, (m0, name) => {
+      switch (String(name).toLowerCase()) {
+        case "amp": return "&";
+        case "lt": return "<";
+        case "gt": return ">";
+        case "quot": return '"';
+        default: return "'";
+      }
+    });
 
     html = html
       .replace(/```html/gi, "")

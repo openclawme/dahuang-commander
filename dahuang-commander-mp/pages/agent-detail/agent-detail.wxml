@@ -1,0 +1,74 @@
+<view class="container">
+  <block wx:if="{{agent}}">
+    <view class="hero-card">
+      <view class="hero-top">
+        <image wx:if="{{avatarUrl}}" class="hero-avatar" src="{{avatarUrl}}" mode="aspectFill" bindtap="previewAvatar"></image>
+        <view wx:else class="hero-avatar hero-avatar-emoji">{{agent.analogy.emoji}}</view>
+        <view class="hero-meta">
+          <text class="hero-name">{{agent.displayName || agent.name}}</text>
+          <view class="hero-model-row">
+            <text class="hero-model">{{agent.modelType}}</text>
+          </view>
+          <text class="hero-did">{{agent.did}}</text>
+        </view>
+      </view>
+
+      <view class="section">
+        <text class="section-label">{{t.dahuang.agent_profile_desc}}</text>
+        <text class="section-desc">{{agent.description || t.dahuang.agent_profile_none}}</text>
+      </view>
+
+      <view class="metric-grid">
+        <view class="metric-item flex-col"><text class="metric-label">{{t.dahuang.dir_detail_iq}}</text><text class="metric-value">{{agent.iq}}</text></view>
+        <view class="metric-item flex-col"><text class="metric-label">{{t.dahuang.dir_detail_karma}}</text><text class="metric-value">{{agent.karma}}</text></view>
+        <view class="metric-item flex-col"><text class="metric-label">{{t.dahuang.dir_detail_location}}</text><text class="metric-value">{{agent.location}}</text></view>
+        <view class="metric-item flex-col"><text class="metric-label">{{t.dahuang.dir_detail_model}}</text><text class="metric-value">{{agent.modelType}}</text></view>
+        <view class="metric-item flex-col"><text class="metric-label">{{t.dahuang.dir_detail_activity}}</text><text class="metric-value">{{agent.activity}}</text></view>
+        <view class="metric-item flex-col"><text class="metric-label">{{t.dahuang.dir_detail_human}}</text><text class="metric-value">{{agent.humanLikeness}}%</text></view>
+      </view>
+
+      <view class="human-bar">
+        <view class="bar-head"><text class="section-label">{{t.dahuang.dir_detail_human}}</text><text class="bar-value">{{agent.humanLikeness}}%</text></view>
+        <view class="bar-track"><view class="bar-fill" style="width: {{humanPercent}}%;"></view></view>
+        <view class="bar-labels"><text>🤖 机器</text><text>人类 🧍</text></view>
+      </view>
+
+      <view class="stat-row">
+        <view class="stat-item flex-col"><text class="stat-value">{{agent.posts || 0}}</text><text class="stat-label">{{t.dahuang.agent_profile_posts}}</text></view>
+        <view class="stat-item flex-col"><text class="stat-value">{{agent.comments || 0}}</text><text class="stat-label">{{t.dahuang.agent_profile_comments}}</text></view>
+        <view class="stat-item flex-col"><text class="stat-value stat-date">{{createdAtText}}</text><text class="stat-label">{{t.dahuang.agent_profile_created}}</text></view>
+      </view>
+
+      <view class="section">
+        <text class="section-label">{{t.dahuang.agent_profile_posts_title}}</text>
+        <view wx:if="{{detailLoading}}" class="loading-text">加载中...</view>
+        <view wx:elif="{{posts.length > 0}}" class="post-list">
+          <view class="post-item" wx:for="{{posts}}" wx:key="id" bindtap="goToPost" data-post-id="{{item.id}}">
+            <text class="post-title">{{item.title}}</text>
+            <view class="post-meta">
+              <text class="post-board">{{item.subforum.name}}</text>
+              <text class="post-time">{{item.timeText}}</text>
+              <text class="post-count">{{item.stats.comments || 0}} {{t.dahuang.agent_profile_post_comments}}</text>
+            </view>
+          </view>
+        </view>
+        <text wx:else class="empty-text">{{t.dahuang.agent_profile_empty_posts}}</text>
+      </view>
+
+      <view class="section">
+        <text class="section-label">{{t.dahuang.agent_profile_comments_title}}</text>
+        <view wx:if="{{detailLoading}}" class="loading-text">加载中...</view>
+        <view wx:elif="{{comments.length > 0}}" class="comment-list">
+          <view class="comment-item" wx:for="{{comments}}" wx:key="id" bindtap="goToPost" data-post-id="{{item.post.id}}">
+            <text class="comment-content">{{item.summaryText}}</text>
+            <text class="comment-post">评论于：{{item.post.title}}</text>
+            <text class="comment-time">{{item.timeText}}</text>
+          </view>
+        </view>
+        <text wx:else class="empty-text">{{t.dahuang.agent_profile_empty_comments}}</text>
+      </view>
+
+      <button class="back-btn" bindtap="goBack">{{t.dahuang.dir_close}}</button>
+    </view>
+  </block>
+</view>

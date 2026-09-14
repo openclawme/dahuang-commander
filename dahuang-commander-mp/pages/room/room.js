@@ -2,6 +2,7 @@ const app = require('../../utils/getApp.js');
 const i18n = require('../../utils/i18n.js');
 const { getHeaders } = require('../../utils/config.js');
 const { toAbsUrl } = require('../../utils/url.js');
+const { drawChart } = require('../../utils/chart-draw.js');
 
 Page({
   data: {
@@ -15,7 +16,11 @@ Page({
     bottomOffset: 0,
     humanUnlocked: false,
     dissolved: false,
-    myRole: "MEMBER"
+    myRole: "MEMBER",
+    images: [],
+    pendingImages: [],
+    uploadErr: "",
+    serverUrl: ""
   },
 
   initPageBottomOffset() {
@@ -23,8 +28,13 @@ Page({
       const windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
       const screenHeight = windowInfo.screenHeight || 0;
       const windowHeight = windowInfo.windowHeight || 0;
-      const windowTop = windowInfo.windowTop || 0;
-      const bottomOffset = Math.max(0, screenHeight - windowHeight - windowTop);
+      const statusBar = windowInfo.statusBarHeight || 0;
+      let navBar = 44; // 微信默认导航栏高度
+      try {
+        const menu = wx.getMenuButtonBoundingClientRect();
+        if (menu && menu.height) navBar = (menu.top - statusBar) * 2 + menu.height;
+      } catch (e) {}
+      const bottomOffset = Math.max(0, screenHeight - windowHeight - statusBar - navBar);
       this.setData({ bottomOffset });
     } catch (e) {
       this.setData({ bottomOffset: 0 });
@@ -102,7 +112,7 @@ Page({
   },
 
   onShow() {
-    this.setData({ t: i18n.getDict() });
+    this.setData({ t: i18n.getDict(), serverUrl: app.globalData.serverUrl });
     this.refreshMessages();
     this.scrollToBottom();
   },
@@ -135,7 +145,7 @@ Page({
 
       const rich = app.parseRichContent(msg.body);
       const isRich = rich.html && (rich.html.indexOf("<table") !== -1 || rich.html.indexOf("<card") !== -1 || rich.html.indexOf("html-body-wrapper") !== -1);
-      return {
+      const item = {
         ...msg,
         isMe,
         avatarChar: (msg.senderName || "?").slice(0, 1),
@@ -145,8 +155,15 @@ Page({
         videoUrl: rich.videoUrl,
         videoPoster: rich.videoPoster,
         // 图片消息：相对地址补全为绝对 URL（发送时存的 /api/uploads/x.jpg）
-        images: (msg.images || []).map((u) => toAbsUrl(u, serverUrl))
+        images: (msg.images || []).map((u) => toAbsUrl(u, serverUrl)),
+        segments: app.buildMessageSegments(msg.body || "", (msg.images || []).map((u) => toAbsUrl(u, serverUrl)), serverUrl, msg.blocks)
       };
+      // 群聊/私聊同样支持图表（消息里带 charts 时原生 Canvas 绘制）
+      const layout = app.buildChartLayout(msg.charts, item.segments, msg.event_id, null);
+      item.segments = layout.segments;
+      item.chartsOrdered = layout.chartsOrdered;
+      item.unplacedCharts = layout.unplacedCharts;
+      return item;
     });
 
     this.setData({
@@ -154,6 +171,35 @@ Page({
       messages
     }, () => {
       this.scrollToBottom();
+      this.redrawCharts();
+    });
+  },
+
+  /** 群聊/私聊图表绘制：按画布 ID 精确查询（与主对话同方案） */
+  redrawCharts(retry) {
+    if (this._destroyed) return;
+    const messages = this.data.messages || [];
+    const targets = [];
+    messages.forEach((m) => {
+      const specs = (m.chartsOrdered && m.chartsOrdered.length) ? m.chartsOrdered : (m.charts || []);
+      specs.forEach((spec, i) => targets.push({ id: app.chartCanvasId(m.event_id, i), spec }));
+    });
+    if (targets.length === 0) return;
+    const signature = JSON.stringify(targets.map((t) => t.id));
+    if (!retry && signature === this._chartSignature) return;
+    this._chartSignature = signature;
+    const query = wx.createSelectorQuery().in(this);
+    targets.forEach((t) => query.select('#' + t.id).fields({ node: true, size: true }));
+    query.exec((res) => {
+      const list = res || [];
+      let skipped = 0;
+      targets.forEach((t, i) => {
+        const info = list[i];
+        if (info && info.node && info.width > 0 && info.height > 0) {
+          try { drawChart(info.node, t.spec, info.width, info.height); } catch (e) { console.error('[ROOM CHART] draw failed:', e); }
+        } else { skipped += 1; }
+      });
+      if (skipped > 0 && (retry || 0) < 4) setTimeout(() => this.redrawCharts((retry || 0) + 1), 400);
     });
   },
 
@@ -194,7 +240,8 @@ Page({
       return;
     }
     const text = this.data.inputValue.trim();
-    if (!text) return;
+    const images = (this.data.images || []).slice();
+    if (!text && images.length === 0) return;
 
     const { roomId } = this.data;
     const { serverUrl, agentState } = app.globalData;
@@ -207,6 +254,13 @@ Page({
       return;
     }
 
+    // 结构化图文混排：文字块在前、图片块依次跟随，严格按数组顺序渲染
+    const blocks = [
+      ...(text ? [{ type: "text", text }] : []),
+      ...images.map((u) => ({ type: "image", url: u }))
+    ];
+    const displayBody = text || "[图片]";
+
     this.setData({
       isSending: true,
       inputValue: ""
@@ -218,13 +272,14 @@ Page({
       event_id: localEventId,
       sender: agentState.did || "me",
       senderName: agentState.name || "我",
-      body: text,
+      body: displayBody,
+      images,
+      blocks,
       ts: Date.now(),
       isPending: true
     };
-    const currentMsgs = this.data.messages || [];
     this.setData({
-      messages: [...currentMsgs, optimisticMsg],
+      messages: [...(this.data.messages || []), optimisticMsg],
       toView: `msg-${localEventId}`
     });
 
@@ -234,8 +289,10 @@ Page({
       // 人类发言标记：服务端据此清零自动回复计数
       header: { ...getHeaders(agentState.token), "X-Human-Send": "true" },
       data: {
-        msgtype: "m.text",
-        body: text
+        msgtype: images.length ? "m.image" : "m.text",
+        body: displayBody,
+        images,
+        blocks
       },
       success: (res) => {
         this.setData({ isSending: false });
@@ -251,12 +308,15 @@ Page({
                   event_id: realEventId,
                   sender: agentState.did,
                   senderName: agentState.name || "我",
-                  body: text,
+                  body: displayBody,
+                  images,
+                  blocks,
                   ts: Date.now()
                 });
               }
             }
           }
+          this.setData({ images: [] });
           this.refreshMessages();
         } else {
           // 标准错误码：被对方拉黑时给出主题化提示
@@ -267,7 +327,9 @@ Page({
           });
           this.setData({
             inputValue: text,
-            messages: currentMsgs
+            images,
+            // 只剔除本次的本地占位消息：不用过期快照整体覆盖（会抹掉期间到达的新消息）
+            messages: (this.data.messages || []).filter((m) => m.event_id !== localEventId)
           });
         }
       },
@@ -279,13 +341,22 @@ Page({
         });
         this.setData({
           inputValue: text,
-          messages: currentMsgs
+          images,
+          messages: (this.data.messages || []).filter((m) => m.event_id !== localEventId)
         });
       }
     });
   },
 
   scrollToBottom() {
+    this._doScrollToBottom();
+    // 二次补滚：图片/长消息渲染后高度会再变，再对齐一次最新位置
+    clearTimeout(this._scrollBottomTimer);
+    this._scrollBottomTimer = setTimeout(() => this._doScrollToBottom(), 420);
+  },
+
+  _doScrollToBottom() {
+    if (this._destroyed) return;
     this.setData({
       toView: ""
     }, () => {
@@ -365,6 +436,112 @@ Page({
         fail: (err) => reject(new Error(err.errMsg || "网络请求失败"))
       });
     });
+  },
+
+  // ---- 图片附件：选择 / 上传 / 移除（与主对话同方案） ----
+  chooseImages() {
+    const max = 4 - (this.data.images || []).length;
+    if (max <= 0) {
+      wx.showToast({ title: "最多上传 4 张图片", icon: "none" });
+      return;
+    }
+    this.setData({ uploadErr: "" }); // 清掉上一轮的错误文案，避免串轮
+    wx.chooseMedia({
+      count: max,
+      mediaType: ["image"],
+      sizeType: ["compressed"],
+      sourceType: ["album", "camera"],
+      success: async (res) => {
+        const files = res.tempFiles || [];
+        if (!files.length) return;
+        const pending = files.map((f) => ({ path: f.tempFilePath, status: "uploading" }));
+        this.setData({ pendingImages: pending });
+        wx.showLoading({ title: "上传中…", mask: true });
+        const uploaded = [];
+        let failed = 0;
+        for (let i = 0; i < files.length; i++) {
+          const info = await new Promise((r) => wx.getFileSystemManager().getFileInfo({ filePath: files[i].tempFilePath, success: r, fail: () => r({ size: 0 }) }));
+          if (info.size > 6 * 1024 * 1024) {
+            failed += 1;
+            pending[i].status = "error";
+            this.setData({ pendingImages: pending, uploadErr: "单张图片需 ≤6MB" });
+            continue;
+          }
+          const url = await this.uploadOneImage(files[i].tempFilePath);
+          if (url) { uploaded.push(url); pending[i].status = "done"; }
+          else { failed += 1; pending[i].status = "error"; }
+          this.setData({ pendingImages: pending });
+        }
+        this.setData({
+          images: [...(this.data.images || []), ...uploaded].slice(0, 4),
+          pendingImages: []
+        });
+        wx.hideLoading();
+        if (uploaded.length) wx.showToast({ title: failed > 0 ? `已上传 ${uploaded.length} 张，${failed} 张失败` : `已上传 ${uploaded.length} 张`, icon: "none" });
+        else wx.showToast({ title: this.data.uploadErr || "上传失败，请重试", icon: "none" });
+      }
+    });
+  },
+
+  uploadOneImage(tempFilePath) {
+    return new Promise((resolve) => {
+      const extMatch = (tempFilePath || "").match(/\.(\w+)$/);
+      const ext = extMatch ? extMatch[1].toLowerCase() : "jpg";
+      const mimeMap = { png: "png", jpg: "jpeg", jpeg: "jpeg", gif: "gif", webp: "webp" };
+      const mime = mimeMap[ext] || "jpeg";
+      wx.getFileSystemManager().readFile({
+        filePath: tempFilePath,
+        encoding: "base64",
+        success: (r) => {
+          wx.request({
+            url: `${app.globalData.serverUrl}/api/agent/upload-image`,
+            method: "POST",
+            header: getHeaders(app.globalData.agentState.token),
+            data: { base64: `data:image/${mime};base64,${r.data}` },
+            success: (res) => {
+              if (res.statusCode >= 200 && res.statusCode < 300 && res.data && res.data.url) {
+                resolve(res.data.url);
+              } else {
+                this.setData({ uploadErr: (res.data && res.data.error) || `HTTP ${res.statusCode}` });
+                resolve(null);
+              }
+            },
+            fail: (err) => { this.setData({ uploadErr: err.errMsg || "网络失败" }); resolve(null); }
+          });
+        },
+        fail: () => { this.setData({ uploadErr: "读取图片失败" }); resolve(null); }
+      });
+    });
+  },
+
+  removeImage(e) {
+    const i = e.currentTarget.dataset.index;
+    const arr = (this.data.images || []).slice();
+    const removed = arr.splice(i, 1)[0];
+    this.setData({ images: arr });
+    if (removed && removed.startsWith("/api/uploads/")) {
+      const name = removed.split("/").pop();
+      wx.request({
+        url: `${app.globalData.serverUrl}/api/agent/upload-image/${encodeURIComponent(name)}`,
+        method: "DELETE",
+        header: getHeaders(app.globalData.agentState.token),
+        success: (res) => {
+          if (res.statusCode === 409) {
+            wx.showToast({ title: "图片已被帖子或群聊引用，已保留", icon: "none" });
+          }
+        },
+        fail: () => {
+          // 网络失败时恢复本地图片列表，避免"图片已删但实际还在服务端"的假象
+          this.setData({ images: [removed, ...arr] });
+        }
+      });
+    }
+  },
+
+  onUnload() {
+    // 页面销毁后不再 setData/绘制：清理补滚定时器与图表重试链
+    this._destroyed = true;
+    clearTimeout(this._scrollBottomTimer);
   },
 
   onInputFocus(e) {

@@ -19,6 +19,7 @@ export interface ChatMessage {
   isPending?: boolean;
   tasks?: any[];
   progress?: number;
+  charts?: any[];
   suggestions?: Array<{ id: string; label: string; command: string }>;
   progressState?: {
     phase: string;
@@ -963,6 +964,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                     isPending: !!data.isPending,
                     progress: data.progress !== undefined ? data.progress : m.progress,
                     progressState: data.isPending ? m.progressState : null,
+                    charts: (Array.isArray(data.charts) && data.charts.length > 0) ? data.charts.filter(Boolean) : m.charts,
                     suggestions: (data.suggestions && data.suggestions.length > 0) ? data.suggestions : m.suggestions,
                     tasks: (() => {
                       let currentTasks = m.tasks || [];
@@ -1002,6 +1004,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                       timestamp: getTimestamp(),
                       isPending: !!data.isPending,
                       progressState: data.isPending ? undefined : null,
+                      charts: (Array.isArray(data.charts) && data.charts.length > 0) ? data.charts.filter(Boolean) : undefined,
                       suggestions: (data.suggestions && data.suggestions.length > 0) ? data.suggestions : undefined,
                       tasks: (() => {
                         if (data.progress === 100 && data.tasks && Array.isArray(data.tasks)) {

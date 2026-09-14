@@ -1,4 +1,4 @@
-<view class="container" style="{{keyboardShift > 0 ? 'transform: translateY(-' + keyboardShift + 'px);' : ''}}">
+<view class="container" style="transform: translateY(-{{keyboardShift}}px);">
 
   <view class="cyber-panel glow-cyan tab-pane-container chat-panel">
     <!-- 待主人决策横幅 -->
@@ -7,7 +7,7 @@
       <text class="decision-banner-text">{{t.index.decisions_banner.replace('{count}', pendingCount)}}</text>
       <text class="decision-banner-arrow">›</text>
     </view>
-    <scroll-view class="chat-scroll" scroll-y scroll-into-view="{{toChatView}}" scroll-with-animation>
+    <scroll-view class="chat-scroll" scroll-y scroll-into-view="{{toChatView}}" scroll-with-animation bindscroll="onChatScroll">
       <view class="chat-item chat-item-{{item.sender}} {{item.sender === 'system' ? 'chat-item-system' : ''}}" wx:for="{{chatHistory}}" wx:key="id" id="chat-{{item.id}}" data-index="{{index}}" bindlongpress="onMessageLongPress">
         <view class="chat-bubble-header flex-row">
           <text class="chat-avatar">{{item.sender === 'human' ? '我' : item.sender === 'system' ? '系' : avatarChar}}</text>
@@ -42,33 +42,73 @@
             </view>
           </block>
           <block wx:else>
-            <rich-text wx:if="{{item.isRich}}" class="msg-body-rich" nodes="{{item.richContent}}" user-select></rich-text>
+            <block wx:if="{{item.segments && item.segments.length > 0}}">
+              <view class="msg-segments">
+                <block wx:for="{{item.segments}}" wx:for-item="seg" wx:key="index">
+                  <rich-text wx:if="{{seg.type === 'text'}}" class="msg-body-rich" nodes="{{seg.richContent}}" user-select></rich-text>
+                  <image wx:elif="{{seg.type === 'image'}}" class="msg-segment-image" src="{{seg.url}}" mode="widthFix" bindtap="previewAgentImage" data-src="{{seg.url}}" data-urls="{{item.images || item.agentImages}}"></image>
+                  <view wx:elif="{{seg.type === 'chart'}}" class="bubble-chart-inline">
+                    <!-- 点数多时按 _minWidthPx 加宽并横向滚动；少点数时 min-width:100% 拉满容器
+                         （普通 view overflow 滚动，不用 scroll-view——flex 内会把 canvas 高度算成 0） -->
+                    <view class="bubble-chart-inline-scroll">
+                      <canvas
+                        type="2d"
+                        class="bubble-chart-canvas bubble-chart-canvas-inline"
+                        id="{{seg.canvasId}}"
+                        style="{{seg.chartSpec && seg.chartSpec._minWidthPx ? 'width: ' + seg.chartSpec._minWidthPx + 'px; min-width: 100%;' : 'width: 100%;'}}"
+                      ></canvas>
+                    </view>
+                  </view>
+                  <view wx:elif="{{seg.type === 'table'}}" class="msg-segment-table">
+                    <text class="msg-table-title" wx:if="{{seg.table.title}}">{{seg.table.title}}</text>
+                    <scroll-view scroll-x class="msg-table-scroll" show-scrollbar="{{false}}">
+                      <!-- grid 定列宽：表头与数据行用同一 grid-template-columns，列严格对齐 -->
+                      <view class="msg-table">
+                        <view class="msg-table-row msg-table-head" style="grid-template-columns: repeat({{seg.table.headers.length}}, minmax(180rpx, 1fr));">
+                          <view class="msg-table-cell msg-table-th" wx:for="{{seg.table.headers}}" wx:for-item="h" wx:key="i">{{h.text}}</view>
+                        </view>
+                        <view class="msg-table-row" style="grid-template-columns: repeat({{seg.table.headers.length}}, minmax(180rpx, 1fr));" wx:for="{{seg.table.rows}}" wx:for-item="row" wx:key="ri">
+                          <view class="msg-table-cell" wx:for="{{row.cells}}" wx:for-item="cell" wx:key="i">{{cell.text}}</view>
+                        </view>
+                      </view>
+                    </scroll-view>
+                  </view>
+                </block>
+              </view>
+            </block>
+            <rich-text wx:elif="{{item.isRich}}" class="msg-body-rich" nodes="{{item.richContent}}" user-select></rich-text>
             <text wx:elif="{{item.content && item.content !== '（智能体处理中...）'}}" user-select>{{item.content}}</text>
           </block>
 
+          <!-- Agent 回复图片（网络图已转存为平台图片） -->
+          <view class="agent-image-grid" wx:if="{{item.sender === 'agent' && item.agentImages && item.agentImages.length > 0 && !(item.segments && item.segments.length > 0)}}">
+            <image class="agent-image-thumb" wx:for="{{item.agentImages}}" wx:for-item="img" wx:key="*this"
+                   src="{{img}}" mode="widthFix" bindtap="previewAgentImage" data-src="{{img}}" data-urls="{{item.agentImages}}"></image>
+          </view>
+
           <!-- 主人发送的图片（历史记录 + 点击大图预览） -->
-          <view class="human-image-grid" wx:if="{{item.sender === 'human' && item.images && item.images.length > 0}}">
+          <view class="human-image-grid" wx:if="{{item.sender === 'human' && item.images && item.images.length > 0 && !(item.segments && item.segments.length > 0)}}">
             <image class="human-image-thumb" wx:for="{{item.images}}" wx:for-item="img" wx:key="*this"
                    src="{{serverUrl}}{{img}}" mode="aspectFill" bindtap="previewHumanImage" bindlongpress="onHumanImageLongPress" data-src="{{img}}"></image>
           </view>
 
           <!-- 原生 Canvas 图表（数据点多时画布加宽、横向滚动） -->
-          <view class="bubble-chart-list" wx:if="{{item.charts && item.charts.length > 0}}">
+          <view class="bubble-chart-list" wx:if="{{item.unplacedCharts && item.unplacedCharts.length > 0}}">
             <scroll-view
               scroll-x
               class="bubble-chart-scroll"
               enhanced
               show-scrollbar="{{false}}"
-              wx:for="{{item.charts}}"
-              wx:for-item="chartSpec"
+              wx:for="{{item.unplacedCharts}}"
+              wx:for-item="uc"
               wx:for-index="ci"
               wx:key="ci"
             >
               <canvas
                 type="2d"
                 class="bubble-chart-canvas"
-                id="chart-canvas-{{item.id}}-{{ci}}"
-                style="width: {{chartSpec._minWidthPx ? chartSpec._minWidthPx + 'px' : ''}};"
+                id="{{uc.canvasId}}"
+                style="width: {{uc.spec._minWidthPx ? uc.spec._minWidthPx + 'px' : ''}};"
               ></canvas>
             </scroll-view>
           </view>
@@ -201,6 +241,16 @@
         <view class="wechat-image-remove" catchtap="removeImage" data-index="{{index}}">×</view>
       </view>
     </view>
+    <view class="image-quick-actions" wx:if="{{(pendingImages && pendingImages.length > 0) || (images && images.length > 0)}}">
+      <scroll-view class="image-quick-scroll" scroll-x enable-flex show-scrollbar="{{false}}">
+        <view class="image-quick-track flex-row">
+          <view class="image-quick-chip" wx:for="{{imageQuickActions}}" wx:key="command" hover-class="image-quick-chip-hover" bindtap="onImageQuickAction" data-command="{{item.command}}">
+            <text class="image-quick-chip-icon">{{item.icon}}</text>
+            <text class="image-quick-chip-text">{{item.label}}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
     <view class="wechat-input-bar">
       <view class="wechat-field">
         <textarea
@@ -214,7 +264,7 @@
           show-confirm-bar="{{false}}"
           disable-default-padding
           adjust-position="{{false}}"
-          cursor-spacing="0"
+          cursor-spacing="20"
           bindfocus="onInputFocus"
           bindblur="onInputBlur"
           bindkeyboardheightchange="onKeyboardHeightChange"
@@ -225,6 +275,128 @@
       </view>
       <view class="wechat-submit-btn" bindtap="sendInstruction">{{t.index.send}}</view>
     </view>
+  </view>
+
+  <!-- 主人快捷面板：右下角浮钮 + 指令/任务面板（面板锚定 FAB 弹出） -->
+  <view class="quick-fab {{keyboardShift > 0 ? 'quick-fab-hidden' : ''}} {{fabIdle ? 'quick-fab-idle' : ''}} {{fabJumping ? 'quick-fab-jump' : ''}} {{fabGliding ? 'quick-fab-glide' : ''}}" style="left: {{quickFabX}}px; top: {{quickFabY}}px;" catchtouchstart="onQuickFabStart" catchtouchmove="onQuickFabMove" bindtouchend="onQuickFabEnd">
+    <view class="quick-fab-halo"></view>
+    <view class="quick-fab-ring"></view>
+    <view class="quick-fab-glass">
+      <view class="quick-fab-sheen"></view>
+      <!-- 灵气雾气：两层柔和光晕缓慢漂移/旋转/呼吸，星芒转动时雾气流转变幻 -->
+      <view class="quick-fab-mist">
+        <view class="quick-fab-mist-a"></view>
+        <view class="quick-fab-mist-b"></view>
+      </view>
+      <view class="quick-fab-star">
+        <view class="claude-starburst-breathe">
+          <view class="claude-starburst">
+            <view class="claude-ray r0"></view>
+            <view class="claude-ray r1"></view>
+            <view class="claude-ray r2"></view>
+            <view class="claude-ray r3"></view>
+            <view class="claude-ray r4"></view>
+            <view class="claude-ray r5"></view>
+            <view class="claude-ray r6"></view>
+            <view class="claude-ray r7"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="quick-panel-mask" wx:if="{{showQuickPanel}}" bindtap="closeQuickPanel"></view>
+  <view class="quick-panel" wx:if="{{showQuickPanel}}" style="left: {{quickPanelPos.left}}px; top: {{quickPanelPos.top}}px;">
+    <view class="quick-panel-close" catchtap="closeQuickPanel">✕</view>
+    <view class="quick-panel-header flex-row align-center justify-between" catchtouchstart="onPanelHeadStart" catchtouchmove="onPanelHeadMove" bindtouchend="onPanelHeadEnd">
+      <view class="quick-panel-head-left flex-row align-center">
+        <view class="quick-panel-mark">笺</view>
+        <view class="quick-panel-title-box flex-col">
+          <text class="quick-panel-title">灵犀笺</text>
+          <text class="quick-panel-subtitle">常用与推荐 · 按住可拖动</text>
+        </view>
+      </view>
+    </view>
+
+    <scroll-view class="quick-panel-scroll" scroll-y>
+      <view class="quick-panel-loading" wx:if="{{quickPanelLoading}}">
+        <view class="quick-loading-star">
+          <view class="claude-starburst-breathe">
+            <view class="claude-starburst">
+              <view class="claude-ray r0"></view>
+              <view class="claude-ray r1"></view>
+              <view class="claude-ray r2"></view>
+              <view class="claude-ray r3"></view>
+              <view class="claude-ray r4"></view>
+              <view class="claude-ray r5"></view>
+              <view class="claude-ray r6"></view>
+              <view class="claude-ray r7"></view>
+            </view>
+          </view>
+        </view>
+        <text class="quick-loading-text">灵犀推演中…</text>
+      </view>
+
+      <view class="quick-section" wx:if="{{!quickPanelLoading}}">
+        <view class="quick-section-head flex-row align-center justify-between">
+          <view class="flex-row align-center">
+            <view class="quick-section-dot task-dot"></view>
+            <text class="quick-section-title">进行中</text>
+          </view>
+          <view class="flex-row align-center">
+            <view class="quick-section-more" style="margin-right: 24rpx;" catchtap="openScheduleFromPanel">我的日程 ›</view>
+            <view class="quick-section-more" catchtap="openTasksFromPanel">任务中心 ›</view>
+          </view>
+        </view>
+        <view class="quick-task-item" wx:for="{{quickTasks}}" wx:key="id" hover-class="quick-task-item-hover" bindtap="tapQuickTask" data-id="{{item.id}}">
+          <view class="quick-task-status"></view>
+          <view class="quick-task-main flex-col">
+            <text class="quick-task-title">{{item.title}}</text>
+            <view class="quick-task-bar"><view class="quick-task-bar-fill" style="width: {{item.progress}}%;"></view></view>
+          </view>
+          <text class="quick-task-progress">{{item.progress}}%</text>
+        </view>
+        <text wx:if="{{quickTasks.length === 0}}" class="quick-empty">暂无运行中任务</text>
+      </view>
+
+      <view class="quick-section" wx:if="{{!quickPanelLoading}}">
+        <view class="quick-section-head flex-row align-center justify-between">
+          <view class="flex-row align-center">
+            <view class="quick-section-dot command-dot"></view>
+            <text class="quick-section-title">常用指令</text>
+          </view>
+          <view class="quick-refresh" hover-class="quick-refresh-hover" bindtap="refreshQuickCommands">↻ 换一批</view>
+        </view>
+        <view class="quick-chip" wx:for="{{quickCommands}}" wx:key="id" hover-class="quick-chip-hover" bindtap="tapQuickCommand" data-command="{{item.command}}">
+          <view class="quick-chip-index">{{index + 1}}</view>
+          <view class="quick-chip-body flex-col">
+            <text class="quick-chip-text">{{item.label}}</text>
+            <text class="quick-chip-reason" wx:if="{{item.reason}}">{{item.reason}}</text>
+          </view>
+          <text class="quick-chip-arrow">›</text>
+        </view>
+        <text wx:if="{{!quickPanelLoading && quickCommands.length === 0}}" class="quick-empty">暂无常用指令</text>
+      </view>
+
+      <view class="quick-section" wx:if="{{!quickPanelLoading}}">
+        <view class="quick-section-head flex-row align-center justify-between">
+          <view class="flex-row align-center">
+            <view class="quick-section-dot rec-dot"></view>
+            <text class="quick-section-title">今日推荐</text>
+          </view>
+          <view class="quick-refresh" hover-class="quick-refresh-hover" bindtap="refreshQuickRecommendations">↻ 换一批</view>
+        </view>
+        <view class="quick-chip" wx:for="{{quickRecommendations}}" wx:key="command" hover-class="quick-chip-hover" bindtap="tapQuickCommand" data-command="{{item.command}}">
+          <view class="quick-chip-index">{{index + 1}}</view>
+          <view class="quick-chip-body flex-col">
+            <text class="quick-chip-text">{{item.label}}</text>
+            <text class="quick-chip-reason" wx:if="{{item.reason}}">{{item.reason}}</text>
+          </view>
+          <text class="quick-chip-arrow">›</text>
+        </view>
+        <text wx:if="{{!quickPanelLoading && quickRecommendations.length === 0}}" class="quick-empty">暂无推荐任务</text>
+      </view>
+    </scroll-view>
   </view>
 
   <!-- Command Approval gate overlay modal -->

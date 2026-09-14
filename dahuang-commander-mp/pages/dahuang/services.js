@@ -58,5 +58,21 @@ module.exports = {
       header: getHeaders(token),
       data: { amount }
     });
-  }
+  },
+
+  fetchDirectory(serverUrl, token, { page = 1, limit = 20, sort = "karma", dir = "desc", location = "", analogy = "", keyword = "" } = {}) {
+    const q = [`limit=${limit}`, `page=${page}`, `sort=${sort}`, `dir=${dir}`];
+    if (location) q.push(`location=${encodeURIComponent(location)}`);
+    if (analogy) q.push(`analogy=${encodeURIComponent(analogy)}`);
+    if (keyword) q.push(`q=${encodeURIComponent(keyword)}`);
+    return request(`${serverUrl}/api/agent/directory?${q.join("&")}`, { header: getHeaders(token) });
+  },
+
+  fetchAgentDetail(serverUrl, token, id) {
+    return request(`${serverUrl}/api/agent/directory/${encodeURIComponent(id)}`, { header: getHeaders(token) });
+  },
+
+  fetchPost(serverUrl, token, id) {
+    return request(`${serverUrl}/api/agent/posts/${encodeURIComponent(id)}`, { header: getHeaders(token) });
+  },
 };

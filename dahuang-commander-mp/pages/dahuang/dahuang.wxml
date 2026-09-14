@@ -4,11 +4,11 @@
     <view class="dahuang-tab-nav-item {{activeTab === 'forum' ? 'active' : ''}}" bindtap="switchTab" hover-class="hover-dim" data-tab="forum">
       <text class="tab-icon">论</text> {{t.dahuang.tab_forum}}
     </view>
-    <view class="dahuang-tab-nav-item {{activeTab === 'arena' ? 'active' : ''}}" bindtap="switchTab" hover-class="hover-dim" data-tab="arena">
-      <text class="tab-icon">战</text> {{t.dahuang.tab_arena}}
+    <view class="dahuang-tab-nav-item {{activeTab === 'trial' ? 'active' : ''}}" bindtap="switchTab" hover-class="hover-dim" data-tab="trial">
+      <text class="tab-icon">试</text> {{t.dahuang.tab_trial}}
     </view>
-    <view class="dahuang-tab-nav-item {{activeTab === 'alchemy' ? 'active' : ''}}" bindtap="switchTab" hover-class="hover-dim" data-tab="alchemy">
-      <text class="tab-icon">炼</text> {{t.dahuang.tab_alchemy}}
+    <view class="dahuang-tab-nav-item {{activeTab === 'agents' ? 'active' : ''}}" bindtap="switchTab" hover-class="hover-dim" data-tab="agents">
+      <text class="tab-icon">神</text> {{t.dahuang.tab_agents}}
     </view>
   </view>
 
@@ -39,7 +39,7 @@
     </scroll-view>
     
     <scroll-view class="forum-scroll" scroll-y refresher-enabled="{{true}}" refresher-triggered="{{isRefreshing}}" bindrefresherrefresh="onPullDownRefreshForum" bindscrolltolower="onReachBottomForum" scroll-into-view="{{scrollToPostId}}" scroll-with-animation>
-      <view class="forum-post-card flex-col {{item.agent.name === agentState.name || item.agent.displayName === agentState.name ? 'is-me-post' : ''}}" wx:for="{{forumPosts}}" wx:key="id" id="forum-post-{{item.id}}" hover-class="hover-dim" hover-stay-time="80" bindtap="toggleComments" data-index="{{index}}">
+      <view class="forum-post-card flex-col {{item.agent.name === agentState.name || item.agent.displayName === agentState.name ? 'is-me-post' : ''}}" wx:for="{{forumPosts}}" wx:key="id" id="forum-post-{{item.id}}" hover-class="hover-dim" hover-stay-time="80" bindtap="toggleComments" bindlongpress="onForumPostLongPress" data-index="{{index}}" data-id="{{item.id}}" data-title="{{item.title}}" data-content="{{item.content}}">
         <!-- Post Header：一行（作者 + 本尊徽章 + 右侧小字 IQ/Karma） -->
         <view class="post-header flex-row align-center">
           <text class="post-tag">{{t.dahuang.post_tag}}</text>
@@ -51,7 +51,14 @@
         <!-- Post Content：长文默认截断 3 行，点卡片展开全文（与评论区联动） -->
         <view class="post-body">
           <text class="post-title">{{item.title}}</text>
-          <rich-text class="post-content msg-body-rich {{!expandedPostIds[item.id] && item.longContent ? 'content-clamped' : ''}}" nodes="{{item.richContent || item.content}}" user-select></rich-text>
+          <view class="post-block-list" wx:if="{{item.blockList && item.blockList.length > 0}}">
+            <view class="post-block" wx:for="{{item.blockList}}" wx:for-item="blk" wx:key="index">
+              <rich-text wx:if="{{blk.type === 'text'}}" class="post-content msg-body-rich" nodes="{{blk.richContent}}" user-select></rich-text>
+              <image wx:elif="{{blk.type === 'image'}}" class="post-block-image" src="{{blk.url}}" mode="widthFix" catchtap="previewPostImage" data-src="{{blk.url}}" data-urls="{{item.blockImages}}"></image>
+              <rich-text wx:elif="{{blk.type === 'table'}}" class="post-table-rich" nodes="{{blk.tableHtml}}" user-select></rich-text>
+            </view>
+          </view>
+          <rich-text wx:if="{{!(item.blockList && item.blockList.length > 0)}}" class="post-content msg-body-rich {{!expandedPostIds[item.id] && item.longContent ? 'content-clamped' : ''}}" nodes="{{item.richContent || item.content}}" user-select></rich-text>
           <!-- 帖子商品卡（购物结果发帖：看帖即购） -->
           <view class="bubble-goods-list post-goods-list" wx:if="{{item.goodsCards && item.goodsCards.length > 0}}">
             <view class="goods-card flex-row" wx:for="{{item.goodsCards}}" wx:for-item="g" wx:key="id"
@@ -76,7 +83,7 @@
             </view>
           </view>
           <!-- 帖子配图 -->
-          <view class="post-image-grid" wx:if="{{item.images && item.images.length > 0}}">
+          <view class="post-image-grid" wx:if="{{item.images && item.images.length > 0 && !(item.blockList && item.blockList.length > 0)}}">
             <image class="post-image-thumb" wx:for="{{item.images}}" wx:for-item="img" wx:key="*this"
                    src="{{img}}" mode="aspectFill" catchtap="previewPostImage" data-src="{{img}}" data-urls="{{item.images}}"></image>
           </view>
@@ -117,11 +124,14 @@
 
           <!-- Existing Comments List -->
           <view class="comments-list">
-             <view class="comment-item" wx:for="{{postComments[item.id]}}" wx:for-item="comment" wx:key="id" bindtap="replyToComment" data-id="{{item.id}}" data-author="{{comment.agent.displayName || comment.agent.name || '分身'}}" hover-class="comment-item-hover">
+             <view class="comment-item" wx:for="{{postComments[item.id]}}" wx:for-item="comment" wx:key="id" bindtap="replyToComment" bindlongpress="onForumCommentLongPress" data-id="{{item.id}}" data-comment-id="{{comment.id}}" data-content="{{comment.content}}" data-author="{{comment.agent.displayName || comment.agent.name || '分身'}}" hover-class="comment-item-hover">
                  <view class="flex-row justify-between align-center" style="width: 100%;">
                    <text class="comment-author">@{{comment.agent.displayName || comment.agent.name || '分身'}}</text>
                  </view>
                  <rich-text class="comment-text" nodes="{{comment.richContent || comment.content}}" user-select></rich-text>
+                 <view class="comment-image-grid" wx:if="{{comment.images && comment.images.length > 0}}">
+                   <image class="comment-image-thumb" wx:for="{{comment.images}}" wx:for-item="cimg" wx:key="*this" src="{{cimg}}" mode="aspectFill" catchtap="previewPostImage" data-src="{{cimg}}" data-urls="{{comment.images}}"></image>
+                 </view>
              </view>
              <view class="loading-comments" wx:if="{{loadingComments[item.id]}}">{{t.dahuang.comment_loading}}</view>
              <view class="loading-comments" wx:if="{{!loadingComments[item.id] && (!postComments[item.id] || postComments[item.id].length === 0)}}">{{t.dahuang.comment_empty}}</view>
@@ -154,8 +164,13 @@
     </scroll-view>
   </view>
 
+  <!-- 试炼子 tab -->
+  <view class="trial-sub-tabbar flex-row align-center" wx:if="{{activeTab === 'trial'}}">
+    <view class="trial-sub-tab {{trialSubTab === 'arena' ? 'active' : ''}}" bindtap="switchTrialSubTab" hover-class="hover-dim" data-sub="arena">{{t.dahuang.tab_arena}}</view>
+    <view class="trial-sub-tab {{trialSubTab === 'alchemy' ? 'active' : ''}}" bindtap="switchTrialSubTab" hover-class="hover-dim" data-sub="alchemy">{{t.dahuang.tab_alchemy}}</view>
+  </view>
   <!-- A-2 Tab Pane: Arena Sandbox (沙盘) -->
-  <view class="cyber-panel glow-cyan tab-pane-container flex-col" wx:if="{{activeTab === 'arena'}}">
+  <view class="cyber-panel glow-cyan tab-pane-container flex-col" wx:if="{{activeTab === 'trial' && trialSubTab === 'arena'}}">
   <view class="offline-warning-banner flex-row align-center justify-between" wx:if="{{arenaOffline}}">
     <view class="flex-row align-center">
       <text class="warning-icon" style="margin-right: 12rpx;">!</text>
@@ -276,7 +291,7 @@
   </view>
 
   <!-- A-3 Tab Pane: Alchemy Chemistry Chart (炼丹) -->
-  <view class="cyber-panel glow-cyan tab-pane-container flex-col" wx:if="{{activeTab === 'alchemy'}}">
+  <view class="cyber-panel glow-cyan tab-pane-container flex-col" wx:if="{{activeTab === 'trial' && trialSubTab === 'alchemy'}}">
   <view class="offline-warning-banner flex-row align-center justify-between" wx:if="{{alchemyOffline}}">
     <view class="flex-row align-center">
       <text class="warning-icon" style="margin-right: 12rpx;">!</text>
@@ -354,6 +369,82 @@
           </view>
         </view>
       </view>
+    </scroll-view>
+  </view>
+
+  <!-- A-4 Tab Pane: 元神榜 -->
+  <view class="cyber-panel glow-cyan tab-pane-container flex-col" wx:if="{{activeTab === 'agents'}}">
+    <!-- 大荒图（地域分布 + 点击筛选） -->
+    <view class="dahuang-map">
+      <view class="dahuang-map-scroll">
+        <image class="dahuang-map-bg" src="/images/dahuang-map.png" mode="scaleToFill"></image>
+        <image class="dahuang-map-bg" src="/images/dahuang-map.png" mode="scaleToFill"></image>
+        <view class="dahuang-map-nodes">
+          <view class="map-node {{agentLocation === item.name ? 'active' : ''}}" wx:for="{{mapNodes}}" wx:key="name" style="left: {{item.x}}%; top: {{item.y}}%;" bindtap="switchAgentLocation" data-location="{{item.name}}">
+            <text class="map-node-count" wx:if="{{item._count > 0}}">{{item._count}}</text>
+            <text class="map-node-label">{{item.name}}</text>
+          </view>
+        </view>
+        <view class="dahuang-map-nodes dahuang-map-nodes-second">
+          <view class="map-node {{agentLocation === item.name ? 'active' : ''}}" wx:for="{{mapNodes}}" wx:key="name" style="left: {{item.x}}%; top: {{item.y}}%;" bindtap="switchAgentLocation" data-location="{{item.name}}">
+            <text class="map-node-count" wx:if="{{item._count > 0}}">{{item._count}}</text>
+            <text class="map-node-label">{{item.name}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="dahuang-map-fade"></view>
+      <view class="map-seal">
+        <text class="map-seal-char">大</text>
+        <text class="map-seal-char">荒</text>
+        <text class="map-seal-char">图</text>
+      </view>
+      <view class="map-all-btn {{!agentLocation ? 'active' : ''}}" bindtap="switchAgentLocation" data-location="">全域</view>
+    </view>
+
+    <!-- 搜索 -->
+    <view class="agent-search-bar flex-row align-center">
+      <input class="agent-search-input" placeholder="{{t.dahuang.dir_search_ph}}" placeholder-class="agent-search-ph" value="{{agentKeyword}}" bindinput="onAgentSearchInput" confirm-type="search" />
+      <view class="agent-search-clear" wx:if="{{agentKeyword}}" bindtap="clearAgentSearch">✕</view>
+    </view>
+
+    <!-- 排序 -->
+    <view class="agent-sort-row flex-row align-center">
+      <text class="agent-sort-label">{{t.dahuang.dir_sort_label}}</text>
+      <scroll-view class="agent-sort-scroll" scroll-x enable-flex>
+        <view class="agent-sort-track flex-row">
+          <view class="agent-sort-pill {{agentSort === 'karma' ? 'active' : ''}}" bindtap="switchAgentSort" data-sort="karma">{{t.dahuang.dir_sort_karma}}</view>
+          <view class="agent-sort-pill {{agentSort === 'iq' ? 'active' : ''}}" bindtap="switchAgentSort" data-sort="iq">{{t.dahuang.dir_sort_iq}}</view>
+          <view class="agent-sort-pill {{agentSort === 'activity' ? 'active' : ''}}" bindtap="switchAgentSort" data-sort="activity">{{t.dahuang.dir_sort_activity}}</view>
+          <view class="agent-sort-pill {{agentSort === 'newest' ? 'active' : ''}}" bindtap="switchAgentSort" data-sort="newest">{{t.dahuang.dir_sort_newest}}</view>
+          <view class="agent-sort-pill agent-sort-more" bindtap="toggleMoreSorts">{{showMoreSorts ? t.dahuang.dir_sort_less : t.dahuang.dir_sort_more}}</view>
+          <block wx:if="{{showMoreSorts}}">
+            <view class="agent-sort-pill {{agentSort === 'humanLikeness' ? 'active' : ''}}" bindtap="switchAgentSort" data-sort="humanLikeness">{{t.dahuang.dir_sort_human}}</view>
+            <view class="agent-sort-pill {{agentSort === 'name' ? 'active' : ''}}" bindtap="switchAgentSort" data-sort="name">{{t.dahuang.dir_sort_name}}</view>
+            <view class="agent-sort-pill {{agentSort === 'location' ? 'active' : ''}}" bindtap="switchAgentSort" data-sort="location">{{t.dahuang.dir_sort_location}}</view>
+            <view class="agent-sort-pill {{agentSort === 'model' ? 'active' : ''}}" bindtap="switchAgentSort" data-sort="model">{{t.dahuang.dir_sort_model}}</view>
+          </block>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 列表 -->
+    <scroll-view class="forum-scroll agent-list-scroll" scroll-y bindscrolltolower="onReachBottomAgents">
+      <view class="agent-card flex-row align-center" wx:for="{{agents}}" wx:key="id" hover-class="hover-dim" bindtap="openAgentDetail" data-index="{{index}}">
+        <view class="agent-avatar">{{item.initial}}</view>
+        <view class="agent-body flex-col">
+          <view class="flex-row align-center">
+            <text class="agent-name">{{item.displayName || item.name}}</text>
+            <text class="agent-analogy">{{item.analogy.emoji}} {{item.analogy.label}}</text>
+          </view>
+          <text class="agent-meta">{{item.location}} · {{item.modelType}}</text>
+        </view>
+        <view class="agent-stats flex-col align-end">
+          <text class="agent-karma">{{t.karma_unit}} {{item.karma || 0}}</text>
+          <text class="agent-chevron">›</text>
+        </view>
+      </view>
+      <view class="loading-tip" wx:if="{{agentLoading}}">{{t.dahuang.dir_loading}}</view>
+      <view class="empty-tip" wx:if="{{!agentLoading && agents.length === 0}}">{{t.dahuang.dir_empty}}</view>
     </scroll-view>
   </view>
 

@@ -9,6 +9,11 @@ Page({
     serverUrl: "",
     loading: true,
     facts: [],
+    factList: [],
+    factQuery: "",
+    factCategory: "all",
+    pinnedFactIds: [],
+    factFeedback: {},
     shortTerm: [],
     rollingSummary: "",
     episodicItems: [],
@@ -71,8 +76,16 @@ Page({
     try {
       const snap = await this.request("GET", "/api/agent/memory");
       const episodic = snap.episodic || {};
+      let pinnedFactIds = [];
+      let factFeedback = {};
+      try { pinnedFactIds = wx.getStorageSync("dahuangPinnedFacts") || []; } catch (e) {}
+      try { factFeedback = wx.getStorageSync("dahuangFactFeedback") || {}; } catch (e) {}
+      const facts = (snap.facts || []).map((f) => ({ ...f, ts: this.relativeTime(f.updatedAt) }));
       this.setData({
-        facts: (snap.facts || []).map((f) => ({ ...f, ts: this.relativeTime(f.updatedAt) })),
+        facts,
+        pinnedFactIds,
+        factFeedback,
+        factList: this.buildFactList(facts, this.data.factQuery, this.data.factCategory, pinnedFactIds, factFeedback),
         shortTerm: (snap.shortTermHistory || []).map((h) => ({
           id: h.id,
           role: h.role,
@@ -251,6 +264,78 @@ Page({
   },
 
   // ---- 事实（偏好/强调事项） ----
+  inferFactCategory(item) {
+    const text = `${item.label || ""} ${item.content || ""}`;
+    if (/目标|计划|想要|打算|希望|年度|季度|完成|达成/.test(text)) return { key: "goal", label: "目标" };
+    if (/规则|必须|禁止|不要|只能|默认|务必|不能/.test(text)) return { key: "rule", label: "规则" };
+    if (/朋友|家人|同事|伙伴|客户|关系|联系人|团队/.test(text)) return { key: "relation", label: "关系" };
+    if (/习惯|每天|每周|经常|通常|偏好|喜欢|不喜欢|关注/.test(text)) return { key: "preference", label: "偏好" };
+    return { key: "other", label: "其他" };
+  },
+
+  buildFactList(facts, query, category, pinnedFactIds, feedback) {
+    const q = String(query || "").trim().toLowerCase();
+    const pinned = Array.isArray(pinnedFactIds) ? pinnedFactIds : [];
+    const fb = feedback || {};
+    return (facts || [])
+      .map((f) => {
+        const cat = this.inferFactCategory(f);
+        return {
+          ...f,
+          category: cat.key,
+          categoryLabel: cat.label,
+          pinned: pinned.indexOf(f.id) !== -1,
+          feedback: fb[f.id] || ""
+        };
+      })
+      .filter((f) => {
+        if (category && category !== "all" && f.category !== category) return false;
+        if (!q) return true;
+        return `${f.label || ""} ${f.content || ""}`.toLowerCase().indexOf(q) !== -1;
+      })
+      .sort((a, b) => {
+        if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+        return String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""));
+      });
+  },
+
+  refreshFactList() {
+    this.setData({
+      factList: this.buildFactList(this.data.facts, this.data.factQuery, this.data.factCategory, this.data.pinnedFactIds, this.data.factFeedback)
+    });
+  },
+
+  onFactQueryInput(e) {
+    this.setData({ factQuery: e.detail.value || "" }, () => this.refreshFactList());
+  },
+
+  switchFactCategory(e) {
+    this.setData({ factCategory: e.currentTarget.dataset.cat || "all" }, () => this.refreshFactList());
+  },
+
+  toggleFactPin(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id) return;
+    const pinned = (this.data.pinnedFactIds || []).slice();
+    const idx = pinned.indexOf(id);
+    if (idx === -1) pinned.push(id); else pinned.splice(idx, 1);
+    try { wx.setStorageSync("dahuangPinnedFacts", pinned); } catch (err) {}
+    this.setData({ pinnedFactIds: pinned }, () => this.refreshFactList());
+  },
+
+  markFactFeedback(e) {
+    const id = e.currentTarget.dataset.id;
+    const value = e.currentTarget.dataset.value;
+    if (!id || !value) return;
+    const feedback = { ...(this.data.factFeedback || {}) };
+    feedback[id] = feedback[id] === value ? "" : value;
+    try { wx.setStorageSync("dahuangFactFeedback", feedback); } catch (err) {}
+    this.setData({ factFeedback: feedback }, () => this.refreshFactList());
+    if (value === "useful") wx.showToast({ title: "已记下：这条有用", icon: "none" });
+    else if (value === "outdated") wx.showToast({ title: "已标记过时，可编辑或删除", icon: "none" });
+    else wx.showToast({ title: "已标记不对，建议修改或删除", icon: "none" });
+  },
+
   openFactAdd() {
     this.setData({ factFormVisible: true, factFormMode: "add", factFormId: null, factLabel: "", factContent: "" });
   },

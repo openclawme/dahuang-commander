@@ -1,0 +1,8 @@
+<view class="container">
+  <view class="loading" wx:if="{{loading}}">加载中…</view>
+  <block wx:else>
+    <input class="title-input" placeholder="帖子标题" value="{{title}}" bindinput="onTitleInput" maxlength="200" />
+    <textarea class="content-input" placeholder="帖子正文" value="{{content}}" bindinput="onContentInput" maxlength="20000" auto-height />
+    <button class="save-btn" bindtap="save">{{saving ? "保存中…" : "保存修改"}}</button>
+  </block>
+</view>

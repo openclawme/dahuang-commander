@@ -94,22 +94,42 @@
       </view>
     </view>
 
-    <!-- ① 主人偏好 · 强调事项 -->
+    <!-- ① 关键记忆 · 分身认知 -->
     <view class="settings-section">
       <view class="section-header section-header-col">
         <text class="section-title">{{t.memory.facts_title}}</text>
         <text class="section-desc">{{t.memory.facts_desc}}</text>
       </view>
+
+      <input class="fact-search" placeholder="搜索关键记忆" placeholder-class="fact-search-ph" value="{{factQuery}}" bindinput="onFactQueryInput" />
+      <view class="fact-cat-row flex-row">
+        <view class="fact-cat-pill {{factCategory === 'all' ? 'active' : ''}}" bindtap="switchFactCategory" data-cat="all">全部</view>
+        <view class="fact-cat-pill {{factCategory === 'preference' ? 'active' : ''}}" bindtap="switchFactCategory" data-cat="preference">偏好</view>
+        <view class="fact-cat-pill {{factCategory === 'goal' ? 'active' : ''}}" bindtap="switchFactCategory" data-cat="goal">目标</view>
+        <view class="fact-cat-pill {{factCategory === 'rule' ? 'active' : ''}}" bindtap="switchFactCategory" data-cat="rule">规则</view>
+        <view class="fact-cat-pill {{factCategory === 'relation' ? 'active' : ''}}" bindtap="switchFactCategory" data-cat="relation">关系</view>
+        <view class="fact-cat-pill {{factCategory === 'other' ? 'active' : ''}}" bindtap="switchFactCategory" data-cat="other">其他</view>
+      </view>
+
       <view class="settings-list">
-        <view class="fact-row flex-col" wx:for="{{facts}}" wx:key="id" bindtap="onFactTap"
+        <view class="fact-row flex-col" wx:for="{{factList}}" wx:key="id" bindtap="onFactTap"
               data-id="{{item.id}}" data-label="{{item.label}}" data-content="{{item.content}}" hover-class="row-hover">
           <view class="flex-row align-center" style="gap: 12rpx;">
+            <text class="fact-cat-tag">{{item.categoryLabel}}</text>
             <text class="fact-label" wx:if="{{item.label}}">{{item.label}}</text>
+            <text class="fact-pin-tag" wx:if="{{item.pinned}}">置顶</text>
             <text class="fact-time">{{item.ts}}</text>
           </view>
           <text class="fact-content" user-select>{{item.content}}</text>
+          <view class="fact-actions flex-row">
+            <view class="fact-action {{item.pinned ? 'on' : ''}}" catchtap="toggleFactPin" data-id="{{item.id}}">{{item.pinned ? '取消置顶' : '置顶'}}</view>
+            <view class="fact-action {{item.feedback === 'useful' ? 'on' : ''}}" catchtap="markFactFeedback" data-id="{{item.id}}" data-value="useful">有用</view>
+            <view class="fact-action {{item.feedback === 'outdated' ? 'warn' : ''}}" catchtap="markFactFeedback" data-id="{{item.id}}" data-value="outdated">过时</view>
+            <view class="fact-action {{item.feedback === 'wrong' ? 'danger' : ''}}" catchtap="markFactFeedback" data-id="{{item.id}}" data-value="wrong">不对</view>
+          </view>
         </view>
-        <view class="empty-agents flex-col align-center" wx:if="{{facts.length === 0}}">
+
+        <view class="empty-agents flex-col align-center" wx:if="{{factList.length === 0}}">
           <text class="empty-icon">🧠</text>
           <text class="empty-text">{{t.memory.facts_empty}}</text>
         </view>

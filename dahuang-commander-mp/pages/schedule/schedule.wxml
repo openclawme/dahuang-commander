@@ -1,0 +1,62 @@
+<view class="container">
+  <view class="seg-row">
+    <view class="seg {{view === 'today' ? 'active' : ''}}" bindtap="switchView" data-view="today">今天</view>
+    <view class="seg {{view === 'week' ? 'active' : ''}}" bindtap="switchView" data-view="week">本周</view>
+    <view class="seg {{view === 'all' ? 'active' : ''}}" bindtap="switchView" data-view="all">全部</view>
+    <view class="seg {{view === 'inbox' ? 'active' : ''}}" bindtap="switchView" data-view="inbox">
+      收件箱{{inboxCount > 0 ? ' ' + inboxCount : ''}}
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{!loading && groups.length === 0}}">
+    <text class="empty-title">还没有日程</text>
+    <text class="empty-hint">试试说：「明早八点提醒我带伞」</text>
+  </view>
+
+  <view class="group" wx:for="{{groups}}" wx:key="key">
+    <view class="group-head flex-row align-center">
+      <text class="group-title">{{item.title}}</text>
+      <text class="group-count">{{item.items.length}}</text>
+    </view>
+    <view class="sched-card flex-row {{it.overdue ? 'overdue' : ''}}" wx:for="{{item.items}}" wx:for-item="it" wx:key="id">
+      <view class="sched-check {{it.status === 'DONE' ? 'checked' : ''}}" catchtap="toggleDone" data-id="{{it.id}}" data-status="{{it.status}}">
+        <text wx:if="{{it.status === 'DONE'}}">✓</text>
+      </view>
+      <view class="sched-main flex-col" bindtap="openActions" data-id="{{it.id}}">
+        <view class="sched-line flex-row align-center">
+          <text class="sched-time {{it.inbox ? 'sched-time-muted' : ''}}">{{it.timeLabel}}</text>
+          <text class="sched-kind kind-{{it.kindClass}}">{{it.kindLabel}}</text>
+          <text class="sched-repeat" wx:if="{{it.repeatLabel}}">↻ {{it.repeatLabel}}</text>
+        </view>
+        <text class="sched-title">{{it.title}}</text>
+        <text class="sched-note" wx:if="{{it.note}}">{{it.note}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="fab-add" bindtap="openCreate">＋</view>
+
+  <view class="sheet-mask" wx:if="{{showSheet}}" bindtap="closeSheet"></view>
+  <view class="sheet" wx:if="{{showSheet}}">
+    <view class="sheet-title">{{sheetMode === 'arrange' ? '安排时间' : '新建日程'}}</view>
+    <input class="sheet-input" placeholder="要办什么？例如：交房租" value="{{createTitle}}" bindinput="onCreateTitle" disabled="{{sheetMode === 'arrange'}}" />
+    <view class="sheet-row flex-row">
+      <picker mode="date" value="{{createDate}}" start="{{minDate}}" bindchange="onCreateDate">
+        <view class="sheet-picker">{{createDate}}</view>
+      </picker>
+      <picker mode="time" value="{{createTime}}" bindchange="onCreateTime">
+        <view class="sheet-picker">{{createTime}}</view>
+      </picker>
+    </view>
+    <view class="sheet-row flex-row" wx:if="{{sheetMode === 'create'}}">
+      <picker range="{{repeatOptions}}" value="{{repeatIndex}}" bindchange="onRepeatChange">
+        <view class="sheet-picker">重复：{{repeatOptions[repeatIndex]}}</view>
+      </picker>
+    </view>
+    <view class="sheet-actions flex-row">
+      <view class="sheet-btn sheet-btn-plain" bindtap="closeSheet">取消</view>
+      <view class="sheet-btn sheet-btn-ghost" wx:if="{{sheetMode === 'create'}}" bindtap="submitInbox">存为待办</view>
+      <view class="sheet-btn sheet-btn-primary" bindtap="submitSheet">{{submitting ? '保存中…' : '保存'}}</view>
+    </view>
+  </view>
+</view>

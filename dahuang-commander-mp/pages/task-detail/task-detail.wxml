@@ -1,0 +1,43 @@
+<view class="container">
+  <view class="loading-text" wx:if="{{loading}}">加载中…</view>
+  <block wx:elif="{{task}}">
+    <view class="hero-card flex-col">
+      <view class="flex-row align-center justify-between">
+        <text class="hero-status">{{task.statusLabel}}</text>
+        <text class="hero-time">{{task.timeText}}</text>
+      </view>
+      <text class="hero-command">{{task.command}}</text>
+      <text class="hero-meta">尝试 {{task.attempt}} / {{task.maxAttempts}} · 更新 {{task.updateText}}</text>
+    </view>
+
+    <view class="section" wx:if="{{resultText}}">
+      <text class="section-title">任务结果</text>
+      <view class="result-card"><text class="result-text" user-select>{{resultText}}</text></view>
+    </view>
+
+    <view class="section" wx:if="{{task.error}}">
+      <text class="section-title">错误信息</text>
+      <view class="error-card"><text class="error-text">{{task.error}}</text></view>
+    </view>
+
+    <view class="section">
+      <text class="section-title">执行步骤</text>
+      <view class="timeline" wx:if="{{events.length > 0}}">
+        <view class="event-item flex-col" wx:for="{{events}}" wx:key="id">
+          <view class="flex-row align-center justify-between">
+            <text class="event-type">{{item.type || item.role || '步骤'}}</text>
+            <text class="event-time">{{item.timeText}}</text>
+          </view>
+          <text class="event-content" wx:if="{{item.contentText}}" user-select>{{item.contentText}}</text>
+        </view>
+      </view>
+      <text class="empty-text" wx:else>暂无执行记录</text>
+    </view>
+
+    <view class="action-row flex-row">
+      <button class="action-btn ghost" bindtap="cancelTask" wx:if="{{task.status === 'PENDING' || task.status === 'PROCESSING'}}">取消任务</button>
+      <button class="action-btn primary" bindtap="retryTask" wx:if="{{task.status === 'FAILED' || task.status === 'DEAD_LETTER'}}">重新执行</button>
+      <button class="action-btn primary" bindtap="resumeTask" wx:if="{{task.status === 'FAILED' || task.status === 'DEAD_LETTER'}}">从检查点续跑</button>
+    </view>
+  </block>
+</view>

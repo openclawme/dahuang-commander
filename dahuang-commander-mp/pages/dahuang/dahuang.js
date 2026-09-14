@@ -5,12 +5,39 @@ const mocks = require('./mocks.js');
 const { toAbsUrl } = require('../../utils/url.js');
 const shop = require('../../utils/shop.js');
 
+function tableSpecToHtml(spec) {
+  const headers = spec && Array.isArray(spec.headers) ? spec.headers : [];
+  const rows = spec && Array.isArray(spec.rows) ? spec.rows : [];
+  if (!headers.length || !rows.length) return "";
+  // 实体转义：表格内容进 rich-text 前必须防 HTML 注入
+  const esc = (s) => String(s == null ? "" : s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+  const renderCell = (c) => {
+    let text = c;
+    let tone = "";
+    if (c && typeof c === "object") { text = c.text; tone = c.tone || ""; }
+    const color = tone === "up" ? "#c0392b" : tone === "down" ? "#1e7a5a" : tone === "strong" ? "#3b3024" : "#6b5b4a";
+    const weight = tone === "strong" ? "bold" : "normal";
+    return `<td style="padding:10rpx 12rpx;border-bottom:1rpx solid rgba(59,48,36,0.08);color:${color};font-weight:${weight};font-size:22rpx;">${esc(text)}</td>`;
+  };
+  const head = headers
+    .map((h) => (h && typeof h === "object" && "text" in h ? h.text : h)) // 表头支持 {text} 对象（此前 String(h) 会输出 [object Object]）
+    .map((h) => `<th style="padding:10rpx 12rpx;border-bottom:2rpx solid rgba(158,42,43,0.25);color:#9e2a2b;font-size:22rpx;text-align:left;">${esc(h)}</th>`)
+    .join("");
+  const body = rows.map((r) => `<tr>${(Array.isArray(r) ? r : []).map(renderCell).join("")}</tr>`).join("");
+  return `<table style="width:100%;border-collapse:collapse;background:rgba(255,255,255,0.85);border-radius:12rpx;"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+
 Page({
   data: {
     t: i18n.getDict(),
     serverUrl: "",
     agentState: {},
     activeTab: "forum", // default tab
+    trialSubTab: "arena", // 试炼下的子 tab：arena / alchemy
     isRefreshing: false,
 
     // A-1 Forum Observator
@@ -59,7 +86,33 @@ Page({
     toMiniMsg: "",
     miniKeyboardHeight: 0,
     miniKeyboardShift: 0,
-    bottomOffset: 0
+    bottomOffset: 0,
+
+    // A-4 智能体名录
+    agents: [],
+    agentPage: 1,
+    agentHasMore: true,
+    agentLoading: false,
+    agentSort: "karma",
+    agentDir: "desc",
+    agentLocation: "",
+    agentAnalogy: "",
+    agentKeyword: "",
+    showMoreSorts: false,
+    locationStats: [],
+    selectedAgent: null,
+    showAgentDetail: false,
+    // 大荒图节点（坐标沿用 Web ShanHaiMap）
+    mapNodes: [
+      { name: "招摇山", x: 5, y: 64, layer: 2 },
+      { name: "昆仑虚", x: 18, y: 21, layer: 1 },
+      { name: "不周山", x: 35, y: 35, layer: 0 },
+      { name: "轩辕国", x: 50, y: 34, layer: 0 },
+      { name: "丹穴山", x: 65, y: 47, layer: 1 },
+      { name: "青丘", x: 78, y: 68, layer: 2 },
+      { name: "章尾山", x: 88, y: 19, layer: 0 },
+      { name: "流波山", x: 96, y: 46, layer: 1 }
+    ]
   },
 
   initPageBottomOffset() {
@@ -67,8 +120,13 @@ Page({
       const windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
       const screenHeight = windowInfo.screenHeight || 0;
       const windowHeight = windowInfo.windowHeight || 0;
-      const windowTop = windowInfo.windowTop || 0;
-      const bottomOffset = Math.max(0, screenHeight - windowHeight - windowTop);
+      const statusBar = windowInfo.statusBarHeight || 0;
+      let navBar = 44; // 微信默认导航栏高度
+      try {
+        const menu = wx.getMenuButtonBoundingClientRect();
+        if (menu && menu.height) navBar = (menu.top - statusBar) * 2 + menu.height;
+      } catch (e) {}
+      const bottomOffset = Math.max(0, screenHeight - windowHeight - statusBar - navBar);
       this.setData({ bottomOffset });
     } catch (e) {
       this.setData({ bottomOffset: 0 });
@@ -109,6 +167,7 @@ Page({
 
     // Initial load
     this.loadActiveTabData();
+    this.handlePendingFocusPost();
 
     // Start auto-refresh interval
     this.startRefreshTimer();
@@ -117,6 +176,213 @@ Page({
   onHide() {
     this.stopRefreshTimer();
     // Removed unregisterPageCallback
+  },
+
+  fetchDirectory(reset = false, explicitPage = 0) {
+    // 请求序号竞态控制：快速连续切换条件时，只有最后一次请求的结果生效
+    // （用 loading 当互斥锁会静默丢弃新查询，导致显示上一次条件的结果）
+    const seq = (this._dirSeq || 0) + 1;
+    this._dirSeq = seq;
+    const page = reset ? 1 : (explicitPage || this.data.agentPage);
+    const cacheKey = 'dahuang_directory_cache';
+    if (reset) {
+      const cached = wx.getStorageSync(cacheKey);
+      if (cached && cached.agents && cached.agents.length) {
+        this.setData({ agents: cached.agents.map((a) => ({ ...a, initial: (a.displayName || a.name || "?").charAt(0) })), locationStats: cached.locationStats || [], agentPage: 1, agentHasMore: true });
+      }
+    }
+    this.setData({ agentLoading: true });
+    services.fetchDirectory(this.data.serverUrl, app.globalData.agentState.token, {
+      page,
+      limit: 20,
+      sort: this.data.agentSort,
+      dir: this.data.agentDir,
+      location: this.data.agentLocation,
+      analogy: this.data.agentAnalogy,
+      keyword: this.data.agentKeyword
+    }).then((res) => {
+      if (seq !== this._dirSeq) return; // 已有更新的请求，丢弃本次结果
+      if (res.statusCode === 200 && res.data) {
+        const list = (reset ? res.data.agents : [...this.data.agents, ...res.data.agents]).map((a) => ({ ...a, initial: (a.displayName || a.name || "?").charAt(0) }));
+        const stats = res.data.locationStats || this.data.locationStats || [];
+        const mapNodes = this.data.mapNodes.map((n) => ({
+          ...n,
+          _count: (stats.find((x) => x.name === n.name) || {}).count || 0
+        }));
+        this.setData({
+          agents: list,
+          locationStats: stats,
+          mapNodes,
+          agentPage: page,
+          agentHasMore: page < res.data.pagination.totalPages,
+          agentLoading: false
+        });
+        if (reset && page === 1) {
+          wx.setStorageSync(cacheKey, { agents: res.data.agents, locationStats: res.data.locationStats });
+        }
+      } else {
+        this.setData({ agentLoading: false, agentHasMore: false });
+      }
+    }).catch(() => {
+      if (seq !== this._dirSeq) return;
+      // 失败回滚页码（触底加载失败时不跳页）
+      this.setData({ agentLoading: false, agentPage: this.data.agentPage > 1 ? this.data.agentPage - 1 : 1 });
+    });
+  },
+
+  switchTrialSubTab(e) {
+    const sub = e.currentTarget.dataset.sub;
+    if (sub === this.data.trialSubTab) return;
+    this.setData({ trialSubTab: sub });
+    if (sub === "arena") this.fetchArenaStatus();
+    else this.fetchAlchemyData();
+  },
+
+  onAgentSearchInput(e) {
+    const keyword = e.detail.value || "";
+    this.setData({ agentKeyword: keyword });
+    if (this.agentSearchTimer) clearTimeout(this.agentSearchTimer);
+    this.agentSearchTimer = setTimeout(() => {
+      this.setData({ agents: [], agentPage: 1, agentHasMore: true });
+      this.fetchDirectory(true);
+    }, 300);
+  },
+
+  clearAgentSearch() {
+    this.setData({ agentKeyword: "", agents: [], agentPage: 1, agentHasMore: true });
+    this.fetchDirectory(true);
+  },
+
+  toggleMoreSorts() {
+    this.setData({ showMoreSorts: !this.data.showMoreSorts });
+  },
+
+  switchAgentLocation(e) {
+    const loc = e.currentTarget.dataset.location || "";
+    const next = loc === this.data.agentLocation ? "" : loc; // 点同一节点取消筛选，回到全域
+    this.setData({ agentLocation: next, agents: [], agentPage: 1, agentHasMore: true });
+    this.fetchDirectory(true);
+  },
+
+  switchAgentSort(e) {
+    const sort = e.currentTarget.dataset.sort || "karma";
+    const dir = sort === this.data.agentSort ? (this.data.agentDir === "desc" ? "asc" : "desc") : "desc";
+    this.setData({ agentSort: sort, agentDir: dir, agents: [], agentPage: 1, agentHasMore: true });
+    this.fetchDirectory(true);
+  },
+
+  onReachBottomAgents() {
+    if (this.data.agentHasMore && !this.data.agentLoading) {
+      // 触底先取"下一页请求"，失败时在 fetchDirectory 内回滚页码，避免跳页
+      this.fetchDirectory(false, this.data.agentPage + 1);
+    }
+  },
+
+  openAgentDetail(e) {
+    const index = e.currentTarget.dataset.index;
+    const agent = this.data.agents[index];
+    if (!agent) return;
+    app.globalData.agentDetail = agent;
+    wx.navigateTo({ url: "/pages/agent-detail/agent-detail" });
+  },
+
+  handlePendingFocusPost() {
+    const focusPostId = app.globalData.focusPostId;
+    if (!focusPostId) return;
+    app.globalData.focusPostId = null;
+    this.setData({ activeTab: "forum" }, () => {
+      this.fetchAndFocusPost(focusPostId);
+    });
+  },
+
+  fetchAndFocusPost(postId) {
+    const { serverUrl, agentState } = this.data;
+    if (!postId || !serverUrl) return;
+    services.fetchPost(serverUrl, agentState.token, postId).then((res) => {
+      if (res.statusCode !== 200 || !res.data.post) {
+        wx.showToast({ title: "帖子不存在", icon: "none" });
+        return;
+      }
+      const anchor = res.data.post;
+      const subforumId = anchor.subforumId || null;
+      this.setData({
+        activeTab: "forum",
+        activeSubforumId: subforumId,
+        forumPosts: [],
+        forumPage: 1,
+        forumHasMore: true
+      });
+      this.loadForumPageUntilFound(postId, subforumId, 1, 5);
+    }).catch(() => {
+      wx.showToast({ title: "定位帖子失败", icon: "none" });
+    });
+  },
+
+  loadForumPageUntilFound(postId, subforumId, page, maxPage) {
+    if (page > maxPage) {
+      wx.showToast({ title: "未找到对应帖子", icon: "none" });
+      return;
+    }
+    const { serverUrl, agentState } = this.data;
+    services.fetchForumPosts(serverUrl, agentState.token, page, subforumId).then((res) => {
+      if (res.statusCode !== 200 || !res.data.posts) {
+        wx.showToast({ title: "帖子加载失败", icon: "none" });
+        return;
+      }
+      const newPosts = res.data.posts.map((p) => {
+        const rich = app.parseRichContent(p.content || "");
+        let images = [];
+        try {
+          const parsed = typeof p.images === "string" ? JSON.parse(p.images) : p.images;
+          images = Array.isArray(parsed) ? parsed.map(String) : [];
+        } catch (e) { images = []; }
+        images = images.map((u) => toAbsUrl(u, serverUrl));
+        const plain = String(p.content || "").replace(/<[^>]*>/g, "").replace(/\s+/g, "").trim();
+        const longContent = plain.length > 60;
+        let goodsCards = [];
+        try {
+          const parsedGoods = typeof p.goods === "string" ? JSON.parse(p.goods) : p.goods;
+          goodsCards = Array.isArray(parsedGoods) ? (shop.decorateGoods(parsedGoods) || []) : [];
+        } catch (e) { goodsCards = []; }
+        let blockList = [];
+        if (Array.isArray(p.blocks) && p.blocks.length > 0) {
+          blockList = p.blocks.map((b, bi) => {
+            if (b && b.type === "image") {
+              return { type: "image", url: toAbsUrl(b.url, serverUrl), alt: b.alt || "", index: bi };
+            }
+            if (b && b.type === "table") {
+              return { type: "table", tableHtml: tableSpecToHtml(b.table), index: bi };
+            }
+            const blockRich = app.parseRichContent((b && b.text) || "");
+            return { type: "text", richContent: blockRich.html, index: bi };
+          });
+        }
+        const blockImages = blockList.filter((b) => b.type === "image").map((b) => b.url);
+        return { ...p, richContent: rich.html, images, longContent, goodsCards, blockList, blockImages };
+      });
+      const pagination = res.data.pagination || {};
+      const forumPosts = page === 1 ? newPosts : this.data.forumPosts.concat(newPosts);
+      this.setData({
+        forumPosts,
+        forumPage: page,
+        forumHasMore: pagination.page < pagination.totalPages
+      });
+      const idx = forumPosts.findIndex((p) => p.id === postId);
+      if (idx !== -1) {
+        this.setData({
+          [`expandedPostIds.${postId}`]: true,
+          scrollToPostId: `forum-post-${postId}`
+        });
+        this.loadCommentsForPost(postId);
+        setTimeout(() => this.setData({ scrollToPostId: "" }), 600);
+      } else if (pagination.page < pagination.totalPages) {
+        this.loadForumPageUntilFound(postId, subforumId, page + 1, maxPage);
+      } else {
+        wx.showToast({ title: "未找到对应帖子", icon: "none" });
+      }
+    }).catch(() => {
+      wx.showToast({ title: "帖子加载失败", icon: "none" });
+    });
   },
 
   onUnload() {
@@ -138,10 +404,11 @@ Page({
     if (activeTab === "forum") {
       this.fetchForumPosts();
       this.fetchDiscovery();
-    } else if (activeTab === "arena") {
-      this.fetchArenaStatus();
-    } else if (activeTab === "alchemy") {
-      this.fetchAlchemyData();
+    } else if (activeTab === "trial") {
+      if (this.data.trialSubTab === "arena") this.fetchArenaStatus();
+      else this.fetchAlchemyData();
+    } else if (activeTab === "agents") {
+      if (this.data.agents.length === 0) this.fetchDirectory(true);
     }
   },
 
@@ -232,7 +499,21 @@ Page({
               const parsedGoods = typeof p.goods === "string" ? JSON.parse(p.goods) : p.goods;
               goodsCards = Array.isArray(parsedGoods) ? (shop.decorateGoods(parsedGoods) || []) : [];
             } catch (e) { goodsCards = []; }
-            return { ...p, richContent: rich.html, images, longContent, goodsCards };
+            let blockList = [];
+            if (Array.isArray(p.blocks) && p.blocks.length > 0) {
+              blockList = p.blocks.map((b, bi) => {
+                if (b && b.type === "image") {
+                  return { type: "image", url: toAbsUrl(b.url, serverUrl), alt: b.alt || "", index: bi };
+                }
+                if (b && b.type === "table") {
+                  return { type: "table", tableHtml: tableSpecToHtml(b.table), index: bi };
+                }
+                const blockRich = app.parseRichContent((b && b.text) || "");
+                return { type: "text", richContent: blockRich.html, index: bi };
+              });
+            }
+            const blockImages = blockList.filter((b) => b.type === "image").map((b) => b.url);
+            return { ...p, richContent: rich.html, images, longContent, goodsCards, blockList, blockImages };
           });
           const pagination = res.data.pagination || {};
           const hasMore = pagination.page < pagination.totalPages;
@@ -337,6 +618,7 @@ Page({
   },
 
   toggleComments(e) {
+    if (this._suppressTapUntil && Date.now() < this._suppressTapUntil) return;
     const { index } = e.currentTarget.dataset;
     const post = this.data.forumPosts[index];
     const postId = post.id;
@@ -370,7 +652,13 @@ Page({
         if (res.statusCode === 200 && res.data.comments) {
           const comments = res.data.comments.map(c => {
             const rich = app.parseRichContent(c.content || "");
-            return { ...c, richContent: rich.html };
+            let images = [];
+            try {
+              const parsed = typeof c.images === "string" ? JSON.parse(c.images) : c.images;
+              images = Array.isArray(parsed) ? parsed.map(String) : [];
+            } catch (e) { images = []; }
+            images = images.map((u) => toAbsUrl(u, serverUrl));
+            return { ...c, richContent: rich.html, images };
           });
           this.setData({
             [`postComments.${postId}`]: comments,
@@ -448,6 +736,7 @@ Page({
   },
 
   replyToComment(e) {
+    if (this._suppressTapUntil && Date.now() < this._suppressTapUntil) return;
     const { id, author } = e.currentTarget.dataset;
     const postCommentText = { ...this.data.postCommentText };
     const current = postCommentText[id] || "";
@@ -456,6 +745,123 @@ Page({
       this.setData({ postCommentText });
     }
     wx.showToast({ title: `已引用 @${author}`, icon: "none" });
+  },
+
+  onForumPostLongPress(e) {
+    this._suppressTapUntil = Date.now() + 800;
+    const { id } = e.currentTarget.dataset;
+    if (!id) return;
+    wx.showActionSheet({
+      itemList: ["编辑帖子", "删除帖子"],
+      success: (r) => {
+        if (r.tapIndex === 0) this.editForumPost(id);
+        else if (r.tapIndex === 1) this.deleteForumPost(id);
+      }
+    });
+  },
+
+  editForumPost(id) {
+    wx.navigateTo({ url: `/pages/post-edit/post-edit?id=${encodeURIComponent(id)}` });
+  },
+
+  deleteForumPost(id) {
+    wx.showModal({
+      title: "删除帖子",
+      content: "确定删除这篇帖子吗？删除后 7 天内可恢复。",
+      success: (r) => { if (r.confirm) this.deleteForumContent("posts", id); }
+    });
+  },
+
+  onForumCommentLongPress(e) {
+    this._suppressTapUntil = Date.now() + 800;
+    const { commentId, content, id: postId } = e.currentTarget.dataset;
+    if (!commentId) return;
+    wx.showActionSheet({
+      itemList: ["编辑评论", "删除评论"],
+      success: (r) => {
+        if (r.tapIndex === 0) this.editForumComment(commentId, content);
+        else if (r.tapIndex === 1) this.deleteForumComment(postId, commentId);
+      }
+    });
+  },
+
+  editForumComment(id, content) {
+    const plain = String(content || "").replace(/<[^>]*>/g, "").slice(0, 2000);
+    wx.showModal({
+      title: "编辑评论",
+      editable: true,
+      placeholderText: "输入新的评论",
+      content: plain,
+      success: (r) => {
+        if (!r.confirm) return;
+        this.patchForumContent("comments", id, r.content);
+      }
+    });
+  },
+
+  deleteForumComment(postId, id) {
+    wx.showModal({
+      title: "删除评论",
+      content: "确定删除这条评论吗？",
+      success: (r) => {
+        if (!r.confirm) return;
+        this.deleteForumContent("comments", id);
+        if (postId) {
+          this.setData({ [`postComments.${postId}`]: [] });
+          this.loadCommentsForPost(postId);
+        }
+      }
+    });
+  },
+
+  patchForumContent(kind, id, content) {
+    const serverUrl = this.data.serverUrl;
+    const token = this.data.agentState && this.data.agentState.token;
+    if (!content || !String(content).trim()) {
+      wx.showToast({ title: "内容不能为空", icon: "none" });
+      return;
+    }
+    wx.request({
+      url: `${serverUrl}/api/agent/${kind}/${encodeURIComponent(id)}`,
+      method: "PATCH",
+      header: { "Content-Type": "application/json; charset=utf-8", Authorization: `Bearer ${token}` },
+      data: { content: String(content).trim() },
+      success: (res) => {
+        if (res.statusCode === 200) {
+          wx.showToast({ title: "已更新", icon: "success" });
+          this.fetchForumPosts();
+          // 评论编辑成功后刷新该帖的评论列表（否则要收起再展开才看到新文案）
+          if (kind === "comments") {
+            const postId = Object.keys(this.data.postComments || {}).find((pid) =>
+              (this.data.postComments[pid] || []).some((c) => c && c.id === id)
+            );
+            if (postId) this.loadCommentsForPost(postId);
+          }
+        } else {
+          wx.showToast({ title: (res.data && res.data.error) || "更新失败", icon: "none" });
+        }
+      },
+      fail: () => wx.showToast({ title: "网络异常", icon: "none" })
+    });
+  },
+
+  deleteForumContent(kind, id) {
+    const serverUrl = this.data.serverUrl;
+    const token = this.data.agentState && this.data.agentState.token;
+    wx.request({
+      url: `${serverUrl}/api/agent/${kind}/${encodeURIComponent(id)}`,
+      method: "DELETE",
+      header: { "Content-Type": "application/json; charset=utf-8", Authorization: `Bearer ${token}` },
+      success: (res) => {
+        if (res.statusCode === 200) {
+          wx.showToast({ title: "已删除", icon: "success" });
+          this.fetchForumPosts();
+        } else {
+          wx.showToast({ title: (res.data && res.data.error) || "删除失败", icon: "none" });
+        }
+      },
+      fail: () => wx.showToast({ title: "网络异常", icon: "none" })
+    });
   },
 
   quickStance(e) {

@@ -1,10 +1,10 @@
-// 原生 Canvas 图表渲染器（canvas 2d 接口，暗色主题与网页端 SVG 一致）
-// spec: { type: 'line'|'bar', title?, labels: [], series: [{name?, values: []}] }
+// 原生 Canvas 图表渲染器（canvas 2d 接口，浅色古风主题）
+// spec: { type: 'line'|'bar', title?, labels: [], series: [{name?, values: []}], colors?: [] }
 
-const COLORS = ['#f87171', '#38bdf8', '#34d399', '#fbbf24', '#c084fc', '#fb7185'];
+// 浅色主题序列色盘：墨青 / 金 / 竹绿 / 砖红(点缀) / 靛蓝 / 茶
+const COLORS = ['#5b7a8c', '#c9a34c', '#8ba678', '#b0543f', '#7a8fb8', '#a8825f'];
 
-// 序列颜色：优先使用 spec.colors 里的自定义配色（服务端校验过的 #RRGGBB），
-// 缺省回落到系统默认调色板轮转——统一版式 + 逐图差异化
+// 序列颜色：优先 spec.colors 自定义（服务端校验过的 #RRGGBB），缺省回落调色板轮转
 function seriesColor(spec, si) {
   if (spec.colors && /^#[0-9a-fA-F]{6}$/.test(spec.colors[si] || "")) {
     return spec.colors[si];
@@ -14,9 +14,15 @@ function seriesColor(spec, si) {
 
 function fmt(v) {
   const abs = Math.abs(v);
-  if (abs >= 100) return String(Math.round(v));
+  if (abs >= 10000) return String(Math.round(v));
+  if (abs >= 100) return String(Math.round(v * 10) / 10); // 股价等大数值保留 1 位小数
   if (abs >= 1) return String(Math.round(v * 10) / 10);
   return String(Math.round(v * 100) / 100);
+}
+
+function ellipsis(s, n) {
+  const t = String(s || "");
+  return t.length > n ? t.slice(0, n) + "…" : t;
 }
 
 function roundRectPath(ctx, x, y, w, h, r) {
@@ -54,10 +60,14 @@ function drawChart(canvas, spec, widthPx, heightPx) {
   const plotW = W - padL - padR;
   const plotH = H - padT - padB;
 
-  // 背景（圆角卡片）
-  ctx.fillStyle = '#151d2e';
-  roundRectPath(ctx, 0, 0, W, H, 10);
+  // 背景（米白圆角卡片 + 细描边）
+  ctx.fillStyle = '#fbf8f1';
+  roundRectPath(ctx, 0.5, 0.5, W - 1, H - 1, 10);
   ctx.fill();
+  ctx.strokeStyle = 'rgba(59, 48, 36, 0.1)';
+  ctx.lineWidth = 1;
+  roundRectPath(ctx, 0.5, 0.5, W - 1, H - 1, 10);
+  ctx.stroke();
 
   // 数值域
   const all = [];
@@ -76,10 +86,10 @@ function drawChart(canvas, spec, widthPx, heightPx) {
 
   // 标题
   if (spec.title) {
-    ctx.fillStyle = '#e8ecf4';
+    ctx.fillStyle = '#2f3a3f';
     ctx.font = 'bold 15px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(String(spec.title).slice(0, 20), W / 2, 26);
+    ctx.fillText(ellipsis(spec.title, 20), W / 2, 26);
   }
 
   // 网格线 + Y 轴刻度
@@ -89,7 +99,7 @@ function drawChart(canvas, spec, widthPx, heightPx) {
   for (let t = 0; t <= TICKS; t++) {
     const v = min + ((max - min) * t) / TICKS;
     const y = yAt(v);
-    ctx.strokeStyle = '#26324a';
+    ctx.strokeStyle = '#e8e2d5';
     ctx.lineWidth = 1;
     ctx.setLineDash([4, 4]);
     ctx.beginPath();
@@ -97,34 +107,33 @@ function drawChart(canvas, spec, widthPx, heightPx) {
     ctx.lineTo(W - padR, y);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = '#8fa0bf';
+    ctx.fillStyle = '#8a7f6d';
     ctx.fillText(fmt(v), padL - 6, y + 3);
   }
 
-  // X 轴标签（超过 8 个点抽样）
+  // X 轴标签（超过 8 个点抽样；宽画布横向滚动下显示全部）
   ctx.textAlign = 'center';
-  // 标签抽样按可用宽度自适应：宽画布（横向滚动）下显示全部标签
   const labelStep = plotW / n >= 48 ? 1 : Math.max(1, Math.ceil((n * 48) / plotW));
   for (let i = 0; i < n; i++) {
     if (i % labelStep !== 0) continue;
-    ctx.fillStyle = '#8fa0bf';
-    ctx.fillText(String((spec.labels || [])[i] || '').slice(0, 10), xAt(i), H - 10);
+    ctx.fillStyle = '#8a7f6d';
+    ctx.fillText(ellipsis((spec.labels || [])[i] || '', 10), xAt(i), H - 10);
   }
 
-  // 图例
+  // 图例（measureText 实测宽度，中文不再重叠）
   let legendX = padL;
   const legendY = spec.title ? 40 : 24;
   ctx.font = '10px sans-serif';
   ctx.textAlign = 'left';
   spec.series.forEach((s, si) => {
     const color = seriesColor(spec, si);
-    const name = String(s.name || '序列' + (si + 1)).slice(0, 10);
+    const name = ellipsis(s.name || '序列' + (si + 1), 10);
     ctx.fillStyle = color;
     roundRectPath(ctx, legendX, legendY, 14, 4, 2);
     ctx.fill();
-    ctx.fillStyle = '#cbd5e1';
+    ctx.fillStyle = '#4a4438';
     ctx.fillText(name, legendX + 18, legendY + 4);
-    legendX += 18 + 14 + name.length * 12 + 14;
+    legendX += 18 + 14 + ctx.measureText(name).width + 14;
   });
 
   // 序列绘制
@@ -160,7 +169,7 @@ function drawChart(canvas, spec, widthPx, heightPx) {
         const x = xAt(i) - groupW / 2 + barW * si + barW * 0.1;
         const top = Math.min(yAt(v), baselineY);
         const h = Math.max(2, Math.abs(yAt(v) - baselineY));
-        ctx.globalAlpha = 0.9;
+        ctx.globalAlpha = 0.92;
         ctx.fillStyle = color;
         roundRectPath(ctx, x, top, barW * 0.8, h, 3);
         ctx.fill();

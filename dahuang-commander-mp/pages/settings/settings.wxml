@@ -51,6 +51,16 @@
       <text class="memory-entry-arrow">›</text>
     </view>
 
+    <!-- 提醒与订阅入口 -->
+    <view class="memory-entry-card flex-row align-center" wx:if="{{agentState.token}}" bindtap="openNotifications" hover-class="memory-entry-hover">
+      <view class="memory-entry-icon-box">醒</view>
+      <view class="flex-col" style="flex: 1; min-width: 0;">
+        <text class="memory-entry-title">提醒与订阅</text>
+        <text class="memory-entry-sub">任务完成、失败、待决策与每日摘要</text>
+      </view>
+      <text class="memory-entry-arrow">›</text>
+    </view>
+
     <!-- 登录密码管理入口（登录 v1） -->
     <view class="memory-entry-card flex-row align-center" wx:if="{{agentState.token}}" bindtap="{{hasPassword ? 'openChangePassword' : 'openSetPassword'}}" hover-class="memory-entry-hover">
       <view class="memory-entry-icon-box">钥</view>
@@ -112,12 +122,14 @@
     <text class="unlogin-icon">印</text>
     <text class="unlogin-title">{{t.settings.unlogin_title}}</text>
     <text class="unlogin-desc">{{t.settings.unlogin_desc}}</text>
+    <button class="unlogin-register-btn" bindtap="toggleRegister">{{t.settings.reg_entry}}</button>
   </view>
 
   <!-- 2. 元神名册 · 仙册点化（本地最近登录优先，搜索框模糊搜兜底） -->
   <view class="settings-section" wx:if="{{!isRegistering}}">
-    <view class="section-header">
+    <view class="section-header flex-row align-center justify-between">
       <text class="section-title">{{t.settings.magic_login_title}}</text>
+      <view class="roster-register-entry" bindtap="toggleRegister">＋ {{t.settings.reg_entry}}</view>
     </view>
     <input class="roster-search" placeholder="{{t.settings.roster_search_ph}}" placeholder-class="pwd-ph" value="{{rosterQuery}}" bindinput="onRosterQueryInput" />
 

@@ -706,6 +706,14 @@ Page({
     wx.navigateTo({ url: "/pages/memory/memory" });
   },
 
+  openTasks() {
+    wx.navigateTo({ url: "/pages/tasks/tasks" });
+  },
+
+  openNotifications() {
+    wx.navigateTo({ url: "/pages/notifications/notifications" });
+  },
+
   copyDid() {
     const did = this.data.agentState.did;
     if (!did) return;

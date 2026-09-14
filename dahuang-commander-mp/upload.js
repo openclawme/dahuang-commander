@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '实现容器平滑上移腾出键盘空间，保持输入框紧贴键盘且不重置对话滚动位置';
+const desc = '注册入口美化：与全站扁平按钮同规格，简洁文案';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

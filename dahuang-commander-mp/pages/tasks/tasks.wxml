@@ -1,0 +1,67 @@
+<view class="container">
+  <view class="task-stats flex-row">
+    <view class="stat-card flex-col" bindtap="switchFilter" data-filter="pending">
+      <text class="stat-num stat-pending">{{counts.pending}}</text>
+      <text class="stat-label">待处理</text>
+    </view>
+    <view class="stat-card flex-col" bindtap="switchFilter" data-filter="processing">
+      <text class="stat-num stat-processing">{{counts.processing}}</text>
+      <text class="stat-label">进行中</text>
+    </view>
+    <view class="stat-card flex-col" bindtap="switchFilter" data-filter="completed">
+      <text class="stat-num stat-completed">{{counts.completed}}</text>
+      <text class="stat-label">已完成</text>
+    </view>
+    <view class="stat-card flex-col" bindtap="switchFilter" data-filter="failed">
+      <text class="stat-num stat-failed">{{counts.failed}}</text>
+      <text class="stat-label">失败</text>
+    </view>
+  </view>
+
+  <scroll-view class="filter-scroll" scroll-x enable-flex>
+    <view class="filter-track flex-row">
+      <view class="filter-pill {{filter === 'all' ? 'active' : ''}}" bindtap="switchFilter" data-filter="all">全部</view>
+      <view class="filter-pill {{filter === 'pending' ? 'active' : ''}}" bindtap="switchFilter" data-filter="pending">待处理</view>
+      <view class="filter-pill {{filter === 'processing' ? 'active' : ''}}" bindtap="switchFilter" data-filter="processing">进行中</view>
+      <view class="filter-pill {{filter === 'completed' ? 'active' : ''}}" bindtap="switchFilter" data-filter="completed">已完成</view>
+      <view class="filter-pill {{filter === 'failed' ? 'active' : ''}}" bindtap="switchFilter" data-filter="failed">失败</view>
+      <view class="filter-pill {{filter === 'cron' ? 'active' : ''}}" bindtap="switchFilter" data-filter="cron">定时任务</view>
+    </view>
+  </scroll-view>
+
+  <view class="cron-section" wx:if="{{filter === 'cron'}}">
+    <view class="section-title">定时任务</view>
+    <view class="cron-card flex-col" wx:for="{{cronJobs}}" wx:key="id">
+      <view class="flex-row align-center justify-between">
+        <text class="cron-command">{{item.command}}</text>
+        <text class="cron-status {{item.status === 'ACTIVE' ? 'on' : 'off'}}">{{item.statusLabel}}</text>
+      </view>
+      <text class="cron-meta">周期：{{item.cronExpression}} · 上次：{{item.timeText}}</text>
+      <view class="cron-actions flex-row">
+        <view class="mini-btn" catchtap="cronAction" data-id="{{item.id}}" data-action="{{item.status === 'ACTIVE' ? 'pause' : 'resume'}}">{{item.status === 'ACTIVE' ? '暂停' : '恢复'}}</view>
+        <view class="mini-btn primary" catchtap="cronAction" data-id="{{item.id}}" data-action="runNow">立即执行</view>
+      </view>
+    </view>
+    <view class="empty-text" wx:if="{{cronJobs.length === 0}}">暂无定时任务</view>
+  </view>
+
+  <view class="task-list" wx:elif="{{filter !== 'cron'}}">
+    <view class="task-card flex-col" wx:for="{{tasks}}" wx:key="id" bindtap="openTaskDetail" data-id="{{item.id}}">
+      <view class="flex-row align-center justify-between">
+        <text class="task-title">{{item.title}}</text>
+        <text class="task-status {{item.statusCls}}">{{item.statusLabel}}</text>
+      </view>
+      <text class="task-preview" wx:if="{{item.resultPreview}}">{{item.resultPreview}}</text>
+      <text class="task-error" wx:if="{{item.error}}">{{item.error}}</text>
+      <view class="flex-row align-center justify-between task-footer">
+        <text class="task-time">{{item.timeText}}</text>
+        <view class="flex-row task-actions">
+          <view class="mini-btn" wx:if="{{item.status === 'PENDING' || item.status === 'PROCESSING'}}" catchtap="cancelTask" data-id="{{item.id}}">取消</view>
+          <view class="mini-btn primary" wx:if="{{item.status === 'FAILED' || item.status === 'DEAD_LETTER'}}" catchtap="retryTask" data-id="{{item.id}}">重跑</view>
+        </view>
+      </view>
+    </view>
+    <view class="empty-text" wx:if="{{!loading && tasks.length === 0}}">暂无任务</view>
+    <view class="loading-text" wx:if="{{loading}}">加载中…</view>
+  </view>
+</view>
