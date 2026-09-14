@@ -3,14 +3,14 @@ const { getHeaders } = require('../../utils/config.js');
 
 /** 集市频道：前三个是聚推客活动组（频次最高排最前），后五个是京东/拼多多商品频道 */
 const CHANNELS = [
-  { key: "jtk_hongbao", label: "外卖红包", kind: "jtk" },
-  { key: "jtk_travel", label: "出行酒店", kind: "jtk" },
-  { key: "jtk_deal", label: "电商捡漏", kind: "jtk" },
-  { key: "guess", label: "猜你喜欢", kind: "feed" },
-  { key: "bigcoupon", label: "大额券", kind: "feed" },
-  { key: "nine9", label: "9.9包邮", kind: "feed" },
-  { key: "pdd_subsidy", label: "百亿补贴", kind: "feed" },
-  { key: "pdd_seckill", label: "秒杀", kind: "feed" },
+  { key: "jtk_hongbao", label: "外卖红包", sub: "美团·饿了么", kind: "jtk" },
+  { key: "jtk_travel", label: "出行酒店", sub: "打车·酒店", kind: "jtk" },
+  { key: "jtk_deal", label: "电商捡漏", sub: "淘宝·京东·拼多多", kind: "jtk" },
+  { key: "guess", label: "猜你喜欢", sub: "京东精选", kind: "feed" },
+  { key: "bigcoupon", label: "大额券", sub: "京东精选", kind: "feed" },
+  { key: "nine9", label: "9.9包邮", sub: "京东精选", kind: "feed" },
+  { key: "pdd_subsidy", label: "百亿补贴", sub: "拼多多", kind: "feed" },
+  { key: "pdd_seckill", label: "秒杀", sub: "拼多多", kind: "feed" },
 ];
 
 // 聚推客活动分组规则（按官方 cate_name + 名称关键词）

@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '集市页上线：搜索问分身+外卖红包/电商捡漏/百亿补贴8频道+订单徽标';
+const desc = '集市界面重设计：频道4x2大按钮网格+活动双列卡片';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

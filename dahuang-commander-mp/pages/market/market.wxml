@@ -23,31 +23,30 @@
     <view class="market-auth-btn" hover-class="hover-dim" bindtap="goAuth">去备案 ›</view>
   </view>
 
-  <!-- 频道横滑 -->
-  <scroll-view class="market-channels" scroll-x enable-flex>
-    <view class="market-channels-track flex-row">
-      <view
-        class="market-channel-pill {{activeChannel === item.key ? 'active' : ''}}"
-        wx:for="{{channels}}"
-        wx:key="key"
-        hover-class="hover-dim"
-        bindtap="selectChannel"
-        data-key="{{item.key}}"
-      >
-        <text class="channel-pill-label">{{item.label}}</text>
-      </view>
+  <!-- 频道 4×2 网格：不滑动、大按钮、带来源小字 -->
+  <view class="market-channels-grid">
+    <view
+      class="market-channel-item {{activeChannel === item.key ? 'active' : ''}}"
+      wx:for="{{channels}}"
+      wx:key="key"
+      hover-class="hover-dim"
+      bindtap="selectChannel"
+      data-key="{{item.key}}"
+    >
+      <text class="channel-item-label">{{item.label}}</text>
+      <text class="channel-item-sub">{{item.sub}}</text>
     </view>
-  </scroll-view>
+  </view>
 
-  <!-- 聚推客活动卡 -->
-  <view class="market-act-list flex-col" wx:if="{{activities.length > 0}}">
-    <view class="market-act-card flex-row align-center" wx:for="{{activities}}" wx:key="actId" hover-class="hover-dim" bindtap="onActivityTap" data-index="{{index}}">
+  <!-- 聚推客活动：双列卡片，一屏两行展示 4 个活动 -->
+  <view class="market-act-grid" wx:if="{{activities.length > 0}}">
+    <view class="market-act-card flex-col" wx:for="{{activities}}" wx:key="actId" hover-class="hover-dim" bindtap="onActivityTap" data-index="{{index}}">
       <image class="market-act-img" src="{{item.image}}" mode="aspectFill"></image>
-      <view class="market-act-body flex-col">
-        <text class="market-act-name text-ellipsis">{{item.name}}</text>
-        <text class="market-act-platform">{{item.platform}}</text>
+      <text class="market-act-name text-ellipsis-2">{{item.name}}</text>
+      <view class="market-act-foot flex-row align-center justify-between">
+        <text class="market-act-platform text-ellipsis">{{item.platform}}</text>
+        <text class="market-act-go">领券›</text>
       </view>
-      <view class="market-act-go">领券 ›</view>
     </view>
   </view>
 
