@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '消息内链接可点击复制+PDD授权备案入口';
+const desc = 'PDD授权引导优化：复制链接后发微信聊天点击即可直接拉起拼多多App';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

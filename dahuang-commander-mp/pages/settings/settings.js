@@ -685,7 +685,7 @@ Page({
             success: () => {
               wx.showModal({
                 title: "拼多多授权备案",
-                content: "授权链接已复制，请粘贴到浏览器打开，并按提示在拼多多内点击确认授权（一人一次）。完成后回到这里，状态会自动更新。",
+                content: "授权链接已复制。请打开微信聊天（如文件传输助手）粘贴并发送，再点击链接——微信会自动拉起拼多多 App，在拼多多内点确认授权即可（一人一次，无需浏览器）。完成后回到这里，状态会自动更新。",
                 confirmText: "知道了",
                 showCancel: false,
                 success: () => this.refreshPddAuthStatus()
