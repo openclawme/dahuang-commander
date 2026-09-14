@@ -1212,6 +1212,8 @@ App({
             ? { type: "chart", chartIndex: seg.chartIndex, index: i }
             : seg.type === "link"
               ? { type: "link", url: seg.url, index: i }
+              : seg.type === "miniapp"
+                ? { type: "miniapp", appId: seg.appId, path: seg.path, index: i }
               : seg.type === "text"
                 ? { type: "text", richContent: this.parseRichContent(seg.text).html, index: i }
                 : { type: "image", url: seg.url, index: i }
@@ -1222,13 +1224,19 @@ App({
   splitLinkSegments(text) {
     const out = [];
     const src = String(text || "");
-    const re = /https?:\/\/[^\s"'<>`，。！？；、（）【】()\[\]]+/g;
+    // wxapp://appid/path → 小程序直达跳转段（点按拉起目标小程序领券）；
+    // http(s) 链接 → 可点击复制段
+    const re = /wxapp:\/\/([A-Za-z0-9_]+)\/([^\s"'<>`，。！？；、]+)|https?:\/\/[^\s"'<>`，。！？；、（）【】()\[\]]+/g;
     let last = 0;
     let m;
     while ((m = re.exec(src))) {
       const before = src.slice(last, m.index);
       if (before) out.push({ type: "text", text: before });
-      out.push({ type: "link", url: m[0] });
+      if (m[1]) {
+        out.push({ type: "miniapp", appId: m[1], path: m[2] || "" });
+      } else {
+        out.push({ type: "link", url: m[0] });
+      }
       last = m.index + m[0].length;
     }
     const rest = src.slice(last);

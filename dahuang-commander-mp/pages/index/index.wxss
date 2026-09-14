@@ -3737,6 +3737,23 @@
   background: rgba(255, 255, 255, 0.6);
 }
 
+.msg-miniapp-btn {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin: 10rpx 0;
+  padding: 16rpx 24rpx;
+  border-radius: 14rpx;
+  background: linear-gradient(135deg, #4a7f99, #5b8fa8);
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 600;
+  max-width: 420rpx;
+}
+.msg-miniapp-btn:active { opacity: 0.85; }
+.msg-miniapp-icon { font-size: 30rpx; }
+.msg-miniapp-label { letter-spacing: 1rpx; }
+
 .msg-link {
   display: block;
   color: #4a7f99;

@@ -46,6 +46,10 @@
               <view class="msg-segments">
                 <block wx:for="{{item.segments}}" wx:for-item="seg" wx:key="index">
                   <rich-text wx:if="{{seg.type === 'text'}}" class="msg-body-rich" nodes="{{seg.richContent}}" user-select></rich-text>
+                  <view wx:elif="{{seg.type === 'miniapp'}}" class="msg-miniapp-btn" bindtap="tapOpenMiniapp" data-appid="{{seg.appId}}" data-path="{{seg.path}}">
+                    <text class="msg-miniapp-icon">🚀</text>
+                    <text class="msg-miniapp-label">打开小程序领券</text>
+                  </view>
                   <text wx:elif="{{seg.type === 'link'}}" class="msg-link" bindtap="tapMsgLink" data-url="{{seg.url}}" user-select>{{seg.url}}</text>
                   <image wx:elif="{{seg.type === 'image'}}" class="msg-segment-image" src="{{seg.url}}" mode="widthFix" bindtap="previewAgentImage" data-src="{{seg.url}}" data-urls="{{item.images || item.agentImages}}"></image>
                   <view wx:elif="{{seg.type === 'chart'}}" class="bubble-chart-inline">

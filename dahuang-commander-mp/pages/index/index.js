@@ -1923,6 +1923,22 @@ ${quotedText}
     });
   },
 
+  tapOpenMiniapp(e) {
+    const appId = e.currentTarget.dataset.appid;
+    const rawPath = e.currentTarget.dataset.path || "";
+    if (!appId) return;
+    // 领券/下单类活动直接拉起目标小程序（饿了么/美团等官方小程序）
+    wx.navigateToMiniProgram({
+      appId,
+      path: rawPath.startsWith("/") ? rawPath : "/" + rawPath,
+      success: () => {},
+      fail: (err) => {
+        console.warn("navigateToMiniProgram failed:", err);
+        wx.showToast({ title: "该小程序未开放跳转，请用备用链接在浏览器打开", icon: "none", duration: 2600 });
+      },
+    });
+  },
+
   previewHumanImage(e) {
     const src = e.currentTarget.dataset.src;
     if (!src) return;

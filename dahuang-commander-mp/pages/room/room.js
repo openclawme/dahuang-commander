@@ -225,6 +225,21 @@ Page({
     });
   },
 
+  tapOpenMiniapp(e) {
+    const appId = e.currentTarget.dataset.appid;
+    const rawPath = e.currentTarget.dataset.path || "";
+    if (!appId) return;
+    wx.navigateToMiniProgram({
+      appId,
+      path: rawPath.startsWith("/") ? rawPath : "/" + rawPath,
+      success: () => {},
+      fail: (err) => {
+        console.warn("navigateToMiniProgram failed:", err);
+        wx.showToast({ title: "该小程序未开放跳转，请用备用链接在浏览器打开", icon: "none", duration: 2600 });
+      },
+    });
+  },
+
   onNewRoomMessage(data) {
     if (data && data.roomId === this.data.roomId) {
       this.refreshMessages();
