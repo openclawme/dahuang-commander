@@ -31,6 +31,7 @@ Page({
     oldPassword: "",
     newPassword: "",
     confirmPassword: "",
+    pddAuthBound: false, // 拼多多授权备案状态
 
     // 自动回复预算
     groupReplyBudget: 5,
@@ -92,6 +93,7 @@ Page({
   onShow() {
     const dict = i18n.getDict() || {};
     this.refreshJdAuthStatus(); // 京东授权状态（回调完成后回来自动更新）
+    this.refreshPddAuthStatus(); // 拼多多授权备案状态
     const filteredLogs = (app.globalData.logs || []).filter(l => {
       if (app.globalData.showDevLogs) return true;
       return l.type === "SYSTEM" || l.type === "ACTION";
@@ -648,6 +650,58 @@ Page({
         if (res.statusCode === 200 && res.data && res.data.success) {
           this.setData({ jdAuthBound: res.data.bound === true });
         }
+      }
+    });
+  },
+
+  refreshPddAuthStatus() {
+    const { serverUrl, agentState } = this.data;
+    if (!agentState.token) return;
+    wx.request({
+      url: `${serverUrl}/api/agent/shopping/pdd-authority`,
+      header: getHeaders(agentState.token),
+      success: (res) => {
+        if (res.statusCode === 200 && res.data && res.data.success) {
+          this.setData({ pddAuthBound: res.data.bound === true });
+        }
+      }
+    });
+  },
+
+  // 拼多多授权备案：生成授权链接 → 复制 → 浏览器打开在拼多多内确认
+  openPddAuth() {
+    const { serverUrl, agentState } = this.data;
+    if (!agentState.token) return;
+    wx.showLoading({ title: "生成授权链接", mask: true });
+    wx.request({
+      url: `${serverUrl}/api/agent/shopping/pdd-authority`,
+      header: getHeaders(agentState.token),
+      success: (res) => {
+        wx.hideLoading();
+        const url = res.data && res.data.authorityUrl;
+        if (res.statusCode === 200 && url) {
+          wx.setClipboardData({
+            data: url,
+            success: () => {
+              wx.showModal({
+                title: "拼多多授权备案",
+                content: "授权链接已复制，请粘贴到浏览器打开，并按提示在拼多多内点击确认授权（一人一次）。完成后回到这里，状态会自动更新。",
+                confirmText: "知道了",
+                showCancel: false,
+                success: () => this.refreshPddAuthStatus()
+              });
+            }
+          });
+        } else if (res.data && res.data.bound === true) {
+          this.setData({ pddAuthBound: true });
+          wx.showToast({ title: "已完成备案，无需重复授权", icon: "none" });
+        } else {
+          wx.showToast({ title: "生成授权链接失败", icon: "none" });
+        }
+      },
+      fail: () => {
+        wx.hideLoading();
+        wx.showToast({ title: "网络失败", icon: "none" });
       }
     });
   },

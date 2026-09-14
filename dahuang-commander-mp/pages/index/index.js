@@ -1911,6 +1911,18 @@ ${quotedText}
     wx.previewImage({ current: src, urls });
   },
 
+  tapMsgLink(e) {
+    const url = e.currentTarget.dataset.url;
+    if (!url) return;
+    // 小程序内不能直接拉起系统浏览器，复制链接并提示用户到浏览器打开
+    wx.setClipboardData({
+      data: url,
+      success: () => {
+        wx.showToast({ title: "链接已复制，请到浏览器打开", icon: "none", duration: 2200 });
+      },
+    });
+  },
+
   previewHumanImage(e) {
     const src = e.currentTarget.dataset.src;
     if (!src) return;

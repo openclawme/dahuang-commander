@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '切换Agent后清空旧身份会话态：群聊房间/日志/待决策/页面级缓存按身份纪元重置';
+const desc = '消息内链接可点击复制+PDD授权备案入口';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

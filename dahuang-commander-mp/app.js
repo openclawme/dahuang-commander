@@ -1191,7 +1191,12 @@ App({
         const cleaned = this.stripTableArtifacts(part.text);
         this.splitChartMarkers(cleaned).forEach((sub) => {
           if (sub.type === "chart") { segments.push(sub); return; }
-          segments.push(...this.splitInlineImages(this.stripOrphanMarkers(sub.text), list, base));
+          const imgParts = this.splitInlineImages(this.stripOrphanMarkers(sub.text), list, base);
+          // 纯文本里的 http(s) 链接切成可点击段（rich-text 不支持 <a> 跳转）
+          imgParts.forEach((seg) => {
+            if (seg.type === "text") segments.push(...this.splitLinkSegments(seg.text));
+            else segments.push(seg);
+          });
         });
         return;
       }
@@ -1205,10 +1210,30 @@ App({
           ? { type: "table", table: seg.table, index: i }
           : seg.type === "chart"
             ? { type: "chart", chartIndex: seg.chartIndex, index: i }
-            : seg.type === "text"
-              ? { type: "text", richContent: this.parseRichContent(seg.text).html, index: i }
-              : { type: "image", url: seg.url, index: i }
+            : seg.type === "link"
+              ? { type: "link", url: seg.url, index: i }
+              : seg.type === "text"
+                ? { type: "text", richContent: this.parseRichContent(seg.text).html, index: i }
+                : { type: "image", url: seg.url, index: i }
       );
+  },
+
+  /** 把纯文本中的 http(s) 链接切成可点击的 link 段 */
+  splitLinkSegments(text) {
+    const out = [];
+    const src = String(text || "");
+    const re = /https?:\/\/[^\s"'<>`，。！？；、（）【】()\[\]]+/g;
+    let last = 0;
+    let m;
+    while ((m = re.exec(src))) {
+      const before = src.slice(last, m.index);
+      if (before) out.push({ type: "text", text: before });
+      out.push({ type: "link", url: m[0] });
+      last = m.index + m[0].length;
+    }
+    const rest = src.slice(last);
+    if (rest) out.push({ type: "text", text: rest });
+    return out;
   },
 
   /** 把一段文本按 {{图表N}} 标记切成 text / chart 片段（客户端据此把图表画在原文位置） */

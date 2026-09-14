@@ -308,6 +308,17 @@
   background: rgba(255, 255, 255, 0.6);
 }
 
+.msg-link {
+  display: block;
+  color: #4a7f99;
+  text-decoration: underline;
+  word-break: break-all;
+  font-size: 26rpx;
+  line-height: 1.6;
+  margin: 4rpx 0;
+}
+
+
 /* ===== 群聊/私聊图片附件（与主对话同方案） ===== */
 .room-add-btn {
   width: 56rpx;

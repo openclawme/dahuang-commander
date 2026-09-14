@@ -39,6 +39,7 @@
               <view class="msg-segments">
                 <block wx:for="{{item.segments}}" wx:for-item="seg" wx:key="index">
                   <rich-text wx:if="{{seg.type === 'text'}}" class="msg-body-rich" nodes="{{seg.richContent}}" user-select></rich-text>
+                  <text wx:elif="{{seg.type === 'link'}}" class="msg-link" bindtap="tapMsgLink" data-url="{{seg.url}}" user-select>{{seg.url}}</text>
                   <image wx:elif="{{seg.type === 'image'}}" class="msg-segment-image" src="{{seg.url}}" mode="widthFix" bindtap="previewRoomImage" data-src="{{seg.url}}" data-urls="{{item.images}}"></image>
                   <view wx:elif="{{seg.type === 'chart'}}" class="bubble-chart-inline">
                     <canvas type="2d" class="bubble-chart-canvas bubble-chart-canvas-inline" id="{{seg.canvasId}}"></canvas>
