@@ -47,9 +47,10 @@
                   <image wx:elif="{{seg.type === 'image'}}" class="msg-segment-image" src="{{seg.url}}" mode="widthFix" bindtap="previewRoomImage" data-src="{{seg.url}}" data-urls="{{item.images}}"></image>
                   <view wx:elif="{{seg.type === 'chart'}}" class="bubble-chart-inline">
                     <canvas type="2d" class="bubble-chart-canvas bubble-chart-canvas-inline" id="{{seg.canvasId}}"
-                            bindtouchstart="onChartTouchStart" bindtouchmove="onChartTouchMove"
-                            bindtouchend="onChartTouchEnd" bindtouchcancel="onChartTouchEnd"
-                            data-id="{{seg.canvasId}}"></canvas>
+                            catchtouchstart="onChartTouchStart" catchtouchmove="onChartTouchMove"
+                            catchtouchend="onChartTouchEnd" catchtouchcancel="onChartTouchEnd"
+                            catchlongpress="onChartLongPress"
+                        data-id="{{seg.canvasId}}"></canvas>
                   </view>
                   <view wx:elif="{{seg.type === 'table'}}" class="msg-segment-table">
                     <text class="msg-table-title" wx:if="{{seg.table.title}}">{{seg.table.title}}</text>
@@ -75,9 +76,10 @@
             <view class="bubble-chart-list" wx:if="{{item.unplacedCharts && item.unplacedCharts.length > 0}}">
               <view class="bubble-chart-inline" wx:for="{{item.unplacedCharts}}" wx:for-item="uc" wx:key="canvasId">
                 <canvas type="2d" class="bubble-chart-canvas bubble-chart-canvas-inline" id="{{uc.canvasId}}"
-                        bindtouchstart="onChartTouchStart" bindtouchmove="onChartTouchMove"
-                        bindtouchend="onChartTouchEnd" bindtouchcancel="onChartTouchEnd"
-                        data-id="{{uc.canvasId}}"></canvas>
+                        catchtouchstart="onChartTouchStart" catchtouchmove="onChartTouchMove"
+                        catchtouchend="onChartTouchEnd" catchtouchcancel="onChartTouchEnd"
+                        catchlongpress="onChartLongPress"
+                data-id="{{uc.canvasId}}"></canvas>
               </view>
             </view>
             <video wx:if="{{item.videoUrl}}" class="msg-rich-video" src="{{item.videoUrl}}" poster="{{item.videoPoster}}" controls style="width: 100%; border-radius: 8rpx; margin-top: 12rpx; border: 1rpx solid rgba(158,42,43,0.3); max-height: 360rpx;"></video>

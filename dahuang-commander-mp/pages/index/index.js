@@ -1071,6 +1071,9 @@ Page({
     if (id) chartHover(id, null);
   },
 
+  // 画布区域拦截长按：不让消息级的「引用/复制」菜单弹出，避免与图表触摸交互冲突
+  onChartLongPress() {},
+
   switchTab(e) {
     const tab = e.currentTarget.dataset.tab;
     this.setData({
