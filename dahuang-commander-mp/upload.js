@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '修复重新进入小程序后图表丢失：sanitizeMessage保留消息自带charts字段';
+const desc = '切换Agent后清空旧身份会话态：群聊房间/日志/待决策/页面级缓存按身份纪元重置';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

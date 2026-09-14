@@ -155,6 +155,23 @@ Page({
 
   onShow() {
     const dict = i18n.getDict() || {};
+    // 身份纪元：切换 Agent 后清空上一元神的页面级缓存（推荐池/展开态/渲染缓存），
+    // 否则快捷面板等仍会显示旧身份的数据
+    const epoch = app.globalData.identityEpoch || 0;
+    if (this._identityEpoch !== epoch) {
+      this._identityEpoch = epoch;
+      this._segCache = new Map();
+      this._chartNoInline = {};
+      this.setData({
+        quickRecommendationPool: [],
+        quickCommands: [],
+        quickRecommendations: [],
+        quickCommandCursor: 0,
+        quickRecCursor: 0,
+        expandedTasks: {},
+        pendingCount: 0
+      });
+    }
     this.setData({
       t: dict,
       agentState: app.globalData.agentState || {},

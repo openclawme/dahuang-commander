@@ -748,6 +748,21 @@ App({
             status: "ONLINE"
           };
           wx.setStorageSync("dahuang_agent_state", this.globalData.agentState);
+          // 切换身份：清空上一元神的会话态（群聊房间/日志/待决策），避免新身份看到旧身份的数据
+          this.globalData.messengerRooms = {};
+          this.globalData.pendingDecisionCount = 0;
+          this.globalData.pendingDecisionTitles = [];
+          this.globalData.pendingSummaryShown = false;
+          this.globalData.identityEpoch = (this.globalData.identityEpoch || 0) + 1;
+          this.globalData.logs = [{
+            id: `log-${Date.now()}`,
+            type: "SYSTEM",
+            message: `🪶 元神更替：当前绑定 [${p.displayName || p.name}]`,
+            timestamp: this.getTimestamp()
+          }];
+          this.triggerPageCallback("onRoomsUpdate");
+          this.triggerPageCallback("onLogsUpdate");
+          this.triggerPageCallback("onAgentStateUpdate", this.globalData.agentState);
           this.recordLoginHistory({ id: p.id, name: p.displayName || p.name, did: p.did });
           this.addLog("SYSTEM", `🔑 凭证验证成功！角色切换为：[${p.name}]`);
           this.loadChatHistoryForAgent(p.id);
