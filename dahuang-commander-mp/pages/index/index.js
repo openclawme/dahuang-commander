@@ -1,7 +1,7 @@
 const app = require('../../utils/getApp.js');
 const i18n = require('../../utils/i18n.js');
 const { getHeaders } = require('../../utils/config.js');
-const { drawChart } = require('../../utils/chart-draw.js');
+const { drawChart, chartHitTest, chartHover } = require('../../utils/chart-draw.js');
 const { toAbsUrl } = require('../../utils/url.js');
 const shop = require('../../utils/shop.js');
 
@@ -1008,7 +1008,7 @@ Page({
         const info = list[i];
         if (info && info.node && info.width > 0 && info.height > 0) {
           try {
-            drawChart(info.node, t.spec, info.width, info.height);
+            drawChart(info.node, t.spec, info.width, info.height, t.id);
           } catch (e) {
             console.error('[CHART] canvas draw failed:', e);
           }
@@ -1030,6 +1030,45 @@ Page({
         }
       }
     });
+  },
+
+  // ===== 图表触摸交互（十字线 + 数值气泡，Epoch 风格） =====
+  _applyChartHover(id, touch, rect) {
+    if (!touch || !rect) return;
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    const idx = chartHitTest(id, x, y);
+    if (idx != null) chartHover(id, idx);
+  },
+
+  onChartTouchStart(e) {
+    const id = e.currentTarget.dataset.id;
+    const touch = (e.touches && e.touches[0]) || null;
+    if (!id || !touch) return;
+    const cacheKey = "_chartRect_" + id;
+    const cached = this[cacheKey];
+    if (cached && cached.at > (this._chartRectCacheAt || 0)) {
+      this._applyChartHover(id, touch, cached.rect);
+      return;
+    }
+    wx.createSelectorQuery().in(this).select("#" + id).boundingClientRect((rect) => {
+      if (!rect) return;
+      this[cacheKey] = { rect, at: Date.now() };
+      this._applyChartHover(id, touch, rect);
+    }).exec();
+  },
+
+  onChartTouchMove(e) {
+    const id = e.currentTarget.dataset.id;
+    const touch = (e.touches && e.touches[0]) || null;
+    if (!id || !touch) return;
+    const cached = this["_chartRect_" + id];
+    if (cached) this._applyChartHover(id, touch, cached.rect);
+  },
+
+  onChartTouchEnd(e) {
+    const id = e.currentTarget.dataset.id;
+    if (id) chartHover(id, null);
   },
 
   switchTab(e) {
@@ -1549,6 +1588,9 @@ Page({
 
   // 记录主人是否停留在底部：主动上滑看历史时暂停自动跟随
   onChatScroll(e) {
+    // 滚动后图表位置变化，触摸命中的 rect 缓存全部失效
+    this._chartRectCacheAt = Date.now();
+
     const d = (e && e.detail) || {};
     const st = d.scrollTop || 0;
     const sh = d.scrollHeight || 0;

@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '图表稳定性修复：消息重渲染后强制重绘canvas，杜绝空白区';
+const desc = '图表触摸交互：按住曲线/柱状图显示十字线与数值气泡（Epoch风格）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

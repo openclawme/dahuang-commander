@@ -2,7 +2,7 @@ const app = require('../../utils/getApp.js');
 const i18n = require('../../utils/i18n.js');
 const { getHeaders } = require('../../utils/config.js');
 const { toAbsUrl } = require('../../utils/url.js');
-const { drawChart } = require('../../utils/chart-draw.js');
+const { drawChart, chartHitTest, chartHover } = require('../../utils/chart-draw.js');
 
 Page({
   data: {
@@ -199,11 +199,50 @@ Page({
       targets.forEach((t, i) => {
         const info = list[i];
         if (info && info.node && info.width > 0 && info.height > 0) {
-          try { drawChart(info.node, t.spec, info.width, info.height); } catch (e) { console.error('[ROOM CHART] draw failed:', e); }
+          try { drawChart(info.node, t.spec, info.width, info.height, t.id); } catch (e) { console.error('[ROOM CHART] draw failed:', e); }
         } else { skipped += 1; }
       });
       if (skipped > 0 && attempt < 4) setTimeout(() => this.redrawCharts(attempt + 1), 400);
     });
+  },
+
+  // ===== 图表触摸交互（十字线 + 数值气泡，Epoch 风格） =====
+  _applyChartHover(id, touch, rect) {
+    if (!touch || !rect) return;
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    const idx = chartHitTest(id, x, y);
+    if (idx != null) chartHover(id, idx);
+  },
+
+  onChartTouchStart(e) {
+    const id = e.currentTarget.dataset.id;
+    const touch = (e.touches && e.touches[0]) || null;
+    if (!id || !touch) return;
+    const cacheKey = "_chartRect_" + id;
+    const cached = this[cacheKey];
+    if (cached && cached.at > (this._chartRectCacheAt || 0)) {
+      this._applyChartHover(id, touch, cached.rect);
+      return;
+    }
+    wx.createSelectorQuery().in(this).select("#" + id).boundingClientRect((rect) => {
+      if (!rect) return;
+      this[cacheKey] = { rect, at: Date.now() };
+      this._applyChartHover(id, touch, rect);
+    }).exec();
+  },
+
+  onChartTouchMove(e) {
+    const id = e.currentTarget.dataset.id;
+    const touch = (e.touches && e.touches[0]) || null;
+    if (!id || !touch) return;
+    const cached = this["_chartRect_" + id];
+    if (cached) this._applyChartHover(id, touch, cached.rect);
+  },
+
+  onChartTouchEnd(e) {
+    const id = e.currentTarget.dataset.id;
+    if (id) chartHover(id, null);
   },
 
   previewRoomImage(e) {
