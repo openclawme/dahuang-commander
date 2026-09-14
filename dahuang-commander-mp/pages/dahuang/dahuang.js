@@ -392,6 +392,11 @@ Page({
 
   switchTab(e) {
     const tab = e.currentTarget.dataset.tab;
+    if (tab === "market") {
+      // 「市」是集市页入口，跳转独立页面（与论/试/神三个面板不同）
+      wx.navigateTo({ url: "/pages/market/market" });
+      return;
+    }
     this.setData({
       activeTab: tab
     }, () => {

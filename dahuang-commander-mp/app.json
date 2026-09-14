@@ -18,7 +18,8 @@
     "pages/task-detail/task-detail",
     "pages/schedule/schedule",
     "pages/notifications/notifications",
-    "pages/orders/orders"
+    "pages/orders/orders",
+    "pages/market/market"
   ],
   "window": {
     "backgroundTextStyle": "light",

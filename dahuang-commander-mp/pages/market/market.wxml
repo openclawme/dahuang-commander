@@ -1,0 +1,92 @@
+<view class="market-container">
+  <!-- 搜索 + 问分身 -->
+  <view class="market-search-bar flex-row align-center">
+    <view class="market-search-box flex-row align-center">
+      <text class="market-search-icon">寻</text>
+      <input
+        class="market-search-input"
+        placeholder="想买什么？如：纸巾 / 蓝牙耳机"
+        placeholder-class="market-search-placeholder"
+        value="{{keyword}}"
+        bindinput="onKeywordInput"
+        confirm-type="search"
+        bindconfirm="onSearch"
+      />
+      <view class="market-search-btn" hover-class="hover-dim" bindtap="onSearch">搜索</view>
+    </view>
+    <view class="market-ask-btn" hover-class="hover-dim" bindtap="askAgent">问分身</view>
+  </view>
+
+  <!-- 拼多多授权引导条（仅未备案时出现） -->
+  <view class="market-auth-bar flex-row align-center justify-between" wx:if="{{pddAuthNotice}}">
+    <text class="market-auth-text">拼多多频道需授权备案一次（10 秒）</text>
+    <view class="market-auth-btn" hover-class="hover-dim" bindtap="goAuth">去备案 ›</view>
+  </view>
+
+  <!-- 频道横滑 -->
+  <scroll-view class="market-channels" scroll-x enable-flex>
+    <view class="market-channels-track flex-row">
+      <view
+        class="market-channel-pill {{activeChannel === item.key ? 'active' : ''}}"
+        wx:for="{{channels}}"
+        wx:key="key"
+        hover-class="hover-dim"
+        bindtap="selectChannel"
+        data-key="{{item.key}}"
+      >
+        <text class="channel-pill-label">{{item.label}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 聚推客活动卡 -->
+  <view class="market-act-list flex-col" wx:if="{{activities.length > 0}}">
+    <view class="market-act-card flex-row align-center" wx:for="{{activities}}" wx:key="actId" hover-class="hover-dim" bindtap="onActivityTap" data-index="{{index}}">
+      <image class="market-act-img" src="{{item.image}}" mode="aspectFill"></image>
+      <view class="market-act-body flex-col">
+        <text class="market-act-name text-ellipsis">{{item.name}}</text>
+        <text class="market-act-platform">{{item.platform}}</text>
+      </view>
+      <view class="market-act-go">领券 ›</view>
+    </view>
+  </view>
+
+  <!-- 商品瀑布流（双列） -->
+  <view class="market-goods-grid" wx:if="{{goods.length > 0}}">
+    <view class="market-goods-card flex-col" wx:for="{{goods}}" wx:key="id" hover-class="hover-dim" bindtap="onGoodsTap" data-index="{{index}}">
+      <view class="market-goods-img-wrap">
+        <image class="market-goods-img" src="{{item.image}}" mode="aspectFill"></image>
+        <text class="market-goods-platform platform-{{item.platform}}">{{item.platformText}}</text>
+      </view>
+      <text class="market-goods-title text-ellipsis-2">{{item.title}}</text>
+      <view class="market-goods-price-row flex-row align-center">
+        <text class="market-goods-symbol">¥</text>
+        <text class="market-goods-price">{{item.afterText}}</text>
+        <text class="market-goods-origin" wx:if="{{item.couponYuan > 0}}">¥{{item.priceText}}</text>
+      </view>
+      <view class="market-goods-meta flex-row align-center">
+        <text class="market-goods-coupon" wx:if="{{item.couponYuan > 0}}">券{{item.couponYuan}}元</text>
+        <text class="market-goods-sales text-ellipsis" wx:if="{{item.salesTip}}">{{item.salesTip}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载/空态 -->
+  <view class="market-state flex-col align-center" wx:if="{{loading}}">
+    <text class="market-state-text">正在逛集市…</text>
+  </view>
+  <view class="market-state flex-col align-center" wx:if="{{!loading && loadError && activities.length === 0 && goods.length === 0}}">
+    <text class="market-state-text">{{loadError}}</text>
+    <view class="market-state-ask" hover-class="hover-dim" bindtap="askAgent">交给分身去办 ›</view>
+  </view>
+
+  <!-- 底部：我的订单 -->
+  <view class="market-footer flex-row align-center justify-between" bindtap="goOrders" hover-class="hover-dim">
+    <view class="flex-row align-center">
+      <view class="market-footer-badge">单</view>
+      <text class="market-footer-label">我的订单</text>
+      <view class="market-order-badge" wx:if="{{orderBadge > 0}}">{{orderBadge}} 待结算</view>
+    </view>
+    <text class="market-footer-arrow">›</text>
+  </view>
+</view>

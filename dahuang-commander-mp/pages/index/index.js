@@ -199,6 +199,16 @@ Page({
     }
     // 待决策：拉取数量；登录后若有待办，插入摘要提醒
     this.refreshPendingDecisions();
+    // 集市「问分身」带回来的指令：自动发送给 Agent
+    const pendingCmd = app.globalData.pendingMasterCommand;
+    if (pendingCmd) {
+      app.globalData.pendingMasterCommand = null;
+      setTimeout(() => app.sendInstruction(pendingCmd), 500);
+    }
+  },
+
+  openMarket() {
+    wx.navigateTo({ url: "/pages/market/market" });
   },
 
   refreshPendingDecisions() {

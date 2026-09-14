@@ -354,6 +354,15 @@
         <text class="quick-loading-text">灵犀推演中…</text>
       </view>
 
+      <view class="quick-market-entry" wx:if="{{!quickPanelLoading}}" hover-class="hover-dim" bindtap="openMarket">
+        <view class="quick-market-badge">市</view>
+        <view class="quick-market-body flex-col">
+          <text class="quick-market-title">逛集市</text>
+          <text class="quick-market-sub">外卖红包 · 电商捡漏 · 行情速览</text>
+        </view>
+        <text class="quick-market-arrow">›</text>
+      </view>
+
       <view class="quick-section" wx:if="{{!quickPanelLoading}}">
         <view class="quick-section-head flex-row align-center justify-between">
           <view class="flex-row align-center">

@@ -1,0 +1,221 @@
+/* ===== 集市页（大荒之地 · 市）古风淡雅 ===== */
+.market-container {
+  min-height: 100vh;
+  background: #f6f1e7;
+  padding: 20rpx 20rpx 140rpx;
+  box-sizing: border-box;
+}
+
+/* 搜索栏 */
+.market-search-bar { gap: 14rpx; }
+.market-search-box {
+  flex: 1;
+  background: #fffdf6;
+  border: 1rpx solid rgba(168, 132, 47, 0.35);
+  border-radius: 999rpx;
+  padding: 10rpx 10rpx 10rpx 22rpx;
+  gap: 10rpx;
+}
+.market-search-icon {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 8rpx;
+  background: rgba(176, 84, 63, 0.85);
+  color: #fdf8ec;
+  font-size: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.market-search-input { flex: 1; font-size: 27rpx; color: #2b2a26; }
+.market-search-placeholder { color: #a89f8e; }
+.market-search-btn {
+  background: rgba(201, 163, 76, 0.16);
+  color: #8a6d1f;
+  font-size: 25rpx;
+  font-weight: 600;
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  flex-shrink: 0;
+}
+.market-ask-btn {
+  background: #5b7a8c;
+  color: #f6f1e7;
+  font-size: 25rpx;
+  font-weight: 600;
+  padding: 12rpx 24rpx;
+  border-radius: 999rpx;
+  flex-shrink: 0;
+}
+
+/* 授权引导条 */
+.market-auth-bar {
+  margin-top: 16rpx;
+  background: rgba(176, 84, 63, 0.08);
+  border: 1rpx solid rgba(176, 84, 63, 0.3);
+  border-radius: 12rpx;
+  padding: 14rpx 20rpx;
+}
+.market-auth-text { font-size: 24rpx; color: #9c4a3a; }
+.market-auth-btn { font-size: 24rpx; color: #b0543f; font-weight: 600; }
+
+/* 频道横滑 */
+.market-channels { margin: 20rpx 0 8rpx; white-space: nowrap; }
+.market-channels-track { gap: 14rpx; padding-right: 20rpx; }
+.market-channel-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 12rpx 26rpx;
+  border-radius: 999rpx;
+  background: #fffdf6;
+  border: 1rpx solid rgba(91, 122, 140, 0.25);
+  flex-shrink: 0;
+}
+.market-channel-pill.active {
+  background: rgba(91, 122, 140, 0.12);
+  border-color: #5b7a8c;
+}
+.channel-pill-label { font-size: 26rpx; color: #4a6a7c; font-weight: 600; }
+.market-channel-pill.active .channel-pill-label { color: #35586a; }
+
+/* 聚推客活动卡 */
+.market-act-list { gap: 16rpx; margin-top: 16rpx; }
+.market-act-card {
+  background: #fffdf6;
+  border: 1rpx solid rgba(168, 132, 47, 0.25);
+  border-radius: 16rpx;
+  padding: 16rpx;
+  gap: 18rpx;
+}
+.market-act-img {
+  width: 108rpx;
+  height: 108rpx;
+  border-radius: 12rpx;
+  background: #efe8d8;
+  flex-shrink: 0;
+}
+.market-act-body { flex: 1; min-width: 0; gap: 8rpx; }
+.market-act-name { font-size: 27rpx; color: #2b2a26; font-weight: 600; }
+.market-act-platform { font-size: 22rpx; color: #8a7f6d; }
+.market-act-go {
+  background: rgba(201, 163, 76, 0.16);
+  color: #8a6d1f;
+  font-size: 24rpx;
+  font-weight: 600;
+  padding: 12rpx 22rpx;
+  border-radius: 999rpx;
+  flex-shrink: 0;
+}
+
+/* 商品瀑布流 */
+.market-goods-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+.market-goods-card {
+  width: calc((100% - 16rpx) / 2);
+  background: #fffdf6;
+  border: 1rpx solid rgba(59, 48, 36, 0.08);
+  border-radius: 16rpx;
+  padding: 14rpx;
+  box-sizing: border-box;
+  gap: 8rpx;
+}
+.market-goods-img-wrap { position: relative; }
+.market-goods-img {
+  width: 100%;
+  height: 300rpx;
+  border-radius: 12rpx;
+  background: #efe8d8;
+}
+.market-goods-platform {
+  position: absolute;
+  left: 10rpx;
+  top: 10rpx;
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  color: #fdf8ec;
+}
+.platform-jd { background: rgba(91, 122, 140, 0.9); }
+.platform-pdd { background: rgba(176, 84, 63, 0.9); }
+.market-goods-title {
+  font-size: 25rpx;
+  color: #2b2a26;
+  line-height: 1.45;
+  min-height: 72rpx;
+}
+.market-goods-price-row { gap: 4rpx; }
+.market-goods-symbol { font-size: 24rpx; color: #b0543f; font-weight: 600; }
+.market-goods-price { font-size: 34rpx; color: #b0543f; font-weight: 700; }
+.market-goods-origin {
+  font-size: 21rpx;
+  color: #a89f8e;
+  text-decoration: line-through;
+}
+.market-goods-meta { gap: 10rpx; }
+.market-goods-coupon {
+  font-size: 20rpx;
+  color: #8a6d1f;
+  background: rgba(201, 163, 76, 0.14);
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+}
+.market-goods-sales { font-size: 20rpx; color: #8a7f6d; }
+
+/* 状态 */
+.market-state { padding: 100rpx 0; gap: 20rpx; }
+.market-state-text { font-size: 26rpx; color: #8a7f6d; }
+.market-state-ask {
+  font-size: 26rpx;
+  color: #4a6a7c;
+  font-weight: 600;
+  border: 1rpx solid rgba(91, 122, 140, 0.35);
+  border-radius: 999rpx;
+  padding: 12rpx 30rpx;
+}
+
+/* 底部订单入口 */
+.market-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fffdf6;
+  border-top: 1rpx solid rgba(59, 48, 36, 0.08);
+  padding: 20rpx 32rpx calc(20rpx + env(safe-area-inset-bottom));
+  gap: 10rpx;
+}
+.market-footer-badge {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 10rpx;
+  background: rgba(176, 84, 63, 0.85);
+  color: #fdf8ec;
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.market-footer-label { font-size: 28rpx; color: #2b2a26; font-weight: 600; margin-left: 14rpx; }
+.market-order-badge {
+  margin-left: 16rpx;
+  font-size: 20rpx;
+  color: #8a6d1f;
+  background: rgba(201, 163, 76, 0.16);
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+}
+.market-footer-arrow { font-size: 30rpx; color: #a89f8e; }
+
+.text-ellipsis { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.text-ellipsis-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.hover-dim { opacity: 0.75; }
