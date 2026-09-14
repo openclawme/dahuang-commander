@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '饿了么美团领券直达：wxapp跳转段渲染成按钮，一键拉起目标小程序';
+const desc = '领券按钮改古风淡金样式：朱砂券印+金色描边';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

@@ -311,19 +311,39 @@
 .msg-miniapp-btn {
   display: flex;
   align-items: center;
-  gap: 10rpx;
+  gap: 12rpx;
   margin: 10rpx 0;
-  padding: 16rpx 24rpx;
-  border-radius: 14rpx;
-  background: linear-gradient(135deg, #4a7f99, #5b8fa8);
-  color: #fff;
-  font-size: 28rpx;
-  font-weight: 600;
+  padding: 14rpx 22rpx;
+  border-radius: 12rpx;
+  background: rgba(201, 163, 76, 0.10);
+  border: 1rpx solid rgba(168, 132, 47, 0.35);
   max-width: 420rpx;
+  box-sizing: border-box;
 }
-.msg-miniapp-btn:active { opacity: 0.85; }
-.msg-miniapp-icon { font-size: 30rpx; }
-.msg-miniapp-label { letter-spacing: 1rpx; }
+.msg-miniapp-badge {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 8rpx;
+  background: rgba(176, 84, 63, 0.85);
+  color: #fdf8ec;
+  font-size: 24rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.msg-miniapp-label {
+  color: #8a6d1f;
+  font-size: 27rpx;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+}
+.msg-miniapp-btn:active {
+  background: rgba(201, 163, 76, 0.2);
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
 
 .msg-link {
   display: block;
