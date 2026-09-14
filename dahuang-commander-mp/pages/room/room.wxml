@@ -47,8 +47,8 @@
                   <image wx:elif="{{seg.type === 'image'}}" class="msg-segment-image" src="{{seg.url}}" mode="widthFix" bindtap="previewRoomImage" data-src="{{seg.url}}" data-urls="{{item.images}}"></image>
                   <view wx:elif="{{seg.type === 'chart'}}" class="bubble-chart-inline">
                     <canvas type="2d" class="bubble-chart-canvas bubble-chart-canvas-inline" id="{{seg.canvasId}}"
-                            catchtouchstart="onChartTouchStart" catchtouchmove="onChartTouchMove"
-                            catchtouchend="onChartTouchEnd" catchtouchcancel="onChartTouchEnd"
+                            bindtouchstart="onChartTouchStart" bindtouchmove="onChartTouchMove"
+                            bindtouchend="onChartTouchEnd" bindtouchcancel="onChartTouchEnd"
                             catchlongpress="onChartLongPress"
                         data-id="{{seg.canvasId}}"></canvas>
                   </view>
@@ -76,8 +76,8 @@
             <view class="bubble-chart-list" wx:if="{{item.unplacedCharts && item.unplacedCharts.length > 0}}">
               <view class="bubble-chart-inline" wx:for="{{item.unplacedCharts}}" wx:for-item="uc" wx:key="canvasId">
                 <canvas type="2d" class="bubble-chart-canvas bubble-chart-canvas-inline" id="{{uc.canvasId}}"
-                        catchtouchstart="onChartTouchStart" catchtouchmove="onChartTouchMove"
-                        catchtouchend="onChartTouchEnd" catchtouchcancel="onChartTouchEnd"
+                        bindtouchstart="onChartTouchStart" bindtouchmove="onChartTouchMove"
+                        bindtouchend="onChartTouchEnd" bindtouchcancel="onChartTouchEnd"
                         catchlongpress="onChartLongPress"
                 data-id="{{uc.canvasId}}"></canvas>
               </view>

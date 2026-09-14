@@ -2,7 +2,7 @@ const app = require('../../utils/getApp.js');
 const i18n = require('../../utils/i18n.js');
 const { getHeaders } = require('../../utils/config.js');
 const { toAbsUrl } = require('../../utils/url.js');
-const { drawChart, chartHitTest, chartHover } = require('../../utils/chart-draw.js');
+const { drawChart, chartHitTest, chartHover, chartWidth } = require('../../utils/chart-draw.js');
 
 Page({
   data: {
@@ -236,6 +236,15 @@ Page({
     const id = e.currentTarget.dataset.id;
     const touch = (e.touches && e.touches[0]) || null;
     if (!id || !touch) return;
+    // 宽图（横向可滚动）：滑动让位给原生滚动，只清除悬浮；
+    // 窄图（正好铺满）：滑动跟随更新气泡
+    const w = chartWidth(id);
+    let winW = 375;
+    try { winW = (wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync()).windowWidth || 375; } catch (err) {}
+    if (w && w > winW - 60) {
+      chartHover(id, null);
+      return;
+    }
     const cached = this["_chartRect_" + id];
     if (cached) this._applyChartHover(id, touch, cached.rect);
   },

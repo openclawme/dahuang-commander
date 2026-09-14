@@ -275,4 +275,10 @@ function chartHover(canvasId, index) {
   paint(st);
 }
 
-module.exports = { drawChart, chartHitTest, chartHover };
+/** 画布 CSS 逻辑宽度（宽图判定用：超过屏幕宽度即横向可滚动） */
+function chartWidth(canvasId) {
+  const st = chartStates.get(canvasId);
+  return st ? st.W : null;
+}
+
+module.exports = { drawChart, chartHitTest, chartHover, chartWidth };
