@@ -71,6 +71,6 @@
       <text class="kb-footer-plus">＋</text>
       <text class="kb-footer-label">上传文档</text>
     </view>
-    <text class="kb-footer-hint">支持 txt / md / pdf / csv / json / html · 单篇 ≤5MB</text>
+    <text class="kb-footer-hint">支持 txt / md / pdf / docx / xlsx / csv / json / html · 单篇 ≤5MB</text>
   </view>
 </view>

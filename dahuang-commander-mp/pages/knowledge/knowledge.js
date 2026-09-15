@@ -122,7 +122,7 @@ Page({
     wx.chooseMessageFile({
       count: 1,
       type: "file",
-      extension: ["txt", "md", "pdf", "csv", "json", "html"],
+      extension: ["txt", "md", "pdf", "csv", "json", "html", "docx", "xlsx"],
       success: (res) => {
         const f = (res.tempFiles && res.tempFiles[0]) || null;
         if (!f) return;
