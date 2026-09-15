@@ -368,9 +368,9 @@
       <!-- 四大入口砖：2×2 大按钮 -->
       <view class="quick-entry-grid" wx:if="{{!quickPanelLoading}}">
         <view class="quick-entry-tile" hover-class="hover-dim" bindtap="openMarket">
-          <view class="quick-entry-badge">市</view>
+          <view class="quick-entry-badge">惠</view>
           <view class="flex-col" style="min-width: 0;">
-            <text class="quick-entry-label">逛集市</text>
+            <text class="quick-entry-label">天天优惠</text>
             <text class="quick-entry-sub">优惠券 · 比价</text>
           </view>
         </view>

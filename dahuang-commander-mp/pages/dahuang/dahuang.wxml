@@ -11,7 +11,7 @@
       <text class="tab-icon">神</text> {{t.dahuang.tab_agents}}
     </view>
     <view class="dahuang-tab-nav-item" bindtap="switchTab" hover-class="hover-dim" data-tab="market">
-      <text class="tab-icon">市</text> 集市
+      <text class="tab-icon">市</text> 天天优惠
     </view>
   </view>
 
