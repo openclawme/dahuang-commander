@@ -21,7 +21,8 @@
     "pages/orders/orders",
     "pages/market/market",
     "pages/knowledge/knowledge",
-    "pages/knowledge-detail/knowledge-detail"
+    "pages/knowledge-detail/knowledge-detail",
+    "pages/mcp/mcp"
   ],
   "window": {
     "backgroundTextStyle": "light",

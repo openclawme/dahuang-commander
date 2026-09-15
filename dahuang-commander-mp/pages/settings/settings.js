@@ -701,6 +701,10 @@ Page({
     wx.navigateTo({ url: "/pages/knowledge/knowledge" });
   },
 
+  openMcp() {
+    wx.navigateTo({ url: "/pages/mcp/mcp" });
+  },
+
   refreshKbCount() {
     const { serverUrl, agentState } = app.globalData;
     if (!agentState || !agentState.token) return;

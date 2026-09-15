@@ -1,0 +1,51 @@
+<view class="mc-container">
+  <!-- 头部 -->
+  <view class="mc-head flex-row align-center">
+    <view class="mc-head-badge">具</view>
+    <view class="flex-col" style="margin-left: 16rpx;">
+      <text class="mc-head-title">MCP 工具</text>
+      <text class="mc-head-sub">分身的外挂商店 · 通过标准协议接入的第三方能力</text>
+    </view>
+  </view>
+
+  <!-- 状态提示 -->
+  <view class="mc-banner flex-col" wx:if="{{!loading && !errorText && !enabled}}">
+    <text class="mc-banner-text">MCP 未开启：服务器端尚未配置（MCP_ENABLED）。</text>
+  </view>
+  <view class="mc-banner flex-col" wx:if="{{!loading && !errorText && enabled && servers.length === 0}}">
+    <text class="mc-banner-text">已开启但暂无已配置的服务端（缺少服务端 Key）。</text>
+  </view>
+
+  <!-- 服务端列表 -->
+  <view class="mc-list flex-col" wx:if="{{!loading && !errorText}}">
+    <view class="mc-card flex-col" wx:for="{{servers}}" wx:key="id">
+      <view class="flex-row align-center">
+        <view class="mc-card-badge">{{item.label.slice(0, 1)}}</view>
+        <view class="flex-col" style="flex: 1; min-width: 0;">
+          <text class="mc-card-title">{{item.label}}</text>
+          <text class="mc-card-host" bindtap="onCopyHost" data-host="{{item.host}}">{{item.host}}（点按复制）</text>
+        </view>
+        <text class="mc-card-state">已启用</text>
+      </view>
+      <text class="mc-card-meta">{{item.toolCount}} 个工具 · {{item.loadedText}}</text>
+      <view class="mc-tools flex-row" wx:if="{{item.toolNames && item.toolNames.length}}">
+        <text class="mc-tool-chip" wx:for="{{item.toolNames}}" wx:for-item="tn" wx:key="*this">{{tn}}</text>
+      </view>
+      <text class="mc-card-hint">分身任务开始时自动连接并注入这些工具，失败不影响内置能力。</text>
+    </view>
+  </view>
+
+  <!-- 状态 -->
+  <view class="mc-state" wx:if="{{loading}}">
+    <text class="mc-state-text">加载中…</text>
+  </view>
+  <view class="mc-state" wx:if="{{!loading && errorText}}">
+    <text class="mc-state-text">{{errorText}}</text>
+  </view>
+
+  <!-- 说明 -->
+  <view class="mc-footer-note flex-col" wx:if="{{!loading && !errorText}}">
+    <text class="mc-note-title">什么是 MCP？</text>
+    <text class="mc-note-text">MCP（Model Context Protocol）是智能体接入第三方工具的标准协议。分身每次任务开始时自动连接已启用的服务端，把其工具并入自己的能力清单——新增能力无需修改分身本体。</text>
+  </view>
+</view>

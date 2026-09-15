@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '知识库 v3：问答+文档双段页、多选批量删除、停用开关、搜索高亮、文档改名';
+const desc = 'MCP 工具页（元神修炼入口）+ 高德地图图片桥接（聊天框直接渲染）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

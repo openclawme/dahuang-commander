@@ -1,0 +1,89 @@
+/* ===== MCP 工具管理页（古风淡雅） ===== */
+.mc-container {
+  min-height: 100vh;
+  background: #f6f1e7;
+  padding: 24rpx 24rpx 60rpx;
+  box-sizing: border-box;
+}
+
+/* 头部 */
+.mc-head { padding: 12rpx 8rpx 24rpx; }
+.mc-head-badge {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 18rpx;
+  background: rgba(91, 122, 140, 0.9);
+  color: #fdf8ec;
+  font-size: 36rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.mc-head-title { font-size: 36rpx; color: #2b2a26; font-weight: 700; }
+.mc-head-sub { font-size: 23rpx; color: #8a7f6d; margin-top: 4rpx; }
+
+/* 提示条 */
+.mc-banner {
+  background: rgba(201, 163, 76, 0.14);
+  border: 1rpx solid rgba(168, 132, 47, 0.35);
+  border-radius: 14rpx;
+  padding: 18rpx 22rpx;
+}
+.mc-banner-text { font-size: 24rpx; color: #8a6d1f; line-height: 1.5; }
+
+/* 服务端卡片 */
+.mc-list { margin-top: 20rpx; gap: 16rpx; }
+.mc-card {
+  background: #fffdf6;
+  border: 1rpx solid rgba(59, 48, 36, 0.08);
+  border-radius: 16rpx;
+  padding: 22rpx;
+  gap: 10rpx;
+}
+.mc-card-badge {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 14rpx;
+  background: rgba(91, 122, 140, 0.12);
+  color: #4a6a7c;
+  font-size: 28rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 16rpx;
+}
+.mc-card-title { font-size: 29rpx; color: #2b2a26; font-weight: 700; }
+.mc-card-host { font-size: 21rpx; color: #a89f8e; margin-top: 2rpx; }
+.mc-card-state {
+  flex-shrink: 0;
+  font-size: 21rpx;
+  color: #4a6a7c;
+  border: 1rpx solid rgba(91, 122, 140, 0.4);
+  border-radius: 999rpx;
+  padding: 4rpx 18rpx;
+}
+.mc-card-meta { font-size: 22rpx; color: #8a7f6d; }
+.mc-tools { flex-wrap: wrap; gap: 10rpx; }
+.mc-tool-chip {
+  font-size: 20rpx;
+  color: #6b4f14;
+  background: rgba(201, 163, 76, 0.16);
+  border-radius: 8rpx;
+  padding: 4rpx 12rpx;
+}
+.mc-card-hint { font-size: 21rpx; color: #a89f8e; line-height: 1.5; }
+
+/* 状态 */
+.mc-state { display: flex; align-items: center; justify-content: center; padding: 80rpx 0; }
+.mc-state-text { font-size: 26rpx; color: #8a7f6d; }
+
+/* 说明 */
+.mc-footer-note { margin-top: 28rpx; gap: 8rpx; padding: 0 8rpx; }
+.mc-note-title { font-size: 24rpx; color: #4a6a7c; font-weight: 700; }
+.mc-note-text { font-size: 22rpx; color: #8a7f6d; line-height: 1.7; }
+
+.hover-dim { opacity: 0.75; }

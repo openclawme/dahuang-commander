@@ -130,6 +130,16 @@
       <text class="memory-entry-arrow">›</text>
     </view>
 
+    <!-- MCP 工具（分身的外挂商店 · 已装工具清单） -->
+    <view class="memory-entry-card flex-row align-center" wx:if="{{agentState.token}}" bindtap="openMcp" hover-class="memory-entry-hover">
+      <view class="memory-entry-icon-box">具</view>
+      <view class="flex-col" style="flex: 1; min-width: 0;">
+        <text class="memory-entry-title">MCP 工具</text>
+        <text class="memory-entry-sub">分身的外挂商店 · 高德地图等已装工具</text>
+      </view>
+      <text class="memory-entry-arrow">›</text>
+    </view>
+
     <!-- 微信服务通知（订阅消息：日程到点/行情跌破提醒推到微信） -->
     <view class="memory-entry-card flex-row align-center" wx:if="{{agentState.token}}" bindtap="openSubscribeReminder" hover-class="memory-entry-hover">
       <view class="memory-entry-icon-box">醒</view>
