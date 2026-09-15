@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '集市v2比价视图：搜索后京东拼多多分列对比，最低价高亮';
+const desc = '订阅消息授权修复：模板ID缓存失效后重新向服务端获取';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

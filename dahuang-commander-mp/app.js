@@ -849,7 +849,8 @@ App({
         }
       });
     };
-    if (this.globalData.wechatTemplateId !== undefined) {
+    // 只有拿到真实模板 ID 才直接用；null/空值（模板当时未配置的旧缓存）要重新向服务端要
+    if (this.globalData.wechatTemplateId) {
       doRequest(this.globalData.wechatTemplateId);
       return;
     }
