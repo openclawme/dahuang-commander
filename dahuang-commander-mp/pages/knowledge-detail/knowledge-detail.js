@@ -45,6 +45,39 @@ Page({
     });
   },
 
+  onRename() {
+    const d = this.data.doc;
+    if (!d) return;
+    wx.showModal({
+      title: "修改文档名",
+      editable: true,
+      placeholderText: "输入新名称",
+      content: d.title,
+      success: (m) => {
+        if (!m.confirm) return;
+        const title = (m.content || "").trim();
+        if (!title || title === d.title) return;
+        const { serverUrl, agentState } = app.globalData;
+        wx.request({
+          url: `${serverUrl}/api/agent/knowledge/manage`,
+          method: "POST",
+          data: { action: "rename", docKey: this.data.docKey, title },
+          header: getHeaders(agentState.token),
+          success: (res) => {
+            if (res.statusCode === 200 && res.data && res.data.success) {
+              this.setData({ doc: { ...d, title } });
+              wx.setNavigationBarTitle({ title: title.slice(0, 10) });
+              wx.showToast({ title: "已改名", icon: "none" });
+            } else {
+              wx.showToast({ title: (res.data && res.data.error) || "改名失败", icon: "none" });
+            }
+          },
+          fail: () => wx.showToast({ title: "网络异常", icon: "none" }),
+        });
+      },
+    });
+  },
+
   onDelete() {
     const d = this.data.doc;
     if (!d) return;

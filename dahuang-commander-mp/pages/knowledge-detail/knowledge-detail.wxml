@@ -4,7 +4,10 @@
     <view class="flex-row align-center">
       <view class="kd-head-badge">文</view>
       <view class="flex-col" style="margin-left: 16rpx; flex: 1; min-width: 0;">
-        <text class="kd-head-title">{{doc.title}}</text>
+        <view class="flex-row align-center">
+          <text class="kd-head-title">{{doc.title}}</text>
+          <view class="kd-rename" hover-class="hover-dim" bindtap="onRename">改名</view>
+        </view>
         <text class="kd-head-meta">{{doc.sizeText}}{{doc.chunkText}} · {{doc.timeText}}</text>
       </view>
     </view>

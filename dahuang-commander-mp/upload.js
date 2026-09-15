@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '知识库上传：弹窗自定文档标题（不再用微信临时文件名）';
+const desc = '知识库 v3：问答+文档双段页、多选批量删除、停用开关、搜索高亮、文档改名';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

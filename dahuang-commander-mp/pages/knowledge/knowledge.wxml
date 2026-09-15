@@ -1,72 +1,160 @@
 <view class="kb-container">
   <!-- 头部统计 -->
-  <view class="kb-head flex-col">
-    <view class="flex-row align-center">
-      <view class="kb-head-badge">库</view>
-      <view class="flex-col" style="margin-left: 16rpx;">
-        <text class="kb-head-title">知识库</text>
-        <text class="kb-head-sub">{{summaryText || '正在加载…'}}</text>
-      </view>
+  <view class="kb-head flex-row align-center">
+    <view class="kb-head-badge">库</view>
+    <view class="flex-col" style="margin-left: 16rpx;">
+      <text class="kb-head-title">知识库</text>
+      <text class="kb-head-sub">{{summaryText || '正在加载…'}}</text>
     </view>
-    <text class="kb-head-hint">分身在回答相关问题时会自动引用这里的资料</text>
   </view>
 
-  <!-- 搜索框（语义搜索） -->
-  <view class="kb-search flex-row align-center">
-    <text class="kb-search-icon">寻</text>
-    <input
-      class="kb-search-input"
-      placeholder="搜索文档内容…"
-      placeholder-class="kb-search-placeholder"
-      value="{{keyword}}"
-      bindinput="onKeywordInput"
-      confirm-type="search"
-      bindconfirm="onSearch"
-    />
-    <view class="kb-search-btn" hover-class="hover-dim" bindtap="onSearch">搜索</view>
+  <!-- 双段切换：问答 / 文档 -->
+  <view class="kb-seg flex-row">
+    <view class="kb-seg-item {{tab === 'qa' ? 'kb-seg-on' : ''}}" hover-class="hover-dim" bindtap="switchTab" data-tab="qa">💬 问答</view>
+    <view class="kb-seg-item {{tab === 'docs' ? 'kb-seg-on' : ''}}" hover-class="hover-dim" bindtap="switchTab" data-tab="docs">📚 文档{{docs.length ? ' · ' + docs.length : ''}}</view>
   </view>
 
-  <!-- 搜索结果 -->
-  <view class="kb-hit-list flex-col" wx:if="{{searching}}">
-    <view class="kb-hit-card flex-col" wx:for="{{searchHits}}" wx:key="id" hover-class="hover-dim">
-      <text class="kb-hit-title">{{item.title}}</text>
-      <text class="kb-hit-snippet">{{item.snippet}}</text>
+  <!-- ============ 问答面板 ============ -->
+  <view class="kb-qa" wx:if="{{tab === 'qa'}}">
+    <view class="kb-qa-clear-row" wx:if="{{qaMessages.length}}">
+      <view class="kb-qa-clear" hover-class="hover-dim" bindtap="clearQa">清空会话</view>
     </view>
-    <text class="kb-empty" wx:if="{{!loading && searchHits.length === 0}}">没有搜到相关内容</text>
-  </view>
-
-  <!-- 文档列表 -->
-  <view class="kb-list flex-col" wx:if="{{!searching}}">
-    <view
-      class="kb-doc-card flex-row align-center"
-      wx:for="{{docs}}"
-      wx:key="docKey"
-      hover-class="hover-dim"
-      bindtap="onDocTap"
-      bindlongpress="onDocLongPress"
-      data-key="{{item.docKey}}"
-      data-title="{{item.title}}"
+    <scroll-view
+      class="kb-qa-scroll"
+      scroll-y
+      scroll-into-view="{{qaScrollTo}}"
+      scroll-with-animation
     >
-      <view class="kb-doc-badge">文</view>
-      <view class="flex-col" style="flex: 1; min-width: 0;">
-        <text class="kb-doc-title text-ellipsis">{{item.title}}</text>
-        <text class="kb-doc-meta">{{item.sizeText}}{{item.chunkCount > 1 ? ' · ' + item.chunkCount + ' 块' : ''}} · {{item.timeText}}</text>
+      <view class="kb-qa-empty flex-col align-center" wx:if="{{!qaMessages.length}}">
+        <view class="kb-qa-empty-badge">问</view>
+        <text class="kb-qa-empty-title">向知识库提问</text>
+        <text class="kb-qa-empty-text">分身只基于「已启用」的文档回答，并标注引用出处</text>
+        <text class="kb-qa-empty-text">支持多轮追问，本次会话在浏览期间保留</text>
       </view>
-      <text class="kb-doc-arrow">›</text>
-    </view>
-
-    <!-- 空态：两条引导路径 -->
-    <view class="kb-empty-box flex-col align-center" wx:if="{{!loading && docs.length === 0}}">
-      <view class="kb-empty-badge">库</view>
-      <text class="kb-empty-title">知识库还是空的</text>
-      <text class="kb-empty-text">两种方式开始：</text>
-      <text class="kb-empty-text">① 对分身说「记住：…」</text>
-      <text class="kb-empty-text">② 点下方按钮上传文档</text>
+      <view class="kb-qa-msg {{item.role === 'user' ? 'kb-qa-user' : ''}}" wx:for="{{qaMessages}}" wx:key="*this" id="qa-{{index}}">
+        <view class="kb-qa-bubble {{item.role === 'user' ? 'kb-qa-bubble-user' : 'kb-qa-bubble-ai'}}">
+          <text class="kb-qa-text" user-select>{{item.content}}</text>
+          <view class="kb-qa-cites" wx:if="{{item.citations && item.citations.length}}">
+            <view
+              class="kb-qa-cite"
+              wx:for="{{item.citations}}"
+              wx:for-item="cite"
+              wx:key="docKey"
+              hover-class="hover-dim"
+              bindtap="onCitationTap"
+              data-key="{{cite.docKey}}"
+            >《{{cite.title}}》</view>
+          </view>
+        </view>
+      </view>
+      <view class="kb-qa-typing" wx:if="{{qaLoading}}"><text>正在查阅知识库…</text></view>
+    </scroll-view>
+    <view class="kb-qa-inputbar">
+      <input
+        class="kb-qa-input"
+        placeholder="基于知识库提问…"
+        placeholder-class="kb-search-placeholder"
+        value="{{qaInput}}"
+        bindinput="onQaInput"
+        confirm-type="send"
+        bindconfirm="sendQa"
+        cursor-spacing="20"
+      />
+      <view class="kb-qa-send {{qaLoading ? 'kb-qa-send-dim' : ''}}" hover-class="hover-dim" bindtap="sendQa">发送</view>
     </view>
   </view>
 
-  <!-- 底部上传 -->
-  <view class="kb-footer" bindtap="onUploadTap" hover-class="hover-dim">
+  <!-- ============ 文档面板 ============ -->
+  <view class="kb-pane" wx:if="{{tab === 'docs'}}">
+    <view class="kb-search flex-row align-center">
+      <text class="kb-search-icon">寻</text>
+      <input
+        class="kb-search-input"
+        placeholder="搜索文档内容…"
+        placeholder-class="kb-search-placeholder"
+        value="{{keyword}}"
+        bindinput="onKeywordInput"
+        confirm-type="search"
+        bindconfirm="onSearch"
+      />
+      <view class="kb-search-btn" hover-class="hover-dim" bindtap="onSearch">搜索</view>
+    </view>
+
+    <!-- 管理工具行 -->
+    <view class="kb-tools flex-row align-center" wx:if="{{!searching}}">
+      <view class="kb-manage-btn" hover-class="hover-dim" bindtap="toggleManage">{{manageMode ? '完成' : '管理'}}</view>
+      <text class="kb-tools-hint">停用的文档不参与问答，但搜索仍可找到</text>
+    </view>
+
+    <!-- 搜索结果（去重 + 高亮） -->
+    <view class="kb-hit-list flex-col" wx:if="{{searching}}">
+      <view
+        class="kb-hit-card flex-col"
+        wx:for="{{searchHits}}"
+        wx:key="id"
+        hover-class="hover-dim"
+        bindtap="onHitTap"
+        data-key="{{item.docKey}}"
+      >
+        <view class="flex-row align-center">
+          <rich-text class="kb-hit-title" nodes="{{item.titleNodes}}"></rich-text>
+          <text class="kb-hit-score">{{item.scoreText}}</text>
+        </view>
+        <rich-text class="kb-hit-snippet" nodes="{{item.snippetNodes}}"></rich-text>
+      </view>
+      <view class="kb-hit-clear" hover-class="hover-dim" bindtap="clearSearch">清空搜索，返回列表</view>
+    </view>
+
+    <!-- 文档列表 -->
+    <view class="kb-list flex-col" wx:if="{{!searching}}">
+      <view
+        class="kb-doc-card flex-row align-center"
+        wx:for="{{docs}}"
+        wx:key="docKey"
+        hover-class="hover-dim"
+        bindtap="onDocTap"
+        data-key="{{item.docKey}}"
+      >
+        <view class="kb-sel {{selectedKeys[item.docKey] ? 'kb-sel-on' : ''}}" wx:if="{{manageMode}}">
+          <text class="kb-sel-tick" wx:if="{{selectedKeys[item.docKey]}}">✓</text>
+        </view>
+        <view class="kb-doc-badge" wx:else>文</view>
+        <view class="flex-col" style="flex: 1; min-width: 0;">
+          <view class="flex-row align-center">
+            <text class="kb-doc-title text-ellipsis">{{item.title}}</text>
+            <text class="kb-doc-tag" wx:if="{{!item.enabled}}">停用</text>
+          </view>
+          <text class="kb-doc-meta">{{item.sizeText}}{{item.chunkCount > 1 ? ' · ' + item.chunkCount + ' 块' : ''}} · {{item.timeText}}</text>
+        </view>
+        <switch
+          wx:if="{{!manageMode}}"
+          class="kb-doc-switch"
+          checked="{{item.enabled}}"
+          color="#b0543f"
+          catchtap="noop"
+          bindchange="onToggleEnabled"
+          data-key="{{item.docKey}}"
+        />
+        <text class="kb-doc-arrow" wx:else>›</text>
+      </view>
+
+      <!-- 空态 -->
+      <view class="kb-empty-box flex-col align-center" wx:if="{{!loading && docs.length === 0}}">
+        <view class="kb-empty-badge">库</view>
+        <text class="kb-empty-title">知识库还是空的</text>
+        <text class="kb-empty-text">① 对分身说「记住：…」</text>
+        <text class="kb-empty-text">② 点下方按钮上传文档</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部：管理栏 / 上传 -->
+  <view class="kb-bar flex-row align-center" wx:if="{{tab === 'docs' && manageMode && !searching}}">
+    <view class="kb-bar-btn" hover-class="hover-dim" bindtap="onSelectAll">全选</view>
+    <text class="kb-bar-count">已选 {{selectedCount}} 篇</text>
+    <view class="kb-bar-btn kb-bar-danger {{selectedCount === 0 ? 'kb-bar-disabled' : ''}}" hover-class="hover-dim" bindtap="onBatchDelete">删除</view>
+  </view>
+  <view class="kb-footer" wx:if="{{tab === 'docs' && !manageMode}}" bindtap="onUploadTap" hover-class="hover-dim">
     <view class="kb-footer-btn flex-row align-center">
       <text class="kb-footer-plus">＋</text>
       <text class="kb-footer-label">上传文档</text>
