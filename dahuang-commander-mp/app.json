@@ -20,7 +20,8 @@
     "pages/notifications/notifications",
     "pages/orders/orders",
     "pages/market/market",
-    "pages/knowledge/knowledge"
+    "pages/knowledge/knowledge",
+    "pages/knowledge-detail/knowledge-detail"
   ],
   "window": {
     "backgroundTextStyle": "light",

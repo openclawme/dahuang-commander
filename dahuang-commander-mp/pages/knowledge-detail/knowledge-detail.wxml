@@ -1,0 +1,33 @@
+<view class="kd-container">
+  <!-- 文档头 -->
+  <view class="kd-head flex-col" wx:if="{{doc}}">
+    <view class="flex-row align-center">
+      <view class="kd-head-badge">文</view>
+      <view class="flex-col" style="margin-left: 16rpx; flex: 1; min-width: 0;">
+        <text class="kd-head-title">{{doc.title}}</text>
+        <text class="kd-head-meta">{{doc.sizeText}}{{doc.chunkText}} · {{doc.timeText}}</text>
+      </view>
+    </view>
+    <text class="kd-head-hint" wx:if="{{doc.source}}">来源：{{doc.source}}</text>
+  </view>
+
+  <!-- 正文 -->
+  <scroll-view class="kd-body" scroll-y wx:if="{{doc}}">
+    <text class="kd-content" user-select>{{doc.content}}</text>
+  </scroll-view>
+
+  <!-- 状态 -->
+  <view class="kd-state" wx:if="{{loading}}">
+    <text class="kd-state-text">加载中…</text>
+  </view>
+  <view class="kd-state" wx:if="{{!loading && errorText}}">
+    <text class="kd-state-text">{{errorText}}</text>
+  </view>
+
+  <!-- 底部删除 -->
+  <view class="kd-footer" wx:if="{{doc}}" bindtap="onDelete" hover-class="hover-dim">
+    <view class="kd-footer-btn flex-row align-center">
+      <text class="kd-footer-label">删除这篇文档</text>
+    </view>
+  </view>
+</view>

@@ -83,6 +83,12 @@ Page({
       .catch(() => this.setData({ searching: true, loading: false, searchHits: [] }));
   },
 
+  onDocTap(e) {
+    const key = e.currentTarget.dataset.key;
+    if (!key) return;
+    wx.navigateTo({ url: `/pages/knowledge-detail/knowledge-detail?docKey=${encodeURIComponent(key)}` });
+  },
+
   onDocLongPress(e) {
     const key = e.currentTarget.dataset.key;
     const title = e.currentTarget.dataset.title;
@@ -116,7 +122,7 @@ Page({
     wx.chooseMessageFile({
       count: 1,
       type: "file",
-      extension: ["txt", "md", "pdf"],
+      extension: ["txt", "md", "pdf", "csv", "json", "html"],
       success: (res) => {
         const f = (res.tempFiles && res.tempFiles[0]) || null;
         if (!f) return;
