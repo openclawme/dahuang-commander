@@ -19,7 +19,8 @@
     "pages/schedule/schedule",
     "pages/notifications/notifications",
     "pages/orders/orders",
-    "pages/market/market"
+    "pages/market/market",
+    "pages/knowledge/knowledge"
   ],
   "window": {
     "backgroundTextStyle": "light",

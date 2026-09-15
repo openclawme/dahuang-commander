@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '集市更名天天优惠（FAB入口/页面标题/大荒导航）';
+const desc = '知识库管理页：统计+语义搜索+长按删除+上传文档（txt/md）';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

@@ -120,6 +120,16 @@
       <text class="memory-entry-arrow">›</text>
     </view>
 
+    <!-- 知识库（语义检索 · 管理入口） -->
+    <view class="memory-entry-card flex-row align-center" wx:if="{{agentState.token}}" bindtap="openKnowledge" hover-class="memory-entry-hover">
+      <view class="memory-entry-icon-box">库</view>
+      <view class="flex-col" style="flex: 1; min-width: 0;">
+        <text class="memory-entry-title">知识库</text>
+        <text class="memory-entry-sub">{{kbCount >= 0 ? '共 ' + kbCount + ' 篇文档 · 上传/搜索/删除' : '文档资料 · 语义检索 · 管理'}}</text>
+      </view>
+      <text class="memory-entry-arrow">›</text>
+    </view>
+
     <!-- 微信服务通知（订阅消息：日程到点/行情跌破提醒推到微信） -->
     <view class="memory-entry-card flex-row align-center" wx:if="{{agentState.token}}" bindtap="openSubscribeReminder" hover-class="memory-entry-hover">
       <view class="memory-entry-icon-box">醒</view>

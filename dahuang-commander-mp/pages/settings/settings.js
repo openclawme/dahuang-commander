@@ -33,6 +33,7 @@ Page({
     confirmPassword: "",
     pddAuthBound: false, // 拼多多授权备案状态
     wxSubQuota: -1, // 微信订阅消息剩余额度（-1=未查询）
+    kbCount: -1, // 知识库文档数（-1=未查询）
 
     // 自动回复预算
     groupReplyBudget: 5,
@@ -96,6 +97,7 @@ Page({
     this.refreshJdAuthStatus(); // 京东授权状态（回调完成后回来自动更新）
     this.refreshPddAuthStatus(); // 拼多多授权备案状态
     this.refreshWxSubQuota(); // 微信提醒额度
+    this.refreshKbCount(); // 知识库数量
     const filteredLogs = (app.globalData.logs || []).filter(l => {
       if (app.globalData.showDevLogs) return true;
       return l.type === "SYSTEM" || l.type === "ACTION";
@@ -692,6 +694,25 @@ Page({
           });
         }
       }
+    });
+  },
+
+  openKnowledge() {
+    wx.navigateTo({ url: "/pages/knowledge/knowledge" });
+  },
+
+  refreshKbCount() {
+    const { serverUrl, agentState } = app.globalData;
+    if (!agentState || !agentState.token) return;
+    wx.request({
+      url: `${serverUrl}/api/agent/knowledge`,
+      method: "GET",
+      header: getHeaders(agentState.token),
+      success: (res) => {
+        if (res.statusCode === 200 && res.data && res.data.summary) {
+          this.setData({ kbCount: res.data.summary.count || 0 });
+        }
+      },
     });
   },
 

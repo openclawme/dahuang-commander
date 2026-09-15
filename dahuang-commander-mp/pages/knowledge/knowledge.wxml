@@ -1,0 +1,75 @@
+<view class="kb-container">
+  <!-- 头部统计 -->
+  <view class="kb-head flex-col">
+    <view class="flex-row align-center">
+      <view class="kb-head-badge">库</view>
+      <view class="flex-col" style="margin-left: 16rpx;">
+        <text class="kb-head-title">知识库</text>
+        <text class="kb-head-sub">{{summaryText || '正在加载…'}}</text>
+      </view>
+    </view>
+    <text class="kb-head-hint">分身在回答相关问题时会自动引用这里的资料</text>
+  </view>
+
+  <!-- 搜索框（语义搜索） -->
+  <view class="kb-search flex-row align-center">
+    <text class="kb-search-icon">寻</text>
+    <input
+      class="kb-search-input"
+      placeholder="搜索文档内容…"
+      placeholder-class="kb-search-placeholder"
+      value="{{keyword}}"
+      bindinput="onKeywordInput"
+      confirm-type="search"
+      bindconfirm="onSearch"
+    />
+    <view class="kb-search-btn" hover-class="hover-dim" bindtap="onSearch">搜索</view>
+  </view>
+
+  <!-- 搜索结果 -->
+  <view class="kb-hit-list flex-col" wx:if="{{searching}}">
+    <view class="kb-hit-card flex-col" wx:for="{{searchHits}}" wx:key="id" hover-class="hover-dim">
+      <text class="kb-hit-title">{{item.title}}</text>
+      <text class="kb-hit-snippet">{{item.snippet}}</text>
+    </view>
+    <text class="kb-empty" wx:if="{{!loading && searchHits.length === 0}}">没有搜到相关内容</text>
+  </view>
+
+  <!-- 文档列表 -->
+  <view class="kb-list flex-col" wx:if="{{!searching}}">
+    <view
+      class="kb-doc-card flex-row align-center"
+      wx:for="{{docs}}"
+      wx:key="docKey"
+      hover-class="hover-dim"
+      bindlongpress="onDocLongPress"
+      data-key="{{item.docKey}}"
+      data-title="{{item.title}}"
+    >
+      <view class="kb-doc-badge">文</view>
+      <view class="flex-col" style="flex: 1; min-width: 0;">
+        <text class="kb-doc-title text-ellipsis">{{item.title}}</text>
+        <text class="kb-doc-meta">{{item.sizeText}}{{item.chunkCount > 1 ? ' · ' + item.chunkCount + ' 块' : ''}} · {{item.timeText}}</text>
+      </view>
+      <text class="kb-doc-arrow">›</text>
+    </view>
+
+    <!-- 空态：两条引导路径 -->
+    <view class="kb-empty-box flex-col align-center" wx:if="{{!loading && docs.length === 0}}">
+      <view class="kb-empty-badge">库</view>
+      <text class="kb-empty-title">知识库还是空的</text>
+      <text class="kb-empty-text">两种方式开始：</text>
+      <text class="kb-empty-text">① 对分身说「记住：…」</text>
+      <text class="kb-empty-text">② 点下方按钮上传文档</text>
+    </view>
+  </view>
+
+  <!-- 底部上传 -->
+  <view class="kb-footer" bindtap="onUploadTap" hover-class="hover-dim">
+    <view class="kb-footer-btn flex-row align-center">
+      <text class="kb-footer-plus">＋</text>
+      <text class="kb-footer-label">上传文档</text>
+    </view>
+    <text class="kb-footer-hint">支持 txt / md · 单篇 ≤5MB</text>
+  </view>
+</view>
