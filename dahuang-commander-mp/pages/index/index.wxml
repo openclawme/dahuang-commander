@@ -15,7 +15,18 @@
           <text class="chat-bubble-time">{{item.timestamp}}</text>
         </view>
         
-        <view class="chat-bubble-body bubble-{{item.sender === 'human' ? 'user' : 'agent'}} {{item.isRich ? 'bubble-rich' : ''}} {{item.isError ? 'bubble-error' : ''}}">
+        <!-- 日程到点提醒：古风卡片（铃印 + 标题 + 正文 + 时刻） -->
+        <view class="sched-remind-card" wx:if="{{item.sender === 'system' && item.sysKind === 'schedule'}}">
+          <view class="sched-remind-badge">铃</view>
+          <view class="sched-remind-body flex-col">
+            <view class="flex-row align-center">
+              <text class="sched-remind-title">日程到点</text>
+              <text class="sched-remind-time" wx:if="{{item.sysTime}}">{{item.sysTime}}</text>
+            </view>
+            <text class="sched-remind-text">{{item.content}}</text>
+          </view>
+        </view>
+        <view class="chat-bubble-body bubble-{{item.sender === 'human' ? 'user' : 'agent'}} {{item.isRich ? 'bubble-rich' : ''}} {{item.isError ? 'bubble-error' : ''}}" wx:else>
           <view class="chat-quote-preview" wx:if="{{item.sender === 'human' && item.quote}}">
             <text class="chat-quote-preview-text">{{item.quote}}</text>
           </view>
@@ -354,13 +365,36 @@
         <text class="quick-loading-text">灵犀推演中…</text>
       </view>
 
-      <view class="quick-market-entry" wx:if="{{!quickPanelLoading}}" hover-class="hover-dim" bindtap="openMarket">
-        <view class="quick-market-badge">市</view>
-        <view class="quick-market-body flex-col">
-          <text class="quick-market-title">逛集市</text>
-          <text class="quick-market-sub">外卖红包 · 电商捡漏 · 行情速览</text>
+      <!-- 四大入口砖：2×2 大按钮 -->
+      <view class="quick-entry-grid" wx:if="{{!quickPanelLoading}}">
+        <view class="quick-entry-tile" hover-class="hover-dim" bindtap="openMarket">
+          <view class="quick-entry-badge">市</view>
+          <view class="flex-col" style="min-width: 0;">
+            <text class="quick-entry-label">逛集市</text>
+            <text class="quick-entry-sub">优惠券 · 比价</text>
+          </view>
         </view>
-        <text class="quick-market-arrow">›</text>
+        <view class="quick-entry-tile" hover-class="hover-dim" bindtap="openScheduleFromPanel">
+          <view class="quick-entry-badge">程</view>
+          <view class="flex-col" style="min-width: 0;">
+            <text class="quick-entry-label">我的日程</text>
+            <text class="quick-entry-sub">提醒 · 安排</text>
+          </view>
+        </view>
+        <view class="quick-entry-tile" hover-class="hover-dim" bindtap="openTasksFromPanel">
+          <view class="quick-entry-badge">务</view>
+          <view class="flex-col" style="min-width: 0;">
+            <text class="quick-entry-label">任务中心</text>
+            <text class="quick-entry-sub">进度 · 结果</text>
+          </view>
+        </view>
+        <view class="quick-entry-tile" hover-class="hover-dim" bindtap="openNotifications">
+          <view class="quick-entry-badge">讯</view>
+          <view class="flex-col" style="min-width: 0;">
+            <text class="quick-entry-label">消息通知</text>
+            <text class="quick-entry-sub">提醒 · 待办</text>
+          </view>
+        </view>
       </view>
 
       <view class="quick-section" wx:if="{{!quickPanelLoading}}">
@@ -368,10 +402,6 @@
           <view class="flex-row align-center">
             <view class="quick-section-dot task-dot"></view>
             <text class="quick-section-title">进行中</text>
-          </view>
-          <view class="flex-row align-center">
-            <view class="quick-section-more" style="margin-right: 24rpx;" catchtap="openScheduleFromPanel">我的日程 ›</view>
-            <view class="quick-section-more" catchtap="openTasksFromPanel">任务中心 ›</view>
           </view>
         </view>
         <view class="quick-task-item" wx:for="{{quickTasks}}" wx:key="id" hover-class="quick-task-item-hover" bindtap="tapQuickTask" data-id="{{item.id}}">

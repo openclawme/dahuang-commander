@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '输入框文字显示修复（日程/联系人/建群/记忆）+日程弹层键盘上移';
+const desc = '日程输入框高度修复+日程到点古风铃印卡片+FAB面板四大入口砖重设计';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

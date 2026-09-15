@@ -189,7 +189,11 @@ App({
     socket.on("schedule_reminder", (data) => {
       const title = (data && data.title) || "日程提醒";
       const body = (data && data.body) || "";
-      this.pushSystemChat(`🔔 【${title}】${body}`);
+      // 结构化卡片（古风铃印，替换掉不搭调的 🔔 图标）
+      this.pushSystemChat(`【${title}】${body}`, {
+        sysKind: "schedule",
+        sysTime: (data && data.dueAt) ? new Date(data.dueAt).toTimeString().slice(0, 5) : "",
+      });
       try { wx.vibrateShort({ type: "medium" }); } catch (e) {}
       wx.showToast({ title: "日程到点： " + title, icon: "none", duration: 2500 });
       this.triggerPageCallback("onScheduleReminder", data || {});
@@ -676,12 +680,13 @@ App({
   },
 
   // 主对话框插入一条系统消息（待办提醒/登录摘要等）
-  pushSystemChat(message) {
+  pushSystemChat(message, extra) {
     const newMsg = {
       id: `sys-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       sender: "system",
       content: message,
-      timestamp: this.getTimestamp()
+      timestamp: this.getTimestamp(),
+      ...(extra || {})
     };
     this.globalData.chatHistory.push(newMsg);
     this.trimChatHistory();

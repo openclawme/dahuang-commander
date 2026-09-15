@@ -211,6 +211,10 @@ Page({
     wx.navigateTo({ url: "/pages/market/market" });
   },
 
+  openNotifications() {
+    wx.navigateTo({ url: "/pages/notifications/notifications" });
+  },
+
   refreshPendingDecisions() {
     if (!app.refreshPendingDecisions) return;
     app.refreshPendingDecisions((count) => {
