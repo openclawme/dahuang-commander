@@ -32,6 +32,7 @@ Page({
     newPassword: "",
     confirmPassword: "",
     pddAuthBound: false, // 拼多多授权备案状态
+    wxSubQuota: -1, // 微信订阅消息剩余额度（-1=未查询）
 
     // 自动回复预算
     groupReplyBudget: 5,
@@ -94,6 +95,7 @@ Page({
     const dict = i18n.getDict() || {};
     this.refreshJdAuthStatus(); // 京东授权状态（回调完成后回来自动更新）
     this.refreshPddAuthStatus(); // 拼多多授权备案状态
+    this.refreshWxSubQuota(); // 微信提醒额度
     const filteredLogs = (app.globalData.logs || []).filter(l => {
       if (app.globalData.showDevLogs) return true;
       return l.type === "SYSTEM" || l.type === "ACTION";
@@ -669,6 +671,30 @@ Page({
   },
 
   // 拼多多授权备案：生成授权链接 → 复制 → 浏览器打开在拼多多内确认
+  /** 开启微信提醒：用户点击时弹出订阅授权框（微信要求必须由用户手势触发） */
+  openSubscribeReminder() {
+    if (app.requestScheduleSubscribe) app.requestScheduleSubscribe();
+    // 授权结果回传后（约 1s）刷新额度显示
+    setTimeout(() => this.refreshWxSubQuota(), 1500);
+  },
+
+  refreshWxSubQuota() {
+    const { serverUrl, agentState } = app.globalData;
+    if (!agentState || !agentState.token) return;
+    wx.request({
+      url: `${serverUrl}/api/wechat/subscribe-grant`,
+      method: "GET",
+      header: getHeaders(agentState.token),
+      success: (res) => {
+        if (res.statusCode === 200 && res.data) {
+          this.setData({
+            wxSubQuota: typeof res.data.subQuota === "number" ? res.data.subQuota : -1,
+          });
+        }
+      }
+    });
+  },
+
   openPddAuth() {
     const { serverUrl, agentState } = this.data;
     if (!agentState.token) return;

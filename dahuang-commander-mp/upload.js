@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '订阅消息授权修复：模板ID缓存失效后重新向服务端获取';
+const desc = '设置页新增开启微信提醒入口：点击必弹订阅授权框';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
