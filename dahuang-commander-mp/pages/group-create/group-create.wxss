@@ -26,6 +26,7 @@
 }
 
 .form-input {
+  color: #3b3024;
   width: 100%;
   height: 96rpx;
   line-height: 96rpx;

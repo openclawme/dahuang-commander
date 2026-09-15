@@ -37,9 +37,9 @@
   <view class="fab-add" bindtap="openCreate">＋</view>
 
   <view class="sheet-mask" wx:if="{{showSheet}}" bindtap="closeSheet"></view>
-  <view class="sheet" wx:if="{{showSheet}}">
+  <view class="sheet" wx:if="{{showSheet}}" style="transform: translateY(-{{sheetShift}}px);">
     <view class="sheet-title">{{sheetMode === 'arrange' ? '安排时间' : '新建日程'}}</view>
-    <input class="sheet-input" placeholder="要办什么？例如：交房租" value="{{createTitle}}" bindinput="onCreateTitle" disabled="{{sheetMode === 'arrange'}}" />
+    <input class="sheet-input" placeholder="要办什么？例如：交房租" value="{{createTitle}}" bindinput="onCreateTitle" disabled="{{sheetMode === 'arrange'}}" bindfocus="onSheetFocus" bindblur="onSheetBlur" bindkeyboardheightchange="onSheetKeyboard" />
     <view class="sheet-row flex-row">
       <picker mode="date" value="{{createDate}}" start="{{minDate}}" bindchange="onCreateDate">
         <view class="sheet-picker">{{createDate}}</view>

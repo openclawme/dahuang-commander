@@ -236,6 +236,9 @@
 }
 
 .form-input {
+  color: #3b3024;
+  min-height: 56rpx;
+  line-height: 1.5;
   width: 100%;
   background: #ffffff;
   border: 1rpx solid rgba(59, 48, 36, 0.15);

@@ -248,6 +248,14 @@ Page({
   onCreateTitle(e) { this.setData({ createTitle: e.detail.value }); },
   onCreateDate(e) { this.setData({ createDate: e.detail.value }); },
   onCreateTime(e) { this.setData({ createTime: e.detail.value }); },
+
+  // 键盘弹起时把底部弹层整体上移（Huawei 等机型键盘会盖住 fixed 弹层）
+  onSheetFocus() {},
+  onSheetBlur() { this.setData({ sheetShift: 0 }); },
+  onSheetKeyboard(e) {
+    const h = (e && e.detail && e.detail.height) || 0;
+    if (h !== this.data.sheetShift) this.setData({ sheetShift: h > 0 ? Math.min(h, 380) : 0 });
+  },
   onRepeatChange(e) { this.setData({ repeatIndex: Number(e.detail.value) || 0 }); },
 
   submitSheet() {
