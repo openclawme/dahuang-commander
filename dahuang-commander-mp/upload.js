@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = 'MCP 商店：公共共享服务（系统 Key 默认可用，额度用尽可自填 Key 覆盖）';
+const desc = '地图图片交付修复：结构化 maps 兜底（不依赖模型正文）+ 静态图自动适配整条路线';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

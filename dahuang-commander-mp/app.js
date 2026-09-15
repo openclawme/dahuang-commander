@@ -553,6 +553,14 @@ App({
       if (sanitized.agentImages && sanitized.agentImages.length > 0) {
         data.agentImages = sanitized.agentImages;
       }
+      // 地图图片：服务端结构化 maps 字段（api_deliver_map 生成），与正文提取合并去重
+      if (Array.isArray(data.maps) && data.maps.length > 0) {
+        const base = this.globalData.serverUrl || "";
+        const mapUrls = data.maps.map((u) => (String(u || "").startsWith("/") ? `${base}${u}` : String(u)));
+        const merged = [...(data.agentImages || [])];
+        mapUrls.forEach((u) => { if (u && merged.indexOf(u) === -1) merged.push(u); });
+        data.agentImages = merged;
+      }
       if (sanitized.isPending && data.progress !== 100 && data.isPending !== false) {
         data.isPending = true;
       }
@@ -1159,7 +1167,7 @@ App({
     while ((m = htmlRe.exec(content))) add(m[1]);
     const mdRe = /!\[[^\]]*\]\(([^)\s]+)\)/g;
     while ((m = mdRe.exec(content))) add(m[1]);
-    const bareRe = /(https?:\/\/[^\s"'<>]+?\.(?:png|jpe?g|gif|webp)(?:\?[^\s"'<>]*)?|\/api\/uploads\/[^\s"'<>]+)/gi;
+    const bareRe = /(https?:\/\/[^\s"'<>]+?\.(?:png|jpe?g|gif|webp)(?:\?[^\s"'<>]*)?|\/api\/uploads\/[^\s"'<>]+|\/uploads\/[^\s"'<>]+\.(?:png|jpe?g|gif|webp))/gi;
     while ((m = bareRe.exec(content))) add(m[1]);
     return urls.slice(0, 6).map((u) => (u.startsWith("/") ? `${this.globalData.serverUrl}${u}` : u));
   },
