@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '设置页新增开启微信提醒入口：点击必弹订阅授权框';
+const desc = '聊天发送提醒类指令时预判弹订阅授权框，日程到点可推微信';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

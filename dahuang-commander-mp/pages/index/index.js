@@ -1848,6 +1848,12 @@ Page({
     const rawText = this.data.inputValue.trim();
     if (!rawText) return;
 
+    // 预判提醒类意图：在发送手势的合法时刻先弹订阅授权框，
+    // 这样聊天里建的日程/提醒到点后也能推微信通知
+    if (app.requestScheduleSubscribe && /提醒|记得|叫我|定时|日程|几点|闹钟|到时/.test(rawText)) {
+      app.requestScheduleSubscribe();
+    }
+
     const quoted = this.data.quotedMessage;
     const quotedText = quoted && typeof quoted.content === "string" ? quoted.content : "";
     let commandText = rawText;
