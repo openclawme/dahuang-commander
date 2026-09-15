@@ -3,35 +3,48 @@
   <view class="mc-head flex-row align-center">
     <view class="mc-head-badge">具</view>
     <view class="flex-col" style="margin-left: 16rpx;">
-      <text class="mc-head-title">MCP 工具</text>
-      <text class="mc-head-sub">分身的外挂商店 · 通过标准协议接入的第三方能力</text>
+      <text class="mc-head-title">MCP 工具商店</text>
+      <text class="mc-head-sub">分身的外挂管理 · 启停 / 测试 / 安装 / 移除</text>
     </view>
   </view>
 
-  <!-- 状态提示 -->
-  <view class="mc-banner flex-col" wx:if="{{!loading && !errorText && !enabled}}">
-    <text class="mc-banner-text">MCP 未开启：服务器端尚未配置（MCP_ENABLED）。</text>
-  </view>
-  <view class="mc-banner flex-col" wx:if="{{!loading && !errorText && enabled && servers.length === 0}}">
-    <text class="mc-banner-text">已开启但暂无已配置的服务端（缺少服务端 Key）。</text>
+  <!-- 非主人横幅 -->
+  <view class="mc-banner flex-col" wx:if="{{!loading && !isAdmin}}">
+    <text class="mc-banner-text">仅主人可管理 MCP 工具。</text>
   </view>
 
   <!-- 服务端列表 -->
-  <view class="mc-list flex-col" wx:if="{{!loading && !errorText}}">
+  <view class="mc-list flex-col" wx:if="{{!loading && isAdmin}}">
     <view class="mc-card flex-col" wx:for="{{servers}}" wx:key="id">
       <view class="flex-row align-center">
-        <view class="mc-card-badge">{{item.label.slice(0, 1)}}</view>
+        <view class="mc-card-badge">{{item.name.slice(0, 1)}}</view>
         <view class="flex-col" style="flex: 1; min-width: 0;">
-          <text class="mc-card-title">{{item.label}}</text>
-          <text class="mc-card-host" bindtap="onCopyHost" data-host="{{item.host}}">{{item.host}}（点按复制）</text>
+          <text class="mc-card-title">{{item.name}}</text>
+          <text class="mc-card-host" bindtap="onCopyHost" data-host="{{item.host}}">{{item.host}} · {{item.authMode === 'header' ? '头部鉴权' : 'URL 鉴权'}}（点按复制地址）</text>
         </view>
-        <text class="mc-card-state">已启用</text>
+        <switch checked="{{item.enabled}}" color="#b0543f" style="transform: scale(0.75);" bindchange="onToggleEnabled" data-id="{{item.id}}" />
       </view>
-      <text class="mc-card-meta">{{item.toolCount}} 个工具 · {{item.loadedText}}</text>
+
+      <text class="mc-card-meta" wx:if="{{item.enabled}}">{{item.toolCount}} 个工具 · {{item.lastLoadedText}}</text>
+      <text class="mc-card-meta" wx:else>已停用（其工具不注入分身）</text>
+      <text class="mc-card-error" wx:if="{{item.lastError}}">最近错误：{{item.lastError}}</text>
+
       <view class="mc-tools flex-row" wx:if="{{item.toolNames && item.toolNames.length}}">
         <text class="mc-tool-chip" wx:for="{{item.toolNames}}" wx:for-item="tn" wx:key="*this">{{tn}}</text>
       </view>
-      <text class="mc-card-hint">分身任务开始时自动连接并注入这些工具，失败不影响内置能力。</text>
+
+      <view class="mc-card-actions flex-row">
+        <view class="mc-act-btn" hover-class="hover-dim" bindtap="onTest" data-id="{{item.id}}">{{item.testing ? '测试中…' : '测试连接'}}</view>
+        <view class="mc-act-btn" hover-class="hover-dim" bindtap="onEditOpen" data-id="{{item.id}}">编辑</view>
+        <view class="mc-act-btn mc-act-danger" hover-class="hover-dim" bindtap="onDelete" data-id="{{item.id}}">移除</view>
+      </view>
+    </view>
+
+    <!-- 空态 -->
+    <view class="mc-empty flex-col align-center" wx:if="{{!loading && servers.length === 0}}">
+      <view class="mc-empty-badge">具</view>
+      <text class="mc-empty-title">还没有安装任何 MCP 工具</text>
+      <text class="mc-empty-text">点下方按钮，从目录安装或自定义接入</text>
     </view>
   </view>
 
@@ -39,13 +52,102 @@
   <view class="mc-state" wx:if="{{loading}}">
     <text class="mc-state-text">加载中…</text>
   </view>
-  <view class="mc-state" wx:if="{{!loading && errorText}}">
-    <text class="mc-state-text">{{errorText}}</text>
+
+  <!-- 底部添加 -->
+  <view class="mc-footer" bindtap="onAddOpen" hover-class="hover-dim" wx:if="{{!loading && isAdmin}}">
+    <view class="mc-footer-btn flex-row align-center">
+      <text class="mc-footer-plus">＋</text>
+      <text class="mc-footer-label">添加工具</text>
+    </view>
+    <text class="mc-footer-hint">启用越多，分身每次响应略慢 · 已装 {{servers.length}} 个服务端</text>
+  </view>
+</view>
+
+<!-- ===== 添加弹层 ===== -->
+<view class="mc-mask" wx:if="{{showAddSheet}}" bindtap="closeAddSheet" catchtouchmove="noop"></view>
+<view class="mc-sheet" wx:if="{{showAddSheet}}">
+  <view class="mc-sheet-head flex-row align-center">
+    <text class="mc-sheet-title">{{addMode === 'catalog' ? '从目录安装' : '自定义接入'}}</text>
+    <view class="mc-sheet-close" bindtap="closeAddSheet">✕</view>
   </view>
 
-  <!-- 说明 -->
-  <view class="mc-footer-note flex-col" wx:if="{{!loading && !errorText}}">
-    <text class="mc-note-title">什么是 MCP？</text>
-    <text class="mc-note-text">MCP（Model Context Protocol）是智能体接入第三方工具的标准协议。分身每次任务开始时自动连接已启用的服务端，把其工具并入自己的能力清单——新增能力无需修改分身本体。</text>
+  <!-- 目录模式 -->
+  <scroll-view class="mc-sheet-body" scroll-y wx:if="{{addMode === 'catalog'}}">
+    <text class="mc-group-label">官方</text>
+    <view class="mc-cat-item flex-row align-center" wx:for="{{catalog.official}}" wx:key="serverKey" bindtap="onCatalogInstall" data-key="{{item.serverKey}}" hover-class="hover-dim">
+      <view class="flex-col" style="flex: 1; min-width: 0;">
+        <view class="flex-row align-center">
+          <text class="mc-cat-name">{{item.name}}</text>
+          <text class="mc-cat-needkey" wx:if="{{item.needsKey}}">需 Key</text>
+        </view>
+        <text class="mc-cat-desc">{{item.description}}</text>
+        <text class="mc-cat-hint" wx:if="{{item.keyHint}}">Key 申请：{{item.keyHint}}</text>
+      </view>
+      <text class="mc-cat-install">安装</text>
+    </view>
+    <text class="mc-group-label">社区（免 Key）</text>
+    <view class="mc-cat-item flex-row align-center" wx:for="{{catalog.community}}" wx:key="serverKey" bindtap="onCatalogInstall" data-key="{{item.serverKey}}" hover-class="hover-dim">
+      <view class="flex-col" style="flex: 1; min-width: 0;">
+        <view class="flex-row align-center">
+          <text class="mc-cat-name">{{item.name}}</text>
+          <text class="mc-cat-free">免 Key</text>
+        </view>
+        <text class="mc-cat-desc">{{item.description}}</text>
+        <text class="mc-cat-note" wx:if="{{item.note}}">{{item.note}}</text>
+      </view>
+      <text class="mc-cat-install">安装</text>
+    </view>
+  </scroll-view>
+
+  <!-- 自定义模式 -->
+  <scroll-view class="mc-sheet-body" scroll-y wx:else>
+    <text class="mc-form-label">名称 *</text>
+    <input class="mc-form-input" placeholder="如：我的天气服务" value="{{custom.name}}" bindinput="onCustomInput" data-field="name" />
+    <text class="mc-form-label">MCP 地址 *</text>
+    <input class="mc-form-input" placeholder="如：https://xxx.com/mcp?key={key}" value="{{custom.url}}" bindinput="onCustomInput" data-field="url" />
+    <text class="mc-form-hint">支持 {key} 占位符；已内嵌 Key 的完整 URL 也支持</text>
+    <text class="mc-form-label">Key（可选）</text>
+    <input class="mc-form-input" placeholder="留空=URL 内嵌或无 Key" value="{{custom.key}}" bindinput="onCustomInput" data-field="key" />
+    <text class="mc-form-label">鉴权方式</text>
+    <view class="flex-row" style="gap: 16rpx;">
+      <view class="mc-form-chip {{custom.authMode === 'url' ? 'mc-form-chip-on' : ''}}" bindtap="onCustomAuthMode" data-value="url">URL 参数</view>
+      <view class="mc-form-chip {{custom.authMode === 'header' ? 'mc-form-chip-on' : ''}}" bindtap="onCustomAuthMode" data-value="header">请求头</view>
+    </view>
+    <block wx:if="{{custom.authMode === 'header'}}">
+      <text class="mc-form-label">请求头模板</text>
+      <input class="mc-form-input" placeholder="Authorization: Bearer {key}" value="{{custom.authHeader}}" bindinput="onCustomInput" data-field="authHeader" />
+    </block>
+    <view class="mc-sheet-submit" hover-class="hover-dim" bindtap="onCustomSubmit">接入</view>
+  </scroll-view>
+</view>
+
+<!-- ===== Key 弹窗 ===== -->
+<view class="mc-mask" wx:if="{{keyModal.show}}" bindtap="closeKeyModal" catchtouchmove="noop"></view>
+<view class="mc-keymodal" wx:if="{{keyModal.show}}">
+  <text class="mc-keymodal-title">{{keyModal.target.name}} · 填写 Key</text>
+  <text class="mc-keymodal-hint" wx:if="{{keyModal.target.keyHint}}">{{keyModal.target.keyHint}}</text>
+  <input class="mc-form-input" placeholder="粘贴 Key" value="{{keyModal.key}}" bindinput="onKeyModalInput" />
+  <view class="mc-sheet-submit" hover-class="hover-dim" bindtap="onKeyModalSubmit">安装</view>
+</view>
+
+<!-- ===== 编辑弹层 ===== -->
+<view class="mc-mask" wx:if="{{showEditSheet}}" bindtap="closeEditSheet" catchtouchmove="noop"></view>
+<view class="mc-sheet" wx:if="{{showEditSheet}}">
+  <view class="mc-sheet-head flex-row align-center">
+    <text class="mc-sheet-title">编辑服务端</text>
+    <view class="mc-sheet-close" bindtap="closeEditSheet">✕</view>
   </view>
+  <scroll-view class="mc-sheet-body" scroll-y>
+    <text class="mc-form-label">名称</text>
+    <input class="mc-form-input" value="{{editName}}" bindinput="onEditInput" data-field="editName" />
+    <text class="mc-form-label">Key（留空=保持不变）</text>
+    <input class="mc-form-input" placeholder="留空则保持原 Key 不变" value="{{editKey}}" bindinput="onEditInput" data-field="editKey" />
+    <view class="flex-row align-center" style="justify-content: space-between; margin-top: 8rpx;">
+      <text class="mc-form-hint">清除 Key</text>
+      <switch checked="{{editClearKey}}" color="#b0543f" style="transform: scale(0.75);" bindchange="onEditClearKey" />
+    </view>
+    <text class="mc-form-label">Key 申请渠道说明</text>
+    <input class="mc-form-input" value="{{editKeyHint}}" bindinput="onEditInput" data-field="editKeyHint" />
+    <view class="mc-sheet-submit" hover-class="hover-dim" bindtap="onEditSubmit">保存</view>
+  </scroll-view>
 </view>
