@@ -126,11 +126,15 @@ Page({
         }
         const { serverUrl, agentState } = app.globalData;
         wx.showLoading({ title: "上传解析中", mask: true });
+        // 注意：wx.uploadFile 绝不能带手动 Content-Type（会破坏 multipart 边界）
         wx.uploadFile({
           url: `${serverUrl}/api/agent/knowledge/upload`,
           filePath: f.path,
           name: "file",
-          header: getHeaders(agentState.token),
+          header: {
+            Authorization: `Bearer ${agentState.token}`,
+            "X-Agent-Version": "7.0",
+          },
           success: (res) => {
             wx.hideLoading();
             let data = {};
@@ -142,9 +146,16 @@ Page({
               wx.showToast({ title: (data && data.error) || "上传失败", icon: "none", duration: 2600 });
             }
           },
-          fail: () => {
+          fail: (err) => {
             wx.hideLoading();
-            wx.showToast({ title: "网络异常，上传失败", icon: "none" });
+            console.warn("[KB_UPLOAD] uploadFile failed:", err);
+            wx.showToast({
+              title: (err && err.errMsg && err.errMsg.indexOf("domain") !== -1)
+                ? "域名未配置：请在后台把 dahuang.land 加入 uploadFile 合法域名"
+                : "网络异常，上传失败",
+              icon: "none",
+              duration: 3000,
+            });
           },
         });
       },

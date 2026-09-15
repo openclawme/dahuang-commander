@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '知识库上传支持PDF文档';
+const desc = '修复文档上传：去掉手动Content-Type+域名未配置时给出明确提示';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
