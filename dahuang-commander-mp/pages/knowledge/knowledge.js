@@ -116,7 +116,7 @@ Page({
     wx.chooseMessageFile({
       count: 1,
       type: "file",
-      extension: ["txt", "md"],
+      extension: ["txt", "md", "pdf"],
       success: (res) => {
         const f = (res.tempFiles && res.tempFiles[0]) || null;
         if (!f) return;
