@@ -4,17 +4,12 @@
     <view class="mc-head-badge">具</view>
     <view class="flex-col" style="margin-left: 16rpx;">
       <text class="mc-head-title">MCP 工具商店</text>
-      <text class="mc-head-sub">分身的外挂管理 · 启停 / 测试 / 安装 / 移除</text>
+      <text class="mc-head-sub">给你的分身装外挂 · 启停 / 测试 / 安装 / 移除</text>
     </view>
   </view>
 
-  <!-- 非主人横幅 -->
-  <view class="mc-banner flex-col" wx:if="{{!loading && !isAdmin}}">
-    <text class="mc-banner-text">仅主人可管理 MCP 工具。</text>
-  </view>
-
   <!-- 服务端列表 -->
-  <view class="mc-list flex-col" wx:if="{{!loading && isAdmin}}">
+  <view class="mc-list flex-col" wx:if="{{!loading}}">
     <view class="mc-card flex-col" wx:for="{{servers}}" wx:key="id">
       <view class="flex-row align-center">
         <view class="mc-card-badge">{{item.name.slice(0, 1)}}</view>
@@ -54,7 +49,7 @@
   </view>
 
   <!-- 底部添加 -->
-  <view class="mc-footer" bindtap="onAddOpen" hover-class="hover-dim" wx:if="{{!loading && isAdmin}}">
+  <view class="mc-footer" bindtap="onAddOpen" hover-class="hover-dim" wx:if="{{!loading}}">
     <view class="mc-footer-btn flex-row align-center">
       <text class="mc-footer-plus">＋</text>
       <text class="mc-footer-label">添加工具</text>

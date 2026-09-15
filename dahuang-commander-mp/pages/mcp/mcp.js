@@ -5,8 +5,7 @@ Page({
   data: {
     loading: true,
     errorText: "",
-    isAdmin: true,
-    servers: [],           // {id,name,host,authMode,hasKey,keyHint,enabled,toolCount,lastError,lastLoadedText,toolNames,testing}
+    servers: [],           // {id,name,serverKey,host,authMode,hasKey,keyHint,enabled,toolCount,lastError,lastLoadedText,toolNames,testing}
     catalog: { official: [], community: [] },
     // 添加弹层
     showAddSheet: false,
@@ -75,7 +74,6 @@ Page({
       .then((r) => {
         this.setData({
           loading: false,
-          isAdmin: true,
           servers: (r.servers || []).map((s) => ({
             ...s,
             lastLoadedText: s.lastLoadedAt ? "最近加载 " + this.timeText(new Date(s.lastLoadedAt).getTime()) : "尚未加载（下次任务自动连接）",
@@ -84,12 +82,7 @@ Page({
         });
       })
       .catch((err) => {
-        const msg = err.message || "";
-        this.setData({
-          loading: false,
-          isAdmin: false,
-          errorText: msg.indexOf("403") !== -1 || msg.indexOf("管理") !== -1 || msg.indexOf("未配置") !== -1 ? "仅主人可管理 MCP 工具" : msg,
-        });
+        this.setData({ loading: false, errorText: err.message || "加载失败" });
       });
   },
 

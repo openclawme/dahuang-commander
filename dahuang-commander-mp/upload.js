@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = 'MCP 工具商店（管理版）：目录安装/自定义接入/启停编辑删除/连接测试';
+const desc = 'MCP 工具商店：按分身隔离，每个主人都可浏览目录、安装管理自己的服务';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
