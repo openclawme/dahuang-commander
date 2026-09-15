@@ -14,13 +14,17 @@
       <view class="flex-row align-center">
         <view class="mc-card-badge">{{item.name.slice(0, 1)}}</view>
         <view class="flex-col" style="flex: 1; min-width: 0;">
-          <text class="mc-card-title">{{item.name}}</text>
+          <view class="flex-row align-center">
+            <text class="mc-card-title">{{item.name}}</text>
+            <text class="mc-cat-free" wx:if="{{item.shared}}">系统提供</text>
+          </view>
           <text class="mc-card-host" bindtap="onCopyHost" data-host="{{item.host}}">{{item.host}} · {{item.authMode === 'header' ? '头部鉴权' : 'URL 鉴权'}}（点按复制地址）</text>
         </view>
         <switch checked="{{item.enabled}}" color="#b0543f" style="transform: scale(0.75);" bindchange="onToggleEnabled" data-id="{{item.id}}" />
       </view>
 
-      <text class="mc-card-meta" wx:if="{{item.enabled}}">{{item.toolCount}} 个工具 · {{item.lastLoadedText}}</text>
+      <text class="mc-card-meta" wx:if="{{item.enabled && !item.usingSystemKey}}">{{item.toolCount}} 个工具 · {{item.lastLoadedText}}</text>
+      <text class="mc-card-meta" wx:if="{{item.enabled && item.usingSystemKey}}">{{item.toolCount}} 个工具 · 使用系统共享 Key（额度用尽可在「编辑」里填自己的 Key）</text>
       <text class="mc-card-meta" wx:else>已停用（其工具不注入分身）</text>
       <text class="mc-card-error" wx:if="{{item.lastError}}">最近错误：{{item.lastError}}</text>
 
@@ -31,7 +35,7 @@
       <view class="mc-card-actions flex-row">
         <view class="mc-act-btn" hover-class="hover-dim" bindtap="onTest" data-id="{{item.id}}">{{item.testing ? '测试中…' : '测试连接'}}</view>
         <view class="mc-act-btn" hover-class="hover-dim" bindtap="onEditOpen" data-id="{{item.id}}">编辑</view>
-        <view class="mc-act-btn mc-act-danger" hover-class="hover-dim" bindtap="onDelete" data-id="{{item.id}}">移除</view>
+        <view class="mc-act-btn mc-act-danger" hover-class="hover-dim" bindtap="onDelete" data-id="{{item.id}}" wx:if="{{!item.shared}}">移除</view>
       </view>
     </view>
 
@@ -73,12 +77,14 @@
       <view class="flex-col" style="flex: 1; min-width: 0;">
         <view class="flex-row align-center">
           <text class="mc-cat-name">{{item.name}}</text>
-          <text class="mc-cat-needkey" wx:if="{{item.needsKey}}">需 Key</text>
+          <text class="mc-cat-free" wx:if="{{item.shared}}">系统提供·已默认启用</text>
+          <text class="mc-cat-needkey" wx:elif="{{item.needsKey}}">需 Key</text>
         </view>
         <text class="mc-cat-desc">{{item.description}}</text>
-        <text class="mc-cat-hint" wx:if="{{item.keyHint}}">Key 申请：{{item.keyHint}}</text>
+        <text class="mc-cat-hint" wx:if="{{item.shared}}">所有分身默认可用系统 Key；额度用尽后可在管理页填自己的 Key</text>
+        <text class="mc-cat-hint" wx:elif="{{item.keyHint}}">Key 申请：{{item.keyHint}}</text>
       </view>
-      <text class="mc-cat-install">安装</text>
+      <text class="mc-cat-install" wx:if="{{!item.shared}}">安装</text>
     </view>
     <text class="mc-group-label">社区（免 Key）</text>
     <view class="mc-cat-item flex-row align-center" wx:for="{{catalog.community}}" wx:key="serverKey" bindtap="onCatalogInstall" data-key="{{item.serverKey}}" hover-class="hover-dim">
@@ -135,7 +141,7 @@
   <scroll-view class="mc-sheet-body" scroll-y>
     <text class="mc-form-label">名称</text>
     <input class="mc-form-input" value="{{editName}}" bindinput="onEditInput" data-field="editName" />
-    <text class="mc-form-label">Key（留空=保持不变）</text>
+    <text class="mc-form-label">Key（留空=保持不变；共享服务留空=使用系统 Key）</text>
     <input class="mc-form-input" placeholder="留空则保持原 Key 不变" value="{{editKey}}" bindinput="onEditInput" data-field="editKey" />
     <view class="flex-row align-center" style="justify-content: space-between; margin-top: 8rpx;">
       <text class="mc-form-hint">清除 Key</text>
