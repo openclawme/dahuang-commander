@@ -142,6 +142,67 @@
   flex-shrink: 0;
 }
 
+/* 搜索结果工具栏 + 比价视图 */
+.market-result-bar { margin-top: 16rpx; }
+.market-result-count { font-size: 24rpx; color: #8a7f6d; }
+.market-cmp-toggle {
+  font-size: 24rpx;
+  color: #4a6a7c;
+  font-weight: 600;
+  background: #fffdf6;
+  border: 1rpx solid rgba(91, 122, 140, 0.3);
+  padding: 8rpx 20rpx;
+  border-radius: 999rpx;
+}
+.market-cmp-summary {
+  margin-top: 16rpx;
+  background: rgba(201, 163, 76, 0.10);
+  border: 1rpx solid rgba(168, 132, 47, 0.3);
+  border-radius: 14rpx;
+  padding: 14rpx 20rpx;
+  gap: 6rpx;
+}
+.cmp-sum-line { font-size: 24rpx; color: #6b665c; }
+.cmp-price { font-size: 28rpx; color: #b0543f; font-weight: 700; }
+.cmp-sum-divider { margin: 0 12rpx; color: #a89f8e; }
+.cmp-sum-winner { font-size: 26rpx; color: #8a6d1f; font-weight: 700; }
+.market-cmp-cols { margin-top: 16rpx; gap: 16rpx; align-items: flex-start; }
+.market-cmp-col {
+  flex: 1;
+  min-width: 0;
+  background: #fffdf6;
+  border: 1rpx solid rgba(59, 48, 36, 0.08);
+  border-radius: 16rpx;
+  padding: 14rpx;
+  box-sizing: border-box;
+}
+.market-cmp-col-head { margin-bottom: 10rpx; }
+.cmp-col-title { font-size: 27rpx; color: #2b2a26; font-weight: 700; }
+.cmp-col-badge {
+  font-size: 19rpx;
+  color: #8a6d1f;
+  background: rgba(201, 163, 76, 0.18);
+  padding: 3rpx 10rpx;
+  border-radius: 999rpx;
+}
+.market-cmp-row { gap: 12rpx; padding: 10rpx 0; border-bottom: 1rpx dashed rgba(59, 48, 36, 0.08); }
+.market-cmp-row:last-child { border-bottom: none; }
+.market-cmp-img { width: 76rpx; height: 76rpx; border-radius: 10rpx; background: #efe8d8; flex-shrink: 0; }
+.market-cmp-body { flex: 1; min-width: 0; gap: 4rpx; }
+.market-cmp-title { font-size: 23rpx; color: #2b2a26; line-height: 1.4; }
+.market-cmp-price-row { gap: 8rpx; }
+.market-cmp-price { font-size: 28rpx; color: #b0543f; font-weight: 700; }
+.market-cmp-origin { font-size: 19rpx; color: #a89f8e; text-decoration: line-through; }
+.market-cmp-lowest {
+  font-size: 18rpx;
+  color: #8a6d1f;
+  background: rgba(201, 163, 76, 0.18);
+  padding: 2rpx 8rpx;
+  border-radius: 6rpx;
+  flex-shrink: 0;
+}
+.market-cmp-empty { font-size: 22rpx; color: #a89f8e; padding: 20rpx 0; text-align: center; }
+
 /* 商品瀑布流 */
 .market-goods-grid {
   display: flex;

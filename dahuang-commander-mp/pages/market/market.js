@@ -39,6 +39,14 @@ Page({
     pddAuthNotice: false,
     orderBadge: 0,
     serverUrl: "",
+    // 比价视图（搜索结果的京东/拼多多分列对比）
+    cmpMode: true,
+    cmpJd: [],
+    cmpPdd: [],
+    minJdText: "",
+    minPddText: "",
+    cmpWinner: "", // "jd" | "pdd"
+    cmpWinnerText: "",
   },
 
   onLoad() {
@@ -141,12 +149,35 @@ Page({
     this.setData({ searching: true, loading: true, goods: [], activities: [], loadError: "" });
     this.request("/api/agent/shopping/search", "POST", { keyword })
       .then((r) => {
+        const all = (r.goods || []).map((g) => this.decorate(g));
+        const jd = all.filter((g) => g.platform === "jd").sort((a, b) => a.afterCouponYuan - b.afterCouponYuan).slice(0, 5);
+        const pdd = all.filter((g) => g.platform === "pdd").sort((a, b) => a.afterCouponYuan - b.afterCouponYuan).slice(0, 5);
+        const minJd = jd.length ? jd[0].afterText : "";
+        const minPdd = pdd.length ? pdd[0].afterText : "";
+        let cmpWinner = "";
+        let cmpWinnerText = "";
+        if (jd.length && pdd.length) {
+          cmpWinner = jd[0].afterCouponYuan <= pdd[0].afterCouponYuan ? "jd" : "pdd";
+          cmpWinnerText = cmpWinner === "jd"
+            ? `京东更划算，低 ${(pdd[0].afterCouponYuan - jd[0].afterCouponYuan).toFixed(2)} 元`
+            : `拼多多更划算，低 ${(jd[0].afterCouponYuan - pdd[0].afterCouponYuan).toFixed(2)} 元`;
+        } else if (jd.length) {
+          cmpWinnerText = "拼多多暂无可比价结果";
+        } else if (pdd.length) {
+          cmpWinnerText = "京东暂无可比价结果";
+        }
         this.setData({
           searching: true,
           loading: false,
-          goods: (r.goods || []).map((g) => this.decorate(g)),
-          loadError: (r.goods || []).length ? "" : "没搜到，换个词或问问分身",
+          goods: all,
+          loadError: all.length ? "" : "没搜到，换个词或问问分身",
           pddAuthNotice: !!r.pddAuthorityUrl,
+          cmpJd: jd,
+          cmpPdd: pdd,
+          minJdText: minJd,
+          minPddText: minPdd,
+          cmpWinner,
+          cmpWinnerText,
         });
       })
       .catch((err) => this.setData({ searching: true, loading: false, goods: [], loadError: err.message || "搜索失败" }));
@@ -161,6 +192,20 @@ Page({
     }
     app.globalData.pendingMasterCommand = `帮我看看：${keyword}`;
     wx.switchTab({ url: "/pages/index/index" });
+  },
+
+  toggleCmpMode() {
+    this.setData({ cmpMode: !this.data.cmpMode });
+  },
+
+  onCmpGoodsTap(e) {
+    const platform = e.currentTarget.dataset.platform;
+    const idx = e.currentTarget.dataset.index;
+    const list = platform === "jd" ? this.data.cmpJd : this.data.cmpPdd;
+    const g = list && list[idx];
+    if (!g) return;
+    app.globalData.goodsDetail = g;
+    wx.navigateTo({ url: "/pages/goods-detail/goods-detail" });
   },
 
   onGoodsTap(e) {

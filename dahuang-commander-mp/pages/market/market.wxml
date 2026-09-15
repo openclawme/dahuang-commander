@@ -50,8 +50,66 @@
     </view>
   </view>
 
+  <!-- 搜索结果工具栏：比价/列表切换 -->
+  <view class="market-result-bar flex-row align-center justify-between" wx:if="{{searching && goods.length > 0}}">
+    <text class="market-result-count">搜到 {{goods.length}} 件</text>
+    <view class="market-cmp-toggle" hover-class="hover-dim" bindtap="toggleCmpMode">{{cmpMode ? '比价视图' : '列表视图'}} ⇄</view>
+  </view>
+
+  <!-- 比价视图：京东 / 拼多多分列，最低价高亮 -->
+  <block wx:if="{{searching && cmpMode && goods.length > 0}}">
+    <view class="market-cmp-summary flex-col" wx:if="{{cmpWinnerText}}">
+      <view class="flex-row align-center">
+        <text class="cmp-sum-line" wx:if="{{minPddText}}">拼多多最低 <text class="cmp-price">¥{{minPddText}}</text></text>
+        <text class="cmp-sum-divider" wx:if="{{minPddText && minJdText}}">｜</text>
+        <text class="cmp-sum-line" wx:if="{{minJdText}}">京东最低 <text class="cmp-price">¥{{minJdText}}</text></text>
+      </view>
+      <text class="cmp-sum-winner">{{cmpWinnerText}}</text>
+    </view>
+
+    <view class="market-cmp-cols flex-row">
+      <view class="market-cmp-col">
+        <view class="market-cmp-col-head flex-row align-center justify-between">
+          <text class="cmp-col-title">京东</text>
+          <text class="cmp-col-badge win" wx:if="{{cmpWinner === 'jd'}}">更划算</text>
+        </view>
+        <view class="market-cmp-row flex-row align-center" wx:for="{{cmpJd}}" wx:key="id" hover-class="hover-dim" bindtap="onCmpGoodsTap" data-platform="jd" data-index="{{index}}">
+          <image class="market-cmp-img" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="market-cmp-body flex-col">
+            <text class="market-cmp-title text-ellipsis">{{item.title}}</text>
+            <view class="market-cmp-price-row flex-row align-center">
+              <text class="market-cmp-price">¥{{item.afterText}}</text>
+              <text class="market-cmp-origin" wx:if="{{item.couponYuan > 0}}">¥{{item.priceText}}</text>
+            </view>
+          </view>
+          <text class="market-cmp-lowest" wx:if="{{index === 0}}">最低</text>
+        </view>
+        <text class="market-cmp-empty" wx:if="{{cmpJd.length === 0}}">{{pddAuthNotice ? '授权后可搜拼多多' : '暂无结果'}}</text>
+      </view>
+
+      <view class="market-cmp-col">
+        <view class="market-cmp-col-head flex-row align-center justify-between">
+          <text class="cmp-col-title">拼多多</text>
+          <text class="cmp-col-badge win" wx:if="{{cmpWinner === 'pdd'}}">更划算</text>
+        </view>
+        <view class="market-cmp-row flex-row align-center" wx:for="{{cmpPdd}}" wx:key="id" hover-class="hover-dim" bindtap="onCmpGoodsTap" data-platform="pdd" data-index="{{index}}">
+          <image class="market-cmp-img" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="market-cmp-body flex-col">
+            <text class="market-cmp-title text-ellipsis">{{item.title}}</text>
+            <view class="market-cmp-price-row flex-row align-center">
+              <text class="market-cmp-price">¥{{item.afterText}}</text>
+              <text class="market-cmp-origin" wx:if="{{item.couponYuan > 0}}">¥{{item.priceText}}</text>
+            </view>
+          </view>
+          <text class="market-cmp-lowest" wx:if="{{index === 0}}">最低</text>
+        </view>
+        <text class="market-cmp-empty" wx:if="{{cmpPdd.length === 0}}">暂无结果</text>
+      </view>
+    </view>
+  </block>
+
   <!-- 商品瀑布流（双列） -->
-  <view class="market-goods-grid" wx:if="{{goods.length > 0}}">
+  <view class="market-goods-grid" wx:if="{{goods.length > 0 && (!searching || !cmpMode)}}">
     <view class="market-goods-card flex-col" wx:for="{{goods}}" wx:key="id" hover-class="hover-dim" bindtap="onGoodsTap" data-index="{{index}}">
       <view class="market-goods-img-wrap">
         <image class="market-goods-img" src="{{item.image}}" mode="aspectFill"></image>
