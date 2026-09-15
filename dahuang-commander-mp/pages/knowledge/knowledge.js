@@ -130,39 +130,55 @@ Page({
           wx.showToast({ title: "文件超过 5MB，请拆分后再传", icon: "none" });
           return;
         }
-        const { serverUrl, agentState } = app.globalData;
-        wx.showLoading({ title: "上传解析中", mask: true });
-        // 注意：wx.uploadFile 绝不能带手动 Content-Type（会破坏 multipart 边界）
-        wx.uploadFile({
-          url: `${serverUrl}/api/agent/knowledge/upload`,
-          filePath: f.path,
-          name: "file",
-          header: {
-            Authorization: `Bearer ${agentState.token}`,
-            "X-Agent-Version": "7.0",
+        // 微信给的是临时文件名（tmp_xxx），弹可编辑框让主人起个好标题
+        wx.showModal({
+          title: "给文档起个名字",
+          editable: true,
+          placeholderText: "不填则使用文件名",
+          content: (f.name || "").replace(/\.[^.]+$/, "").replace(/^tmp_[A-Za-z0-9]+$/, "文档 " + new Date().toLocaleDateString()),
+          success: (m) => {
+            if (!m.confirm) return; // 取消上传
+            const title = (m.content || "").trim();
+            this.doUpload(f, title);
           },
-          success: (res) => {
-            wx.hideLoading();
-            let data = {};
-            try { data = JSON.parse(res.data || "{}"); } catch (e) {}
-            if (res.statusCode === 200 && data.success) {
-              wx.showToast({ title: "已入库", icon: "none" });
-              this.refreshList();
-            } else {
-              wx.showToast({ title: (data && data.error) || "上传失败", icon: "none", duration: 2600 });
-            }
-          },
-          fail: (err) => {
-            wx.hideLoading();
-            console.warn("[KB_UPLOAD] uploadFile failed:", err);
-            wx.showToast({
-              title: (err && err.errMsg && err.errMsg.indexOf("domain") !== -1)
-                ? "域名未配置：请在后台把 dahuang.land 加入 uploadFile 合法域名"
-                : "网络异常，上传失败",
-              icon: "none",
-              duration: 3000,
-            });
-          },
+        });
+      },
+    });
+  },
+
+  doUpload(f, title) {
+    const { serverUrl, agentState } = app.globalData;
+    wx.showLoading({ title: "上传解析中", mask: true });
+    // 注意：wx.uploadFile 绝不能带手动 Content-Type（会破坏 multipart 边界）
+    wx.uploadFile({
+      url: `${serverUrl}/api/agent/knowledge/upload`,
+      filePath: f.path,
+      name: "file",
+      formData: title ? { title } : {},
+      header: {
+        Authorization: `Bearer ${agentState.token}`,
+        "X-Agent-Version": "7.0",
+      },
+      success: (res) => {
+        wx.hideLoading();
+        let data = {};
+        try { data = JSON.parse(res.data || "{}"); } catch (e) {}
+        if (res.statusCode === 200 && data.success) {
+          wx.showToast({ title: "已入库", icon: "none" });
+          this.refreshList();
+        } else {
+          wx.showToast({ title: (data && data.error) || "上传失败", icon: "none", duration: 2600 });
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading();
+        console.warn("[KB_UPLOAD] uploadFile failed:", err);
+        wx.showToast({
+          title: (err && err.errMsg && err.errMsg.indexOf("domain") !== -1)
+            ? "域名未配置：请在后台把 dahuang.land 加入 uploadFile 合法域名"
+            : "网络异常，上传失败",
+          icon: "none",
+          duration: 3000,
         });
       },
     });
