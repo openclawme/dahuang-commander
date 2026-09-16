@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '京东授权改复制京东直链：App 检测剪贴板直接打开确认，免密码';
+const desc = '京东授权免密双路径引导：微信浏览器登录态 / 本机号码一键登录';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
