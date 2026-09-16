@@ -793,7 +793,7 @@ Page({
             success: () => {
               wx.showModal({
                 title: "授权链接已复制",
-                content: "打开浏览器（系统会提示打开复制的链接）→ 页面点「打开京东App 授权」→ App 内一键确认，免输密码。\n\nApp 未响应就点「在浏览器内直接授权」用短信验证码。完成后回到本页，状态自动刷新。",
+                content: "打开浏览器（系统会提示打开复制的链接）→ 点「前往京东授权」→ 手机验证码登录（无需记密码）。\n\n电脑浏览器打开则可用京东App扫码授权，完全免输入。\n\n完成后回到本页，状态自动刷新。",
                 confirmText: "知道了",
                 showCancel: false,
                 success: () => this.refreshJdAuthStatus()
