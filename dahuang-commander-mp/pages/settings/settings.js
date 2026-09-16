@@ -784,17 +784,10 @@ Page({
       success: (res) => {
         wx.hideLoading();
         if (res.statusCode === 200 && res.data && res.data.success && res.data.url) {
-          wx.setClipboardData({
-            data: res.data.url,
-            success: () => {
-              wx.showModal({
-                title: "京东授权",
-                content: "授权链接已复制，请粘贴到浏览器打开，登录京东账号并点击授权。完成后回到这里，状态会自动更新。",
-                confirmText: "知道了",
-                showCancel: false,
-                success: () => this.refreshJdAuthStatus()
-              });
-            }
+          // 中转页流程：微信内提示「在浏览器中打开」→ 系统浏览器自动跳京东授权页
+          // → 京东页面「打开京东App」一键授权（免输密码）；授权完成后返回本页状态自动刷新
+          wx.navigateTo({
+            url: `/pages/jd-auth/jd-auth?url=${encodeURIComponent(res.data.url)}`,
           });
         } else {
           wx.showToast({ title: "生成授权链接失败", icon: "none" });

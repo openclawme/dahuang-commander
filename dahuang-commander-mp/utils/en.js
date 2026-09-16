@@ -102,7 +102,7 @@ module.exports = {
     op_failed: "Operation failed",
 },
   dahuang: {
-    nav_title: "Console",
+    nav_title: "Dahuang",
     tab_forum: "Forum",
     tab_trial: "Trials",
     tab_arena: "Arena",
@@ -197,7 +197,7 @@ module.exports = {
     mini_btn_send: "Dispatch"
   },
   index: {
-    nav_title: "Feed",
+    nav_title: "Talk",
     you: "You",
     decisions_banner: "⚠️ {count} items need your decision",
     system_label: "System",

@@ -19,7 +19,7 @@ page { background: #f4f1ea; }
   border-radius: 999rpx;
 }
 .seg.active {
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   color: #ffffff;
   font-weight: bold;
 }
@@ -62,7 +62,7 @@ page { background: #f4f1ea; }
   color: #ffffff;
   font-size: 26rpx;
 }
-.sched-check.checked { background: #47857a; border-color: #47857a; }
+.sched-check.checked { background: #5b7a8c; border-color: #5b7a8c; }
 .sched-main { flex: 1; min-width: 0; }
 .sched-line { margin-bottom: 6rpx; }
 .sched-time { font-size: 28rpx; font-weight: bold; color: #9e2a2b; margin-right: 14rpx; }
@@ -74,7 +74,7 @@ page { background: #f4f1ea; }
   color: #6b5b4a;
 }
 .kind-reminder { color: #9e2a2b; border-color: rgba(158, 42, 43, 0.35); }
-.kind-task { color: #47857a; border-color: rgba(71, 133, 122, 0.35); }
+.kind-task { color: #5b7a8c; border-color: rgba(91, 122, 140, 0.35); }
 .kind-renewal { color: #b45309; border-color: rgba(180, 83, 9, 0.35); }
 .kind-bill { color: #b45309; border-color: rgba(180, 83, 9, 0.35); }
 .kind-delivery { color: #5b7a8c; border-color: rgba(91, 122, 140, 0.35); }
@@ -88,7 +88,7 @@ page { background: #f4f1ea; }
   width: 96rpx;
   height: 96rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   color: #ffffff;
   font-size: 48rpx;
   line-height: 96rpx;
@@ -129,15 +129,15 @@ page { background: #f4f1ea; }
 .sheet-actions { gap: 20rpx; }
 .sheet-btn { flex: 1; text-align: center; border-radius: 999rpx; padding: 22rpx 0; font-size: 28rpx; }
 .sheet-btn-plain { background: rgba(59, 48, 36, 0.08); color: #6b5b4a; }
-.sheet-btn-primary { background: linear-gradient(135deg, #9e2a2b, #be123c); color: #ffffff; font-weight: bold; }
+.sheet-btn-primary { background: linear-gradient(135deg, #9e2a2b, #a93230); color: #ffffff; font-weight: bold; }
 
 .sched-time-muted { color: #8c7d68 !important; font-weight: normal !important; }
 .sched-repeat {
   margin-left: 14rpx;
   font-size: 20rpx;
-  color: #47857a;
-  background: rgba(71, 133, 122, 0.08);
+  color: #5b7a8c;
+  background: rgba(91, 122, 140, 0.08);
   border-radius: 999rpx;
   padding: 2rpx 12rpx;
 }
-.sheet-btn-ghost { background: rgba(71, 133, 122, 0.1); color: #47857a; }
+.sheet-btn-ghost { background: rgba(91, 122, 140, 0.1); color: #5b7a8c; }

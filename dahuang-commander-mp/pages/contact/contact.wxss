@@ -30,7 +30,7 @@
   width: 140rpx;
   height: 140rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   margin-bottom: 20rpx;
 }
 
@@ -51,7 +51,7 @@
 }
 
 .online-on {
-  background: #3b5e59;
+  background: #5b7a8c;
 }
 
 .online-off {
@@ -105,7 +105,7 @@
 
 .dm-btn {
   width: 100%;
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   color: #ffffff;
   font-size: 28rpx;
   font-weight: bold;
@@ -257,7 +257,7 @@
 }
 
 .form-save-btn {
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   color: #ffffff;
 }
 

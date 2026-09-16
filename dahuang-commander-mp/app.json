@@ -22,7 +22,8 @@
     "pages/market/market",
     "pages/knowledge/knowledge",
     "pages/knowledge-detail/knowledge-detail",
-    "pages/mcp/mcp"
+    "pages/mcp/mcp",
+    "pages/jd-auth/jd-auth"
   ],
   "window": {
     "backgroundTextStyle": "light",

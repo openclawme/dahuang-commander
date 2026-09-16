@@ -1,17 +1,12 @@
 <view class="container">
-  <!-- Top Tab Switching Bar（文字方印，与全端印章语言一致） -->
+  <!-- Top Tab Switching Bar（纯文字分页：避免「单字方印 + 同字文字标签」重复） -->
+  <!-- 顶部导航：三项原地切换面板 + 最后一项为"跳转集市"（带 › 区分，避免同形不同行为） -->
   <view class="dahuang-tab-navbar flex-row align-center">
-    <view class="dahuang-tab-nav-item {{activeTab === 'forum' ? 'active' : ''}}" bindtap="switchTab" hover-class="hover-dim" data-tab="forum">
-      <text class="tab-icon">论</text> {{t.dahuang.tab_forum}}
-    </view>
-    <view class="dahuang-tab-nav-item {{activeTab === 'trial' ? 'active' : ''}}" bindtap="switchTab" hover-class="hover-dim" data-tab="trial">
-      <text class="tab-icon">试</text> {{t.dahuang.tab_trial}}
-    </view>
-    <view class="dahuang-tab-nav-item {{activeTab === 'agents' ? 'active' : ''}}" bindtap="switchTab" hover-class="hover-dim" data-tab="agents">
-      <text class="tab-icon">神</text> {{t.dahuang.tab_agents}}
-    </view>
-    <view class="dahuang-tab-nav-item" bindtap="switchTab" hover-class="hover-dim" data-tab="market">
-      <text class="tab-icon">市</text> 天天优惠
+    <view class="dahuang-tab-nav-item {{activeTab === 'forum' ? 'active' : ''}}" bindtap="switchTab" hover-class="hover-dim" data-tab="forum">{{t.dahuang.tab_forum}}</view>
+    <view class="dahuang-tab-nav-item {{activeTab === 'trial' ? 'active' : ''}}" bindtap="switchTab" hover-class="hover-dim" data-tab="trial">{{t.dahuang.tab_trial}}</view>
+    <view class="dahuang-tab-nav-item {{activeTab === 'agents' ? 'active' : ''}}" bindtap="switchTab" hover-class="hover-dim" data-tab="agents">{{t.dahuang.tab_agents}}</view>
+    <view class="dahuang-tab-nav-item dahuang-tab-nav-link" bindtap="switchTab" hover-class="hover-dim" data-tab="market">
+      {{t.dahuang.tab_market}}<text class="tab-link-arrow">›</text>
     </view>
   </view>
 
@@ -119,7 +114,7 @@
               class="cyber-btn mini-btn {{postCommentText[item.id] ? 'active' : ''}}" 
               bindtap="onSendDirectComment" 
               data-id="{{item.id}}"
-              style="background: linear-gradient(135deg, #9e2a2b, #be123c); color: #fff; border: none; flex-shrink: 0;"
+              style="background: linear-gradient(135deg, #9e2a2b, #a93230); color: #fff; border: none; flex-shrink: 0;"
             >
               发表评论
             </button>
@@ -484,7 +479,7 @@
                     <view class="mini-task-item flex-col" wx:for="{{item.tasks}}" wx:for-item="task" wx:key="id">
                       <view class="flex-row align-center justify-between">
                         <view class="flex-row align-center" style="gap: 8rpx; min-width: 0;">
-                          <icon type="{{task.status === 'SUCCESS' ? 'success' : (task.status === 'FAILED' ? 'warn' : 'waiting')}}" size="10" color="{{task.status === 'SUCCESS' ? '#3b5e59' : (task.status === 'FAILED' ? '#be123c' : '#9e2a2b')}}"></icon>
+                          <icon type="{{task.status === 'SUCCESS' ? 'success' : (task.status === 'FAILED' ? 'warn' : 'waiting')}}" size="10" color="{{task.status === 'SUCCESS' ? '#5b7a8c' : (task.status === 'FAILED' ? '#a93230' : '#9e2a2b')}}"></icon>
                           <text class="mini-task-title {{task.status === 'SUCCESS' ? 'done' : ''}} text-ellipsis" style="color: {{task.status === 'SUCCESS' ? '#6b5b4a' : '#8c7d68'}}">{{task.desc || task.title}}</text>
                         </view>
                         <text class="mini-task-badge status-{{task.status}}">{{task.status}}</text>

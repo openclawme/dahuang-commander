@@ -16,9 +16,9 @@
 }
 
 .bubble-error {
-  border: 1px solid rgba(190, 18, 60, 0.6) !important;
-  background: rgba(190, 18, 60, 0.12) !important;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(190, 18, 60, 0.25) !important;
+  border: 1px solid rgba(169, 50, 48, 0.6) !important;
+  background: rgba(169, 50, 48, 0.12) !important;
+  box-shadow: 0 6rpx 18rpx -6rpx rgba(169, 50, 48, 0.25) !important;
 }
 
 .avatar-ring {
@@ -64,16 +64,16 @@
 }
 
 .online-pulse {
-  background-color: rgba(59, 94, 89, 0.15);
-  border: 1rpx solid #3b5e59;
-  color: #3b5e59;
+  background-color: rgba(91, 122, 140, 0.15);
+  border: 1rpx solid #5b7a8c;
+  color: #5b7a8c;
   animation: pulse-green 2s infinite alternate;
 }
 
 .offline-glow {
-  background-color: rgba(190, 18, 60, 0.15);
-  border: 1rpx solid #be123c;
-  color: #be123c;
+  background-color: rgba(169, 50, 48, 0.15);
+  border: 1rpx solid #a93230;
+  color: #a93230;
 }
 
 .status-dot {
@@ -124,7 +124,7 @@
 }
 
 .text-emerald {
-  color: #3b5e59;
+  color: #5b7a8c;
 }
 
 /* 历史遗留幽灵类：补上浅色纸主题下的语义色，避免白字白底事故 */
@@ -138,7 +138,7 @@
   color: #6b5b4a;
 }
 .text-green {
-  color: #3b5e59;
+  color: #5b7a8c;
 }
 .text-ellipsis {
   white-space: nowrap;
@@ -269,7 +269,7 @@
 
 .panel-subtitle {
   font-size: 24rpx;
-  color: rgba(59, 94, 89, 0.5);
+  color: rgba(91, 122, 140, 0.5);
   letter-spacing: 2rpx;
 }
 
@@ -286,7 +286,7 @@
   flex: 1;
   min-height: 0;
   height: 100%;
-  border: 1rpx solid rgba(59, 94, 89, 0.1);
+  border: 1rpx solid rgba(91, 122, 140, 0.1);
   background-color: rgba(244, 241, 234, 0.8);
   border-radius: 8rpx;
   padding: 16rpx;
@@ -326,7 +326,7 @@
 }
 
 .tag-ERROR {
-  color: #be123c;
+  color: #a93230;
 }
 
 .msg-SYSTEM {
@@ -419,9 +419,9 @@
   margin-right: 8rpx;
 }
 
-.dot-red { color: #be123c; }
+.dot-red { color: #a93230; }
 .dot-yellow { color: #d97706; }
-.dot-green { color: #3b5e59; }
+.dot-green { color: #5b7a8c; }
 
 .console-title {
   font-size: 24rpx;
@@ -439,8 +439,8 @@
 }
 
 .console-clear-btn:active {
-  background: rgba(190, 18, 60, 0.1);
-  color: #be123c;
+  background: rgba(169, 50, 48, 0.1);
+  color: #a93230;
 }
 
 .console-body {
@@ -563,11 +563,11 @@
 }
 
 .tab-active.text-emerald {
-  color: #3b5e59;
+  color: #5b7a8c;
 }
 
 .tab-active.text-emerald::after {
-  background-color: #3b5e59;
+  background-color: #5b7a8c;
   box-shadow: 0 6rpx 16rpx -6rpx rgba(59, 48, 36, 0.2);
 }
 
@@ -588,9 +588,9 @@
   border: none;
   background-color: transparent;
   border-radius: 0;
-  padding: 16rpx 10rpx;
+  padding: 8rpx 10rpx 16rpx;
   box-sizing: border-box;
-  margin-top: 10rpx;
+  margin-top: 0;
 }
 
 .chat-item {
@@ -734,11 +734,11 @@
   border-radius: 999rpx;
   transition: background 0.3s ease;
 }
-.seg-done { background: #3b5e59; }
-.seg-failed { background: #be123c; }
+.seg-done { background: #5b7a8c; }
+.seg-failed { background: #a93230; }
 .seg-pending { background: rgba(91, 122, 140, 0.15); }
 .seg-active {
-  background: linear-gradient(90deg, rgba(59, 94, 89, 0.3) 25%, rgba(59, 94, 89, 0.95) 50%, rgba(59, 94, 89, 0.3) 75%);
+  background: linear-gradient(90deg, rgba(91, 122, 140, 0.3) 25%, rgba(91, 122, 140, 0.95) 50%, rgba(91, 122, 140, 0.3) 75%);
   background-size: 200% 100%;
   animation: seg-flow 1.2s linear infinite;
 }
@@ -760,7 +760,7 @@
   bottom: 0;
   width: 40%;
   border-radius: 999rpx;
-  background: linear-gradient(90deg, rgba(59, 94, 89, 0.25), rgba(59, 94, 89, 0.85), rgba(59, 94, 89, 0.25));
+  background: linear-gradient(90deg, rgba(91, 122, 140, 0.25), rgba(91, 122, 140, 0.85), rgba(91, 122, 140, 0.25));
   animation: ind-slide 1.6s ease-in-out infinite;
 }
 @keyframes ind-slide {
@@ -799,8 +799,8 @@
   text-align: center;
   flex-shrink: 0;
 }
-.mark-done { color: #3b5e59; }
-.mark-failed { color: #be123c; }
+.mark-done { color: #5b7a8c; }
+.mark-failed { color: #a93230; }
 .mark-running { color: #9e2a2b; }
 .mark-pending { color: #b9c4ca; }
 .ps-step-desc {
@@ -925,9 +925,9 @@
 }
 
 .bubble-task-status-badge.status-SUCCESS {
-  color: #3b5e59;
-  background: rgba(59, 94, 89, 0.1);
-  border: 1rpx solid rgba(59, 94, 89, 0.25);
+  color: #5b7a8c;
+  background: rgba(91, 122, 140, 0.1);
+  border: 1rpx solid rgba(91, 122, 140, 0.25);
 }
 
 .bubble-task-status-badge.status-PROCESSING {
@@ -944,9 +944,9 @@
 }
 
 .bubble-task-status-badge.status-FAILED {
-  color: #be123c;
-  background: rgba(190, 18, 60, 0.1);
-  border: 1rpx solid rgba(190, 18, 60, 0.25);
+  color: #a93230;
+  background: rgba(169, 50, 48, 0.1);
+  border: 1rpx solid rgba(169, 50, 48, 0.25);
 }
 
 .bubble-step-progress-track {
@@ -966,7 +966,7 @@
 }
 
 .bubble-step-progress-fill.fill-SUCCESS {
-  background: linear-gradient(90deg, #3b5e59, #3b5e59);
+  background: linear-gradient(90deg, #5b7a8c, #5b7a8c);
   box-shadow: 0 6rpx 16rpx -8rpx rgba(59, 48, 36, 0.12);
 }
 
@@ -978,7 +978,7 @@
 }
 
 .bubble-step-progress-fill.fill-FAILED {
-  background: linear-gradient(90deg, #be123c, #be123c);
+  background: linear-gradient(90deg, #a93230, #a93230);
   box-shadow: 0 6rpx 16rpx -8rpx rgba(59, 48, 36, 0.12);
 }
 
@@ -1246,28 +1246,28 @@
 }
 
 .glow-red-btn {
-  background: rgba(190, 18, 60, 0.1);
-  border: 1rpx solid rgba(190, 18, 60, 0.4);
-  color: #be123c;
+  background: rgba(169, 50, 48, 0.1);
+  border: 1rpx solid rgba(169, 50, 48, 0.4);
+  color: #a93230;
   box-shadow: 0 6rpx 16rpx -8rpx rgba(59, 48, 36, 0.12);
 }
 
 .glow-red-btn:active {
-  background: rgba(190, 18, 60, 0.25);
-  border-color: #be123c;
+  background: rgba(169, 50, 48, 0.25);
+  border-color: #a93230;
   box-shadow: 0 6rpx 16rpx -8rpx rgba(59, 48, 36, 0.12);
 }
 
 .glow-emerald-btn {
-  background: rgba(59, 94, 89, 0.1);
-  border: 1rpx solid rgba(59, 94, 89, 0.4);
-  color: #3b5e59;
+  background: rgba(91, 122, 140, 0.1);
+  border: 1rpx solid rgba(91, 122, 140, 0.4);
+  color: #5b7a8c;
   box-shadow: 0 6rpx 16rpx -8rpx rgba(59, 48, 36, 0.12);
 }
 
 .glow-emerald-btn:active {
-  background: rgba(59, 94, 89, 0.25);
-  border-color: #3b5e59;
+  background: rgba(91, 122, 140, 0.25);
+  border-color: #5b7a8c;
   box-shadow: 0 6rpx 16rpx -8rpx rgba(59, 48, 36, 0.12);
 }
 
@@ -1310,8 +1310,8 @@
 }
 
 .logs-toggle-badge {
-  background: rgba(59, 94, 89, 0.08);
-  border: 1rpx solid rgba(59, 94, 89, 0.3);
+  background: rgba(91, 122, 140, 0.08);
+  border: 1rpx solid rgba(91, 122, 140, 0.3);
   border-radius: 30rpx;
   padding: 8rpx 18rpx;
   margin: 0;
@@ -1332,7 +1332,7 @@
 .logs-text {
   font-size: 24rpx;
   font-weight: bold;
-  color: #3b5e59;
+  color: #5b7a8c;
 }
 
 /* ==========================================================================
@@ -1478,7 +1478,7 @@
 }
 
 .wechat-submit-btn {
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   color: #ffffff;
   font-size: 28rpx;
   height: 68rpx;
@@ -1520,10 +1520,10 @@
   right: 0;
   height: 60vh;
   background: #090d16;
-  border-top: 2rpx solid #3b5e59;
+  border-top: 2rpx solid #5b7a8c;
   border-top-left-radius: 32rpx;
   border-top-right-radius: 32rpx;
-  box-shadow: 0 -10rpx 40rpx rgba(59, 94, 89, 0.15);
+  box-shadow: 0 -10rpx 40rpx rgba(91, 122, 140, 0.15);
   display: flex;
   flex-direction: column;
   padding: 32rpx 24rpx;
@@ -1537,7 +1537,7 @@
 }
 
 .logs-popup-header {
-  border-bottom: 1rpx solid rgba(59, 94, 89, 0.15);
+  border-bottom: 1rpx solid rgba(91, 122, 140, 0.15);
   padding-bottom: 16rpx;
   margin-bottom: 16rpx;
 }
@@ -1573,9 +1573,9 @@
 }
 
 .logs-clear-btn:active {
-  background: rgba(190, 18, 60, 0.1);
-  color: #be123c;
-  border-color: rgba(190, 18, 60, 0.2);
+  background: rgba(169, 50, 48, 0.1);
+  color: #a93230;
+  border-color: rgba(169, 50, 48, 0.2);
 }
 
 .logs-close-btn {
@@ -1787,7 +1787,7 @@
 
 .seal-color-0 {
   background: radial-gradient(circle, #7f1d1d 0%, #450a0a 100%);
-  border: 2rpx solid #be123c;
+  border: 2rpx solid #a93230;
   box-shadow: 0 6rpx 16rpx -8rpx rgba(59, 48, 36, 0.12);
 }
 
@@ -1799,7 +1799,7 @@
 
 .seal-color-2 {
   background: radial-gradient(circle, #064e3b 0%, #022c22 100%);
-  border: 2rpx solid #3b5e59;
+  border: 2rpx solid #5b7a8c;
   box-shadow: 0 6rpx 16rpx -8rpx rgba(59, 48, 36, 0.12);
 }
 
@@ -1920,10 +1920,6 @@
   border: 1rpx solid rgba(158, 42, 43, 0.4);
   color: #9e2a2b;
   font-weight: bold;
-}
-
-.tab-icon {
-  font-size: 24rpx;
 }
 
 /* Dynamic Tab Panes */
@@ -2094,15 +2090,15 @@
 }
 
 .stance-agree {
-  background: rgba(59, 94, 89, 0.12) !important;
-  border: 1rpx solid rgba(59, 94, 89, 0.3) !important;
-  color: #3b5e59 !important;
+  background: rgba(91, 122, 140, 0.12) !important;
+  border: 1rpx solid rgba(91, 122, 140, 0.3) !important;
+  color: #5b7a8c !important;
 }
 
 .stance-disagree {
-  background: rgba(190, 18, 60, 0.12) !important;
-  border: 1rpx solid rgba(190, 18, 60, 0.3) !important;
-  color: #be123c !important;
+  background: rgba(169, 50, 48, 0.12) !important;
+  border: 1rpx solid rgba(169, 50, 48, 0.3) !important;
+  color: #a93230 !important;
 }
 
 .post-comment-composer {
@@ -2232,11 +2228,11 @@
 }
 
 .choice-coop {
-  color: #3b5e59;
+  color: #5b7a8c;
 }
 
 .choice-betray {
-  color: #be123c;
+  color: #a93230;
 }
 
 .dilemma-control-cockpit {
@@ -2280,7 +2276,7 @@
 }
 
 .btn-coop {
-  background: linear-gradient(135deg, #9e2a2b, #be123c) !important;
+  background: linear-gradient(135deg, #9e2a2b, #a93230) !important;
   border: none !important;
   color: #ffffff !important;
   box-shadow: 0 6rpx 16rpx -8rpx rgba(158, 42, 43, 0.35);
@@ -2361,7 +2357,7 @@
 }
 
 .node-dot.energy-lvl-high {
-  background: #be123c;
+  background: #a93230;
   box-shadow: 0 6rpx 16rpx -6rpx rgba(59, 48, 36, 0.2);
 }
 
@@ -2371,7 +2367,7 @@
 }
 
 .node-dot.energy-lvl-low {
-  background: #3b5e59;
+  background: #5b7a8c;
   box-shadow: 0 6rpx 16rpx -6rpx rgba(59, 48, 36, 0.2);
 }
 
@@ -2453,7 +2449,7 @@
 }
 
 .drawer-occupy-btn {
-  background: linear-gradient(135deg, #9e2a2b, #be123c) !important;
+  background: linear-gradient(135deg, #9e2a2b, #a93230) !important;
   color: #ffffff !important;
   font-size: 24rpx;
   font-weight: bold;
@@ -2590,8 +2586,8 @@
 .sub-score-badge {
   font-size: 24rpx;
   font-weight: bold;
-  color: #3b5e59;
-  background: rgba(59, 94, 89, 0.1);
+  color: #5b7a8c;
+  background: rgba(91, 122, 140, 0.1);
   padding: 2rpx 8rpx;
   border-radius: 6rpx;
 }
@@ -2618,7 +2614,7 @@
 }
 
 .compiler-submit-btn {
-  background: linear-gradient(135deg, #9e2a2b, #be123c) !important;
+  background: linear-gradient(135deg, #9e2a2b, #a93230) !important;
   color: #ffffff !important;
   font-size: 24rpx;
   font-weight: bold;
@@ -2640,15 +2636,15 @@
 }
 
 .compile-success {
-  background: rgba(59, 94, 89, 0.08);
-  border: 1rpx solid rgba(59, 94, 89, 0.25);
-  color: #3b5e59;
+  background: rgba(91, 122, 140, 0.08);
+  border: 1rpx solid rgba(91, 122, 140, 0.25);
+  color: #5b7a8c;
 }
 
 .compile-error {
-  background: rgba(190, 18, 60, 0.08);
-  border: 1rpx solid rgba(190, 18, 60, 0.25);
-  color: #be123c;
+  background: rgba(169, 50, 48, 0.08);
+  border: 1rpx solid rgba(169, 50, 48, 0.25);
+  color: #a93230;
 }
 
 .feedback-text {
@@ -2670,7 +2666,8 @@
 
 /* 聊天面板：收紧左右留白，提高横向空间利用率 */
 .chat-panel {
-  padding: 20rpx 4rpx;
+  /* 顶部不再留内边距：消息区上方的空白由容器统一控制，避免多层叠加 */
+  padding: 0 4rpx 20rpx;
   background: transparent;
   border: none;
   box-shadow: none;
@@ -2708,6 +2705,7 @@
 
 /* ===== 待主人决策横幅（与 quote-banner 同语言：朱砂细描边条） ===== */
 .decision-banner {
+  margin-top: 4rpx;
   background: rgba(158, 42, 43, 0.06);
   border: none;
   border-left: 6rpx solid #9e2a2b;
@@ -3578,15 +3576,15 @@
   width: 14rpx;
   height: 14rpx;
   border-radius: 50%;
-  background: #3b5e59;
-  box-shadow: 0 0 0 6rpx rgba(59, 94, 89, 0.12);
+  background: #5b7a8c;
+  box-shadow: 0 0 0 6rpx rgba(91, 122, 140, 0.12);
   flex-shrink: 0;
   animation: quickTaskPulse 1.8s ease-in-out infinite;
 }
 
 @keyframes quickTaskPulse {
-  0%, 100% { box-shadow: 0 0 0 4rpx rgba(59, 94, 89, 0.10); }
-  50% { box-shadow: 0 0 0 9rpx rgba(59, 94, 89, 0.16); }
+  0%, 100% { box-shadow: 0 0 0 4rpx rgba(91, 122, 140, 0.10); }
+  50% { box-shadow: 0 0 0 9rpx rgba(91, 122, 140, 0.16); }
 }
 
 .quick-task-main {
@@ -3613,14 +3611,14 @@
 
 .quick-task-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #7fa0b2, #3b5e59);
+  background: linear-gradient(90deg, #7fa0b2, #5b7a8c);
   border-radius: 4rpx;
 }
 
 .quick-task-progress {
   font-size: 22rpx;
   font-weight: bold;
-  color: #3b5e59;
+  color: #5b7a8c;
   flex-shrink: 0;
 }
 
@@ -3914,7 +3912,7 @@
   display: block;
   font-size: 24rpx;
   font-weight: bold;
-  color: #3b5e59;
+  color: #5b7a8c;
   padding: 16rpx 18rpx 8rpx;
 }
 .msg-table-scroll { width: 100%; }
@@ -3965,3 +3963,50 @@
 }
 
 
+
+/* 悬浮按钮首次引导气泡（只出现一次） */
+.fab-guide {
+  position: absolute;
+  z-index: 1000;
+  transform: translate(-100%, -6rpx);
+  margin-left: -18rpx;
+  max-width: 420rpx;
+  background: #fdfbf7;
+  border: 1rpx solid rgba(158, 42, 43, 0.28);
+  border-radius: 16rpx;
+  padding: 16rpx 20rpx;
+  box-shadow: 0 10rpx 26rpx -12rpx rgba(59, 48, 36, 0.42);
+}
+.fab-guide-text {
+  font-size: 24rpx;
+  color: #6b5b4a;
+  line-height: 1.5;
+}
+.fab-guide-arrow {
+  position: absolute;
+  right: -10rpx;
+  top: 28rpx;
+  width: 18rpx;
+  height: 18rpx;
+  background: #fdfbf7;
+  border-right: 1rpx solid rgba(158, 42, 43, 0.28);
+  border-top: 1rpx solid rgba(158, 42, 43, 0.28);
+  transform: rotate(45deg);
+}
+
+/* 决策卡收口态：处理完不再挂按钮，卡片整体降噪 */
+.decision-card-done {
+  opacity: 0.68;
+  border-color: rgba(59, 48, 36, 0.16);
+  background: #f7f4ec;
+}
+.decision-card-done .decision-remind-badge {
+  background: rgba(91, 122, 140, 0.32);
+}
+.decision-card-done .sched-remind-title {
+  color: #8c7d68;
+  font-weight: 600;
+}
+.decision-card-done .sched-remind-text {
+  color: #a2907a;
+}

@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '决策卡去重：登录摘要与实时推送合并，不再出现两个立即处理按钮';
+const desc = '京东授权改为中转页流程：浏览器内自动跳转，可唤起京东App一键授权';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

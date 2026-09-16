@@ -200,6 +200,19 @@ Page({
   },
 
   deleteItem(id) {
+    const item = this.findItem(id);
+    const title = item ? item.title : "这条日程";
+    wx.showModal({
+      title: "删除日程",
+      content: `确定删除「${title}」吗？删除后无法恢复。`,
+      confirmColor: "#9e2a2b",
+      success: (r) => {
+        if (r.confirm) this.doDeleteItem(id);
+      }
+    });
+  },
+
+  doDeleteItem(id) {
     const { serverUrl, agentState } = app.globalData;
     wx.request({
       url: `${serverUrl}/api/agent/schedule/${encodeURIComponent(id)}`,

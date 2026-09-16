@@ -75,7 +75,7 @@
   width: 72rpx;
   height: 72rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   flex-shrink: 0;
 }
 
@@ -105,7 +105,7 @@
 }
 
 .check-on {
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   border-color: #9e2a2b;
 }
 
@@ -121,7 +121,7 @@
 
 .create-btn {
   width: 100%;
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   color: #ffffff;
   font-size: 28rpx;
   font-weight: bold;

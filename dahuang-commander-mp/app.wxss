@@ -47,8 +47,8 @@ view, scroll-view, text, input, button {
 }
 
 .glow-emerald {
-  box-shadow: 0 10rpx 30rpx -8rpx rgba(59, 94, 89, 0.18);
-  border-color: rgba(59, 94, 89, 0.35);
+  box-shadow: 0 10rpx 30rpx -8rpx rgba(91, 122, 140, 0.18);
+  border-color: rgba(91, 122, 140, 0.35);
 }
 
 /* Agent 生成的 HTML 卡片（rich-text）在浅色纸底上的默认排版 */
@@ -106,15 +106,15 @@ view, scroll-view, text, input, button {
 }
 
 .badge-success {
-  color: #3b5e59;
-  border-color: rgba(59, 94, 89, 0.4);
-  background-color: rgba(59, 94, 89, 0.1);
+  color: #5b7a8c;
+  border-color: rgba(91, 122, 140, 0.4);
+  background-color: rgba(91, 122, 140, 0.1);
 }
 
 .badge-failed {
-  color: #be123c;
-  border-color: rgba(190, 18, 60, 0.4);
-  background-color: rgba(190, 18, 60, 0.1);
+  color: #a93230;
+  border-color: rgba(169, 50, 48, 0.4);
+  background-color: rgba(169, 50, 48, 0.1);
 }
 
 /* Scrollbars - Hidden/Minimalist */

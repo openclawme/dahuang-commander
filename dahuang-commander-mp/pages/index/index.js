@@ -73,6 +73,7 @@ Page({
     messageMenu: null,
     toLogView: "",
     toChatView: "",
+    showFabGuide: false,
     latestCommand: "",
     activeTab: "chat", // chat, forum, arena, alchemy
     pendingApproval: null, 
@@ -155,6 +156,11 @@ Page({
 
   onShow() {
     const dict = i18n.getDict() || {};
+    // 悬浮按钮首启引导：只在没看过时展示一次
+    try {
+      this.setData({ showFabGuide: !wx.getStorageSync("dahuangFabGuideSeen") });
+    } catch (e) {}
+
     // 身份纪元：切换 Agent 后清空上一元神的页面级缓存（推荐池/展开态/渲染缓存），
     // 否则快捷面板等仍会显示旧身份的数据
     const epoch = app.globalData.identityEpoch || 0;
@@ -211,6 +217,26 @@ Page({
     wx.navigateTo({ url: "/pages/market/market" });
   },
 
+  /**
+   * 决策卡收口：待办清零时把对话里所有决策卡标记为已处理（落盘）。
+   * 只标记不删除——保留"我处理过这件事"的痕迹，避免对话记录突然少一块。
+   */
+  markDecisionCardsResolved() {
+    const hist = (app.globalData && app.globalData.chatHistory) || [];
+    let changed = false;
+    hist.forEach((m) => {
+      if (m && m.sender === "system" && m.sysKind === "decision" && m.sysResolved !== true) {
+        m.sysResolved = true;
+        m.sysResolvedAt = Date.now();
+        changed = true;
+      }
+    });
+    if (changed) {
+      try { app.saveChatHistory(); } catch (e) {}
+      this.syncGlobalData();
+    }
+  },
+
   openNotifications() {
     wx.navigateTo({ url: "/pages/notifications/notifications" });
   },
@@ -220,6 +246,7 @@ Page({
     app.refreshPendingDecisions((count) => {
       this.setData({ pendingCount: count });
       // 登录摘要：本次会话首次发现待办时在主对话插一条系统摘要（卡片就地带「立即处理」按钮）
+      if (count === 0 && app.globalData.pendingDecisionLoaded) this.markDecisionCardsResolved();
       if (count > 0 && !app.globalData.pendingSummaryShown) {
         app.globalData.pendingSummaryShown = true;
         const titles = (app.globalData.pendingDecisionTitles || []).slice(0, 3).map(t => `「${t}」`).join("、");
@@ -249,8 +276,13 @@ Page({
     const cmdBatch = this.pickBatch(aiPool, 0, 4);
     const recBatch = this.pickBatch(aiPool, 4, 4);
     const tasks = this.buildQuickTasks();
+    if (this.data.showFabGuide) {
+      try { wx.setStorageSync("dahuangFabGuideSeen", 1); } catch (e) {}
+    }
     this.setData({
       showQuickPanel: true,
+      // 打开面板即视为已理解悬浮按钮：引导气泡消失并落盘
+      ...(this.data.showFabGuide ? { showFabGuide: false } : {}),
       quickPanelLoading: !aiPool.length,
       quickPanelPos: this.computeQuickPanelPos(),
       quickCommands: cmdBatch.batch,
@@ -340,6 +372,11 @@ Page({
 
   closeQuickPanel() {
     this.setData({ showQuickPanel: false });
+  },
+
+  dismissFabGuide() {
+    this.setData({ showFabGuide: false });
+    try { wx.setStorageSync("dahuangFabGuideSeen", 1); } catch (e) {}
   },
 
   openTasksFromPanel() {
@@ -617,6 +654,9 @@ Page({
   onPendingDecision(data) {
     if (data && typeof data.count === "number") {
       this.setData({ pendingCount: data.count });
+      // 决策中心处理完返回：权威确认归零才把对话里的决策卡收口
+      // （请求失败也会回传 0，那种情况不能误标成已处理）
+      if (data.count === 0 && app.globalData.pendingDecisionLoaded) this.markDecisionCardsResolved();
     }
   },
 
@@ -855,6 +895,18 @@ Page({
         unplacedCharts: layout2.unplacedCharts,
         psDisplay: m.progressState ? buildPsDisplay(m.progressState, this.data.expandedTasks && this.data.expandedTasks[m.id]) : null
       };
+    });
+
+    // 决策卡状态派生（渲染时计算，不写死快照）：
+    // - 已被主动收口（sysResolved）或当前确实没有待办 → 视为已处理
+    // - 有未处理的决策卡 → 件数用实时值，不用卡片写入时的旧快照
+    const liveDecisionCount = (app.globalData && app.globalData.pendingDecisionCount) || 0;
+    const decisionCountLoaded = !!(app.globalData && app.globalData.pendingDecisionLoaded);
+    processedChatHistory.forEach((m) => {
+      if (!m || m.sender !== "system" || m.sysKind !== "decision") return;
+      // 未拿到权威件数前保持"待处理"，避免启动瞬间翻来翻去
+      m.decisionResolved = m.sysResolved === true || (decisionCountLoaded && liveDecisionCount === 0);
+      m.decisionLiveCount = liveDecisionCount;
     });
 
     const filteredLogs = logs.filter(l => {

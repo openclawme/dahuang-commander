@@ -67,7 +67,7 @@
 }
 
 .maint-btn-primary {
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   color: #ffffff;
   border-color: #9e2a2b;
 }
@@ -175,7 +175,7 @@
 }
 
 .form-save-btn {
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   color: #ffffff;
 }
 

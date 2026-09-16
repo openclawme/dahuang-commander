@@ -170,7 +170,7 @@
 }
 
 .send-btn {
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   color: #ffffff;
   font-size: 28rpx;
   font-weight: bold;
@@ -221,7 +221,7 @@
   border-radius: 999rpx;
 }
 .unlock-btn {
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   color: #ffffff;
 }
 .lock-btn {

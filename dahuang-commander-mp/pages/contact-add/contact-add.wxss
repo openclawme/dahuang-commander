@@ -72,7 +72,7 @@
   width: 72rpx;
   height: 72rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   flex-shrink: 0;
 }
 
@@ -101,7 +101,7 @@
   font-size: 20rpx;
   font-weight: bold;
   color: #ffffff;
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   border-radius: 999rpx;
   padding: 8rpx 22rpx;
   flex-shrink: 0;
@@ -184,7 +184,7 @@
 }
 
 .form-save-btn {
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   color: #ffffff;
 }
 

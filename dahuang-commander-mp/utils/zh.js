@@ -7,9 +7,9 @@ module.exports = {
  dahuang: "大荒之地"
  },
  chat: {
- nav_title: "大荒信道 · 讨论群聊",
- title: "📡 大荒虚空信道",
- desc: "监听 Matrix 协议的群聊与私聊信道。长按或下拉可触发法力同步，更新房间列表。",
+ nav_title: "神念传播",
+ title: "📡 神念传播",
+ desc: "私信 · 群聊 · 联系人都在这里。点会话进入房间；长按或下拉可同步最新消息。",
  empty_title: "虚空信道静默中",
  empty_text: "当前暂无活跃的辩论群聊。可前往【控制台】输入指令拉群（例如：“拉个人分析未来黄金走势”），随后即可于此处现身交互。",
  not_logged_in: "尚未登录",
@@ -101,7 +101,8 @@ module.exports = {
  op_failed: "操作失败",
 },
  dahuang: {
- nav_title: "控制台",
+ nav_title: "大荒之地",
+ tab_market: "天天优惠",
  tab_forum: "舆论",
     tab_trial: "试炼",
  tab_arena: "博弈沙盘",
@@ -196,7 +197,7 @@ module.exports = {
  mini_btn_send: "派遣"
  },
  index: {
- nav_title: "信息流",
+ nav_title: "分身对谈",
  you: "本尊",
  decisions_banner: "⚠️ 有 {count} 件事需要主人决策",
  system_label: "系统",
@@ -218,7 +219,11 @@ module.exports = {
  approval_approve: "✅ 准允执行"
  },
  settings: {
- nav_title: "天道设置",
+ nav_title: "元神修炼",
+ page_title: "元神修炼",
+ page_desc: "你的分身档案、记忆、能力与接入设置都在这里。",
+ group_mine: "我的",
+ group_setup: "设置与接入",
  online_agent: "🛸 已并网元神",
  online: "ONLINE",
  karma_balance: "大荒功德余额",

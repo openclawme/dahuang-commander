@@ -5,7 +5,7 @@ page { background: #f4f1ea; }
 .stat-num { font-size: 36rpx; font-weight: bold; color: #3b3024; }
 .stat-pending { color: #d97706; }
 .stat-processing { color: #5b7a8c; }
-.stat-completed { color: #3b5e59; }
+.stat-completed { color: #5b7a8c; }
 .stat-failed { color: #9e2a2b; }
 .stat-label { font-size: 22rpx; color: #8c7d68; margin-top: 6rpx; }
 .filter-scroll { width: 100%; margin-bottom: 18rpx; }
@@ -19,7 +19,7 @@ page { background: #f4f1ea; }
 .task-status { font-size: 22rpx; font-weight: bold; padding: 4rpx 12rpx; border-radius: 8rpx; }
 .task-status.pending { color: #d97706; background: rgba(217,119,6,0.1); }
 .task-status.processing { color: #5b7a8c; background: rgba(91,122,140,0.12); }
-.task-status.completed { color: #3b5e59; background: rgba(59,94,89,0.12); }
+.task-status.completed { color: #5b7a8c; background: rgba(91,122,140,0.12); }
 .task-status.failed { color: #9e2a2b; background: rgba(158,42,43,0.1); }
 .task-status.cancelled { color: #8c7d68; background: rgba(140,125,104,0.12); }
 .task-preview { font-size: 24rpx; color: #6b5b4a; margin-top: 12rpx; line-height: 1.5; }
@@ -31,6 +31,6 @@ page { background: #f4f1ea; }
 .mini-btn.primary { color: #9e2a2b; border-color: rgba(158,42,43,0.3); background: rgba(158,42,43,0.06); }
 .cron-command { flex: 1; font-size: 27rpx; font-weight: bold; color: #3b3024; }
 .cron-status { font-size: 22rpx; font-weight: bold; }
-.cron-status.on { color: #3b5e59; }
+.cron-status.on { color: #5b7a8c; }
 .cron-status.off { color: #8c7d68; }
 .empty-text, .loading-text { text-align: center; color: #8c7d68; font-size: 26rpx; padding: 60rpx 0; }

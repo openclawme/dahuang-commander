@@ -238,6 +238,13 @@ App({
     // 待主人决策：分身上报的事项实时提醒（卡片就地带「立即处理」按钮）
     socket.on("agent_pending_decision", (data) => {
       this.globalData.pendingDecisionCount = (data && data.count) || 1;
+      // 本地件数同步上位：新决策到达即视为"有待办"，
+      // 否则渲染层会因件数仍是 0 把这张新卡误判成已处理
+      this.globalData.pendingDecisionCount = Math.max(
+        this.globalData.pendingDecisionCount || 0,
+        (data && data.count) || 1,
+      );
+      this.globalData.pendingDecisionLoaded = true;
       this.pushSystemChat((data && data.title) || "待办事项", {
         sysKind: "decision",
         sysCount: (data && data.count) || 1,
@@ -730,6 +737,9 @@ App({
         if (res.statusCode === 200 && res.data) {
           const count = res.data.count || 0;
           this.globalData.pendingDecisionCount = count;
+          // 只有拿到权威件数后才允许"归零=已处理"的判定，
+          // 否则启动瞬间会把还没加载完的决策卡误判成已处理（闪烁）
+          this.globalData.pendingDecisionLoaded = true;
           this.globalData.pendingDecisionTitles = (res.data.decisions || []).slice(0, 3).map(d => d.title);
           if (callback) callback(count);
         } else if (callback) callback(0);

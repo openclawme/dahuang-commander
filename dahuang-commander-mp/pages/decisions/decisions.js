@@ -51,6 +51,7 @@ Page({
       }));
       this.setData({ decisions, loading: false });
       app.globalData.pendingDecisionCount = res.count || 0;
+      app.globalData.pendingDecisionLoaded = true;
       // 通知首页横幅同步
       if (typeof app.triggerPageCallback === "function") {
         app.triggerPageCallback("onPendingDecision", { count: res.count || 0 });

@@ -76,7 +76,7 @@
   position: absolute;
   top: -10rpx;
   right: -10rpx;
-  background: #be123c;
+  background: #a93230;
   color: #ffffff;
   font-size: 24rpx;
   font-weight: bold;
@@ -247,7 +247,7 @@
   border: 4rpx solid #f4f1ea;
 }
 .online-on {
-  background: #3b5e59;
+  background: #5b7a8c;
 }
 .online-off {
   background: #c4b8a5;
@@ -348,7 +348,7 @@
   border-radius: 50%;
   border: 3rpx solid #f4f1ea;
 }
-.online-on { background: #3b5e59; }
+.online-on { background: #5b7a8c; }
 .online-off { background: #b5aa9a; }
 
 .segment-item {
@@ -366,7 +366,7 @@
   margin-top: 28rpx;
   padding: 16rpx 34rpx;
   border-radius: 999rpx;
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   color: #ffffff;
   font-size: 24rpx;
   font-weight: bold;

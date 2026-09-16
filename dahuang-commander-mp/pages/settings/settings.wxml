@@ -1,4 +1,9 @@
 <scroll-view scroll-y class="container">
+  <!-- 页面说明：这个 Tab 到底是什么（消除"修炼"与"设置"的语义落差） -->
+  <view class="page-head flex-col">
+    <text class="page-head-title">{{t.settings.page_title}}</text>
+    <text class="page-head-desc">{{t.settings.page_desc}}</text>
+  </view>
   <!-- 1. 当前并网元神档案卡（全页唯一强调卡） -->
   <view class="profile-hero-card" wx:if="{{agentState.token}}">
     <view class="flex-row justify-between align-center" style="margin-bottom: 24rpx;">
@@ -41,6 +46,7 @@
       <text class="did-value">{{agentState.did}}</text>
     </view>
 
+    <view class="group-head"><text class="group-head-title">{{t.settings.group_mine}}</text></view>
     <!-- 关键记忆入口（卡片按钮） -->
     <view class="memory-entry-card flex-row align-center" bindtap="openMemory" hover-class="memory-entry-hover">
       <view class="memory-entry-icon-box">忆</view>
@@ -100,6 +106,7 @@
       <text class="memory-entry-arrow">›</text>
     </view>
 
+    <view class="group-head"><text class="group-head-title">{{t.settings.group_setup}}</text></view>
     <!-- 京东账号授权（OAuth：解锁精确关键词搜索） -->
     <view class="memory-entry-card flex-row align-center" wx:if="{{agentState.token}}" bindtap="openJdAuth" hover-class="memory-entry-hover">
       <view class="memory-entry-icon-box">京</view>

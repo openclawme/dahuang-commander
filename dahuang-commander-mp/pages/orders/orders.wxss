@@ -30,7 +30,7 @@
 }
 
 .summary-settled {
-  color: #3b5e59;
+  color: #5b7a8c;
 }
 
 .summary-label {
@@ -125,7 +125,7 @@
 }
 
 .status-settled {
-  color: #3b5e59;
+  color: #5b7a8c;
 }
 
 .status-invalid {

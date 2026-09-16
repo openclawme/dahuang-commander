@@ -4,21 +4,10 @@ const zh = require('./zh.js');
 let currentLang = 'zh';
 
 const initLanguage = () => {
+  // 统一中文：新页面大量文案尚未进字典，跟随系统切英文会出现"半汉半英"，
+  // 比中文界面更糟。这里只保留显式缓存（未来若有语言设置项可直接生效）。
   const cachedLang = wx.getStorageSync('dahuang_lang');
-  if (cachedLang) {
-    currentLang = cachedLang;
-  } else {
-    try {
-      const appInfo = wx.getAppBaseInfo();
-      if (appInfo.language && appInfo.language.indexOf('en') === 0) {
-        currentLang = 'en';
-      } else {
-        currentLang = 'zh';
-      }
-    } catch (e) {
-      currentLang = 'zh';
-    }
-  }
+  currentLang = cachedLang || 'zh';
 };
 
 const updateTabBar = () => {

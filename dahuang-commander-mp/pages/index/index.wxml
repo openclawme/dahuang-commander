@@ -27,23 +27,24 @@
           </view>
         </view>
         <!-- 待主人决策：古风卡片（决印 + 标题 + 正文 + 就地处理按钮） -->
-        <view class="decision-remind-card" wx:elif="{{item.sender === 'system' && item.sysKind === 'decision'}}">
-          <view class="decision-remind-badge">决</view>
+        <!-- 决策卡：待处理（活组件，件数实时）/ 已处理（收口态，不再挂按钮） -->
+        <view class="decision-remind-card {{item.decisionResolved ? 'decision-card-done' : ''}}" wx:elif="{{item.sender === 'system' && item.sysKind === 'decision'}}">
+          <view class="decision-remind-badge">{{item.decisionResolved ? '✓' : '决'}}</view>
           <view class="sched-remind-body flex-col">
             <view class="flex-row align-center">
-              <text class="sched-remind-title">{{item.sysTitle || '待主人决策'}}</text>
-              <text class="sched-remind-time" wx:if="{{item.sysCount > 1}}">{{item.sysCount}} 件</text>
+              <text class="sched-remind-title">{{item.decisionResolved ? '这些已处理完毕' : (item.sysTitle || '待主人决策')}}</text>
+              <text class="sched-remind-time" wx:if="{{!item.decisionResolved && item.decisionLiveCount > 1}}">还有 {{item.decisionLiveCount}} 件</text>
             </view>
             <text class="sched-remind-text">{{item.content}}</text>
-            <view class="decision-go-btn" hover-class="hover-dim" bindtap="openDecisions">立即处理</view>
+            <view class="decision-go-btn" wx:if="{{!item.decisionResolved}}" hover-class="hover-dim" bindtap="openDecisions">立即处理</view>
           </view>
         </view>
         <view class="chat-bubble-body bubble-{{item.sender === 'human' ? 'user' : 'agent'}} {{item.isRich ? 'bubble-rich' : ''}} {{item.isError ? 'bubble-error' : ''}}" wx:else>
           <view class="chat-quote-preview" wx:if="{{item.sender === 'human' && item.quote}}">
             <text class="chat-quote-preview-text">{{item.quote}}</text>
           </view>
-          <view class="error-banner flex-row align-center" wx:if="{{item.isError}}" style="margin-bottom: 8rpx; color: #be123c; font-size: 26rpx; font-weight: bold;">
-            <icon type="warn" size="12" color="#be123c" style="margin-right: 8rpx;"></icon>
+          <view class="error-banner flex-row align-center" wx:if="{{item.isError}}" style="margin-bottom: 8rpx; color: #a93230; font-size: 26rpx; font-weight: bold;">
+            <icon type="warn" size="12" color="#a93230" style="margin-right: 8rpx;"></icon>
             <text>天道推演中断 / 执行异常</text>
           </view>
           <block wx:if="{{item.isPending && (!item.tasks || item.tasks.length === 0) && (!item.content || item.content === '（智能体处理中...）')}}">
@@ -318,6 +319,11 @@
   </view>
 
   <!-- 主人快捷面板：右下角浮钮 + 指令/任务面板（面板锚定 FAB 弹出） -->
+  <!-- 首次引导：悬浮按钮没有文字，新用户不知道它是干什么的 -->
+  <view class="fab-guide" wx:if="{{showFabGuide && keyboardShift === 0}}" style="left: {{quickFabX}}px; top: {{quickFabY}}px;" bindtap="dismissFabGuide">
+    <text class="fab-guide-text">点这里召唤常用指令与任务</text>
+    <view class="fab-guide-arrow"></view>
+  </view>
   <view class="quick-fab {{keyboardShift > 0 ? 'quick-fab-hidden' : ''}} {{fabIdle ? 'quick-fab-idle' : ''}} {{fabJumping ? 'quick-fab-jump' : ''}} {{fabGliding ? 'quick-fab-glide' : ''}}" style="left: {{quickFabX}}px; top: {{quickFabY}}px;" catchtouchstart="onQuickFabStart" catchtouchmove="onQuickFabMove" bindtouchend="onQuickFabEnd">
     <view class="quick-fab-halo"></view>
     <view class="quick-fab-ring"></view>

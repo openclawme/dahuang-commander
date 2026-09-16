@@ -280,7 +280,7 @@
 }
 
 .form-save-btn {
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   color: #ffffff;
 }
 
@@ -355,7 +355,7 @@
   margin: 0;
 }
 .maint-btn-primary {
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   color: #ffffff;
   border-color: #9e2a2b;
 }
@@ -370,7 +370,7 @@
   font-size: 24rpx;
   font-weight: bold;
   color: #ffffff;
-  background: linear-gradient(135deg, #9e2a2b, #be123c);
+  background: linear-gradient(135deg, #9e2a2b, #a93230);
   border-radius: 999rpx;
   padding: 10rpx 28rpx;
   box-shadow: 0 4rpx 12rpx -4rpx rgba(158, 42, 43, 0.5);
@@ -479,8 +479,8 @@
   background: rgba(244, 241, 234, 0.8);
 }
 .fact-action.on {
-  color: #3b5e59;
-  background: rgba(59, 94, 89, 0.1);
+  color: #5b7a8c;
+  background: rgba(91, 122, 140, 0.1);
 }
 .fact-action.warn {
   color: #d97706;
