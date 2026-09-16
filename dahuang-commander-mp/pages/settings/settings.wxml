@@ -1,7 +1,6 @@
 <scroll-view scroll-y class="container">
-  <!-- 页面说明：这个 Tab 到底是什么（消除"修炼"与"设置"的语义落差） -->
+  <!-- 页面说明（标题已在导航栏，这里不再重复） -->
   <view class="page-head flex-col">
-    <text class="page-head-title">{{t.settings.page_title}}</text>
     <text class="page-head-desc">{{t.settings.page_desc}}</text>
   </view>
   <!-- 1. 当前并网元神档案卡（全页唯一强调卡） -->

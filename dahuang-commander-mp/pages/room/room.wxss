@@ -11,35 +11,46 @@
 .msg-scroll {
   flex: 1;
   min-height: 0;
-  padding: 20rpx 12rpx;
+  padding: 8rpx 12rpx 0;
   box-sizing: border-box;
 }
 
 .msg-list {
   display: flex;
   flex-direction: column;
-  gap: 30rpx;
-  padding-bottom: 40rpx;
+  gap: 0;             /* 间距交给 .msg-item 的 margin-bottom，避免叠加 */
+  padding-bottom: 0;  /* 最后一条贴到输入区上边线 */
 }
 
 .msg-item {
+  /* 与分身对谈一致：纵向排列 —— 头部一行（头像/昵称/时间）+ 下方气泡 */
   width: 100%;
+  display: flex;
+  flex-direction: column;
   align-items: flex-start;
-  gap: 16rpx;
+  margin-bottom: 14rpx;
+  padding: 0 8rpx;
+}
+.msg-head {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 2rpx;
 }
 
 .msg-me {
-  flex-direction: row-reverse;
+  align-items: flex-end;
 }
 
 .msg-other {
-  flex-direction: row;
+  align-items: flex-start;
 }
 
 .msg-avatar {
-  width: 70rpx;
-  height: 70rpx;
-  border-radius: 50%;
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 16rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,13 +61,14 @@
 }
 
 .msg-me .msg-avatar {
-  background-color: rgba(158, 42, 43, 0.1);
-  border: 2rpx solid #9e2a2b;
-  box-shadow: 0 6rpx 18rpx -6rpx rgba(158, 42, 43, 0.3);
+  background-color: rgba(107, 91, 74, 0.08);
+  border: none;
+  box-shadow: none;
 }
 
 .avatar-char {
-  font-size: 32rpx;
+  font-size: 24rpx;
+  color: #6b5b4a;
 }
 
 .msg-content-wrapper {
@@ -74,7 +86,6 @@
 .sender-name {
   font-size: 24rpx;
   color: #6b5b4a;
-  margin-bottom: 6rpx;
   font-weight: bold;
 }
 
@@ -126,7 +137,7 @@
 .msg-time {
   font-size: 24rpx;
   color: #8c7d68;
-  margin-top: 6rpx;
+  flex-shrink: 0;
 }
 
 /* Chat Footer Input Styles */

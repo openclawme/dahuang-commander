@@ -1,6 +1,6 @@
 /* 页头说明 + 分组标题（把"设置"从一页长滚动里分层出来） */
 .page-head {
-  padding: 8rpx 8rpx 24rpx;
+  padding: 0 8rpx 18rpx;
 }
 .page-head-title {
   font-size: 40rpx;

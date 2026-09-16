@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '京东授权定稿：扫码免密流程写进授权弹窗引导';
+const desc = '群聊/私聊对话框布局对齐分身对谈：头像改为与昵称/时间同处气泡上方一行、缩小为同规格方形印章头像，气泡宽度与消息间距同步对齐';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

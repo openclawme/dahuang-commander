@@ -1,7 +1,6 @@
 <view class="container">
-  <!-- 顶部标题/导语 -->
+  <!-- 顶部导语（标题已在导航栏，这里不再重复） -->
   <view class="channel-header flex-col">
-    <text class="channel-title">{{t.chat.title}}</text>
     <text class="channel-desc">{{t.chat.desc}}</text>
   </view>
 

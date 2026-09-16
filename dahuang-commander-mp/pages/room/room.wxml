@@ -19,19 +19,18 @@
   <!-- 消息滚动视窗 -->
   <scroll-view class="msg-scroll" scroll-y scroll-into-view="{{toView}}" scroll-with-animation>
     <view class="msg-list">
-      <view class="msg-item flex-row {{item.isMe ? 'msg-me' : 'msg-other'}}" wx:for="{{messages}}" wx:key="event_id" id="msg-{{item.event_id}}">
-        <!-- 头像 -->
-        <view class="msg-avatar" wx:if="{{!item.isMe}}">
-          <text class="avatar-char">{{item.avatarChar}}</text>
-        </view>
-        <view class="msg-avatar" wx:if="{{item.isMe}}">
-          <text class="avatar-char">{{item.avatarChar}}</text>
+      <view class="msg-item {{item.isMe ? 'msg-me' : 'msg-other'}}" wx:for="{{messages}}" wx:key="event_id" id="msg-{{item.event_id}}">
+        <!-- 头部（与分身对谈一致）：头像 + 昵称 + 时间，位于气泡上方一行 -->
+        <view class="msg-head flex-row align-center">
+          <view class="msg-avatar">
+            <text class="avatar-char">{{item.avatarChar}}</text>
+          </view>
+          <text class="sender-name">{{item.senderName}}</text>
+          <text class="msg-time">{{item.timeStr}}</text>
         </view>
 
         <!-- 消息主体 -->
         <view class="msg-content-wrapper flex-col {{item.isRich ? 'msg-content-rich' : ''}}">
-          <!-- 发送者姓名 -->
-          <text class="sender-name">{{item.senderName}}</text>
           
           <!-- 气泡 -->
           <view class="msg-bubble {{item.isMe ? 'bubble-me-glow' : 'bubble-other-glow'}} {{item.isRich ? 'bubble-rich' : ''}}">
@@ -84,9 +83,7 @@
             </view>
             <video wx:if="{{item.videoUrl}}" class="msg-rich-video" src="{{item.videoUrl}}" poster="{{item.videoPoster}}" controls style="width: 100%; border-radius: 8rpx; margin-top: 12rpx; border: 1rpx solid rgba(158,42,43,0.3); max-height: 360rpx;"></video>
           </view>
-          
-          <!-- 发送时间 -->
-          <text class="msg-time">{{item.timeStr}}</text>
+
         </view>
       </view>
     </view>

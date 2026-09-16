@@ -74,6 +74,7 @@ Page({
     toLogView: "",
     toChatView: "",
     showFabGuide: false,
+    chatTopSpacer: 0, // 顶部动态占位（px）：消息少时把列表顶到底部
     latestCommand: "",
     activeTab: "chat", // chat, forum, arena, alchemy
     pendingApproval: null, 
@@ -199,6 +200,7 @@ Page({
     }
     this.scrollToBottom();
     this.startLiveStatusTicker();
+    this.measureChatBottomGap();
     // 回到前台时补拉离线期间完成的任务结果
     if (app.pullOfflineNotifications) {
       app.pullOfflineNotifications();
@@ -372,6 +374,36 @@ Page({
 
   closeQuickPanel() {
     this.setData({ showQuickPanel: false });
+  },
+
+  /**
+   * 消息少时把列表顶到底部（贴近输入框）：
+   * 计算「可视区高度 − 列表内容高度」得到顶部需要补的空白。
+   * 只增大顶部占位，不让内容溢出 → 不会影响原生滚动（消息多时占位自动为 0）。
+   * 上面 12rpx 是消息区自身的上下内边距。
+   */
+  measureChatBottomGap() {
+    if (this._measurePending) return;
+    this._measurePending = true;
+    clearTimeout(this._measureTimer);
+    this._measureTimer = setTimeout(() => {
+      this._measurePending = false;
+      try {
+        const q = wx.createSelectorQuery().in(this);
+        q.select(".chat-scroll").boundingClientRect();
+        q.select(".chat-list").boundingClientRect();
+        q.exec((res) => {
+          const sv = res && res[0];
+          const list = res && res[1];
+          if (!sv || !list || !sv.height || !list.height) return;
+          // 消息区已无内边距、末条无外边距 → 差值直接就是需要补的空白
+          const gap = Math.max(0, Math.round(sv.height - list.height));
+          if (Math.abs(gap - (this.data.chatTopSpacer || 0)) > 2) {
+            this.setData({ chatTopSpacer: gap });
+          }
+        });
+      } catch (e) {}
+    }, 120);
   },
 
   dismissFabGuide() {
@@ -995,6 +1027,8 @@ Page({
     // 避免阅读时被进度更新反复拉回。仅发送消息等用户主动动作时滚动。
     this.setData(updates, () => {
       this.redrawCharts(chartTouched ? -1 : 0);
+      this.measureChatBottomGap();
+      setTimeout(() => this.measureChatBottomGap(), 500);
     });
 
     // 进度秒表：存在进行中的进度状态机时启动 500ms ticker（驱动秒表/伪进度/停滞提示）

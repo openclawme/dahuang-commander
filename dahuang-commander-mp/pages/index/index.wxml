@@ -8,6 +8,10 @@
       <text class="decision-banner-arrow">›</text>
     </view>
     <scroll-view class="chat-scroll" scroll-y scroll-into-view="{{toChatView}}" scroll-with-animation bindscroll="onChatScroll">
+      <!-- 顶部动态占位：消息少时把列表顶到输入框上方。
+           只加高度、不改变溢出行为 → 内容多时占位为 0，滚动完全不受影响 -->
+      <view class="chat-top-spacer" style="{{chatTopSpacer > 0 ? 'height: ' + chatTopSpacer + 'px;' : ''}}"></view>
+      <view class="chat-list">
       <view class="chat-item chat-item-{{item.sender}} {{item.sender === 'system' ? 'chat-item-system' : ''}}" wx:for="{{chatHistory}}" wx:key="id" id="chat-{{item.id}}" data-index="{{index}}" bindlongpress="onMessageLongPress">
         <view class="chat-bubble-header flex-row">
           <text class="chat-avatar">{{item.sender === 'human' ? '我' : item.sender === 'system' ? '系' : avatarChar}}</text>
@@ -245,6 +249,7 @@
       <view class="empty-tasks flex-col align-center" wx:if="{{chatHistory.length === 0}}">
         <text class="empty-icon">言</text>
         <text class="empty-text">{{t.index.empty}}</text>
+      </view>
       </view>
     </scroll-view>
   </view>
