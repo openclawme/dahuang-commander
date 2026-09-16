@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '京东授权引导：微信点开→右上角在浏览器中打开→京东App一键授权';
+const desc = '京东授权中转页：系统浏览器直接显示「打开京东App 授权」按钮';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

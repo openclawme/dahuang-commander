@@ -784,14 +784,16 @@ Page({
       success: (res) => {
         wx.hideLoading();
         if (res.statusCode === 200 && res.data && res.data.success && res.data.url) {
-          // 复制链接流程（三步）：微信聊天点开 → 微信浏览器右上角「···」→「在浏览器中打开」
-          // → 系统浏览器里京东页的「打开京东App」生效，App 内已登录一键授权免密码
+          // 复制中转页链接：系统浏览器（华为等会检测剪贴板主动提醒）打开后，
+          // 页面提供「打开京东App 授权」大按钮（App scheme 拉起，免输密码）
+          // 与「浏览器内直接授权（短信验证码）」兜底；微信内打开则提示「在浏览器中打开」
+          const redirectUrl = `${serverUrl}/api/jd-oauth/redirect?url=${encodeURIComponent(res.data.url)}`;
           wx.setClipboardData({
-            data: res.data.url,
+            data: redirectUrl,
             success: () => {
               wx.showModal({
                 title: "授权链接已复制",
-                content: "① 微信聊天里粘贴并发送（如文件传输助手），点开链接\n② 点右上角「···」→「在浏览器中打开」\n③ 系统浏览器里点「打开京东App」→ App 内一键授权（免输密码）\n\n没有 App 按钮就选短信验证码登录。完成后回到本页，状态自动刷新。",
+                content: "打开浏览器（系统会提示打开复制的链接）→ 页面点「打开京东App 授权」→ App 内一键确认，免输密码。\n\nApp 未响应就点「在浏览器内直接授权」用短信验证码。完成后回到本页，状态自动刷新。",
                 confirmText: "知道了",
                 showCancel: false,
                 success: () => this.refreshJdAuthStatus()
