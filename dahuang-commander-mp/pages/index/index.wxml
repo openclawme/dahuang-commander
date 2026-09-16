@@ -26,6 +26,18 @@
             <text class="sched-remind-text">{{item.content}}</text>
           </view>
         </view>
+        <!-- 待主人决策：古风卡片（决印 + 标题 + 正文 + 就地处理按钮） -->
+        <view class="decision-remind-card" wx:elif="{{item.sender === 'system' && item.sysKind === 'decision'}}">
+          <view class="decision-remind-badge">决</view>
+          <view class="sched-remind-body flex-col">
+            <view class="flex-row align-center">
+              <text class="sched-remind-title">{{item.sysTitle || '待主人决策'}}</text>
+              <text class="sched-remind-time" wx:if="{{item.sysCount > 1}}">{{item.sysCount}} 件</text>
+            </view>
+            <text class="sched-remind-text">{{item.content}}</text>
+            <view class="decision-go-btn" hover-class="hover-dim" bindtap="openDecisions">立即处理</view>
+          </view>
+        </view>
         <view class="chat-bubble-body bubble-{{item.sender === 'human' ? 'user' : 'agent'}} {{item.isRich ? 'bubble-rich' : ''}} {{item.isError ? 'bubble-error' : ''}}" wx:else>
           <view class="chat-quote-preview" wx:if="{{item.sender === 'human' && item.quote}}">
             <text class="chat-quote-preview-text">{{item.quote}}</text>

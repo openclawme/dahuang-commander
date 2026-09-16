@@ -219,11 +219,15 @@ Page({
     if (!app.refreshPendingDecisions) return;
     app.refreshPendingDecisions((count) => {
       this.setData({ pendingCount: count });
-      // 登录摘要：本次会话首次发现待办时在主对话插一条系统摘要
+      // 登录摘要：本次会话首次发现待办时在主对话插一条系统摘要（卡片就地带「立即处理」按钮）
       if (count > 0 && !app.globalData.pendingSummaryShown) {
         app.globalData.pendingSummaryShown = true;
         const titles = (app.globalData.pendingDecisionTitles || []).slice(0, 3).map(t => `「${t}」`).join("、");
-        app.pushSystemChat(`📋 待办摘要：有 ${count} 件事需要主人决策：${titles}${count > 3 ? "…" : ""}（点击顶部横幅处理）`);
+        app.pushSystemChat(`${titles}${count > 3 ? "…" : ""}`, {
+          sysKind: "decision",
+          sysCount: count,
+          sysTitle: `待办摘要：${count} 件事需要主人决策`,
+        });
       }
     });
   },

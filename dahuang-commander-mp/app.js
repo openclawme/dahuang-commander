@@ -235,10 +235,13 @@ App({
       this.triggerPageCallback("onApprovalPending", data);
     });
 
-    // 待主人决策：分身上报的事项实时提醒
+    // 待主人决策：分身上报的事项实时提醒（卡片就地带「立即处理」按钮）
     socket.on("agent_pending_decision", (data) => {
       this.globalData.pendingDecisionCount = (data && data.count) || 1;
-      this.pushSystemChat(`⚠️ 有事情需要主人决策：${(data && data.title) || "待办事项"}（点击顶部横幅处理）`);
+      this.pushSystemChat((data && data.title) || "待办事项", {
+        sysKind: "decision",
+        sysCount: (data && data.count) || 1,
+      });
       this.triggerPageCallback("onPendingDecision", data);
     });
 

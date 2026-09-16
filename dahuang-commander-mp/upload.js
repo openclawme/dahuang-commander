@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '地图图片交付修复：结构化 maps 兜底（不依赖模型正文）+ 静态图自动适配整条路线';
+const desc = '待决策/待办摘要改为古风卡片+就地「立即处理」按钮，系统消息左对齐';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
