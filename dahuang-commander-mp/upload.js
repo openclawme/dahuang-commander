@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '待决策/待办摘要改为古风卡片+就地「立即处理」按钮，系统消息左对齐';
+const desc = '决策卡去重：登录摘要与实时推送合并，不再出现两个立即处理按钮';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

@@ -692,6 +692,19 @@ App({
 
   // 主对话框插入一条系统消息（待办提醒/登录摘要等）
   pushSystemChat(message, extra) {
+    // 决策卡去重：登录摘要与实时推送可能同秒到达同一件事，
+    // 上一条是同内容的决策卡时合并（更新件数），避免出现两个「立即处理」按钮
+    if (extra && extra.sysKind === "decision") {
+      const hist = this.globalData.chatHistory;
+      const last = hist[hist.length - 1];
+      const norm = (s) => String(s || "").replace(/^[「『]/, "").replace(/[」』]$/, "").trim();
+      if (last && last.sender === "system" && last.sysKind === "decision" && norm(last.content) === norm(message)) {
+        last.sysCount = Math.max(last.sysCount || 1, extra.sysCount || 1);
+        this.saveChatHistory();
+        this.triggerPageCallback("onChatHistoryUpdate");
+        return;
+      }
+    }
     const newMsg = {
       id: `sys-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       sender: "system",
