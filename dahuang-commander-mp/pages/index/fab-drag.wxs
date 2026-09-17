@@ -3,8 +3,9 @@
  *
  * 为什么放在视图层：逻辑层的 setData 每帧都要「过桥 + 触发布局」，
  * 手指和浮钮之间天然隔着一次线程往返，拖起来就发黏。
- * 这里 touchmove 全程只在视图层处理，并且只改 transform（合成器属性，不重排），
- * 松手时才 callMethod 回调逻辑层一次，由逻辑层定稿落点、起跳滑向边缘。
+ * 这里 touchmove 全程只在视图层处理，并且只改 transform（合成器属性，不重排）；
+ * 拖动期间不碰 left/top，松手时用一笔 setStyle 把「落点 + 归零的 transform」
+ * 原子交接出去，再回调逻辑层定稿、起跳滑向边缘。
  *
  * 拖动期间毛玻璃、灵气雾气、星芒呼吸等外观一律不动。
  *
@@ -43,16 +44,20 @@ function point(event) {
 }
 
 /**
- * 只改临时位移，不动已定稿的 left/top。
+ * 拖动期间只改临时位移（transform），不动已定稿的 left/top。
  *
- * 【为什么位移只走 transform 这一条道】
+ * 【为什么拖动期间只走 transform 这一条道】
+ * transform 是合成器属性，改它不触发布局；而拖动期间样式绑定那边并没有重新
+ * 求值（逻辑层一次 setData 都没发），所以这条道上不存在第二个写者，谁优先都
+ * 不影响结果 —— 这是唯一一条「不依赖平台语义」的稳定路径。
+ *
+ * 【为什么收尾必须由视图层来交】
  * 文档只说 setStyle 的优先级「高于 wxml 定义」，却没说后续 JS 的 setData
- * 能不能把它收回去。若不能，被 setStyle 写过的属性会被永久钉住 —— 所以：
- *  WXS 只碰 transform，绝不碰 left/top（定稿位置永远归逻辑层管，滑向边缘的
- *  CSS 过渡才不会被钉住）；
- *  WXS 收尾时把 transform 显式写回单位值而非空串（空串可能被视为「无变化」
- *  而忽略），此时它与样式绑定期望的值恰好一致 —— 于是「优先级谁高」这个问题
- *  在收尾瞬间自动消失，两种实现都得到同一个正确结果。
+ * 能不能把它收回去。收尾若分两步走（视图层先归零 transform，逻辑层再 setData
+ * 挪到落点），两步之间隔着一次线程往返，那一两帧浮钮会停在旧位置上闪一下；
+ * 合成一笔就要求「位移」和「位置」在同一次写入里同时生效，只有视图层做得到。
+ * 因此收尾这笔 setStyle 由视图层写下最终位置，并把同一个值回传给逻辑层记账，
+ * 两边不各算各的。
  */
 function setOffset(ownerInstance, px, py) {
   var ins = fab(ownerInstance);
@@ -63,7 +68,7 @@ function setOffset(ownerInstance, px, py) {
   ownerInstance.callMethod('onFabDrag', { px: px, py: py });
 }
 
-/** 把 transform 交还给样式绑定。用单位值而不是空串：空串可能被当成无变化忽略掉 */
+/** 交还 transform（未拖动过就松手/被打断时用）。用单位值而非空串：空串可能被当成无变化忽略 */
 function releaseOffset(ownerInstance) {
   var ins = fab(ownerInstance);
   if (ins) ins.setStyle({ transform: 'translate3d(0px,0px,0)' });
@@ -83,12 +88,27 @@ function finish(ownerInstance, allowTap) {
     }
     return;
   }
-  // 交回的是「实际施加的位移量」而非绝对落点：逻辑层拿按下时的位置加一下即可，
-  // 不依赖视图层是否读到了 dataset 里的坐标与边界
+  // 落点：按下时的位置 + 实际施加的位移（两者都来自 dataset，与逻辑层同一坐标系）
+  var dx = Math.round(d.left + d.px);
+  var dy = Math.round(d.top + d.py);
+  if (d.bounded) {
+    // 边界已知就自己夹一次：写进去的就是最终位置，逻辑层记录的值必须与之逐像素一致
+    dx = clamp(dx, 0, d.maxX);
+    dy = clamp(dy, 0, d.maxY);
+  }
+  var ins = fab(ownerInstance);
+  if (ins) {
+    // 【原子交接】位移与位置写在同一笔 setStyle 里：浮钮在视图层一步挪到落点、
+    // transform 同时归零，中间没有任何一帧停留在旧位置，所以不会闪现。
+    // 若分两步（先交还 transform、再由逻辑层 setData 接上落点），两步之间隔着
+    // 一次线程往返，浮钮会回到按下时的位置闪一下 —— 这正是上一版的毛病。
+    ins.setStyle({ left: dx + 'px', top: dy + 'px', transform: 'translate3d(0px,0px,0)' });
+    // 回传视图层已经写好的绝对落点，逻辑层照着记账即可，两边不会各算各的
+    ownerInstance.callMethod('onFabDrop', { moved: true, x: dx, y: dy });
+    return;
+  }
+  // 兜底（拿不到节点、写不进去）：退回位移量，由逻辑层自己挪
   ownerInstance.callMethod('onFabDrop', { moved: true, px: d.px, py: d.py });
-  // 交还 transform：交还后浮钮短暂回到 left/top（=按下时的位置），逻辑层的
-  // setData 落地即接上落点并起跳，中间约一两帧 —— 这是本次唯一的观感代价。
-  releaseOffset(ownerInstance);
 }
 
 module.exports = {

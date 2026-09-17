@@ -492,10 +492,12 @@ Page({
    * 浮钮拖动改由视图层 WXS 接管（pages/index/fab-drag.wxs）：
    * touchmove 全程不过逻辑层、不 setData，只在视图层改 transform（合成器属性，不重排），
    * 一个手势只过桥两次——抓住 onFabGrab、松手 onFabDrop。
+   * 松手时视图层用一笔 setStyle 把「落点 + 归零的 transform」原子交接完，这里只记账，
+   * 所以不会出现「先回到按下位置再跳到落点」的闪现。
    * 外观（毛玻璃 / 灵气雾气 / 星芒呼吸）与定稿后的起跳滑行逻辑一律不变。
    */
   onFabGrab() {
-    // 记住按下时的位置：视图层回传的是位移量，落点一律由这里基于基准算，单一真相
+    // 记住按下时的位置：视图层若只回传位移量（兜底路径），落点由这里基于基准算
     this._fabDragBase = { x: this.data.quickFabX || 0, y: this.data.quickFabY || 0 };
     this.resetFabIdleTimer();
     // 打断进行中的起跳/滑行动画（重新抓住浮钮）
@@ -508,10 +510,10 @@ Page({
 
   /**
    * 兜底拖动路径：视图层 WXS 拿不到浮钮节点时才会走到这里（等同改造前的实现）。
-   * 载荷与正常路径一致，都是「相对按下位置的位移量」，所以两条路径的落点算法相同。
+   * 这条路径只回传「相对按下位置的位移量」，所以按基准推算落点。
    */
   onFabDrag(res) {
-    const off = this.fabOffsetOf(res);
+    const off = this.fabPointOf(res);
     if (!off) return;
     const win = this._quickFabWindow || {};
     const maxX = typeof win.maxX === "number" ? win.maxX : 9999;
@@ -522,19 +524,32 @@ Page({
     });
   },
 
-  /** 位移量 → 绝对落点（基于按下时的基准夹到窗口内）；载荷异常返回 null */
-  fabOffsetOf(res) {
+  /**
+   * 视图层载荷 → 绝对落点，夹到窗口内；载荷异常返回 null。
+   *
+   * 正常路径里视图层已经在同一笔 setStyle 里把浮钮挪到落点、transform 归零，
+   * 并把该落点原样回传（res.x / res.y）——这里照抄即可，两边各算各的就会有偏差。
+   * 兜底路径只有位移量（res.px / res.py），才按按下时的基准推算。
+   */
+  fabPointOf(res) {
     if (!res) return null;
-    const px = res.px;
-    const py = res.py;
-    if (typeof px !== "number" || typeof py !== "number") return null;
-    const base = this._fabDragBase || { x: this.data.quickFabX || 0, y: this.data.quickFabY || 0 };
     const win = this._quickFabWindow || {};
     const maxX = typeof win.maxX === "number" ? win.maxX : 9999;
     const maxY = typeof win.maxY === "number" ? win.maxY : 9999;
+    let x = null;
+    let y = null;
+    if (typeof res.x === "number" && typeof res.y === "number") {
+      x = res.x;
+      y = res.y;
+    } else if (typeof res.px === "number" && typeof res.py === "number") {
+      const base = this._fabDragBase || { x: this.data.quickFabX || 0, y: this.data.quickFabY || 0 };
+      x = base.x + res.px;
+      y = base.y + res.py;
+    }
+    if (x === null || y === null) return null;
     return {
-      x: Math.min(Math.max(0, base.x + px), maxX),
-      y: Math.min(Math.max(0, base.y + py), maxY)
+      x: Math.min(Math.max(0, x), maxX),
+      y: Math.min(Math.max(0, y), maxY)
     };
   },
 
@@ -557,7 +572,7 @@ Page({
       this.toggleQuickPanel();
       return;
     }
-    const dropped = this.fabOffsetOf(res);
+    const dropped = this.fabPointOf(res);
     if (!dropped) {
       // 载荷异常：只把临时位移清掉，绝不擅自把浮钮落位
       this.setData({ fabDragX: 0, fabDragY: 0 });
@@ -573,8 +588,8 @@ Page({
     const snapX = x < maxX / 2 ? 0 : maxX;
     const targetY = Math.min(Math.max(y - 36, 8), maxY);
     const dist = Math.abs(x - snapX);
-    // 落点定稿与位移归零写在同一笔 setData：样式绑定被重新求值，WXS 写进去的
-    // transform 随之作废、由 left/top 无缝接上，不会出现回弹跳变
+    // 落点定稿：视图层早已把浮钮挪到这里并归零了 transform，这一步只是把同一组值
+    // 写进 data（面板定位、持久化要用），样式绑定求值结果与现状一致，不会跳变
     this.setData({ quickFabX: x, quickFabY: y, fabDragX: 0, fabDragY: 0, fabJumping: true });
     // 起跳顶点附近（320ms）开始向目标滑行，落地时正好落在边缘偏上处
     this._fabSnapTimer = setTimeout(() => {

@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '修复浮钮失效：WXS 事件绑定必须写成 {{fabDrag.move}}，上一版漏了花括号导致浮钮整体无响应';
+const desc = '修复松手后浮钮闪现：落点与位移在同一笔 setStyle 里原子交接，不再先回到按下位置';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');
