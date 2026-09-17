@@ -200,6 +200,7 @@ Page({
     }
     this.scrollToBottom();
     this.startLiveStatusTicker();
+    this._chatGapSettled = false; // 回到前台：视口/内容可能已变，强制重测一次
     this.measureChatBottomGap();
     // 回到前台时补拉离线期间完成的任务结果
     if (app.pullOfflineNotifications) {
@@ -380,10 +381,18 @@ Page({
    * 消息少时把列表顶到底部（贴近输入框）：
    * 计算「可视区高度 − 列表内容高度」得到顶部需要补的空白。
    * 只增大顶部占位，不让内容溢出 → 不会影响原生滚动（消息多时占位自动为 0）。
-   * 上面 12rpx 是消息区自身的上下内边距。
+   *
+   * 性能约束：测量要读渲染层布局（boundingClientRect + exec 会强制刷一次布局再回传），
+   * 而每次聊天更新都会调用它——聊天越长越贵，偏偏流式输出时调用最密。
+   * 但内容只会随输出变长：一旦量到「内容已填满视口」（gap 为 0），
+   * 之后再追加内容只会更高，占位必然还是 0。故用 _chatGapSettled 记住这个结论，
+   * 消息数没有减少时直接跳过测量。只有消息变少（清空/切换分身）
+   * 或布局被主人主动改矮（折叠任务卡）才需要重新量。
    */
   measureChatBottomGap() {
     if (this._measurePending) return;
+    const len = (this.data.chatHistory || []).length;
+    if (this._chatGapSettled && len >= (this._chatGapLen || 0)) return;
     this._measurePending = true;
     clearTimeout(this._measureTimer);
     this._measureTimer = setTimeout(() => {
@@ -398,6 +407,8 @@ Page({
           if (!sv || !list || !sv.height || !list.height) return;
           // 消息区已无内边距、末条无外边距 → 差值直接就是需要补的空白
           const gap = Math.max(0, Math.round(sv.height - list.height));
+          this._chatGapLen = (this.data.chatHistory || []).length;
+          this._chatGapSettled = gap === 0;
           if (Math.abs(gap - (this.data.chatTopSpacer || 0)) > 2) {
             this.setData({ chatTopSpacer: gap });
           }
@@ -1078,6 +1089,7 @@ Page({
     this.setData({ expandedTasks });
     // 记忆展开偏好：下次默认沿用
     try { wx.setStorageSync("dahuangPsExpanded", expandedTasks); } catch (err) {}
+    this._chatGapSettled = false; // 折叠/展开会改矮内容，贴底占位要重新量
     this.syncGlobalData();
   },
 
