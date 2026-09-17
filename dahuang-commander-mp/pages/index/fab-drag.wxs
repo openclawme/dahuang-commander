@@ -12,10 +12,10 @@
  */
 var drag = null;
 
-/** dataset 里的数值（可能以字符串形式传回） */
-function num(v) {
-  var n = v * 1; // 数字原样返回；字符串转数字；其它得 NaN
-  return n === n ? n : 0; // NaN !== NaN
+/** 数值化：缺失或非法一律得 null（0 是合法值，不能被吞掉） */
+function numOrNull(v) {
+  var n = v * 1;
+  return n === n ? n : null; // NaN !== NaN
 }
 
 function clamp(v, min, max) {
@@ -29,21 +29,44 @@ function fab(ownerInstance) {
 }
 
 /**
- * 把浮钮挪到 (x, y)，只改临时位移、不动已定稿的 left/top。
- * 正常路径：选中节点后 setStyle，全程视图层，零过桥。
- * 兜底路径：万一拿不到节点（极少数基础库/自定义组件场景），退回逻辑层 setData——
- * 拖起来和改造前一样，慢但不失灵，绝不会出现「拖不动、一松手才瞬移」。
+ * 取触点坐标：优先 clientX/clientY，缺失时退回 pageX/pageY
+ * （本页不滚动，两者相等；不假设 WXS 一定给了哪一组）
  */
-function applyPos(ownerInstance, x, y, left, top) {
+function point(event) {
+  var ts = event.touches;
+  if (!ts || !ts.length) return null;
+  var t = ts[0];
+  return {
+    x: t.clientX === undefined ? numOrNull(t.pageX) : numOrNull(t.clientX),
+    y: t.clientY === undefined ? numOrNull(t.pageY) : numOrNull(t.clientY)
+  };
+}
+
+/**
+ * 只改临时位移，不动已定稿的 left/top。
+ *
+ * 【为什么位移只走 transform 这一条道】
+ * 文档只说 setStyle 的优先级「高于 wxml 定义」，却没说后续 JS 的 setData
+ * 能不能把它收回去。若不能，被 setStyle 写过的属性会被永久钉住 —— 所以：
+ *  WXS 只碰 transform，绝不碰 left/top（定稿位置永远归逻辑层管，滑向边缘的
+ *  CSS 过渡才不会被钉住）；
+ *  WXS 收尾时把 transform 显式写回单位值而非空串（空串可能被视为「无变化」
+ *  而忽略），此时它与样式绑定期望的值恰好一致 —— 于是「优先级谁高」这个问题
+ *  在收尾瞬间自动消失，两种实现都得到同一个正确结果。
+ */
+function setOffset(ownerInstance, px, py) {
   var ins = fab(ownerInstance);
   if (ins) {
-    ins.setStyle({
-      transform:
-        'translate3d(' + Math.round(x - left) + 'px,' + Math.round(y - top) + 'px,0)'
-    });
+    ins.setStyle({ transform: 'translate3d(' + Math.round(px) + 'px,' + Math.round(py) + 'px,0)' });
     return;
   }
-  ownerInstance.callMethod('onFabDrag', { x: x, y: y });
+  ownerInstance.callMethod('onFabDrag', { px: px, py: py });
+}
+
+/** 把 transform 交还给样式绑定。用单位值而不是空串：空串可能被当成无变化忽略掉 */
+function releaseOffset(ownerInstance) {
+  var ins = fab(ownerInstance);
+  if (ins) ins.setStyle({ transform: 'translate3d(0px,0px,0)' });
 }
 
 function finish(ownerInstance, allowTap) {
@@ -52,35 +75,47 @@ function finish(ownerInstance, allowTap) {
   drag = null;
   if (!d.moved) {
     if (allowTap) {
-      // 6px 以内算点击：交给逻辑层展开/收起面板
+      // 6px 以内算轻触：交给逻辑层展开/收起面板
       ownerInstance.callMethod('onFabDrop', { moved: false });
     } else {
-      // 触摸被系统打断：不当作点击，清掉临时位移，回到已提交位置
-      var ins = fab(ownerInstance);
-      if (ins) ins.setStyle({ transform: '' });
+      // 触摸被系统打断且没拖动过：交还 transform，回到已定稿位置
+      releaseOffset(ownerInstance);
     }
     return;
   }
-  ownerInstance.callMethod('onFabDrop', { moved: true, x: d.x, y: d.y });
+  // 交回的是「实际施加的位移量」而非绝对落点：逻辑层拿按下时的位置加一下即可，
+  // 不依赖视图层是否读到了 dataset 里的坐标与边界
+  ownerInstance.callMethod('onFabDrop', { moved: true, px: d.px, py: d.py });
+  // 交还 transform：交还后浮钮短暂回到 left/top（=按下时的位置），逻辑层的
+  // setData 落地即接上落点并起跳，中间约一两帧 —— 这是本次唯一的观感代价。
+  releaseOffset(ownerInstance);
 }
 
 module.exports = {
   start: function (event, ownerInstance) {
-    var t = event.touches && event.touches[0];
-    if (!t) return;
+    var p = point(event);
     var ds = (event.currentTarget && event.currentTarget.dataset) || {};
-    var left = num(ds.x);
-    var top = num(ds.y);
+    var left = numOrNull(ds.x);
+    var top = numOrNull(ds.y);
+    var maxX = numOrNull(ds.mx);
+    var maxY = numOrNull(ds.my);
+    if (!p) {
+      // 只在异常时留痕，正常手势不会刷屏
+      console.log('[fab-drag] touchstart 未取到触点坐标，浮钮将拖不动');
+      return;
+    }
     drag = {
-      sx: t.clientX,
-      sy: t.clientY,
+      sx: p.x,
+      sy: p.y,
       moved: false,
-      left: left,
-      top: top,
-      maxX: num(ds.mx),
-      maxY: num(ds.my),
-      x: left,
-      y: top
+      px: 0,
+      py: 0,
+      left: left === null ? 0 : left, // 读不到就当 0：位移是相对的，不影响跟手
+      top: top === null ? 0 : top,
+      maxX: maxX,
+      maxY: maxY,
+      // 只有确认拿到边界才做实时限位；拿不到就不限位，落点由逻辑层兜底夹取
+      bounded: maxX !== null && maxY !== null
     };
     // 逻辑层需要知道「被抓住了」：打断起跳/滑行动画、重置 30 秒呼吸计时
     ownerInstance.callMethod('onFabGrab');
@@ -88,18 +123,22 @@ module.exports = {
 
   move: function (event, ownerInstance) {
     if (!drag) return;
-    var t = event.touches && event.touches[0];
-    if (!t) return;
-    var dx = t.clientX - drag.sx;
-    var dy = t.clientY - drag.sy;
+    var p = point(event);
+    if (!p) return;
+    var dx = p.x - drag.sx;
+    var dy = p.y - drag.sy;
     // 6px 阈值：轻触（点开/收起面板）时的手指微抖不算拖动
     if (!drag.moved && (dx > 6 || dx < -6 || dy > 6 || dy < -6)) drag.moved = true;
     if (!drag.moved) return;
-    var x = clamp(drag.left + dx, 0, drag.maxX);
-    var y = clamp(drag.top + dy, 0, drag.maxY);
-    drag.x = x;
-    drag.y = y;
-    applyPos(ownerInstance, x, y, drag.left, drag.top);
+    var px = dx;
+    var py = dy;
+    if (drag.bounded) {
+      px = clamp(drag.left + dx, 0, drag.maxX) - drag.left;
+      py = clamp(drag.top + dy, 0, drag.maxY) - drag.top;
+    }
+    drag.px = px;
+    drag.py = py;
+    setOffset(ownerInstance, px, py);
   },
 
   end: function (event, ownerInstance) {

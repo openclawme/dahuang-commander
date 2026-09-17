@@ -495,6 +495,8 @@ Page({
    * 外观（毛玻璃 / 灵气雾气 / 星芒呼吸）与定稿后的起跳滑行逻辑一律不变。
    */
   onFabGrab() {
+    // 记住按下时的位置：视图层回传的是位移量，落点一律由这里基于基准算，单一真相
+    this._fabDragBase = { x: this.data.quickFabX || 0, y: this.data.quickFabY || 0 };
     this.resetFabIdleTimer();
     // 打断进行中的起跳/滑行动画（重新抓住浮钮）
     if (this._fabSnapTimer) { clearTimeout(this._fabSnapTimer); this._fabSnapTimer = null; }
@@ -506,43 +508,68 @@ Page({
 
   /**
    * 兜底拖动路径：视图层 WXS 拿不到浮钮节点时才会走到这里（等同改造前的实现）。
-   * 载荷是绝对坐标，不依赖起始基准，因此与 WXS 里缓存的起点不会打架。
+   * 载荷与正常路径一致，都是「相对按下位置的位移量」，所以两条路径的落点算法相同。
    */
   onFabDrag(res) {
-    if (!res) return;
-    const rx = res.x;
-    const ry = res.y;
-    if (typeof rx !== "number" || typeof ry !== "number") return;
+    const off = this.fabOffsetOf(res);
+    if (!off) return;
     const win = this._quickFabWindow || {};
     const maxX = typeof win.maxX === "number" ? win.maxX : 9999;
     const maxY = typeof win.maxY === "number" ? win.maxY : 9999;
     this.setData({
-      quickFabX: Math.min(Math.max(0, rx), maxX),
-      quickFabY: Math.min(Math.max(0, ry), maxY)
+      quickFabX: Math.min(Math.max(0, off.x), maxX),
+      quickFabY: Math.min(Math.max(0, off.y), maxY)
     });
+  },
+
+  /** 位移量 → 绝对落点（基于按下时的基准夹到窗口内）；载荷异常返回 null */
+  fabOffsetOf(res) {
+    if (!res) return null;
+    const px = res.px;
+    const py = res.py;
+    if (typeof px !== "number" || typeof py !== "number") return null;
+    const base = this._fabDragBase || { x: this.data.quickFabX || 0, y: this.data.quickFabY || 0 };
+    const win = this._quickFabWindow || {};
+    const maxX = typeof win.maxX === "number" ? win.maxX : 9999;
+    const maxY = typeof win.maxY === "number" ? win.maxY : 9999;
+    return {
+      x: Math.min(Math.max(0, base.x + px), maxX),
+      y: Math.min(Math.max(0, base.y + py), maxY)
+    };
+  },
+
+  /**
+   * 兜底轻触：万一 WXS 响应事件整体不生效（bindtouchstart 那几个全哑），tap 是
+   * 普通事件绑定，照旧会派发到逻辑层，浮钮至少还点得开面板。正常路径下这次轻触
+   * 已由 onFabDrop 处理，靠时间窗去重，不会连开两次。
+   */
+  onFabTap() {
+    if (Date.now() - (this._fabDropAt || 0) < 400) return;
+    this.resetFabIdleTimer();
+    this.toggleQuickPanel();
   },
 
   onFabDrop(res) {
     if (!res || !res.moved) {
       // 6px 以内：当作轻触，照旧展开/收起面板
+      this._fabDropAt = Date.now();
       this.resetFabIdleTimer();
       this.toggleQuickPanel();
       return;
     }
-    const rx = res.x;
-    const ry = res.y;
-    if (typeof rx !== "number" || typeof ry !== "number") {
+    const dropped = this.fabOffsetOf(res);
+    if (!dropped) {
       // 载荷异常：只把临时位移清掉，绝不擅自把浮钮落位
       this.setData({ fabDragX: 0, fabDragY: 0 });
       return;
     }
+    const x = dropped.x;
+    const y = dropped.y;
     // 松手：篮球式"蓄力→起跳→落地弹起"，跳向最近的左右边缘、
     // 落点比松手处略高（约 36px），像积蓄力量后轻巧落位
     const win = this._quickFabWindow || {};
     const maxX = typeof win.maxX === "number" ? win.maxX : 9999;
     const maxY = typeof win.maxY === "number" ? win.maxY : 9999;
-    const x = Math.min(Math.max(0, rx), maxX);
-    const y = Math.min(Math.max(0, ry), maxY);
     const snapX = x < maxX / 2 ? 0 : maxX;
     const targetY = Math.min(Math.max(y - 36, 8), maxY);
     const dist = Math.abs(x - snapX);
