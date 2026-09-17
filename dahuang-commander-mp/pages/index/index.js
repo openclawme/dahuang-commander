@@ -104,6 +104,12 @@ Page({
     quickFabX: 0,
     quickFabY: 0,
     quickFabReady: false,
+    // 拖动边界（initQuickFabPosition 量出窗口后写入；量不到时给 9999，等同不限制）
+    fabMaxX: 9999,
+    fabMaxY: 9999,
+    // 拖动期间的临时位移：由 WXS 直接在视图层改 transform，这里只在松手/被抓时归零
+    fabDragX: 0,
+    fabDragY: 0,
 
     // B-1 Orbit Aura & Particles
     avatarChar: "靈",
@@ -475,15 +481,20 @@ Page({
       x = Math.min(Math.max(0, x), maxX);
       y = Math.min(Math.max(0, y), maxY);
       this._quickFabWindow = { w, h, fab, maxX, maxY };
-      this.setData({ quickFabX: x, quickFabY: y, quickFabReady: true });
+      // 边界同时下发给视图层：拖动全程在 WXS 里夹取，不必为越界再跑一趟逻辑层
+      this.setData({ quickFabX: x, quickFabY: y, quickFabReady: true, fabMaxX: maxX, fabMaxY: maxY });
     } catch (e) {
       this.setData({ quickFabX: 300, quickFabY: 420, quickFabReady: true });
     }
   },
 
-  onQuickFabStart(e) {
-    const t = e.touches && e.touches[0];
-    if (!t) return;
+  /**
+   * 浮钮拖动改由视图层 WXS 接管（pages/index/fab-drag.wxs）：
+   * touchmove 全程不过逻辑层、不 setData，只在视图层改 transform（合成器属性，不重排），
+   * 一个手势只过桥两次——抓住 onFabGrab、松手 onFabDrop。
+   * 外观（毛玻璃 / 灵气雾气 / 星芒呼吸）与定稿后的起跳滑行逻辑一律不变。
+   */
+  onFabGrab() {
     this.resetFabIdleTimer();
     // 打断进行中的起跳/滑行动画（重新抓住浮钮）
     if (this._fabSnapTimer) { clearTimeout(this._fabSnapTimer); this._fabSnapTimer = null; }
@@ -491,51 +502,62 @@ Page({
     if (this.data.fabJumping || this.data.fabGliding) {
       this.setData({ fabJumping: false, fabGliding: false });
     }
-    this._fabStart = { x: t.clientX, y: t.clientY, left: this.data.quickFabX, top: this.data.quickFabY };
-    this._fabMoved = false;
   },
 
-  onQuickFabMove(e) {
-    const t = e.touches && e.touches[0];
-    const start = this._fabStart;
-    if (!t || !start) return;
-    const dx = t.clientX - start.x;
-    const dy = t.clientY - start.y;
-    if (Math.abs(dx) > 6 || Math.abs(dy) > 6) this._fabMoved = true;
+  /**
+   * 兜底拖动路径：视图层 WXS 拿不到浮钮节点时才会走到这里（等同改造前的实现）。
+   * 载荷是绝对坐标，不依赖起始基准，因此与 WXS 里缓存的起点不会打架。
+   */
+  onFabDrag(res) {
+    if (!res) return;
+    const rx = res.x;
+    const ry = res.y;
+    if (typeof rx !== "number" || typeof ry !== "number") return;
     const win = this._quickFabWindow || {};
     const maxX = typeof win.maxX === "number" ? win.maxX : 9999;
     const maxY = typeof win.maxY === "number" ? win.maxY : 9999;
     this.setData({
-      quickFabX: Math.min(Math.max(0, start.left + dx), maxX),
-      quickFabY: Math.min(Math.max(0, start.top + dy), maxY)
+      quickFabX: Math.min(Math.max(0, rx), maxX),
+      quickFabY: Math.min(Math.max(0, ry), maxY)
     });
   },
 
-  onQuickFabEnd() {
-    this._fabStart = null;
-    if (this._fabMoved) {
-      // 松手：篮球式"蓄力→起跳→落地弹起"，跳向最近的左右边缘、
-      // 落点比松手处略高（约 36px），像积蓄力量后轻巧落位
-      const win = this._quickFabWindow || {};
-      const maxX = typeof win.maxX === "number" ? win.maxX : 0;
-      const maxY = typeof win.maxY === "number" ? win.maxY : 0;
-      const snapX = this.data.quickFabX < maxX / 2 ? 0 : maxX;
-      const targetY = Math.min(Math.max(this.data.quickFabY - 36, 8), maxY);
-      const dist = Math.abs(this.data.quickFabX - snapX);
-      this.setData({ fabJumping: true });
-      // 起跳顶点附近（320ms）开始向目标滑行，落地时正好落在边缘偏上处
-      this._fabSnapTimer = setTimeout(() => {
-        this.setData({ fabGliding: true, quickFabX: snapX, quickFabY: targetY });
-        try { wx.setStorageSync("dahuangQuickFabPos", { x: snapX, y: targetY }); } catch (e) {}
-      }, dist < 20 ? 260 : 320);
-      this._fabJumpEndTimer = setTimeout(() => {
-        this.setData({ fabJumping: false, fabGliding: false });
-        this.resetFabIdleTimer();
-      }, 1250);
+  onFabDrop(res) {
+    if (!res || !res.moved) {
+      // 6px 以内：当作轻触，照旧展开/收起面板
+      this.resetFabIdleTimer();
+      this.toggleQuickPanel();
       return;
     }
-    this.resetFabIdleTimer();
-    this.toggleQuickPanel();
+    const rx = res.x;
+    const ry = res.y;
+    if (typeof rx !== "number" || typeof ry !== "number") {
+      // 载荷异常：只把临时位移清掉，绝不擅自把浮钮落位
+      this.setData({ fabDragX: 0, fabDragY: 0 });
+      return;
+    }
+    // 松手：篮球式"蓄力→起跳→落地弹起"，跳向最近的左右边缘、
+    // 落点比松手处略高（约 36px），像积蓄力量后轻巧落位
+    const win = this._quickFabWindow || {};
+    const maxX = typeof win.maxX === "number" ? win.maxX : 9999;
+    const maxY = typeof win.maxY === "number" ? win.maxY : 9999;
+    const x = Math.min(Math.max(0, rx), maxX);
+    const y = Math.min(Math.max(0, ry), maxY);
+    const snapX = x < maxX / 2 ? 0 : maxX;
+    const targetY = Math.min(Math.max(y - 36, 8), maxY);
+    const dist = Math.abs(x - snapX);
+    // 落点定稿与位移归零写在同一笔 setData：样式绑定被重新求值，WXS 写进去的
+    // transform 随之作废、由 left/top 无缝接上，不会出现回弹跳变
+    this.setData({ quickFabX: x, quickFabY: y, fabDragX: 0, fabDragY: 0, fabJumping: true });
+    // 起跳顶点附近（320ms）开始向目标滑行，落地时正好落在边缘偏上处
+    this._fabSnapTimer = setTimeout(() => {
+      this.setData({ fabGliding: true, quickFabX: snapX, quickFabY: targetY });
+      try { wx.setStorageSync("dahuangQuickFabPos", { x: snapX, y: targetY }); } catch (e) {}
+    }, dist < 20 ? 260 : 320);
+    this._fabJumpEndTimer = setTimeout(() => {
+      this.setData({ fabJumping: false, fabGliding: false });
+      this.resetFabIdleTimer();
+    }, 1250);
   },
 
   /** 30 秒未操作后 FAB 降透明度（呼吸态），触摸即恢复 */

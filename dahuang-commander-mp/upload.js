@@ -13,7 +13,7 @@ const project = new ci.Project({
 
 const pkg = require('./package.json');
 const version = pkg.version || '1.11.20';
-const desc = '性能修复：贴底占位测量不再随每次流式输出重跑（聊天越长越贵，正是拖动发黏的来源）';
+const desc = '浮钮拖动改为视图层 WXS 接管：不再逐帧过桥 setData，只改 transform；毛玻璃与全部动效保持不变';
 
 async function run() {
   console.log('⚡ 正在对「我是分身」微信小程序进行天道编译与打包...');

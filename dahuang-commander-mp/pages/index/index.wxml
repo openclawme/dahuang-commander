@@ -1,3 +1,5 @@
+<wxs module="fabDrag" src="./fab-drag.wxs"></wxs>
+
 <view class="container" style="transform: translateY(-{{keyboardShift}}px);">
 
   <view class="cyber-panel glow-cyan tab-pane-container chat-panel">
@@ -329,7 +331,10 @@
     <text class="fab-guide-text">点这里召唤常用指令与任务</text>
     <view class="fab-guide-arrow"></view>
   </view>
-  <view class="quick-fab {{keyboardShift > 0 ? 'quick-fab-hidden' : ''}} {{fabIdle ? 'quick-fab-idle' : ''}} {{fabJumping ? 'quick-fab-jump' : ''}} {{fabGliding ? 'quick-fab-glide' : ''}}" style="left: {{quickFabX}}px; top: {{quickFabY}}px;" catchtouchstart="onQuickFabStart" catchtouchmove="onQuickFabMove" bindtouchend="onQuickFabEnd">
+  <!-- 拖动由 WXS 在视图层接管（见 fab-drag.wxs）：touchmove 不过逻辑层、不 setData、只改 transform。
+       松手时才回调逻辑层一次（onFabGrab / onFabDrop）定稿落点，起跳滑向边缘仍由逻辑层驱动。
+       left/top 是已定稿的位置，fabDragX/fabDragY 只是拖动期间的临时位移，松手即归零。 -->
+  <view class="quick-fab {{keyboardShift > 0 ? 'quick-fab-hidden' : ''}} {{fabIdle ? 'quick-fab-idle' : ''}} {{fabJumping ? 'quick-fab-jump' : ''}} {{fabGliding ? 'quick-fab-glide' : ''}}" style="left: {{quickFabX}}px; top: {{quickFabY}}px; transform: translate3d({{fabDragX}}px, {{fabDragY}}px, 0);" data-x="{{quickFabX}}" data-y="{{quickFabY}}" data-mx="{{fabMaxX}}" data-my="{{fabMaxY}}" bindtouchstart="fabDrag.start" bindtouchmove="fabDrag.move" bindtouchend="fabDrag.end" bindtouchcancel="fabDrag.cancel">
     <view class="quick-fab-halo"></view>
     <view class="quick-fab-ring"></view>
     <view class="quick-fab-glass">

@@ -1,0 +1,112 @@
+/**
+ * 主人浮钮：视图层拖动（WXS 响应事件）
+ *
+ * 为什么放在视图层：逻辑层的 setData 每帧都要「过桥 + 触发布局」，
+ * 手指和浮钮之间天然隔着一次线程往返，拖起来就发黏。
+ * 这里 touchmove 全程只在视图层处理，并且只改 transform（合成器属性，不重排），
+ * 松手时才 callMethod 回调逻辑层一次，由逻辑层定稿落点、起跳滑向边缘。
+ *
+ * 拖动期间毛玻璃、灵气雾气、星芒呼吸等外观一律不动。
+ *
+ * 拖动状态放在模块级变量：整站只有一个浮钮，index 页同一时刻也只有一个实例。
+ */
+var drag = null;
+
+/** dataset 里的数值（可能以字符串形式传回） */
+function num(v) {
+  var n = v * 1; // 数字原样返回；字符串转数字；其它得 NaN
+  return n === n ? n : 0; // NaN !== NaN
+}
+
+function clamp(v, min, max) {
+  if (v < min) return min;
+  if (v > max) return max;
+  return v;
+}
+
+function fab(ownerInstance) {
+  return ownerInstance.selectComponent('.quick-fab');
+}
+
+/**
+ * 把浮钮挪到 (x, y)，只改临时位移、不动已定稿的 left/top。
+ * 正常路径：选中节点后 setStyle，全程视图层，零过桥。
+ * 兜底路径：万一拿不到节点（极少数基础库/自定义组件场景），退回逻辑层 setData——
+ * 拖起来和改造前一样，慢但不失灵，绝不会出现「拖不动、一松手才瞬移」。
+ */
+function applyPos(ownerInstance, x, y, left, top) {
+  var ins = fab(ownerInstance);
+  if (ins) {
+    ins.setStyle({
+      transform:
+        'translate3d(' + Math.round(x - left) + 'px,' + Math.round(y - top) + 'px,0)'
+    });
+    return;
+  }
+  ownerInstance.callMethod('onFabDrag', { x: x, y: y });
+}
+
+function finish(ownerInstance, allowTap) {
+  if (!drag) return;
+  var d = drag;
+  drag = null;
+  if (!d.moved) {
+    if (allowTap) {
+      // 6px 以内算点击：交给逻辑层展开/收起面板
+      ownerInstance.callMethod('onFabDrop', { moved: false });
+    } else {
+      // 触摸被系统打断：不当作点击，清掉临时位移，回到已提交位置
+      var ins = fab(ownerInstance);
+      if (ins) ins.setStyle({ transform: '' });
+    }
+    return;
+  }
+  ownerInstance.callMethod('onFabDrop', { moved: true, x: d.x, y: d.y });
+}
+
+module.exports = {
+  start: function (event, ownerInstance) {
+    var t = event.touches && event.touches[0];
+    if (!t) return;
+    var ds = (event.currentTarget && event.currentTarget.dataset) || {};
+    var left = num(ds.x);
+    var top = num(ds.y);
+    drag = {
+      sx: t.clientX,
+      sy: t.clientY,
+      moved: false,
+      left: left,
+      top: top,
+      maxX: num(ds.mx),
+      maxY: num(ds.my),
+      x: left,
+      y: top
+    };
+    // 逻辑层需要知道「被抓住了」：打断起跳/滑行动画、重置 30 秒呼吸计时
+    ownerInstance.callMethod('onFabGrab');
+  },
+
+  move: function (event, ownerInstance) {
+    if (!drag) return;
+    var t = event.touches && event.touches[0];
+    if (!t) return;
+    var dx = t.clientX - drag.sx;
+    var dy = t.clientY - drag.sy;
+    // 6px 阈值：轻触（点开/收起面板）时的手指微抖不算拖动
+    if (!drag.moved && (dx > 6 || dx < -6 || dy > 6 || dy < -6)) drag.moved = true;
+    if (!drag.moved) return;
+    var x = clamp(drag.left + dx, 0, drag.maxX);
+    var y = clamp(drag.top + dy, 0, drag.maxY);
+    drag.x = x;
+    drag.y = y;
+    applyPos(ownerInstance, x, y, drag.left, drag.top);
+  },
+
+  end: function (event, ownerInstance) {
+    finish(ownerInstance, true);
+  },
+
+  cancel: function (event, ownerInstance) {
+    finish(ownerInstance, false);
+  }
+};
