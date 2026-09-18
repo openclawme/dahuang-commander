@@ -1,65 +1,75 @@
 @import "tailwindcss";
 
-@keyframes scanline {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+/* ============ 大荒古风淡雅色板（与微信小程序 app.wxss 对齐） ============ */
+@theme {
+  --color-zhusha: #9e2a2b;      /* 朱砂——强调/选中/按钮（小程序 selectedColor） */
+  --color-zhusha-deep: #b0543f; /* 深朱砂 */
+  --color-dai: #3d5a5b;         /* 黛青 */
+  --color-moqing: #5b7a8c;      /* 墨青 */
+  --color-chajin: #a06f3f;      /* 茶金 */
+  --color-zhulv: #6b7b3a;       /* 竹绿 */
+  --color-xuanzhi: #f4f1ea;     /* 宣纸——页面底（小程序 window backgroundColor） */
+  --color-paper: #fffcf6;       /* 纸白——卡片 */
+  --color-mo: #2b2b2b;          /* 墨——正文 */
+  --color-mo-ruan: #6b6560;     /* 墨淡 */
+  --color-bian: #e3dcce;        /* 描边 */
+
+  --font-gufeng: "Noto Serif SC", "Source Han Serif SC", "STSong", "SimSun", "Songti SC", serif;
 }
 
 @keyframes breathe {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.9; }
 }
 
-@keyframes pulse-gold {
-  0%, 100% { box-shadow: 0 0 5px rgba(184, 132, 79, 0.2); border-color: rgba(184, 132, 79, 0.4); }
-  50% { box-shadow: 0 0 15px rgba(184, 132, 79, 0.6); border-color: rgba(184, 132, 79, 0.9); }
+/* 原 CRT 霓虹脉冲改为古风柔光——只留极淡的呼吸光晕，不做大面积动画 */
+@keyframes glow-gold {
+  0%, 100% { box-shadow: 0 0 6px rgba(138, 109, 59, 0.10); border-color: rgba(138, 109, 59, 0.25); }
+  50% { box-shadow: 0 0 12px rgba(138, 109, 59, 0.22); border-color: rgba(138, 109, 59, 0.45); }
 }
 
-@keyframes pulse-cyan {
-  0%, 100% { box-shadow: 0 0 5px rgba(91, 122, 140, 0.2); border-color: rgba(91, 122, 140, 0.4); }
-  50% { box-shadow: 0 0 15px rgba(91, 122, 140, 0.6); border-color: rgba(91, 122, 140, 0.9); }
+@keyframes glow-cyan {
+  0%, 100% { box-shadow: 0 0 6px rgba(91, 122, 140, 0.10); border-color: rgba(91, 122, 140, 0.25); }
+  50% { box-shadow: 0 0 12px rgba(91, 122, 140, 0.22); border-color: rgba(91, 122, 140, 0.45); }
 }
 
-@keyframes pulse-emerald {
-  0%, 100% { box-shadow: 0 0 5px rgba(59, 94, 89, 0.2); border-color: rgba(59, 94, 89, 0.4); }
-  50% { box-shadow: 0 0 15px rgba(59, 94, 89, 0.6); border-color: rgba(59, 94, 89, 0.9); }
+@keyframes glow-emerald {
+  0%, 100% { box-shadow: 0 0 6px rgba(107, 123, 58, 0.10); border-color: rgba(107, 123, 58, 0.25); }
+  50% { box-shadow: 0 0 12px rgba(107, 123, 58, 0.22); border-color: rgba(107, 123, 58, 0.45); }
 }
 
 /* Custom Styles */
 body {
   margin: 0;
   padding: 0;
-  background-color: #0a0907;
-  color: #f3f4f6;
+  background-color: #f4f1ea;   /* 宣纸 */
+  color: #2b2b2b;              /* 墨 */
   overflow-y: auto;
-  user-select: text; /* Enable selection and copying of text */
+  user-select: text;
+  /* 中文友好字体栈（小程序同思路：系统中文黑体优先，标题衬线单独给 h1-h4） */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
 }
 
-.neon-gold {
-  animation: pulse-gold 4s infinite ease-in-out;
+/* 标题用古风衬线（小程序标题字体栈一致） */
+h1, h2, h3, h4 {
+  font-family: var(--font-gufeng);
 }
 
-.neon-cyan {
-  animation: pulse-cyan 4s infinite ease-in-out;
+.gufeng-gold {
+  animation: glow-gold 4s infinite ease-in-out;
 }
 
-.neon-emerald {
-  animation: pulse-emerald 4s infinite ease-in-out;
+.gufeng-cyan {
+  animation: glow-cyan 4s infinite ease-in-out;
+}
+
+.gufeng-emerald {
+  animation: glow-emerald 4s infinite ease-in-out;
 }
 
 .animate-breathe {
   animation: breathe 2.5s infinite ease-in-out;
-}
-
-.scanline-overlay::after {
-  content: " ";
-  display: block;
-  position: absolute;
-  top: 0; left: 0; bottom: 0; right: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(158, 42, 43, 0.06), rgba(59, 94, 89, 0.02), rgba(91, 122, 140, 0.06));
-  z-index: 10;
-  background-size: 100% 2px, 3px 100%;
-  pointer-events: none;
 }
 
 .scroll-smooth {
@@ -68,35 +78,49 @@ body {
 
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #14110d;
+  background: #f0ebe0;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(91, 122, 140, 0.25);
-  border-radius: 2px;
+  background: rgba(91, 122, 140, 0.35);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(91, 122, 140, 0.65);
+  background: rgba(91, 122, 140, 0.6);
 }
 
-/* Matrix Code Rain Style for empty status */
+/* 文字光晕改柔和（原 CRT 强辉光去掉，只留轻描） */
 .text-glow-cyan {
-  text-shadow: 0 0 8px rgba(91, 122, 140, 0.6);
+  text-shadow: 0 0 6px rgba(91, 122, 140, 0.25);
 }
 
 .text-glow-gold {
-  text-shadow: 0 0 8px rgba(184, 132, 79, 0.6);
+  text-shadow: 0 0 6px rgba(160, 111, 63, 0.25);
 }
 
 .text-glow-emerald {
-  text-shadow: 0 0 8px rgba(59, 94, 89, 0.6);
+  text-shadow: 0 0 6px rgba(107, 123, 58, 0.25);
 }
+
+/* ==================== 实时进度区（小程序 index.wxss 逐字移植） ==================== */
+.seg-done { background: #5b7a8c; }
+.seg-failed { background: #a93230; }
+.seg-pending { background: rgba(91, 122, 140, 0.15); }
+.seg-active {
+  background: linear-gradient(90deg, rgba(91, 122, 140, 0.3) 25%, rgba(91, 122, 140, 0.95) 50%, rgba(91, 122, 140, 0.3) 75%);
+  background-size: 200% 100%;
+  animation: seg-flow 1.2s linear infinite;
+}
+.mark-done { color: #5b7a8c; }
+.mark-failed { color: #a93230; }
+.mark-running { color: #9e2a2b; }
+.mark-pending { color: #b9c4ca; }
 
 /* Force enable text selection across the entire app */
 * {

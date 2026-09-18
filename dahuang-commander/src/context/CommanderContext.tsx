@@ -22,6 +22,7 @@ export interface ChatMessage {
   charts?: any[];
   suggestions?: Array<{ id: string; label: string; command: string }>;
   progressState?: {
+    tokensUsed?: number;
     phase: string;
     steps: Array<{ id: string; desc: string; status: string; durationMs: number | null; summary: string }>;
     activeStepId: string;
@@ -1040,6 +1041,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               prev.map((m) => {
                 if (m.id !== data.requestId) return m;
                 const ps = m.progressState || {
+                  tokensUsed: 0,
                   phase: "understanding",
                   steps: [],
                   activeStepId: "",
@@ -1094,6 +1096,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                     break;
                   }
                   case "heartbeat": {
+                    if (typeof data.tokensUsed === "number") ps.tokensUsed = data.tokensUsed;
                     if (data.stepId) {
                       ps.activeStepId = data.stepId;
                       const st = ps.steps.find((s: any) => s.id === data.stepId);
@@ -1258,6 +1261,27 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       addLog("ACTION", "🔗 控御法旨已打通天道总线，正在向大荒服务器投递异步指令...");
       
       const uniqueReqId = `req-${Date.now()}`;
+      // 乐观气泡：立即建立（与小程序一致）——后端 agent_progress 事件可能比 HTTP 响应先到，
+      // 若等响应回来再建气泡，早到的 plan/step 事件会因找不到消息而被丢弃
+      setChatHistory((prev) => [
+        ...prev,
+        {
+          id: uniqueReqId,
+          sender: "agent",
+          isPending: true,
+          content: "（元神入定推演中...）",
+          timestamp: getTimestamp(),
+          progressState: {
+            tokensUsed: 0,
+            phase: "understanding",
+            steps: [],
+            activeStepId: "",
+            lastDetail: "",
+            startedAt: Date.now(),
+            lastUpdateAt: Date.now()
+          }
+        }
+      ]);
       try {
         const res = await fetch(`${getHeavenBaseUrl()}/api/agent/command`, {
           method: "POST",
@@ -1277,29 +1301,22 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (res.ok) {
           const data = await res.json();
           
-          if (data.status === "PROCESSING") {
+          if (data.status === "PROCESSING" || data.status === "QUEUED") {
             addLog("SYSTEM", "🚀 天道已安全接旨并开启异步神念决策！");
             addLog("ACTION", "智能体元神入定思考中... (Background processing active)");
-            setChatHistory((prev) => [
-              ...prev,
-              {
-                id: uniqueReqId,
-                sender: "agent",
-                isPending: true,
-                content: "（元神入定推演中...）",
-                timestamp: getTimestamp(),
-                // 实时进度状态机（agent_progress 事件流驱动）
-                progressState: {
-                  phase: "understanding",
-                  steps: [],
-                  activeStepId: "",
-                  lastDetail: "",
-                  startedAt: Date.now(),
-                  lastUpdateAt: Date.now()
-                }
-              }
-            ]);
-          } else {
+            // 乐观气泡已建；若后端给的是同步完成态，走下方 else 兜底
+            if (data.status === "QUEUED") {
+              setChatHistory((prev) =>
+                prev.map((m) => (m.id === uniqueReqId ? { ...m, isPending: true } : m))
+              );
+            }
+          } else if (data.status !== "COMPLETED") {
+            // 非完成非排队：移除乐观气泡，按错误处理
+            setChatHistory((prev) => prev.filter((m) => m.id !== uniqueReqId));
+          }
+          if (data.status === "COMPLETED") {
+            // 同步完成：撤下乐观气泡，直接渲染结果
+            setChatHistory((prev) => prev.filter((m) => m.id !== uniqueReqId));
             // Synchronous fallback handling (if isAsync was ignored on older versions)
             if (data.logs && Array.isArray(data.logs)) {
               data.logs.forEach((log: any) => {
