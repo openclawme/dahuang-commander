@@ -22,20 +22,16 @@
   50% { opacity: 0.9; }
 }
 
-/* 原 CRT 霓虹脉冲改为古风柔光——只留极淡的呼吸光晕，不做大面积动画 */
-@keyframes glow-gold {
-  0%, 100% { box-shadow: 0 0 6px rgba(138, 109, 59, 0.10); border-color: rgba(138, 109, 59, 0.25); }
-  50% { box-shadow: 0 0 12px rgba(138, 109, 59, 0.22); border-color: rgba(138, 109, 59, 0.45); }
+/* 性能：面板光晕改静态柔和阴影——box-shadow 无限动画会让整块大面板持续重绘，
+   是本页面卡顿的头号来源（古风观感保留，动态开销归零） */
+.gufeng-gold {
+  box-shadow: 0 0 10px rgba(138, 109, 59, 0.14);
 }
-
-@keyframes glow-cyan {
-  0%, 100% { box-shadow: 0 0 6px rgba(91, 122, 140, 0.10); border-color: rgba(91, 122, 140, 0.25); }
-  50% { box-shadow: 0 0 12px rgba(91, 122, 140, 0.22); border-color: rgba(91, 122, 140, 0.45); }
+.gufeng-cyan {
+  box-shadow: 0 0 10px rgba(91, 122, 140, 0.14);
 }
-
-@keyframes glow-emerald {
-  0%, 100% { box-shadow: 0 0 6px rgba(107, 123, 58, 0.10); border-color: rgba(107, 123, 58, 0.25); }
-  50% { box-shadow: 0 0 12px rgba(107, 123, 58, 0.22); border-color: rgba(107, 123, 58, 0.45); }
+.gufeng-emerald {
+  box-shadow: 0 0 10px rgba(107, 123, 58, 0.14);
 }
 
 /* Custom Styles */
@@ -54,18 +50,6 @@ body {
 /* 标题用古风衬线（小程序标题字体栈一致） */
 h1, h2, h3, h4 {
   font-family: var(--font-gufeng);
-}
-
-.gufeng-gold {
-  animation: glow-gold 4s infinite ease-in-out;
-}
-
-.gufeng-cyan {
-  animation: glow-cyan 4s infinite ease-in-out;
-}
-
-.gufeng-emerald {
-  animation: glow-emerald 4s infinite ease-in-out;
 }
 
 .animate-breathe {

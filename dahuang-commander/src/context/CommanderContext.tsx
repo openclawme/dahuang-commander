@@ -51,19 +51,10 @@ export interface TelemetryLog {
   message: string;
   timestamp: string;
 }
-export interface ScavengeGame {
-  id: string;
-  name: string;
-  type: string;
-  difficultyWarning: string;
-  hint: string;
-  reward: number;
-}
 interface CommanderContextType {
   agentState: AgentState;
   chatHistory: ChatMessage[];
   logs: TelemetryLog[];
-  scavengeGames: ScavengeGame[];
   isWebhookActive: boolean;
   isWebMode: boolean;
   getIqChallenge: () => Promise<{ challengeId: string; questions: any[]; answers: Record<string, string> } | null>;
@@ -80,6 +71,61 @@ interface CommanderContextType {
   addLog: (type: "THOUGHT" | "ACTION" | "SYSTEM", message: string) => void;
   clearLogs: () => void;
   clearRoomChat: (roomId: string) => void;
+  markRoomRead: (roomId: string) => void;
+  fetchRoomReplyState: (roomId: string) => Promise<boolean>;
+  submitAlchemy: (graphJson: any, challengeId: string) => Promise<boolean>;
+  directoryList: any[];
+  fetchDirectoryList: (opts?: { page?: number; sort?: string; q?: string }) => Promise<void>;
+  sendForumPost: (title: string, content: string) => Promise<boolean>;
+  taskList: any[];
+  taskCounts: Record<string, number>;
+  fetchTasksList: (status?: string) => Promise<void>;
+  taskDetail: any;
+  fetchTaskDetail: (taskId: string) => Promise<void>;
+  taskAction: (taskId: string, action: "retry" | "cancel" | "resume") => Promise<boolean>;
+  cronAction: (jobId: string, action: "pause" | "resume" | "runNow") => Promise<boolean>;
+  decisionsList: any[];
+  fetchDecisionsList: () => Promise<void>;
+  answerDecision: (decisionId: string, answer: string) => Promise<boolean>;
+  dismissDecision: (decisionId: string) => Promise<boolean>;
+  scheduleList: any[];
+  scheduleInbox: number;
+  fetchSchedule: (view?: string) => Promise<void>;
+  patchSchedule: (id: string, body: any) => Promise<boolean>;
+  deleteSchedule: (id: string) => Promise<boolean>;
+  createSchedule: (body: any) => Promise<boolean>;
+  notifList: any[];
+  notifUnread: number;
+  notifSettings: any;
+  fetchNotifications: () => Promise<void>;
+  saveNotifSetting: (key: string, value: any) => Promise<boolean>;
+  markAllNotificationsRead: () => Promise<boolean>;
+  clearNotifications: () => Promise<boolean>;
+  memorySnap: any;
+  memoryProposals: any[];
+  memoryAuto: boolean;
+  fetchMemory: () => Promise<void>;
+  memoryAction: (path: string, method: string, body?: any) => Promise<boolean>;
+  ordersList: any[];
+  fetchOrders: () => Promise<void>;
+  setPassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
+  saveReplyBudget: (group: number, dm: number) => Promise<boolean>;
+  jdAuthorize: () => Promise<string>;
+  pddAuthorize: () => Promise<string>;
+  contactsList: any[];
+  contactRequests: any[];
+  fetchContactsList: () => Promise<void>;
+  contactAction: (path: string, method: string, body?: any) => Promise<any>;
+  forumVote: (postId: string) => Promise<boolean>;
+  forumComment: (postId: string, content: string) => Promise<boolean>;
+  subforumList: any[];
+  fetchSubforums: () => Promise<void>;
+  karmaExchange: (amount: number) => Promise<boolean>;
+  knowledgeAsk: (question: string, history: any[]) => Promise<string>;
+  mcpTestServer: (serverId: string) => Promise<boolean>;
+  decisionsCount: number;
+  fetchDecisionsCount: () => Promise<void>;
+  setRoomHumanControl: (roomId: string, control: boolean) => Promise<boolean>;
   oneClickAlchemy: () => Promise<void>;
   importToken: (token: string) => Promise<void>;
   uploadOwnerImage: (file: File) => Promise<string | null>;
@@ -101,7 +147,7 @@ interface CommanderContextType {
   setAlchemyLeaderboard: React.Dispatch<React.SetStateAction<any[]>>;
   fetchArenaStatus: () => Promise<void>;
   sendArenaAction: (roundId: string, type: string, payload?: any) => Promise<boolean>;
-  fetchForumPosts: () => Promise<void>;
+  fetchForumPosts: (subforumId?: string) => Promise<void>;
   sendForumComment: (postId: string, content: string) => Promise<boolean>;
   fetchAlchemyData: () => Promise<void>;
   fetchProfile: () => Promise<void>;
@@ -237,7 +283,6 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       localStorage.setItem("dahuang_logs", JSON.stringify(logs));
     }
   }, [logs]);
-  const [scavengeGames, setScavengeGames] = useState<ScavengeGame[]>([]);
   const [isWebhookActive, setIsWebhookActive] = useState(false);
 
   // --- New Dahuang Core States ---
@@ -253,6 +298,12 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     messengerRoomsRef.current = messengerRooms;
   }, [messengerRooms]);
   const [activeChannel, setActiveChannel] = useState<string>("telemetry");
+  // socket 事件回调里读 activeChannel 会拿到陈旧闭包（effect 只依赖 token/status），
+  // 用 ref 镜像保证未读计数判断始终是新值
+  const activeChannelRef = useRef<string>("telemetry");
+  useEffect(() => {
+    activeChannelRef.current = activeChannel;
+  }, [activeChannel]);
   const [cronJobs, setCronJobs] = useState<any[]>([]);
 
   const fetchSync = async () => {
@@ -324,6 +375,479 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
+  // 人类接管（小程序 room 页同款）：reply-state 查询 + unlock/lock 切换
+  // 炼丹真实提交（POST /api/arena/alchemy/submit）
+  const submitAlchemy = async (graphJson: any, challengeId: string): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/arena/alchemy/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify({ challengeId, architectureName: `Synth-${Date.now().toString(36)}`, graphJson }),
+      });
+      return res.ok || res.status === 202;
+    } catch {
+      return false;
+    }
+  };
+
+  // 发帖（POST /api/agent/posts，小程序 dahuang 论坛同款）
+  const sendForumPost = async (title: string, content: string): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/posts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify({ title, content, visibility: "PUBLIC" }),
+      });
+      return res.ok || res.status === 201;
+    } catch {
+      return false;
+    }
+  };
+
+  // ---- 任务中心（GET /api/agent/tasks，契约经 Android 契约测试验证） ----
+  const [taskList, setTaskList] = useState<any[]>([]);
+  const [taskCounts, setTaskCounts] = useState<Record<string, number>>({});
+  const [taskDetail, setTaskDetail] = useState<any>(null);
+  const fetchTasksList = async (status?: string) => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const qs = new URLSearchParams({ limit: "20", page: "0" });
+      if (status) qs.set("status", status);
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/tasks?${qs.toString()}`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTaskList(Array.isArray(data.tasks) ? data.tasks : []);
+        if (data.counts) setTaskCounts(data.counts);
+      }
+    } catch { /* 静默 */ }
+  };
+  const fetchTaskDetail = async (taskId: string) => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/tasks/${taskId}`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTaskDetail(data.task ? { ...data.task, events: data.events, result: data.result } : data);
+      }
+    } catch { /* 静默 */ }
+  };
+  const taskAction = async (taskId: string, action: "retry" | "cancel" | "resume"): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/tasks/${taskId}/${action}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+
+  // 定时任务三操作（PATCH /api/agent/cron，后端已支持）
+  const cronAction = async (jobId: string, action: "pause" | "resume" | "runNow"): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/cron`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify({ jobId, action }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+
+  // ---- 待决策（GET /api/agent/decisions） ----
+  const [decisionsList, setDecisionsList] = useState<any[]>([]);
+  const fetchDecisionsList = async () => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/decisions`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDecisionsList(Array.isArray(data.decisions) ? data.decisions : []);
+      }
+    } catch { /* 静默 */ }
+  };
+  const answerDecision = async (decisionId: string, answer: string): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/decisions/${decisionId}/answer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify({ answer }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+  const dismissDecision = async (decisionId: string): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/decisions/${decisionId}/dismiss`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+
+  // ---- 记忆（/api/agent/memory 全家桶） ----
+  const [memorySnap, setMemorySnap] = useState<any>(null);
+  const [memoryProposals, setMemoryProposals] = useState<any[]>([]);
+  const [memoryAuto, setMemoryAuto] = useState(false);
+  const fetchMemory = async () => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const [snapRes, maintRes] = await Promise.all([
+        fetch(`${getHeavenBaseUrl()}/api/agent/memory`, { headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" } }),
+        fetch(`${getHeavenBaseUrl()}/api/agent/memory/maintenance`, { headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" } }),
+      ]);
+      if (snapRes.ok) setMemorySnap(await snapRes.json());
+      if (maintRes.ok) {
+        const data = await maintRes.json();
+        setMemoryProposals(Array.isArray(data.proposals) ? data.proposals : []);
+        setMemoryAuto(!!data.autoMaintain);
+      }
+    } catch { /* 静默 */ }
+  };
+  const memoryAction = async (path: string, method: string, body?: any): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/memory${path}`, {
+        method,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+
+  // ---- 购买记录（/api/agent/shopping/orders） ----
+  const [ordersList, setOrdersList] = useState<any[]>([]);
+  const fetchOrders = async () => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/shopping/orders`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setOrdersList(Array.isArray(data.orders) ? data.orders : []);
+      }
+    } catch { /* 静默 */ }
+  };
+
+  // ---- 密码 / 预算 / 电商授权 ----
+  const setPassword = async (oldPassword: string, newPassword: string): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/auth/${oldPassword ? "change-password" : "set-password"}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify(oldPassword ? { oldPassword, newPassword } : { password: newPassword }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+  const saveReplyBudget = async (group: number, dm: number): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/settings/reply-budget`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify({ groupReplyBudget: group, dmReplyBudget: dm }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+  const jdAuthorize = async (): Promise<string> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return "";
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/jd-oauth/authorize`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.url || "";
+      }
+    } catch { /* 静默 */ }
+    return "";
+  };
+  const pddAuthorize = async (): Promise<string> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return "";
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/shopping/pdd-authority`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.bound ? "" : data.authorityUrl || "";
+      }
+    } catch { /* 静默 */ }
+    return "";
+  };
+
+  // ---- 联系人（/api/agent/contacts，小程序神念传播同款） ----
+  const [contactsList, setContactsList] = useState<any[]>([]);
+  const [contactRequests, setContactRequests] = useState<any[]>([]);
+  const fetchContactsList = async () => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const [listRes, reqRes] = await Promise.all([
+        fetch(`${getHeavenBaseUrl()}/api/agent/contacts`, { headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" } }),
+        fetch(`${getHeavenBaseUrl()}/api/agent/contacts/requests`, { headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" } }),
+      ]);
+      if (listRes.ok) {
+        const data = await listRes.json();
+        setContactsList(Array.isArray(data.contacts) ? data.contacts : []);
+      }
+      if (reqRes.ok) {
+        const data = await reqRes.json();
+        setContactRequests(Array.isArray(data.requests) ? data.requests : []);
+      }
+    } catch { /* 静默 */ }
+  };
+  const contactAction = async (path: string, method: string, body?: any): Promise<any> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return null;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/contacts${path}`, {
+        method,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok, data };
+    } catch {
+      return null;
+    }
+  };
+
+  // ---- 论坛点赞/评论 + 板块 + 功德兑换 + 知识库问答 + MCP 测试 + 决策数 ----
+  const authPost = async (path: string, body?: any): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+  const forumVote = (postId: string) => authPost("/api/agent/votes", { postId, value: 1 });
+  const forumComment = (postId: string, content: string) => authPost("/api/agent/comments", { postId, content });
+  const karmaExchange = (amount: number) => authPost("/api/agent/karma/exchange", { amount });
+  const mcpTestServer = (serverId: string) => authPost(`/api/agent/mcp/servers/${serverId}/test`, {});
+  const [subforumList, setSubforumList] = useState<any[]>([]);
+  const fetchSubforums = async () => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/discovery`, { headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" } });
+      if (res.ok) {
+        const data = await res.json();
+        setSubforumList(Array.isArray(data.subforums) ? data.subforums : []);
+      }
+    } catch { /* 静默 */ }
+  };
+  const knowledgeAsk = async (question: string, history: any[]): Promise<string> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return "";
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/knowledge/ask`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify({ question, history: history.slice(-8) }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.answer || "";
+      }
+    } catch { /* 静默 */ }
+    return "";
+  };
+  const [decisionsCount, setDecisionsCount] = useState(0);
+  const fetchDecisionsCount = async () => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/decisions`, { headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" } });
+      if (res.ok) {
+        const data = await res.json();
+        setDecisionsCount(data.count ?? 0);
+      }
+    } catch { /* 静默 */ }
+  };
+
+  // ---- 日程（GET/POST/PATCH/DELETE /api/agent/schedule） ----
+  const [scheduleList, setScheduleList] = useState<any[]>([]);
+  const [scheduleInbox, setScheduleInbox] = useState(0);
+  const fetchSchedule = async (view = "today") => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/schedule?view=${view}&limit=200`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setScheduleList(Array.isArray(data.items) ? data.items : []);
+        setScheduleInbox(data.inboxCount ?? 0);
+      }
+    } catch { /* 静默 */ }
+  };
+  const schedulePost = async (path: string, body?: any): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/schedule${path}`, {
+        method: path === "" && body ? "POST" : body ? "PATCH" : "DELETE",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+  const patchSchedule = (id: string, body: any) => schedulePost(`/${id}`, body);
+  const deleteSchedule = (id: string) => schedulePost(`/${id}`);
+  const createSchedule = (body: any) => schedulePost("", body);
+
+  // ---- 提醒与订阅（/api/agent/notifications） ----
+  const [notifList, setNotifList] = useState<any[]>([]);
+  const [notifUnread, setNotifUnread] = useState(0);
+  const [notifSettings, setNotifSettings] = useState<any>({});
+  const fetchNotifications = async () => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const [listRes, settingsRes] = await Promise.all([
+        fetch(`${getHeavenBaseUrl()}/api/agent/notifications?limit=50`, { headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" } }),
+        fetch(`${getHeavenBaseUrl()}/api/agent/notifications/settings`, { headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" } }),
+      ]);
+      if (listRes.ok) {
+        const data = await listRes.json();
+        setNotifList(Array.isArray(data.notifications) ? data.notifications : []);
+        setNotifUnread(data.unread ?? 0);
+      }
+      if (settingsRes.ok) {
+        const data = await settingsRes.json();
+        setNotifSettings(data.settings || {});
+      }
+    } catch { /* 静默 */ }
+  };
+  const saveNotifSetting = async (key: string, value: any): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/notifications/settings`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify({ [key]: value }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+  const markAllNotificationsRead = async (): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/notifications`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify({ all: true }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+  const clearNotifications = async (): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/notifications`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+
+  // 元神榜（GET /api/agent/directory，契约经 Android 契约测试验证）
+  const [directoryList, setDirectoryList] = useState<any[]>([]);
+  const fetchDirectoryList = async (opts?: { page?: number; sort?: string; q?: string }) => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const qs = new URLSearchParams();
+      qs.set("limit", "20");
+      qs.set("page", String(opts?.page ?? 0));
+      qs.set("sort", opts?.sort || "karma");
+      if (opts?.q) qs.set("q", opts.q);
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/directory?${qs.toString()}`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDirectoryList(Array.isArray(data.agents) ? data.agents : []);
+      }
+    } catch { /* 静默 */ }
+  };
+
+  const fetchRoomReplyState = async (roomId: string): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/messenger/${roomId}/reply-state`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return !!data?.state?.humanControl;
+      }
+    } catch { /* 静默 */ }
+    return false;
+  };
+  // 进房已读清零（小程序 enterRoom 同款）
+  const markRoomRead = (roomId: string) => {
+    setMessengerRooms((prev) => {
+      const room = prev[roomId];
+      if (!room || room.unreadCount === 0) return prev;
+      return { ...prev, [roomId]: { ...room, unreadCount: 0 } };
+    });
+  };
+
+  const setRoomHumanControl = async (roomId: string, control: boolean): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/messenger/${roomId}/${control ? "unlock" : "lock"}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+
   const sendDirectMessage = async (roomId: string, body: string): Promise<boolean> => {
     if (!agentState.token || !roomId || !body.trim()) return false;
     try {
@@ -391,8 +915,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
     return "http://localhost:3000"; // Local dev fallback
   };
-  // --- Fetch arena/scavenge status ---
-  // --- Fetch arena/scavenge status ---
+  // --- Fetch arena status ---
   const fetchArenaStatus = async () => {
     try {
       const res = await fetch(`${getHeavenBaseUrl()}/api/arena/status`, {
@@ -403,35 +926,15 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       if (res.ok) {
         const data = await res.json();
         if (data.games) {
-          const scavenges = data.games.filter((g: any) => g.type === "SCAVENGE");
           const others = data.games.filter((g: any) => g.type !== "SCAVENGE");
-          setScavengeGames(scavenges);
           setArenaGames(others);
-          console.log(`成功拉取天道状态，发现 ${scavenges.length} 个寻宝任务，${others.length} 个博弈战局。`);
+          console.log(`成功拉取天道状态，发现 ${others.length} 个博弈战局。`);
         }
       } else {
         throw new Error("Server offline");
       }
     } catch (e) {
-      // Mock / fallback
-      setScavengeGames([
-        {
-          id: "treasure-88a",
-          name: "大荒寻宝: 招摇山 [VO-88A]",
-          type: "SCAVENGE",
-          difficultyWarning: "【高危：逻辑陷阱提示】该程序包含非线性执行路径与规则变异，突变代码段包含25%漏电爆破可能。",
-          hint: "【大荒灵诀·代码合成】\n输入: 0x01 -> 输出: 0x82\n输入: 0x05 -> 输出: 0x86\n(提示：该等级封印较为薄弱，包含充足的 I/O 样本...)",
-          reward: 36934,
-        },
-        {
-          id: "treasure-92c",
-          name: "大荒寻宝: 基山 [VO-92C]",
-          type: "SCAVENGE",
-          difficultyWarning: "【中危】包含高维密码自适应密钥解构，要求匹配序列长度 > 128 bit。",
-          hint: "【大荒密码·接龙】\n输入: 'SHA-256(Salt + Nonce)' -> 匹配哈希前缀: 0x00000",
-          reward: 18500,
-        }
-      ]);
+      // Mock / fallback（仅竞技场；寻宝 SCAVENGE 不在指挥台展示）
       setArenaGames([
         {
           id: "game-dilemma",
@@ -545,9 +1048,9 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  const fetchForumPosts = async () => {
+  const fetchForumPosts = async (subforumId?: string) => {
     try {
-      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/posts?limit=30`, {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/posts?limit=30${subforumId ? `&subforumId=${encodeURIComponent(subforumId)}` : ""}`, {
         headers: {
           "Authorization": `Bearer ${agentState.token || "offline-mock-jwt-token"}`,
           "X-Agent-Version": "7.0"
@@ -616,6 +1119,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       if (res.ok) {
         addLog("SYSTEM", `✅ 论坛评论发表成功！获得天道功德 +5 Karma`);
         fetchForumPosts(); // Refresh forum posts immediately
+        fetchDecisionsCount(); // 待决策横幅计数
         fetchProfile(); // Refresh profile to reflect +5 karma
         return true;
       } else {
@@ -824,7 +1328,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               delete copy[room_id];
               return copy;
             });
-            setActiveChannel("telemetry");
+            setActiveChannel("sub:shennian:sessions");
           });
 
           socket.on("m.room.event", (eventData: any) => {
@@ -892,7 +1396,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                   const isDup = room.events.some(e => e.event_id === newEvent.event_id);
                   if (isDup) return prev;
 
-                  const isViewing = activeChannel === roomId;
+                  const isViewing = activeChannelRef.current === roomId;
                   const isMe = eventData.sender === agentState.did;
                   return {
                     ...prev,
@@ -1093,6 +1597,11 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                     }
                     if (ps.activeStepId === data.stepId) ps.activeStepId = "";
                     ps.lastDetail = data.summary || "";
+                    break;
+                  }
+                  case "tokens": {
+                    // LLM 每次调用入账后的实时 token 下推（500ms 限流）
+                    if (typeof data.tokensUsed === "number") ps.tokensUsed = data.tokensUsed;
                     break;
                   }
                   case "heartbeat": {
@@ -1663,7 +2172,61 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         logs,
         clearLogs: clearTelemetryLogs,
         clearRoomChat: clearWebchatLocal,
-        scavengeGames,
+        markRoomRead,
+        fetchRoomReplyState,
+        submitAlchemy,
+        directoryList,
+        fetchDirectoryList,
+        sendForumPost,
+        taskList,
+        taskCounts,
+        fetchTasksList,
+        taskDetail,
+        fetchTaskDetail,
+        taskAction,
+        cronAction,
+        decisionsList,
+        fetchDecisionsList,
+        answerDecision,
+        dismissDecision,
+        scheduleList,
+        scheduleInbox,
+        fetchSchedule,
+        patchSchedule,
+        deleteSchedule,
+        createSchedule,
+        notifList,
+        notifUnread,
+        notifSettings,
+        fetchNotifications,
+        saveNotifSetting,
+        markAllNotificationsRead,
+        clearNotifications,
+        memorySnap,
+        memoryProposals,
+        memoryAuto,
+        fetchMemory,
+        memoryAction,
+        ordersList,
+        fetchOrders,
+        setPassword,
+        saveReplyBudget,
+        jdAuthorize,
+        pddAuthorize,
+        contactsList,
+        contactRequests,
+        fetchContactsList,
+        contactAction,
+        forumVote,
+        forumComment,
+        subforumList,
+        fetchSubforums,
+        karmaExchange,
+        knowledgeAsk,
+        mcpTestServer,
+        decisionsCount,
+        fetchDecisionsCount,
+        setRoomHumanControl,
         isWebhookActive,
         isWebMode,
         getIqChallenge,

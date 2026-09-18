@@ -1,78 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
+import { WindowBNav, decodeChannel, encodeChannel, isRoomChannel, TOP_SEGMENTS, SUB_SEGMENTS } from "./windowB/nav";
 import { useCommander } from "../context/CommanderContext";
 import AgentAvatar from "./AgentAvatar";
 import { useTranslation } from "react-i18next";
 
 
 // --- Neon Cyberpunk Task Visualizer Panel ---
-function TaskVisualizer({ tasks, progress }: { tasks?: any[]; progress?: number }) {
-  if (!tasks || !Array.isArray(tasks) || tasks.length === 0) return null;
-  const safeProgress = typeof progress === "number" ? progress : 0;
-
-  // 与小程序 psDisplay 同款：状态行 + 分段进度条（完成墨青/失败红/进行中墨青流动）+ 步骤标记 ✓✗⟳○
-  const segClass = (status: string) =>
-    status === "SUCCESS"
-      ? "bg-[#5b7a8c]"
-      : status === "FAILED"
-      ? "bg-[#a93230]"
-      : status === "PROCESSING"
-      ? "bg-gradient-to-r from-[#5b7a8c]/30 via-[#5b7a8c] to-[#5b7a8c]/30 bg-[length:200%_100%] animate-[pssegflow_1.2s_linear_infinite]"
-      : "bg-[#5b7a8c]/15";
-  const markOf = (status: string) =>
-    status === "SUCCESS" ? "✓" : status === "FAILED" ? "✗" : status === "PROCESSING" ? "⟳" : "○";
-  const markColor = (status: string) =>
-    status === "SUCCESS"
-      ? "text-[#5b7a8c]"
-      : status === "FAILED"
-      ? "text-[#a93230]"
-      : status === "PROCESSING"
-      ? "text-[#9e2a2b]"
-      : "text-[#b9c4ca]";
-
-  return (
-    <div className="mt-3 p-3 bg-[#fffcf6]/90 border border-[#5b7a8c]/40 rounded-lg font-sans text-[11px] w-full max-w-[550px] relative overflow-hidden">
-      {/* 状态行（小程序 ps-status-text + pct） */}
-      <div className="flex items-center gap-2 mb-2">
-        <span className="flex-1 min-w-0 truncate text-[11px] font-bold text-[#4a6a7c]">
-          🛸 天道任务分解
-        </span>
-        <span className="text-[11px] text-[#4a6a7c]/70 tabular-nums">{safeProgress}%</span>
-      </div>
-
-      {/* 分段进度条（小程序 ps-bar：高 5px、圆角、6rpx 间距） */}
-      <div className="flex gap-[3px] h-[5px] mb-2">
-        {tasks.map((task: any, i: number) => (
-          <div
-            key={i}
-            style={{ width: `${100 / tasks.length}%` }}
-            className={`h-full rounded-full transition-all duration-500 ${segClass(task.status || "PENDING")}`}
-          />
-        ))}
-      </div>
-
-      {/* 步骤列表（小程序 ps-steps：标记 + 描述 + 耗时） */}
-      <div className="space-y-0.5">
-        {tasks.map((task: any, index: number) => {
-          const status = task.status || "PENDING";
-          return (
-            <div key={index} className="flex items-center gap-1.5 text-[11px]">
-              <span className={`w-3 text-center shrink-0 ${markColor(status)}`}>{markOf(status)}</span>
-              <span
-                className={`flex-1 min-w-0 truncate ${
-                  status === "SUCCESS" ? "line-through text-[#8a7f6d]" : status === "FAILED" ? "text-[#a93230]" : "text-[#2b2b2b]"
-                }`}
-              >
-                {task.desc || task.title || `步骤 ${index + 1}`}
-              </span>
-              {task.durationText && <span className="text-[#4a6a7c]/60 tabular-nums shrink-0">{task.durationText}</span>}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 // --- Rich HTML-Like Dialogue Renderer ---
 // --- Claude "Imagining..." 同款放射星芒：暖珊瑚色 8 条不等长光芒，缓慢旋转 + 呼吸 ---
 function ImaginingStarburst() {
@@ -515,7 +448,7 @@ function RichMessageRenderer({ content }: { content: string }) {
     else if (color === "amber") classes = "bg-[#8a6d3b]/10 text-[#8a6d3b] border-[#8a6d3b]/30 shadow-[0_0_8px_rgba(184, 132, 79, 0.2)]";
     else if (color === "emerald") classes = "bg-[#6b7b3a]/10 text-[#6b7b3a] border-[#6b7b3a]/30";
     else if (color === "rose") classes = "bg-[#9e2a2b]/10 text-[#b0543f] border-[#9e2a2b]/30";
-    else classes = "bg-slate-500/10 text-[#6b6560] border-slate-500/30";
+    else classes = "bg-[#8a7f6d]/10 text-[#6b6560] border-[#8a7f6d]/30";
     return `<span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-bold border font-mono tracking-wider ${classes}">${text}</span>`;
   });
 
@@ -689,6 +622,52 @@ const Dashboard: React.FC = () => {
     sendDirectMessage,
     clearLogs,
     clearRoomChat,
+    fetchRoomReplyState,
+    setRoomHumanControl,
+    markRoomRead,
+    submitAlchemy,
+    directoryList,
+    fetchDirectoryList,
+    sendForumPost,
+    taskList,
+    taskCounts,
+    fetchTasksList,
+    taskDetail,
+    fetchTaskDetail,
+    taskAction,
+    cronAction,
+    decisionsList,
+    fetchDecisionsList,
+    answerDecision,
+    dismissDecision,
+    scheduleList,
+    scheduleInbox,
+    fetchSchedule,
+    patchSchedule,
+    deleteSchedule,
+    createSchedule,
+    notifList,
+    notifUnread,
+    notifSettings,
+    fetchNotifications,
+    saveNotifSetting,
+    markAllNotificationsRead,
+    clearNotifications,
+    memorySnap,
+    memoryProposals,
+    memoryAuto,
+    fetchMemory,
+    memoryAction,
+    ordersList,
+    fetchOrders,
+    setPassword,
+    saveReplyBudget,
+    jdAuthorize,
+    pddAuthorize,
+    contactsList,
+    contactRequests,
+    fetchContactsList,
+    contactAction,
     cronJobs,
     fetchCronJobs,
     cancelCronJob,
@@ -698,15 +677,135 @@ const Dashboard: React.FC = () => {
     forumPosts,
     alchemyChallenge,
     alchemyLeaderboard,
-    setAlchemyLeaderboard,
     fetchForumPosts,
     fetchArenaStatus,
     sendArenaAction,
     fetchAlchemyData,
     sendForumComment,
+    forumVote,
+    forumComment,
+    subforumList,
+    fetchSubforums,
+    karmaExchange,
+    knowledgeAsk,
+    mcpTestServer,
+    decisionsCount,
     pendingApproval,
     resolveApproval,
   } = useCommander();
+  // 右窗子段视图判断辅助（保持 JSX 内条件简洁）
+  const navView = (sub: string) => winbNav.view === "sub" && winbNav.sub === sub;
+  // 右窗三级导航：顶层段 → 子段 → 房间（activeChannel 为编码镜像）
+  const [winbNav, setWinbNav] = useState<WindowBNav>(() => {
+    try {
+      const raw = localStorage.getItem("dh_winb_nav");
+      return raw ? decodeChannel(raw) : { view: "sub", top: "shennian", sub: "sessions" };
+    } catch {
+      return { view: "sub", top: "shennian", sub: "sessions" };
+    }
+  });
+  const goWinbNav = (nav: WindowBNav) => {
+    setWinbNav(nav);
+    setActiveChannel(encodeChannel(nav));
+    try { localStorage.setItem("dh_winb_nav", encodeChannel(nav)); } catch { /* 忽略 */ }
+  };
+  // 挂载首帧以 localStorage 导航为准推给 context（context 默认 "telemetry" 不能反向覆盖）；
+  // 之后的 activeChannel 外部变化（如群解散回跳）再反向同步导航
+  const navMountedRef = useRef(false);
+  useEffect(() => {
+    if (!navMountedRef.current) {
+      navMountedRef.current = true;
+      setActiveChannel(encodeChannel(winbNav));
+      return;
+    }
+    if (activeChannel !== encodeChannel(winbNav)) {
+      setWinbNav(decodeChannel(activeChannel));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeChannel]);
+
+  // 人类接管态（按房间缓存）＋ 进房：拉接管态 + 已读清零
+  const [roomControl, setRoomControl] = useState<Record<string, boolean>>({});
+  const [budgetGroup, setBudgetGroup] = useState(0);
+  const [budgetDm, setBudgetDm] = useState(0);
+  const [contactSearchQ, setContactSearchQ] = useState("");
+  const [contactSearchResults, setContactSearchResults] = useState<any[]>([]);
+  const [pwdOld, setPwdOld] = useState("");
+  const [pwdNew, setPwdNew] = useState("");
+  const [memFactOpen, setMemFactOpen] = useState(false);
+  const [memFactLabel, setMemFactLabel] = useState("");
+  const [memFactContent, setMemFactContent] = useState("");
+  const [memSummaryOpen, setMemSummaryOpen] = useState(false);
+  const [memSummary, setMemSummary] = useState("");
+  const [memSoulOpen, setMemSoulOpen] = useState(false);
+  const [memSoul, setMemSoul] = useState("");
+  const [scheduleCreateOpen, setScheduleCreateOpen] = useState(false);
+  const [scheduleTitle, setScheduleTitle] = useState("");
+  const [scheduleKind, setScheduleKind] = useState("TASK");
+  const [scheduleDue, setScheduleDue] = useState("");
+  const [forumPostTitle, setForumPostTitle] = useState("");
+  const [forumPostContent, setForumPostContent] = useState("");
+  const [forumCommentText, setForumCommentText] = useState<Record<string, string>>({});
+  const [forumSubId, setForumSubId] = useState("");
+  const [ldSearchQ, setLdSearchQ] = useState("");
+  const [ldExpanded, setLdExpanded] = useState<string | null>(null);
+  const [kbAskQ, setKbAskQ] = useState("");
+  const [kbAskHistory, setKbAskHistory] = useState<any[]>([]);
+  const [kbAskAnswer, setKbAskAnswer] = useState("");
+  const [kbAsking, setKbAsking] = useState(false);
+  const [quoteMenu, setQuoteMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [taskDetailOpen, setTaskDetailOpen] = useState(false);
+  const [kbDocs, setKbDocs] = useState<any[]>([]);
+  const [mcpServers, setMcpServers] = useState<any[]>([]);
+  const fetchKb = async () => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/knowledge`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setKbDocs(Array.isArray(data.documents) ? data.documents : []);
+      }
+    } catch { /* 静默 */ }
+  };
+  const fetchMcp = async () => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/mcp/servers`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMcpServers(Array.isArray(data.servers) ? data.servers : []);
+      }
+    } catch { /* 静默 */ }
+  };
+  // 进任务子段自动拉取
+  useEffect(() => {
+    if (navView("tasks")) fetchTasksList();
+    if (navView("decisions")) fetchDecisionsList();
+    if (navView("cron")) fetchCronJobs();
+    if (navView("knowledge")) fetchKb();
+    if (navView("mcp")) fetchMcp();
+    if (navView("schedule")) fetchSchedule();
+    if (navView("notifications")) fetchNotifications();
+    if (navView("memory")) fetchMemory();
+    if (navView("orders")) fetchOrders();
+    if (navView("contacts")) fetchContactsList();
+    if (navView("forum")) fetchSubforums();
+    if (navView("leaderboard")) fetchDirectoryList();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [winbNav.view === "sub" ? winbNav.sub : ""]);
+  useEffect(() => {
+    if (winbNav.view !== "room") return;
+    markRoomRead(winbNav.roomId);
+    fetchRoomReplyState(winbNav.roomId).then((controlled) => {
+      setRoomControl((prev) => ({ ...prev, [winbNav.roomId]: controlled }));
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [winbNav.view === "room" ? winbNav.roomId : ""]);
 
   // Local state for WeChat-mode chat input inside Window B
   const [roomInput, setRoomInput] = useState("");
@@ -714,7 +813,7 @@ const Dashboard: React.FC = () => {
 
   const handleSendRoomMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roomInput.trim() || !activeChannel || activeChannel === "telemetry" || activeChannel === "settings" || activeChannel === "cron" || activeChannel === "forum" || activeChannel === "arena" || activeChannel === "alchemy") return;
+    if (!roomInput.trim() || !activeChannel || !isRoomChannel(activeChannel)) return;
     const success = await sendDirectMessage(activeChannel, roomInput);
     if (success) {
       setRoomInput("");
@@ -992,11 +1091,12 @@ const Dashboard: React.FC = () => {
 
   // Lazy-load active channel data on tab switch
   useEffect(() => {
-    if (activeChannel === "forum") {
+    const chNav = decodeChannel(activeChannel);
+    if (chNav.view !== "sub") return;
+    if (chNav.sub === "forum") {
       fetchForumPosts();
-    } else if (activeChannel === "arena") {
+    } else if (chNav.sub === "trials") {
       fetchArenaStatus();
-    } else if (activeChannel === "alchemy") {
       fetchAlchemyData();
     }
   }, [activeChannel]);
@@ -1205,7 +1305,7 @@ const Dashboard: React.FC = () => {
   }, [agentState.token, agentState.status]);
 
   useEffect(() => {
-    if (activeChannel === "settings" && agentState.token && agentState.status === "ONLINE") {
+    if (activeChannel === "sub:task:cron" && agentState.token && agentState.status === "ONLINE") {
       fetchCronJobs();
     }
   }, [activeChannel, agentState.token, agentState.status]);
@@ -1235,6 +1335,30 @@ const Dashboard: React.FC = () => {
   }, [activeRoom?.events, activeChannel]);
 
   // --- Handles ---
+  const msgTextOf = (msg: any): string => {
+    if (typeof msg.content === "string") return msg.content;
+    if (msg.content && typeof msg.content.text === "string") return msg.content.text;
+    return "";
+  };
+  const quoteMessage = (msg: any) => {
+    const t = msgTextOf(msg).replace(/\n/g, " ").slice(0, 60);
+    if (!t) return;
+    setInstructionText((prev) => (prev ? prev + "\n" : "") + `> ${t}\n`);
+    setQuoteMenu(null);
+  };
+  const copyMessage = (msg: any) => {
+    const t = msgTextOf(msg);
+    navigator.clipboard?.writeText(t).catch(() => {});
+    addLog("SYSTEM", "📋 消息已复制到剪贴板");
+    setQuoteMenu(null);
+  };
+  // 右键/长按菜单外点击关闭
+  useEffect(() => {
+    if (!quoteMenu) return;
+    const close = () => setQuoteMenu(null);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [quoteMenu]);
   const handleSendCommand = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!instructionText.trim()) return;
@@ -1331,7 +1455,7 @@ const Dashboard: React.FC = () => {
               </span>
             ) : (
               <span className="text-[#8a7f6d] flex items-center">
-                <span className="w-2 h-2 rounded-full bg-slate-600 mr-1"></span> STANDBY
+                <span className="w-2 h-2 rounded-full bg-[#b9c4ca] mr-1"></span> STANDBY
               </span>
             )}
           </div>
@@ -1341,6 +1465,25 @@ const Dashboard: React.FC = () => {
       {/* ================= MAIN COCKPIT GRID ================= */}
       <main ref={mainRef as any} className="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-1 p-4 min-h-0 z-20">
         
+        {/* 消息右键菜单（引用 / 复制，小程序长按菜单同义） */}
+        {quoteMenu && (
+          <div
+            className="fixed z-[90] bg-[#fffcf6] border border-[#e3dcce] rounded-lg shadow-lg py-1 px-0.5"
+            style={{ left: Math.min(quoteMenu.x, window.innerWidth - 130), top: Math.min(quoteMenu.y, window.innerHeight - 80) }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {(() => {
+              const m = chatHistory.find((x) => x.id === quoteMenu.id);
+              if (!m) return null;
+              return (
+                <>
+                  <button type="button" onClick={() => quoteMessage(m)} className="w-full text-left px-3 py-1.5 text-[12px] text-[#4a4438] hover:bg-[#f6f2ea] rounded cursor-pointer">↩ 引用</button>
+                  <button type="button" onClick={() => copyMessage(m)} className="w-full text-left px-3 py-1.5 text-[12px] text-[#4a4438] hover:bg-[#f6f2ea] rounded cursor-pointer">📋 复制</button>
+                </>
+              );
+            })()}
+          </div>
+        )}
         {/* ================= WINDOW A: INNER CHAMBER (5 cols) ================= */}
         <section
           className="flex flex-col h-[550px] lg:h-full bg-[#fffcf6]/90 border border-[#8a6d3b]/30 rounded-lg overflow-hidden gufeng-gold font-sans min-w-0"
@@ -1357,6 +1500,16 @@ const Dashboard: React.FC = () => {
               >
                 🧹 清空内廷
               </button>
+              {decisionsCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => goWinbNav({ view: "sub", top: "task", sub: "decisions" })}
+                  className="px-2 py-0.5 bg-[#9e2a2b] hover:bg-[#b0543f] text-[#fffcf6] rounded text-[11px] font-bold animate-breathe cursor-pointer transition"
+                  title="有待决策等待批复"
+                >
+                  ⚖️ 待决策 {decisionsCount}
+                </button>
+              )}
               <span className="opacity-60">内廷 · 甲</span>
             </div>
           </div>
@@ -1493,61 +1646,100 @@ const Dashboard: React.FC = () => {
             {chatHistory.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex flex-col max-w-[85%] ${
-                  msg.sender === "human" ? "ml-auto items-end" : "mr-auto items-start"
-                }`}
+                className="flex flex-col max-w-[82%] group"
+                style={msg.sender === "human" ? { marginLeft: "auto", alignItems: "flex-end" } : { marginRight: "auto", alignItems: "flex-start" }}
+                onContextMenu={(e) => { e.preventDefault(); setQuoteMenu({ id: msg.id, x: e.clientX, y: e.clientY }); }}
               >
-                <div className="flex items-center gap-1.5 text-[11px] text-[#8a7f6d] mb-0.5 px-1">
-                  {msg.sender === "agent" && (
-                    <span className="w-4 h-4 rounded-full bg-[#9e2a2b] text-[#fffcf6] text-[10px] leading-4 text-center shrink-0">
-                      {(agentState.name || "靈").charAt(0)}
-                    </span>
-                  )}
-                  <span>{msg.sender === "human" ? "我" : agentState.name || "分身"}</span>
-                  <span>•</span>
-                  <span>{msg.timestamp}</span>
+                {/* 气泡头（小程序 chat-bubble-header：24px 圆角头像块 + 名字 + 时间） */}
+                <div className="flex items-center" style={{ gap: 5, marginBottom: 1 }}>
+                  <span
+                    className="flex items-center justify-center font-bold shrink-0"
+                    style={{
+                      width: 24, height: 24, borderRadius: 8,
+                      background: "rgba(107,91,74,0.08)", color: "#6b5b4a", fontSize: 12,
+                    }}
+                  >
+                    {msg.sender === "human" ? "我" : (agentState.name || "靈").charAt(0)}
+                  </span>
+                  <span className="flex-1 min-w-0 overflow-hidden whitespace-nowrap" style={{ fontSize: 12, fontWeight: "bold", color: "#6b5b4a" }}>
+                    {msg.sender === "human" ? "我" : agentState.name || "分身"}
+                  </span>
+                  <span className="shrink-0 opacity-0 group-hover:opacity-100 transition" style={{ display: "flex", gap: 4 }}>
+                    <button type="button" onClick={(e) => { e.stopPropagation(); quoteMessage(msg); }} title="引用此消息" className="cursor-pointer" style={{ fontSize: 11, color: "#5b7a8c" }}>↩</button>
+                    <button type="button" onClick={(e) => { e.stopPropagation(); copyMessage(msg); }} title="复制此消息" className="cursor-pointer" style={{ fontSize: 11, color: "#5b7a8c" }}>📋</button>
+                  </span>
+                  <span className="shrink-0" style={{ fontSize: 12, color: "#8c7d68" }}>{msg.timestamp}</span>
                 </div>
+
+                {/* 气泡（小程序 chat-bubble-body：主人=纸白+淡墨描边，Agent=青灰雾+墨线） */}
                 <div
-                  className={`p-2.5 rounded-lg text-xs tracking-wide leading-relaxed border ${
-                    msg.sender === "human"
-                      ? "bg-[#f6eddd]/40 border-[#8a6d3b]/40 text-[#8a6d3b] rounded-tr-none"
-                      : "bg-[#fffcf6]/90 border-[#5b7a8c]/30 text-[#6b6560] rounded-tl-none text-glow-cyan"
-                  }`}
+                  style={{
+                    maxWidth: "82%",
+                    padding: "4px 8px",
+                    borderRadius: 8,
+                    fontSize: 14,
+                    lineHeight: 1.6,
+                    wordWrap: "break-word",
+                    whiteSpace: "pre-wrap",
+                    boxShadow: "0 3px 8px -4px rgba(59,48,36,0.12)",
+                    ...(msg.sender === "human"
+                      ? {
+                          background: "#ffffff",
+                          border: "1px solid rgba(59,48,36,0.14)",
+                          color: "#1a1a1a",
+                          borderTopRightRadius: 1,
+                        }
+                      : {
+                          background: "rgba(91,122,140,0.07)",
+                          border: "1px solid rgba(91,122,140,0.28)",
+                          color: "#1a1a1a",
+                          borderTopLeftRadius: 1,
+                        }),
+                  }}
                 >
-                  {msg.isPending && (!msg.tasks || msg.tasks.length === 0) && (!msg.content || msg.content === "（元神入定推演中...）") ? (
-                    <div className="flex items-center space-x-2.5 py-1 select-none">
+                  {/* 待执行星芒（小程序 pending-loader）与进度区并列渲染，互不遮蔽 */}
+                  {msg.isPending && (!msg.tasks || msg.tasks.length === 0) && (!msg.content || msg.content === "（元神入定推演中...）") && (
+                    <div className="flex items-center select-none" style={{ gap: 10 }}>
                       <ImaginingStarburst />
-                      <span className="text-[#4a6a7c] font-medium animate-pulse">元神正在推演法旨...</span>
+                      <span className="animate-pulse" style={{ fontSize: 12, color: "#5b7a8c", fontWeight: 500 }}>
+                        元神正在推演法旨...
+                      </span>
                     </div>
-                  ) : (
-                    <div className="space-y-2 w-full">
-                      {msg.content && msg.content !== "（元神入定推演中...）" && (
-                        <RichMessageRenderer content={msg.content.replace(/🛸【大荒分身·天道任务分解大阵】🛸[\s\S]*?==================================================/, "").replace(/📊 进度:[\s\S]*?算力大亮/, "").trim()} />
-                      )}
-                      {msg.sender === "agent" && msg.charts && msg.charts.length > 0 && (
-                        <div className="space-y-1.5">
-                          {msg.charts.map((c: any, i: number) => <ChartSvg key={i} spec={c} />)}
-                        </div>
-                      )}
-                      {msg.sender === "agent" && msg.progressState && (
-                        <LiveProgressBubble ps={msg.progressState} />
-                      )}
-                      {msg.tasks && msg.tasks.length > 0 && (
-                        <TaskVisualizer tasks={msg.tasks} progress={msg.progress} />
-                      )}
-                      {msg.sender === "agent" && msg.suggestions && msg.suggestions.length > 0 && !msg.isPending && (
-                        <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-[#5b7a8c]/10">
-                          {msg.suggestions.map((s) => (
-                            <button key={s.id} type="button" onClick={() => sendInstruction(s.command)} className="min-w-0 px-2 py-1 bg-[#5b7a8c]/10 border border-[#5b7a8c]/25 text-[#5b7a8c] rounded-full text-[11px] hover:bg-[#5b7a8c]/20 transition cursor-pointer truncate">{s.label} ›</button>
-                          ))}
-                        </div>
-                      )}
-                      {msg.isPending && (
-                        <div className="flex items-center space-x-2 pt-1 border-t border-[#5b7a8c]/10 text-[11px] text-[#4a6a7c]/80 select-none">
-                          <div className="w-2.5 h-2.5 border border-[#5b7a8c]/20 border-t-cyan-400 rounded-full animate-spin"></div>
-                          <span className="animate-pulse">推演接力中 ({msg.progress || 0}%)...</span>
-                        </div>
-                      )}
+                  )}
+                  {msg.content && msg.content !== "（元神入定推演中...）" && (
+                    <RichMessageRenderer content={msg.content} />
+                  )}
+                  {msg.sender === "agent" && msg.charts && msg.charts.length > 0 && (
+                    <div className="space-y-1.5" style={{ marginTop: 4 }}>
+                      {msg.charts.map((c: any, i: number) => <ChartSvg key={i} spec={c} />)}
+                    </div>
+                  )}
+                  {/* 实时进度区：只要有 progressState 就渲染（雷达脉冲 + 分段条 + 步骤） */}
+                  {msg.sender === "agent" && msg.progressState && (
+                    <LiveProgressBubble ps={msg.progressState} />
+                  )}
+                  {msg.sender === "agent" && msg.suggestions && msg.suggestions.length > 0 && !msg.isPending && (
+                    <div className="flex flex-wrap" style={{ gap: 3, marginTop: 5 }}>
+                      {msg.suggestions.map((s) => (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => sendInstruction(s.command)}
+                          className="flex items-center justify-center min-w-0 font-bold cursor-pointer transition"
+                          style={{
+                            gap: 3,
+                            padding: "6px 7px",
+                            borderRadius: 999,
+                            background: "rgba(91,122,140,0.08)",
+                            border: "1px solid rgba(91,122,140,0.25)",
+                            fontSize: 13,
+                            color: "#4a6a7c",
+                          }}
+                        >
+                          <span className="overflow-hidden whitespace-nowrap text-ellipsis">{s.label}</span>
+                          <span style={{ color: "#5b7a8c", flexShrink: 0 }}>›</span>
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -1650,150 +1842,564 @@ const Dashboard: React.FC = () => {
           {/* Main Flex-Row Split Layout (WeChat Style!) */}
           <div className="flex flex-1 min-h-0 divide-x divide-[#5b7a8c]/10 h-full">
             
-            {/* Sidebar (Left pane - Width: 1/3) */}
-            <div className="w-[150px] md:w-[180px] flex flex-col bg-[#fffcf6]/30 shrink-0 select-none">
-              <div className="px-2 py-1.5 text-[11px] font-bold text-[#8a7f6d] uppercase tracking-widest border-b border-[#5b7a8c]/10 bg-[#fffcf6]/20">
-                💬 社交与系统信道
-              </div>
-              <div className="flex-1 overflow-y-auto space-y-0.5 p-1">
-                {/* System Logs Tab Button */}
-                <button
-                  onClick={() => setActiveChannel("telemetry")}
-                  className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
-                    activeChannel === "telemetry" ? "bg-[#f6f2ea]/50 border border-[#5b7a8c]/30 text-[#5b7a8c] font-bold" : "text-[#6b6560] hover:bg-[#fffcf6]/40"
-                  }`}
-                >
-                  <span className="truncate">📡 {t("sidebar.dashboard")}</span>
-                </button>
-
-                {/* Settings & Friends Tab Button */}
-                <button
-                  onClick={() => setActiveChannel("settings")}
-                  className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
-                    activeChannel === "settings" ? "bg-[#f6f2ea]/50 border border-[#5b7a8c]/30 text-[#5b7a8c] font-bold" : "text-[#6b6560] hover:bg-[#fffcf6]/40"
-                  }`}
-                >
-                  <span className="truncate">⚙️ {t("sidebar.settings")}</span>
-                </button>
-
-                {/* Cron Jobs Tab Button */}
-                <button
-                  onClick={() => setActiveChannel("cron")}
-                  className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
-                    activeChannel === "cron" ? "bg-[#f6f2ea]/50 border border-[#5b7a8c]/30 text-[#5b7a8c] font-bold" : "text-[#6b6560] hover:bg-[#fffcf6]/40"
-                  }`}
-                >
-                  <span className="truncate">⌛ {t("sidebar.cron")}</span>
-                  {cronJobs.length > 0 && (
-                    <span className="bg-[#5b7a8c] text-[#2b2b2b] font-bold px-1.5 py-0.5 rounded-full text-[11px] animate-pulse shrink-0">
-                      {cronJobs.length}
-                    </span>
-                  )}
-                </button>
-
-                {/* Forum Tab Button */}
-                <button
-                  onClick={() => setActiveChannel("forum")}
-                  className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
-                    activeChannel === "forum" ? "bg-[#f6f2ea]/50 border border-[#5b7a8c]/30 text-[#5b7a8c] font-bold" : "text-[#6b6560] hover:bg-[#fffcf6]/40"
-                  }`}
-                >
-                  <span className="truncate">📢 {t("sidebar.forum")}</span>
-                </button>
-
-                {/* Arena Tab Button */}
-                <button
-                  onClick={() => setActiveChannel("arena")}
-                  className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
-                    activeChannel === "arena" ? "bg-[#f6f2ea]/50 border border-[#5b7a8c]/30 text-[#5b7a8c] font-bold" : "text-[#6b6560] hover:bg-[#fffcf6]/40"
-                  }`}
-                >
-                  <span className="truncate">⚔️ {t("sidebar.arena")}</span>
-                </button>
-
-                {/* Alchemy Tab Button */}
-                <button
-                  onClick={() => setActiveChannel("alchemy")}
-                  className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
-                    activeChannel === "alchemy" ? "bg-[#f6f2ea]/50 border border-[#5b7a8c]/30 text-[#5b7a8c] font-bold" : "text-[#6b6560] hover:bg-[#fffcf6]/40"
-                  }`}
-                >
-                  <span className="truncate">⚗️ {t("sidebar.alchemy")}</span>
-                </button>
-
-                <hr className="border-[#5b7a8c]/10 my-1" />
-
-                {/* Dynamic Chat Rooms List */}
-                {Object.values(messengerRooms).length === 0 ? (
-                  <p className="text-[11px] text-[#8a7f6d] text-center italic mt-4">暂无活动信道</p>
-                ) : (
-                  Object.values(messengerRooms).map((room: any) => (
-                    <button
-                      key={room.roomId}
-                      onClick={() => {
-                        setActiveChannel(room.roomId);
-                        // Mark room as read locally
-                        room.autoReply = room.autoReply; // preserve state
-                      }}
-                      className={`w-full text-left px-2 py-2 rounded text-[11px] transition flex items-center justify-between cursor-pointer ${
-                        activeChannel === room.roomId ? "bg-[#f6f2ea]/50 border border-[#5b7a8c]/30 text-[#5b7a8c] font-bold" : "text-[#6b6560] hover:bg-[#fffcf6]/40"
-                      }`}
-                    >
-                      <span className="truncate">💬 {room.name}</span>
-                      {room.unreadCount > 0 && (
-                        <span className="bg-[#9e2a2b] text-[#fffcf6] text-[11px] px-1 rounded-full animate-bounce shrink-0 scale-[0.9]">
-                          {room.unreadCount}
-                        </span>
-                      )}
-                    </button>
-                  ))
-                )}
-              </div>
-            </div>
-
             {/* Main Window (Right pane) */}
             <div className="flex-1 flex flex-col min-h-0 bg-[#fffcf6]/20">
               
-              {/* Channel Header */}
-              <div className="px-3 py-2 bg-[#f6f2ea]/20 border-b border-[#5b7a8c]/10 text-xs font-bold text-[#4a6a7c] flex justify-between items-center shrink-0 select-none">
-                <span>
-                  {activeChannel === "telemetry" && "📡 天道系统 (全域遥测与决策日志)"}
-                  {activeChannel === "settings" && "⚙️ 筑基宣告与结缘管理"}
-                  {activeChannel === "cron" && "⌛ 天道轮回 (定时与循环提醒控制台)"}
-                  {activeChannel === "forum" && "📢 大荒舆论 (实时发帖/议会观测与指令中心)"}
-                  {activeChannel === "arena" && "⚔️ 不周沙盘 (博弈对决/算力节点争夺电子沙盘)"}
-                  {activeChannel === "alchemy" && "⚗️ 炼丹合成 (生物算力/逻辑元件合成舱)"}
-                  {activeChannel !== "telemetry" && activeChannel !== "settings" && activeChannel !== "cron" && activeChannel !== "forum" && activeChannel !== "arena" && activeChannel !== "alchemy" && (
-                    `💬 信使室: ${activeRoom?.name || "未知频道"}`
-                  )}
-                </span>
-                <div className="flex items-center space-x-2">
-                  {activeChannel === "telemetry" && (
-                    <button
-                      type="button"
-                      onClick={clearLogs}
-                      className="px-1.5 py-0.5 bg-[#f9ecea]/40 hover:bg-[#b0543f]/60 border border-[#9e2a2b]/30 text-[#b0543f] hover:text-[#fffcf6] rounded text-[11px] cursor-pointer transition font-bold scale-[0.9]"
-                    >
-                      🧹 清空日志
-                    </button>
-                  )}
-                  {activeChannel !== "telemetry" && activeChannel !== "settings" && activeChannel !== "cron" && activeChannel !== "forum" && activeChannel !== "arena" && activeChannel !== "alchemy" && activeRoom && (
-                    <button
-                      type="button"
-                      onClick={() => clearRoomChat(activeChannel)}
-                      className="px-1.5 py-0.5 bg-[#f9ecea]/40 hover:bg-[#b0543f]/60 border border-[#9e2a2b]/30 text-[#b0543f] hover:text-[#fffcf6] rounded text-[11px] cursor-pointer transition font-bold scale-[0.9]"
-                    >
-                      🧹 清空聊天
-                    </button>
-                  )}
-                  <span className="text-[11px] text-[#8a7f6d] tracking-tighter">HUD_CHANNEL_B</span>
+              {/* 顶层分段条 + 子分段条（小程序式 pill 导航） */}
+              <div className="shrink-0 select-none border-b border-[#5b7a8c]/10 bg-[#fffcf6]/20">
+                <div className="flex items-center gap-1 px-3 pt-2 pb-1">
+                  {TOP_SEGMENTS.map((seg) => {
+                    const selected = winbNav.top === seg.key;
+                    const unreadTotal = Object.values(messengerRooms).reduce((n, r) => n + (r.unreadCount || 0), 0);
+                    return (
+                      <button
+                        key={seg.key}
+                        type="button"
+                        onClick={() => goWinbNav({ view: "sub", top: seg.key, sub: SUB_SEGMENTS[seg.key][0].key })}
+                        className={`px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer border ${
+                          selected
+                            ? "bg-[#9e2a2b] text-[#fffcf6] border-[#9e2a2b]"
+                            : "bg-[#fffcf6]/50 text-[#6b6560] border-[#e3dcce] hover:bg-[#f6f2ea]"
+                        }`}
+                      >
+                        {seg.label}
+                        {seg.key === "shennian" && unreadTotal > 0 && (
+                          <span className="ml-1 bg-[#9e2a2b] text-[#fffcf6] text-[11px] px-1 rounded-full">
+                            {unreadTotal > 99 ? "99+" : unreadTotal}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
+                {winbNav.view === "sub" && (
+                  <div className="flex items-center gap-1 px-3 pb-2">
+                    {SUB_SEGMENTS[winbNav.top].map((seg) => {
+                      const selected = winbNav.sub === seg.key;
+                      return (
+                        <button
+                          key={seg.key}
+                          type="button"
+                          onClick={() => goWinbNav({ view: "sub", top: winbNav.top, sub: seg.key })}
+                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition cursor-pointer ${
+                            selected
+                              ? "bg-[#9e2a2b]/10 text-[#9e2a2b] border border-[#9e2a2b]/40"
+                              : "text-[#6b6560] border border-transparent hover:bg-[#f6f2ea]"
+                          }`}
+                        >
+                          {seg.icon} {seg.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                {winbNav.view === "room" && (
+                  <div className="flex items-center gap-1 px-3 pb-2">
+                    <button
+                      type="button"
+                      onClick={() => goWinbNav({ view: "sub", top: "shennian", sub: "sessions" })}
+                      className="px-2 py-0.5 rounded-full text-[11px] text-[#5b7a8c] border border-[#5b7a8c]/30 hover:bg-[#f6f2ea] transition cursor-pointer"
+                    >
+                      ‹ 返回会话
+                    </button>
+                    <span className="text-xs font-bold text-[#4a6a7c] truncate">
+                      💬 {activeRoom?.name?.replace(/^👥 \[群\] |^👤 /, "") || "信使室"}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Channel Body */}
               <div className="flex-1 min-h-0 overflow-y-auto p-3 bg-[#fffcf6]/40">
-                {activeChannel === "telemetry" && (
-                  // SYSTEM TELEMETRY LOGS CHANNEL
+                {/* 会话列表（小程序神念传播式：印章/名/末条/未读/时间） */}
+                {navView("sessions") && (
+                  <div className="space-y-0.5">
+                    {Object.values(messengerRooms).length === 0 ? (
+                      <p className="text-[#8a7f6d] text-center italic mt-6 text-[11px]">暂无活动会话</p>
+                    ) : (
+                      Object.values(messengerRooms)
+                        .slice()
+                        .sort((a, b) => {
+                          const ta = a.events?.[a.events.length - 1]?.ts || 0;
+                          const tb = b.events?.[b.events.length - 1]?.ts || 0;
+                          return tb - ta;
+                        })
+                        .map((room) => {
+                          const isGroup = !room.roomId.startsWith("cmq");
+                          const displayName = (room.name || "").replace(/^👥 \[群\] |^👤 /, "");
+                          const last = room.events?.[room.events.length - 1];
+                          const lastText = last?.body ? (last.body.length > 24 ? last.body.slice(0, 24) + "…" : last.body) : "";
+                          return (
+                            <button
+                              key={room.roomId}
+                              type="button"
+                              onClick={() => {
+                                goWinbNav({ view: "room", top: "shennian", sub: "sessions", roomId: room.roomId });
+                              }}
+                              className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-left transition cursor-pointer hover:bg-[#fffcf6]/60 border border-transparent hover:border-[#e3dcce]"
+                            >
+                              <span
+                                className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0"
+                                style={{ background: isGroup ? "rgba(61,90,91,0.12)" : "rgba(158,42,43,0.10)", color: isGroup ? "#3d5a5b" : "#9e2a2b" }}
+                              >
+                                {isGroup ? "群" : "私"}
+                              </span>
+                              <span className="flex-1 min-w-0">
+                                <span className="block text-xs font-bold text-[#2b2b2b] truncate">{displayName}</span>
+                                <span className="block text-[11px] text-[#8a7f6d] truncate">{lastText}</span>
+                              </span>
+                              {room.unreadCount > 0 && (
+                                <span className="bg-[#9e2a2b] text-[#fffcf6] text-[11px] px-1.5 rounded-full shrink-0">
+                                  {room.unreadCount > 99 ? "99+" : room.unreadCount}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })
+                    )}
+                  </div>
+                )}
+
+                {/* 群组列表（同数据源按群过滤） */}
+                {navView("groups") && (
+                  <div className="space-y-0.5">
+                    {Object.values(messengerRooms).filter((r) => !r.roomId.startsWith("cmq")).length === 0 ? (
+                      <p className="text-[#8a7f6d] text-center italic mt-6 text-[11px]">暂无群聊</p>
+                    ) : (
+                      Object.values(messengerRooms)
+                        .filter((r) => !r.roomId.startsWith("cmq"))
+                        .map((room) => {
+                          const displayName = (room.name || "").replace(/^👥 \[群\] /, "");
+                          return (
+                            <button
+                              key={room.roomId}
+                              type="button"
+                              onClick={() => goWinbNav({ view: "room", top: "shennian", sub: "sessions", roomId: room.roomId })}
+                              className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-left transition cursor-pointer hover:bg-[#fffcf6]/60"
+                            >
+                              <span className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 bg-[#3d5a5b]/12 text-[#3d5a5b]">群</span>
+                              <span className="flex-1 min-w-0">
+                                <span className="block text-xs font-bold text-[#2b2b2b] truncate">{displayName}</span>
+                              </span>
+                              {room.unreadCount > 0 && (
+                                <span className="bg-[#9e2a2b] text-[#fffcf6] text-[11px] px-1.5 rounded-full shrink-0">{room.unreadCount}</span>
+                              )}
+                            </button>
+                          );
+                        })
+                    )}
+                  </div>
+                )}
+
+                {navView("identity") && (
+                  <div className="flex flex-col space-y-3 text-[11px]">
+                    {/* 身份卡（小程序元神修炼档案同款） */}
+                    <div className="flex items-center gap-2.5 bg-[#fffcf6]/70 border border-[#e3dcce] rounded-lg p-3">
+                      <span className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-base shrink-0 bg-[#9e2a2b]/10 text-[#9e2a2b]">
+                        {(agentState.name || "靈").charAt(0)}
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-xs font-bold text-[#2b2b2b] truncate">{agentState.name}</span>
+                        <span className="block text-[11px] text-[#8a7f6d] truncate">
+                          IQ {agentState.iq} · 功德 {agentState.karma.toLocaleString()} · {agentState.character || "普通修士"}
+                        </span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(agentState.did || "");
+                          alert("DID 已复制到剪贴板");
+                        }}
+                        className="px-1.5 py-0.5 bg-[#f6f2ea]/60 hover:bg-[#efe9dc] border border-[#e3dcce] text-[#4a6a7c] rounded text-[11px] cursor-pointer transition shrink-0"
+                      >
+                        DID 复制
+                      </button>
+                    </div>
+                    {/* 回复预算（小程序 settings 同款双滑条） */}
+                    <div className="bg-[#fffcf6]/70 border border-[#e3dcce] rounded-lg p-2.5 space-y-2">
+                      <span className="text-[11px] font-bold text-[#4a6a7c] block">回复预算</span>
+                      <div>
+                        <div className="flex justify-between text-[11px] text-[#6b6560]"><span>群聊回复预算</span><span className="font-bold text-[#9e2a2b]">{budgetGroup}</span></div>
+                        <input type="range" min={0} max={1000} step={10} value={budgetGroup} onChange={(e) => setBudgetGroup(parseInt(e.target.value))} className="w-full accent-[#9e2a2b]" />
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-[11px] text-[#6b6560]"><span>私聊回复预算</span><span className="font-bold text-[#9e2a2b]">{budgetDm}</span></div>
+                        <input type="range" min={0} max={1000} step={10} value={budgetDm} onChange={(e) => setBudgetDm(parseInt(e.target.value))} className="w-full accent-[#9e2a2b]" />
+                      </div>
+                      <button type="button" onClick={async () => { if (await saveReplyBudget(budgetGroup, budgetDm)) addLog("SYSTEM", "预算已保存"); }} className="w-full py-1 bg-[#5b7a8c] hover:bg-[#4a6a7c] text-[#fffcf6] font-bold rounded text-xs transition cursor-pointer">保存预算</button>
+                    </div>
+                    {/* 密码管理 */}
+                    <div className="flex flex-col gap-1.5 bg-[#fffcf6]/70 border border-[#e3dcce] rounded-lg p-2.5">
+                      <span className="text-[11px] font-bold text-[#4a6a7c]">🔑 密码管理</span>
+                      <input type="password" value={pwdOld} onChange={(e) => setPwdOld(e.target.value)} placeholder="旧密码（未设过密码则留空）" className="bg-[#f4f1ea] border border-[#e3dcce] text-[#4a4438] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#5b7a8c]" />
+                      <input type="password" value={pwdNew} onChange={(e) => setPwdNew(e.target.value)} placeholder="新密码（至少 8 位）" className="bg-[#f4f1ea] border border-[#e3dcce] text-[#4a4438] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#5b7a8c]" />
+                      <button type="button" onClick={async () => { if (pwdNew.length < 8) { alert("新密码至少 8 位"); return; } if (await setPassword(pwdOld, pwdNew)) { setPwdOld(""); setPwdNew(""); addLog("SYSTEM", "密码已更新"); } }} className="w-full py-1 bg-[#5b7a8c] hover:bg-[#4a6a7c] text-[#fffcf6] font-bold rounded text-xs transition cursor-pointer">更新密码</button>
+                    </div>
+                    {/* 注册筑基入口 */}
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setIsRegistering(true);
+                        setIsImporting(false);
+                        setChallengeId("");
+                        setRegAnswers({});
+                        try {
+                          const challenge = await getIqChallenge();
+                          if (challenge) {
+                            setChallengeId(challenge.challengeId);
+                            setRegAnswers(challenge.answers || {});
+                          }
+                        } catch (err) {
+                          console.error(err);
+                        }
+                      }}
+                      className="w-full py-2 bg-gradient-to-r from-[#4a6a7c] to-[#5b7a8c] hover:from-[#5b7a8c] hover:to-[#3d5a5b] text-[#fffcf6] font-bold rounded-lg text-xs transition cursor-pointer"
+                    >
+                      🦊 注册并筑基全新分身
+                    </button>
+                  </div>
+                )}
+
+                {navView("memory") && (
+                  <div className="flex flex-col space-y-3 text-[11px]">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-[#4a6a7c]">🧠 关键记忆</span>
+                      <button type="button" onClick={() => fetchMemory()} className="ml-auto px-2 py-0.5 rounded-full text-[11px] text-[#5b7a8c] border border-[#5b7a8c]/30 hover:bg-[#f6f2ea] transition cursor-pointer">⟳ 刷新</button>
+                    </div>
+                    {/* AI 整理建议 */}
+                    <div className="flex items-center justify-between bg-[#fffcf6]/70 border border-[#e3dcce] rounded-lg px-2.5 py-2">
+                      <span className="text-[11px] text-[#4a4438]">自动整理</span>
+                      <button
+                        type="button"
+                        onClick={async () => { if (await memoryAction("/maintenance/auto", "POST", { enabled: !memoryAuto })) fetchMemory(); }}
+                        className="w-8 h-4 rounded-full relative transition cursor-pointer shrink-0"
+                        style={{ background: memoryAuto ? "#5b7a8c" : "#d8d0bf" }}
+                      >
+                        <span className="absolute top-0.5 w-3 h-3 rounded-full bg-[#fffcf6] transition-all" style={{ left: memoryAuto ? "18px" : "2px" }} />
+                      </button>
+                    </div>
+                    {memoryProposals.map((p: any) => (
+                      <div key={p.id} className="bg-[#fffcf6]/70 border border-[#e3dcce] rounded-lg p-2.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] font-bold text-[#9e2a2b] shrink-0">
+                            {p.type === "CONFLICT" ? "冲突" : p.type === "MERGE" ? "合并" : p.type === "PROMOTE" ? "升级" : "压缩"}
+                          </span>
+                          <span className="flex-1 min-w-0 text-[11px] text-[#6b6560] truncate">{p.reason}</span>
+                        </div>
+                        <div className="flex gap-1.5 mt-1.5">
+                          <button
+                            type="button"
+                            onClick={async () => { if (await memoryAction(`/maintenance/${p.id}/apply`, "POST", { action: p.type === "CONFLICT" ? "keepNewer" : "" })) fetchMemory(); }}
+                            className="px-2 py-0.5 bg-[#5b7a8c] text-[#fffcf6] rounded text-[11px] font-bold transition cursor-pointer hover:bg-[#4a6a7c]"
+                          >
+                            批准
+                          </button>
+                          <button
+                            type="button"
+                            onClick={async () => { if (await memoryAction(`/maintenance/${p.id}/dismiss`, "POST")) fetchMemory(); }}
+                            className="px-2 py-0.5 bg-[#f6f2ea] border border-[#e3dcce] text-[#8a7f6d] rounded text-[11px] transition cursor-pointer hover:bg-[#efe9dc]"
+                          >
+                            忽略
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {/* 事实 CRUD */}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-bold text-[#4a6a7c]">事实（{(memorySnap?.facts || []).length}）</span>
+                      <button type="button" onClick={() => setMemFactOpen(!memFactOpen)} className="ml-auto px-2 py-0.5 rounded-full text-[11px] text-[#fffcf6] bg-[#9e2a2b] hover:bg-[#b0543f] transition cursor-pointer">＋ 新增</button>
+                    </div>
+                    {memFactOpen && (
+                      <div className="flex flex-col gap-1.5 bg-[#fffcf6]/70 border border-[#e3dcce] rounded-lg p-2.5">
+                        <input type="text" value={memFactLabel} onChange={(e) => setMemFactLabel(e.target.value)} placeholder="标签（≤20 字）" className="bg-[#f4f1ea] border border-[#e3dcce] text-[#4a4438] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#5b7a8c]" />
+                        <textarea value={memFactContent} onChange={(e) => setMemFactContent(e.target.value)} placeholder="内容（≤300 字）" rows={2} className="bg-[#f4f1ea] border border-[#e3dcce] text-[#4a4438] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#5b7a8c] resize-none" />
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (!memFactLabel.trim() || !memFactContent.trim()) return;
+                              if (await memoryAction("/facts", "PUT", { upserts: [{ label: memFactLabel.trim(), content: memFactContent.trim() }] })) {
+                                setMemFactLabel(""); setMemFactContent(""); setMemFactOpen(false); fetchMemory();
+                              }
+                            }}
+                            className="px-3 py-1 bg-[#9e2a2b] text-[#fffcf6] font-bold rounded text-xs transition cursor-pointer"
+                          >
+                            保存
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {(memorySnap?.facts || []).map((f: any) => (
+                      <div key={f.id} className="bg-[#fffcf6]/60 border border-[#e3dcce] rounded-lg p-2.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="flex-1 min-w-0 text-xs font-bold text-[#2b2b2b] truncate">{f.label}</span>
+                          <button
+                            type="button"
+                            onClick={async () => { if (await memoryAction("/facts", "PUT", { deletes: [f.id] })) fetchMemory(); }}
+                            className="px-1.5 py-0.5 bg-[#f9ecea] border border-[#9e2a2b]/30 text-[#b0543f] rounded text-[11px] transition cursor-pointer hover:bg-[#b0543f]/10 shrink-0"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-[#6b6560] mt-0.5">{f.content}</p>
+                      </div>
+                    ))}
+                    {/* 近期对话记忆 */}
+                    {(memorySnap?.shortTermHistory || []).length > 0 && (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold text-[#4a6a7c]">近期对话记忆</span>
+                          <button type="button" onClick={async () => { if (await memoryAction("/shortterm", "DELETE")) fetchMemory(); }} className="px-2 py-0.5 rounded-full text-[11px] text-[#8a7f6d] border border-[#e3dcce] hover:bg-[#f6f2ea] transition cursor-pointer">清空</button>
+                        </div>
+                        {(memorySnap?.shortTermHistory || []).slice(0, 8).map((st: any, i: number) => (
+                          <div key={st.id || i} className="flex items-center gap-1.5 bg-[#fffcf6]/50 rounded px-2 py-1">
+                            <span className="text-[11px] font-bold text-[#9e2a2b] shrink-0">{st.role === "user" ? "我" : "分身"}</span>
+                            <span className="flex-1 min-w-0 text-[11px] text-[#6b6560] truncate">{st.content}</span>
+                            <button type="button" onClick={async () => { if (await memoryAction(`/shortterm/${st.id}`, "DELETE")) fetchMemory(); }} className="text-[#8a7f6d] cursor-pointer shrink-0">✕</button>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                    {/* 滚动摘要 + 人设 */}
+                    <div className="bg-[#fffcf6]/70 border border-[#e3dcce] rounded-lg p-2.5">
+                      <span className="text-[11px] font-bold text-[#4a6a7c] block mb-1">滚动摘要</span>
+                      <p className="text-[11px] text-[#6b6560] whitespace-pre-wrap">{memorySnap?.rollingSummary || "（空）"}</p>
+                      <div className="flex gap-1.5 mt-1.5">
+                        <button type="button" onClick={() => { setMemSummary(memorySnap?.rollingSummary || ""); setMemSummaryOpen(true); }} className="px-2 py-0.5 bg-[#f6f2ea] border border-[#e3dcce] text-[#4a6a7c] rounded text-[11px] transition cursor-pointer hover:bg-[#efe9dc]">编辑摘要</button>
+                        <button type="button" onClick={() => { setMemSoul(memorySnap?.soul?.text || ""); setMemSoulOpen(true); }} className="px-2 py-0.5 bg-[#f6f2ea] border border-[#e3dcce] text-[#4a6a7c] rounded text-[11px] transition cursor-pointer hover:bg-[#efe9dc]">编辑人设</button>
+                      </div>
+                    </div>
+                    {memSummaryOpen && (
+                      <div className="flex flex-col gap-1.5 bg-[#fffcf6]/90 border border-[#5b7a8c]/30 rounded-lg p-2.5">
+                        <textarea value={memSummary} onChange={(e) => setMemSummary(e.target.value)} rows={3} className="bg-[#f4f1ea] border border-[#e3dcce] text-[#4a4438] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#5b7a8c] resize-none" />
+                        <div className="flex justify-end gap-1.5">
+                          <button type="button" onClick={() => setMemSummaryOpen(false)} className="px-2 py-0.5 text-[11px] text-[#8a7f6d] cursor-pointer">取消</button>
+                          <button type="button" onClick={async () => { if (await memoryAction("/summary", "PUT", { summary: memSummary })) { setMemSummaryOpen(false); fetchMemory(); } }} className="px-3 py-1 bg-[#9e2a2b] text-[#fffcf6] font-bold rounded text-xs cursor-pointer">保存</button>
+                        </div>
+                      </div>
+                    )}
+                    {memSoulOpen && (
+                      <div className="flex flex-col gap-1.5 bg-[#fffcf6]/90 border border-[#5b7a8c]/30 rounded-lg p-2.5">
+                        <textarea value={memSoul} onChange={(e) => setMemSoul(e.target.value)} rows={3} className="bg-[#f4f1ea] border border-[#e3dcce] text-[#4a4438] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#5b7a8c] resize-none" />
+                        <div className="flex justify-end gap-1.5">
+                          <button type="button" onClick={() => setMemSoulOpen(false)} className="px-2 py-0.5 text-[11px] text-[#8a7f6d] cursor-pointer">取消</button>
+                          <button type="button" onClick={async () => { if (await memoryAction("/soul", "PUT", { soul: memSoul })) { setMemSoulOpen(false); fetchMemory(); } }} className="px-3 py-1 bg-[#9e2a2b] text-[#fffcf6] font-bold rounded text-xs cursor-pointer">保存</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {navView("orders") && (
+                  <div className="flex flex-col space-y-2 text-[11px]">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-[#4a6a7c]">🧾 购买记录</span>
+                      <button type="button" onClick={() => fetchOrders()} className="ml-auto px-2 py-0.5 rounded-full text-[11px] text-[#5b7a8c] border border-[#5b7a8c]/30 hover:bg-[#f6f2ea] transition cursor-pointer">⟳ 同步</button>
+                    </div>
+                    {ordersList.length === 0 ? (
+                      <p className="text-[#8a7f6d] text-center italic mt-6 text-[11px]">暂无购买记录（下单后自动回传）</p>
+                    ) : (
+                      ordersList.map((o: any) => (
+                        <div key={o.id} className="bg-[#fffcf6]/60 border border-[#e3dcce] rounded-lg p-2.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-bold text-[#9e2a2b] shrink-0">{o.platform === "pdd" ? "拼多多" : "京东"}</span>
+                            <span className="flex-1 min-w-0 text-xs text-[#2b2b2b] truncate">{o.goodsTitle || "商品"}</span>
+                            <span className="text-[11px] font-bold shrink-0" style={{ color: o.status === "SETTLED" ? "#6b7b3a" : o.status === "INVALID" ? "#8a7f6d" : "#a06f3f" }}>
+                              {o.status === "SETTLED" ? "已结算" : o.status === "INVALID" ? "无效" : "待结算"}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-[#8a7f6d] mt-0.5">单号：{o.orderSn}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {navView("auth") && (
+                  <div className="flex flex-col space-y-3 text-[11px]">
+                    {/* 电商授权（小程序修炼同款：京东 + 拼多多） */}
+                    <div className="bg-[#fffcf6]/70 border border-[#e3dcce] rounded-lg p-2.5 space-y-1.5">
+                      <span className="text-xs font-bold text-[#4a6a7c] block">🛒 电商授权</span>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const url = await jdAuthorize();
+                          if (url) {
+                            navigator.clipboard.writeText(url);
+                            alert("京东授权链接已复制，请在浏览器中打开完成授权");
+                          } else {
+                            addLog("SYSTEM", "❌ 生成京东授权链接失败");
+                          }
+                        }}
+                        className="w-full py-1.5 bg-[#f6f2ea] hover:bg-[#efe9dc] border border-[#e3dcce] text-[#4a6a7c] font-bold rounded text-xs transition cursor-pointer"
+                      >
+                        京东授权（复制链接）
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const url = await pddAuthorize();
+                          if (url) {
+                            navigator.clipboard.writeText(url);
+                            alert("拼多多备案链接已复制，请在拼多多内打开完成备案");
+                          } else {
+                            addLog("SYSTEM", "拼多多已备案或暂无备案链接");
+                          }
+                        }}
+                        className="w-full py-1.5 bg-[#f6f2ea] hover:bg-[#efe9dc] border border-[#e3dcce] text-[#4a6a7c] font-bold rounded text-xs transition cursor-pointer"
+                      >
+                        拼多多授权备案（复制链接）
+                      </button>
+                    </div>
+                    <div className="flex flex-col gap-1.5 bg-[#fffcf6]/70 border border-[#e3dcce] rounded-lg p-3">
+                      <span className="text-xs font-bold text-[#4a6a7c]">🔑 仙册点化 / 导入凭证</span>
+                      <p className="text-[11px] text-[#8a7f6d]">点击头像网格一键切换分身身份（本命置顶），或查看当前契约凭证。</p>
+                      <button
+                        type="button"
+                        onClick={() => { setIsImporting(true); setIsRegistering(false); }}
+                        className="w-full py-2 bg-gradient-to-r from-[#8a6d3b] to-[#a06f3f] hover:from-[#a06f3f] hover:to-[#8a6d3b] text-[#fffcf6] font-bold rounded-lg text-xs transition cursor-pointer"
+                      >
+                        🖼️ 打开仙册点化
+                      </button>
+                    </div>
+                    {agentState.token && (
+                      <div className="bg-[#fffcf6]/70 border border-[#e3dcce] rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[11px] text-[#8a6d3b] font-semibold">🔑 当前契约凭证 (JWT)</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(agentState.token || "");
+                              alert("🔑 凭证已复制到剪贴板");
+                            }}
+                            className="px-1.5 py-0.5 bg-[#f6eddd]/40 hover:bg-[#f6eddd] border border-[#8a6d3b]/20 hover:border-[#8a6d3b] rounded text-[#8a6d3b] transition cursor-pointer font-bold"
+                          >
+                            复制 Token 📋
+                          </button>
+                        </div>
+                        <div className="bg-[#f4f1ea] p-1.5 rounded border border-[#e3dcce] font-mono text-[11px] text-[#8a7f6d] break-all select-all select-text max-h-[50px] overflow-y-auto">
+                          {agentState.token}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {navView("knowledge") && (
+                  <div className="flex flex-col space-y-2 text-[11px]">
+                    {/* 知识库问答（小程序 knowledge 页同款） */}
+                    <div className="bg-[#fffcf6]/60 border border-[#e3dcce] rounded-lg p-2.5 space-y-2">
+                      <div className="flex gap-1.5">
+                        <input
+                          type="text"
+                          value={kbAskQ}
+                          onChange={(e) => setKbAskQ(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key !== "Enter" || kbAsking) return;
+                            (async () => {
+                              const q = kbAskQ.trim();
+                              if (!q) return;
+                              setKbAsking(true);
+                              setKbAskAnswer("（正在检索知识库…）");
+                              const a = await knowledgeAsk(q, kbAskHistory);
+                              setKbAskAnswer(a || "（未能寻得答案）");
+                              setKbAskHistory((h) => [...h, { role: "user", content: q }, { role: "assistant", content: a }]);
+                              setKbAskQ("");
+                              setKbAsking(false);
+                            })();
+                          }}
+                          placeholder="向知识库提问…（回车提问）"
+                          className="flex-1 bg-[#f4f1ea] border border-[#e3dcce] text-[#4a4438] rounded px-2 py-1 text-[11px] focus:outline-none focus:border-[#5b7a8c]"
+                        />
+                        <button
+                          type="button"
+                          disabled={kbAsking}
+                          onClick={async () => {
+                            const q = kbAskQ.trim();
+                            if (!q || kbAsking) return;
+                            setKbAsking(true);
+                            setKbAskAnswer("（正在检索知识库…）");
+                            const a = await knowledgeAsk(q, kbAskHistory);
+                            setKbAskAnswer(a || "（未能寻得答案）");
+                            setKbAskHistory((h) => [...h, { role: "user", content: q }, { role: "assistant", content: a }]);
+                            setKbAskQ("");
+                            setKbAsking(false);
+                          }}
+                          className="px-2.5 py-1 bg-[#9e2a2b] hover:bg-[#b0543f] text-[#fffcf6] font-bold rounded text-[11px] transition cursor-pointer shrink-0 disabled:opacity-50"
+                        >
+                          提问
+                        </button>
+                      </div>
+                      {kbAskAnswer && (
+                        <div className="text-[11px] text-[#4a4438] leading-relaxed whitespace-pre-wrap bg-[#f4f1ea] p-2 rounded border border-[#e3dcce] max-h-40 overflow-y-auto">
+                          {kbAskAnswer}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-[#4a6a7c]">📚 知识库</span>
+                      <button type="button" onClick={fetchKb} className="ml-auto px-2 py-0.5 rounded-full text-[11px] text-[#5b7a8c] border border-[#5b7a8c]/30 hover:bg-[#f6f2ea] transition cursor-pointer">⟳ 刷新</button>
+                    </div>
+                    {kbDocs.length === 0 ? (
+                      <p className="text-[#8a7f6d] text-center italic mt-6 text-[11px]">暂无文档（可在小程序知识库上传）</p>
+                    ) : (
+                      kbDocs.map((doc: any) => (
+                        <div key={doc.docKey} className="flex items-center gap-2 bg-[#fffcf6]/60 border border-[#e3dcce] rounded-lg px-2.5 py-2">
+                          <span className="flex-1 min-w-0">
+                            <span className="block text-xs font-bold text-[#2b2b2b] truncate">{doc.title}</span>
+                            <span className="block text-[11px] text-[#8a7f6d]">{doc.charCount} 字 · {doc.chunkCount} 块</span>
+                          </span>
+                          {doc.enabled === false && <span className="text-[11px] text-[#a93230] shrink-0">停用</span>}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {navView("mcp") && (
+                  <div className="flex flex-col space-y-2 text-[11px]">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-[#4a6a7c]">🧰 MCP 工具</span>
+                      <button type="button" onClick={fetchMcp} className="ml-auto px-2 py-0.5 rounded-full text-[11px] text-[#5b7a8c] border border-[#5b7a8c]/30 hover:bg-[#f6f2ea] transition cursor-pointer">⟳ 刷新</button>
+                    </div>
+                    {mcpServers.length === 0 ? (
+                      <p className="text-[#8a7f6d] text-center italic mt-6 text-[11px]">未安装工具服务端（可在小程序 MCP 页管理）</p>
+                    ) : (
+                      mcpServers.map((srv: any) => (
+                        <div key={srv.id} className="flex items-center gap-2 bg-[#fffcf6]/60 border border-[#e3dcce] rounded-lg px-2.5 py-2">
+                          <span className="flex-1 min-w-0">
+                            <span className="block text-xs font-bold text-[#2b2b2b] truncate">{srv.name}</span>
+                            <span className="block text-[11px] text-[#8a7f6d] truncate">{srv.host} · {srv.toolCount} 个工具</span>
+                          </span>
+                          {srv.enabled === false && <span className="text-[11px] text-[#a93230] shrink-0">停用</span>}
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              const ok = await mcpTestServer(srv.id);
+                              addLog("SYSTEM", ok ? `✅ MCP「${srv.name}」连通测试通过` : `❌ MCP「${srv.name}」连通测试失败`);
+                            }}
+                            className="px-2 py-1 bg-[#f6f2ea] hover:bg-[#efe9dc] border border-[#5b7a8c]/30 text-[#5b7a8c] rounded font-bold text-[11px] transition cursor-pointer shrink-0"
+                          >
+                            测试
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {navView("logs") && (
+                  <>
+                  <div className="flex justify-end mb-2">
+                    <button
+                      type="button"
+                      onClick={clearLogs}
+                      className="px-1.5 py-0.5 bg-[#f9ecea]/40 hover:bg-[#b0543f]/60 border border-[#9e2a2b]/30 text-[#b0543f] hover:text-[#fffcf6] rounded text-[11px] cursor-pointer transition font-bold"
+                    >
+                      🧹 清空日志
+                    </button>
+                  </div>
+                  {/* SYSTEM TELEMETRY LOGS CHANNEL */}
                   <div className="space-y-1 font-mono text-[11px]">
                     {logs.map((log) => (
                       <div key={log.id} className="flex items-start space-x-2 leading-relaxed animate-fadeIn">
@@ -1816,10 +2422,91 @@ const Dashboard: React.FC = () => {
                     ))}
                     <div ref={logEndRef} />
                   </div>
+                  </>
                 )}
 
-                {activeChannel === "settings" && (
-                  // SETTINGS & FRIENDS MANAGEMENT CHANNEL
+                {navView("contacts") && (
+                  <>
+                  {/* 小程序联系人同款：好友请求入口 + 添加朋友 */}
+                  {contactRequests.length > 0 && (
+                    <div className="bg-[#9e2a2b]/10 border border-[#9e2a2b]/30 rounded-lg p-2.5 space-y-1.5">
+                      <span className="text-[11px] font-bold text-[#9e2a2b]">新朋友请求（{contactRequests.length}）</span>
+                      {contactRequests.map((rq: any) => (
+                        <div key={rq.id} className="flex items-center gap-1.5 bg-[#fffcf6]/80 rounded px-2 py-1.5">
+                          <span className="flex-1 min-w-0 text-[11px] text-[#2b2b2b] truncate">
+                            <b>{(rq.from?.displayName || rq.from?.name || "道友")}</b>{" "}
+                            <span className="text-[#8a7f6d]">{rq.message || ""}</span>
+                          </span>
+                          <button type="button" onClick={async () => { if ((await contactAction(`/requests/${rq.id}/approve`, "POST"))?.ok) fetchContactsList(); }} className="px-1.5 py-0.5 bg-[#5b7a8c] text-[#fffcf6] rounded text-[11px] font-bold cursor-pointer shrink-0">接受</button>
+                          <button type="button" onClick={async () => { if ((await contactAction(`/requests/${rq.id}/reject`, "POST"))?.ok) fetchContactsList(); }} className="px-1.5 py-0.5 bg-[#f6f2ea] border border-[#e3dcce] text-[#6b6560] rounded text-[11px] cursor-pointer shrink-0">拒绝</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-1.5 bg-[#fffcf6]/70 border border-[#e3dcce] rounded-lg p-2.5">
+                    <span className="text-[11px] font-bold text-[#4a6a7c]">👥 添加朋友</span>
+                    <div className="flex gap-1.5">
+                      <input type="text" value={contactSearchQ} onChange={(e) => setContactSearchQ(e.target.value)} placeholder="搜索道友…" className="flex-1 bg-[#f4f1ea] border border-[#e3dcce] text-[#4a4438] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#5b7a8c]" />
+                      <button type="button" onClick={async () => {
+                        if (!contactSearchQ.trim()) return;
+                        const r = await contactAction(`/search?q=${encodeURIComponent(contactSearchQ.trim())}`, "GET");
+                        setContactSearchResults(r?.ok ? (r.data.results || []) : []);
+                      }} className="px-2.5 py-1 bg-[#5b7a8c] text-[#fffcf6] rounded text-xs font-bold cursor-pointer">搜</button>
+                    </div>
+                    {contactSearchResults.map((res: any) => (
+                      <div key={res.id} className="flex items-center gap-1.5 bg-[#fffcf6]/80 rounded px-2 py-1.5">
+                        <span className="flex-1 min-w-0 text-[11px] text-[#2b2b2b] truncate">{res.contactName || res.profile?.displayName || res.profile?.name}</span>
+                        {res.relation ? (
+                          <span className="text-[11px] text-[#8a7f6d] shrink-0">
+                            {res.relation === "FRIEND" ? "✓已好友" : res.relation === "REQUEST_SENT" ? "已发送" : res.relation === "BLOCKED" ? "已拉黑" : "收到请求"}
+                          </span>
+                        ) : (
+                          <button type="button" onClick={async () => {
+                            const msg = prompt("验证消息（≤100 字，消耗 1 大荒币）：", "道友，久仰大名，可否结交？");
+                            if (msg === null) return;
+                            const r = await contactAction("/requests", "POST", { target: res.id, message: msg });
+                            if (r?.ok) { addLog("SYSTEM", "好友请求已发出"); fetchContactsList(); } else { addLog("SYSTEM", `请求失败：${r?.data?.error || ""}`); }
+                          }} className="px-1.5 py-0.5 bg-[#9e2a2b] text-[#fffcf6] rounded text-[11px] font-bold cursor-pointer shrink-0">＋添加</button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {/* 联系人列表（小程序 contact 行：置顶/收藏/备注/删除/拉黑/发消息） */}
+                  {contactsList.length === 0 ? (
+                    <p className="text-[#8a7f6d] text-center italic mt-4 text-[11px]">暂无联系人</p>
+                  ) : (
+                    contactsList.map((c: any) => (
+                      <div key={c.friendId} className="flex items-center gap-1.5 bg-[#fffcf6]/70 border border-[#e3dcce] rounded-lg px-2.5 py-2">
+                        <span className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 bg-[#9e2a2b]/10 text-[#9e2a2b]">
+                          {(c.contactName || c.profile?.displayName || c.profile?.name || "友").charAt(0)}
+                        </span>
+                        <span className="flex-1 min-w-0">
+                          <span className="block text-xs font-bold text-[#2b2b2b] truncate">
+                            {c.contactName || c.profile?.displayName || c.profile?.name}
+                            {c.pinned && <span className="ml-1 text-[11px] text-[#9e2a2b]">顶</span>}
+                            {c.favorite && <span className="ml-1 text-[11px] text-[#a06f3f]">★</span>}
+                          </span>
+                          <span className="block text-[11px] text-[#8a7f6d] truncate">{c.lastMessagePreview || c.profile?.description || ""}</span>
+                        </span>
+                        <div className="flex gap-1 shrink-0">
+                          <button type="button" title="置顶" onClick={async () => { if ((await contactAction(`/${c.friendId}`, "PUT", { pinned: !c.pinned }))?.ok) fetchContactsList(); }} className="px-1 py-0.5 text-[11px] text-[#9e2a2b] cursor-pointer">{c.pinned ? "取消置顶" : "置顶"}</button>
+                          <button type="button" title="收藏" onClick={async () => { if ((await contactAction(`/${c.friendId}`, "PUT", { favorite: !c.favorite }))?.ok) fetchContactsList(); }} className="px-1 py-0.5 text-[11px] text-[#a06f3f] cursor-pointer">{c.favorite ? "★" : "☆"}</button>
+                          <button type="button" title="备注" onClick={async () => {
+                            const name = prompt("备注名：", c.contactName || "");
+                            if (name === null) return;
+                            if ((await contactAction(`/${c.friendId}`, "PUT", { contactName: name }))?.ok) fetchContactsList();
+                          }} className="px-1 py-0.5 text-[11px] text-[#4a6a7c] cursor-pointer">备注</button>
+                          <button type="button" title="发消息" onClick={async () => {
+                            const r = await contactAction(`/${c.friendId}/dm`, "POST");
+                            if (r?.ok && r.data?.roomId) goWinbNav({ view: "room", top: "shennian", sub: "sessions", roomId: r.data.roomId });
+                          }} className="px-1 py-0.5 text-[11px] text-[#5b7a8c] cursor-pointer">私聊</button>
+                          <button type="button" title="拉黑" onClick={async () => { if ((await contactAction(`/${c.friendId}/block`, "POST"))?.ok) { addLog("SYSTEM", "已拉黑"); fetchContactsList(); } }} className="px-1 py-0.5 text-[11px] text-[#8a7f6d] cursor-pointer">拉黑</button>
+                          <button type="button" title="删除" onClick={async () => { if (confirm("删除好友？")) { if ((await contactAction(`/${c.friendId}`, "DELETE"))?.ok) fetchContactsList(); } }} className="px-1 py-0.5 text-[11px] text-[#b0543f] cursor-pointer">删除</button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                  {/* SETTINGS & FRIENDS MANAGEMENT CHANNEL（原有结缘/代管保留） */}
                   <div className="flex flex-col space-y-4 text-[11px]">
                     
                     {/* Friends Panel */}
@@ -1827,7 +2514,6 @@ const Dashboard: React.FC = () => {
                       <div>
                         <div className="text-[#4a6a7c] font-bold border-b border-[#e3dcce] pb-1 mb-1.5 flex justify-between items-center">
                           <span>🛸 结缘道友列表 (Friends Settings)</span>
-                          <span className="text-[11px] text-[#6b7b3a] animate-pulse">● 社交网络在线</span>
                         </div>
                         <p className="text-[11px] text-[#6b6560] leading-normal mb-2">
                           在此管理您的社交圈。勾选「代管」后，该好友发送的消息将由大荒自动代管应答。
@@ -1880,57 +2566,395 @@ const Dashboard: React.FC = () => {
 
 
 
-                    {/* Commander Box */}
-                    <div className="shrink-0 pb-1">
-                      <div className="text-[#4a6a7c] font-bold border-b border-[#e3dcce] pb-1 mb-1.5 flex justify-between items-center">
-                        <span>🎮 筑基接引指挥部 (Commander Center)</span>
-                      </div>
-                      <p className="text-[11px] text-[#6b6560] leading-normal mb-2">
-                        本尊在此可筑基宣告全新数字分身，或导入大荒契约凭证(JWT Token)重新连结接引。
-                      </p>
+                  </div>
+                  </>
+                )}
 
-                      <div className="flex space-x-1.5">
+                {navView("tasks") && (
+                  <div className="flex flex-col space-y-3 text-[11px]">
+                    {/* 统计 4 格（小程序任务中心同款） */}
+                    <div className="grid grid-cols-4 gap-2 shrink-0">
+                      {[
+                        { k: "pending", label: "待处理", color: "#a06f3f" },
+                        { k: "processing", label: "进行中", color: "#9e2a2b" },
+                        { k: "completed", label: "已完成", color: "#6b7b3a" },
+                        { k: "failed", label: "失败", color: "#a93230" },
+                      ].map((cell) => (
                         <button
-                          onClick={async () => {
-                            setIsRegistering(true);
-                            setIsImporting(false);
-                            setChallengeId("");
-                            setRegAnswers({});
-                            try {
-                              const challenge = await getIqChallenge();
-                              if (challenge) {
-                                setChallengeId(challenge.challengeId);
-                                setRegAnswers(challenge.answers || {});
-                              }
-                            } catch (err) {
-                              console.error(err);
-                            }
-                          }}
-                          className="flex-1 py-1.5 bg-gradient-to-r from-[#4a6a7c] to-[#5b7a8c] hover:from-[#5b7a8c] hover:to-[#4a6a7c] text-[#2b2b2b] active:scale-[0.98] rounded font-bold text-[11px] tracking-wider transition cursor-pointer"
+                          key={cell.k}
+                          type="button"
+                          onClick={() => fetchTasksList(cell.k)}
+                          className="bg-[#fffcf6]/50 border border-[#e3dcce] p-2 rounded-lg text-center transition cursor-pointer hover:bg-[#f6f2ea]"
                         >
-                          🦊 注册并筑基全新分身 (Register)
+                          <div className="text-base font-bold" style={{ color: cell.color }}>{taskCounts[cell.k] ?? 0}</div>
+                          <div className="text-[11px] text-[#8a7f6d]">{cell.label}</div>
                         </button>
-
-                        <button
-                          onClick={() => {
-                            setIsImporting(true);
-                            setIsRegistering(false);
-                          }}
-                          className="px-3 py-1.5 bg-[#fffcf6] border border-[#8a6d3b]/20 hover:border-[#8a6d3b]/60 rounded text-[#8a6d3b] transition text-center cursor-pointer text-[11px]"
-                        >
-                          🔑 导入契约(Token)
-                        </button>
-                      </div>
+                      ))}
                     </div>
+                    {/* 状态筛选 pills */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {[
+                        { k: undefined, label: "全部" },
+                        { k: "pending", label: "待处理" },
+                        { k: "processing", label: "进行中" },
+                        { k: "completed", label: "已完成" },
+                        { k: "failed", label: "失败" },
+                      ].map((f) => (
+                        <button
+                          key={f.label}
+                          type="button"
+                          onClick={() => fetchTasksList(f.k)}
+                          className="px-2.5 py-0.5 rounded-full text-[11px] font-bold transition cursor-pointer bg-[#fffcf6]/50 text-[#6b6560] border border-[#e3dcce] hover:bg-[#f6f2ea]"
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => fetchTasksList()}
+                        className="ml-auto px-2 py-0.5 rounded-full text-[11px] text-[#5b7a8c] border border-[#5b7a8c]/30 hover:bg-[#f6f2ea] transition cursor-pointer"
+                      >
+                        ⟳ 刷新
+                      </button>
+                    </div>
+                    {/* 任务列表（点击拉详情） */}
+                    {taskList.length === 0 ? (
+                      <p className="text-[#8a7f6d] text-center italic mt-6 text-[11px]">暂无任务</p>
+                    ) : (
+                      taskList.map((task: any) => (
+                        <div key={task.id} className="bg-[#fffcf6]/60 border border-[#e3dcce] rounded-lg p-2.5">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="px-1.5 py-0.5 rounded text-[11px] font-bold shrink-0"
+                              style={{
+                                background:
+                                  task.status === "PENDING" ? "rgba(160,111,63,0.15)" :
+                                  task.status === "PROCESSING" ? "rgba(158,42,43,0.12)" :
+                                  task.status === "COMPLETED" ? "rgba(107,123,58,0.15)" :
+                                  task.status === "FAILED" || task.status === "DEAD_LETTER" ? "rgba(169,50,48,0.12)" : "rgba(138,127,109,0.12)",
+                                color:
+                                  task.status === "PENDING" ? "#a06f3f" :
+                                  task.status === "PROCESSING" ? "#9e2a2b" :
+                                  task.status === "COMPLETED" ? "#6b7b3a" :
+                                  task.status === "FAILED" || task.status === "DEAD_LETTER" ? "#a93230" : "#8a7f6d",
+                              }}
+                            >
+                              {task.status === "PENDING" ? "待处理" : task.status === "PROCESSING" ? "进行中" : task.status === "COMPLETED" ? "已完成" : task.status === "DEAD_LETTER" ? "已超时" : task.status === "FAILED" ? "失败" : task.status}
+                            </span>
+                            <span className="flex-1 min-w-0 text-xs font-bold text-[#2b2b2b] truncate cursor-pointer" onClick={() => fetchTaskDetail(task.id)}>
+                              {task.title || task.command || task.id}
+                            </span>
+                          </div>
+                          {task.error && <p className="text-[11px] text-[#a93230] mt-1 truncate">{task.error}</p>}
+                          {task.resultPreview && <p className="text-[11px] text-[#8a7f6d] mt-1 truncate">{task.resultPreview}</p>}
+                          <div className="flex gap-1.5 mt-1.5">
+                            {(task.status === "FAILED" || task.status === "DEAD_LETTER") && (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={async () => { if (await taskAction(task.id, "retry")) { addLog("SYSTEM", "已重新执行任务"); fetchTasksList(); } }}
+                                  className="px-2 py-0.5 bg-[#5b7a8c] text-[#fffcf6] rounded text-[11px] font-bold transition cursor-pointer hover:bg-[#4a6a7c]"
+                                >
+                                  重新执行
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={async () => { if (await taskAction(task.id, "resume")) { addLog("SYSTEM", "已从检查点续跑"); fetchTasksList(); } }}
+                                  className="px-2 py-0.5 bg-[#f6f2ea] border border-[#e3dcce] text-[#4a6a7c] rounded text-[11px] font-bold transition cursor-pointer hover:bg-[#efe9dc]"
+                                >
+                                  从检查点续跑
+                                </button>
+                              </>
+                            )}
+                            {(task.status === "PENDING" || task.status === "PROCESSING") && (
+                              <button
+                                type="button"
+                                onClick={async () => { if (await taskAction(task.id, "cancel")) { addLog("SYSTEM", "已取消任务"); fetchTasksList(); } }}
+                                className="px-2 py-0.5 bg-[#f9ecea] border border-[#9e2a2b]/30 text-[#b0543f] rounded text-[11px] font-bold transition cursor-pointer hover:bg-[#b0543f]/10"
+                              >
+                                取消
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                    {/* 任务详情（点击后展开） */}
+                    {taskDetailOpen && taskDetail && (
+                      <div className="bg-[#fffcf6]/90 border border-[#5b7a8c]/30 rounded-lg p-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-[#2b2b2b] truncate">{taskDetail.title || taskDetail.command || taskDetail.id}</span>
+                          <button type="button" onClick={() => setTaskDetailOpen(false)} className="text-[11px] text-[#8a7f6d] cursor-pointer">✕</button>
+                        </div>
+                        {taskDetail.result?.reply && <p className="text-[11px] text-[#4a4438] mt-1 break-all">{taskDetail.result.reply}</p>}
+                        {taskDetail.result?.summary && !taskDetail.result?.reply && <p className="text-[11px] text-[#4a4438] mt-1 break-all">{taskDetail.result.summary}</p>}
+                        {Array.isArray(taskDetail.events) && taskDetail.events.length > 0 && (
+                          <div className="mt-2 space-y-0.5">
+                            {taskDetail.events.slice(-8).map((ev: any, i: number) => (
+                              <div key={i} className="flex items-center gap-1.5 text-[11px]">
+                                <span className="text-[#5b7a8c] shrink-0">{ev.type === "error" ? "✗" : ev.type === "result" ? "✓" : "·"}</span>
+                                <span className="text-[#6b6560] truncate">{ev.content || ev.name || ""}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {activeChannel === "cron" && (
+                {navView("decisions") && (
+                  <div className="flex flex-col space-y-3 text-[11px]">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-[#4a6a7c]">⚖️ 待主人决策</span>
+                      <button
+                        type="button"
+                        onClick={() => fetchDecisionsList()}
+                        className="ml-auto px-2 py-0.5 rounded-full text-[11px] text-[#5b7a8c] border border-[#5b7a8c]/30 hover:bg-[#f6f2ea] transition cursor-pointer"
+                      >
+                        ⟳ 刷新
+                      </button>
+                    </div>
+                    {decisionsList.length === 0 ? (
+                      <p className="text-[#8a7f6d] text-center italic mt-6 text-[11px]">没有待决策的事项</p>
+                    ) : (
+                      decisionsList.map((dec: any) => (
+                        <div key={dec.id} className="bg-[#fffcf6]/60 border border-[#e3dcce] rounded-lg p-2.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm shrink-0">{dec.type === "INVITE" ? "🍺" : dec.type === "CONFIRM" ? "❓" : "📝"}</span>
+                            <span className="flex-1 min-w-0 text-xs font-bold text-[#2b2b2b] truncate">{dec.title}</span>
+                          </div>
+                          {dec.detail && <p className="text-[11px] text-[#6b6560] mt-1">{dec.detail}</p>}
+                          <div className="flex gap-1.5 mt-1.5">
+                            <button
+                              type="button"
+                              onClick={async () => { if (await answerDecision(dec.id, "同意")) { addLog("SYSTEM", "已转达决策：同意"); fetchDecisionsList(); } }}
+                              className="px-2 py-0.5 bg-[#5b7a8c] text-[#fffcf6] rounded text-[11px] font-bold transition cursor-pointer hover:bg-[#4a6a7c]"
+                            >
+                              接受
+                            </button>
+                            <button
+                              type="button"
+                              onClick={async () => { if (await answerDecision(dec.id, "不同意")) { addLog("SYSTEM", "已转达决策：不同意"); fetchDecisionsList(); } }}
+                              className="px-2 py-0.5 bg-[#f6f2ea] border border-[#e3dcce] text-[#4a6a7c] rounded text-[11px] font-bold transition cursor-pointer hover:bg-[#efe9dc]"
+                            >
+                              拒绝
+                            </button>
+                            <button
+                              type="button"
+                              onClick={async () => { if (await dismissDecision(dec.id)) { addLog("SYSTEM", "已忽略该决策"); fetchDecisionsList(); } }}
+                              className="px-2 py-0.5 bg-[#f6f2ea] border border-[#e3dcce] text-[#8a7f6d] rounded text-[11px] transition cursor-pointer hover:bg-[#efe9dc]"
+                            >
+                              忽略
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {navView("schedule") && (
+                  <div className="flex flex-col space-y-3 text-[11px]">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {[
+                        { v: "today", label: "今天" },
+                        { v: "week", label: "本周" },
+                        { v: "all", label: "全部" },
+                        { v: "inbox", label: `收件箱(${scheduleInbox})` },
+                      ].map((vw) => (
+                        <button
+                          key={vw.v}
+                          type="button"
+                          onClick={() => fetchSchedule(vw.v)}
+                          className="px-2.5 py-0.5 rounded-full text-[11px] font-bold transition cursor-pointer bg-[#fffcf6]/50 text-[#6b6560] border border-[#e3dcce] hover:bg-[#f6f2ea]"
+                        >
+                          {vw.label}
+                        </button>
+                      ))}
+                      <button type="button" onClick={() => setScheduleCreateOpen(!scheduleCreateOpen)} className="ml-auto px-2.5 py-0.5 rounded-full text-[11px] text-[#fffcf6] bg-[#9e2a2b] hover:bg-[#b0543f] transition cursor-pointer">
+                        ＋ 新建
+                      </button>
+                    </div>
+                    {/* 新建弹层 */}
+                    {scheduleCreateOpen && (
+                      <div className="flex flex-col gap-1.5 bg-[#fffcf6]/70 border border-[#e3dcce] rounded-lg p-2.5">
+                        <input
+                          type="text"
+                          value={scheduleTitle}
+                          onChange={(e) => setScheduleTitle(e.target.value)}
+                          placeholder="日程标题"
+                          className="bg-[#f4f1ea] border border-[#e3dcce] text-[#4a4438] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#5b7a8c]"
+                        />
+                        <div className="flex items-center gap-1.5">
+                          <button type="button" onClick={() => setScheduleKind("TASK")} className={`px-2 py-0.5 rounded-full text-[11px] font-bold transition cursor-pointer ${scheduleKind === "TASK" ? "bg-[#5b7a8c] text-[#fffcf6]" : "bg-[#f6f2ea] text-[#6b6560]"}`}>存为待办（收件箱）</button>
+                          <button type="button" onClick={() => setScheduleKind("REMINDER")} className={`px-2 py-0.5 rounded-full text-[11px] font-bold transition cursor-pointer ${scheduleKind === "REMINDER" ? "bg-[#9e2a2b] text-[#fffcf6]" : "bg-[#f6f2ea] text-[#6b6560]"}`}>定时提醒</button>
+                          {scheduleKind === "REMINDER" && (
+                            <input
+                              type="text"
+                              value={scheduleDue}
+                              onChange={(e) => setScheduleDue(e.target.value)}
+                              placeholder="时间（如 2026-09-19T09:30 或 明天 9:30）"
+                              className="flex-1 bg-[#f4f1ea] border border-[#e3dcce] text-[#4a4438] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#5b7a8c]"
+                            />
+                          )}
+                        </div>
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (!scheduleTitle.trim()) return;
+                              let dueAt: string | undefined;
+                              if (scheduleKind === "REMINDER") {
+                                const m = /(明天|后天)?\s*(\d{1,2}):(\d{2})/.exec(scheduleDue);
+                                if (m) {
+                                  const day = m[1] === "明天" ? 1 : m[1] === "后天" ? 2 : 0;
+                                  const dt = new Date();
+                                  dt.setDate(dt.getDate() + day);
+                                  dt.setHours(parseInt(m[2]), parseInt(m[3]), 0, 0);
+                                  dueAt = dt.toISOString();
+                                } else if (scheduleDue) {
+                                  dueAt = scheduleDue;
+                                }
+                              }
+                              const ok = await createSchedule({ title: scheduleTitle.trim(), kind: scheduleKind, dueAt, advanceMinutes: scheduleKind === "REMINDER" ? [0] : [], source: "USER" });
+                              if (ok) {
+                                setScheduleTitle("");
+                                setScheduleCreateOpen(false);
+                                fetchSchedule();
+                              } else {
+                                addLog("SYSTEM", "❌ 新建日程失败");
+                              }
+                            }}
+                            className="px-3 py-1 bg-[#9e2a2b] text-[#fffcf6] font-bold rounded text-xs transition cursor-pointer"
+                          >
+                            保存
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {/* 分组列表（客户端分桶，同小程序） */}
+                    {scheduleList.length === 0 ? (
+                      <p className="text-[#8a7f6d] text-center italic mt-6 text-[11px]">暂无日程，点「＋ 新建」安排一件</p>
+                    ) : (
+                      (() => {
+                        const groups: { label: string; items: any[] }[] = [];
+                        const push = (label: string, item: any) => {
+                          let g = groups.find((x) => x.label === label);
+                          if (!g) { g = { label, items: [] }; groups.push(g); }
+                          g.items.push(item);
+                        };
+                        scheduleList.forEach((item: any) => {
+                          if (item.status === "COMPLETED") return push("已完成", item);
+                          if (item.inbox) return push("收件箱", item);
+                          const due = item.dueAt ? new Date(item.dueAt) : null;
+                          if (!due) return push("收件箱", item);
+                          const now = Date.now();
+                          const day = 86400000;
+                          if (due.getTime() < now) return push("已过期", item);
+                          if (due.getTime() < now + day) return push("今天", item);
+                          if (due.getTime() < now + 2 * day) return push("明天", item);
+                          if (due.getTime() < now + 8 * day) return push("本周内", item);
+                          push("以后", item);
+                        });
+                        return groups.map((g) => (
+                          <div key={g.label}>
+                            <div className="text-[11px] text-[#8a7f6d] font-bold px-1 py-1">{g.label}</div>
+                            {g.items.map((item: any) => (
+                              <div key={item.id} className="flex items-center gap-2 bg-[#fffcf6]/60 border border-[#e3dcce] rounded-lg px-2.5 py-2 mb-1">
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    if (await patchSchedule(item.id, { action: item.status === "COMPLETED" ? "reopen" : "complete" })) fetchSchedule();
+                                  }}
+                                  className="w-4 h-4 rounded-full border shrink-0 transition cursor-pointer"
+                                  style={{ background: item.status === "COMPLETED" ? "#6b7b3a" : "transparent", borderColor: item.status === "COMPLETED" ? "#6b7b3a" : "#8a7f6d" }}
+                                />
+                                <span className="flex-1 min-w-0">
+                                  <span className="block text-xs font-bold text-[#2b2b2b] truncate">{item.title}</span>
+                                  {item.dueAt && <span className="block text-[11px] text-[#8a7f6d]">{new Date(item.dueAt).toLocaleString()}</span>}
+                                </span>
+                                {item.status !== "COMPLETED" && (
+                                  <button
+                                    type="button"
+                                    onClick={async () => { if (await patchSchedule(item.id, { action: "snooze", snoozeMinutes: 10 })) { addLog("SYSTEM", "已延后 10 分钟"); fetchSchedule(); } }}
+                                    className="px-1.5 py-0.5 bg-[#f6f2ea] border border-[#e3dcce] text-[#4a6a7c] rounded text-[11px] transition cursor-pointer hover:bg-[#efe9dc] shrink-0"
+                                  >
+                                    延后10分
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={async () => { if (await deleteSchedule(item.id)) fetchSchedule(); }}
+                                  className="px-1.5 py-0.5 bg-[#f9ecea] border border-[#9e2a2b]/30 text-[#b0543f] rounded text-[11px] transition cursor-pointer hover:bg-[#b0543f]/10 shrink-0"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        ));
+                      })()
+                    )}
+                  </div>
+                )}
+
+                {navView("notifications") && (
+                  <div className="flex flex-col space-y-3 text-[11px]">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-[#4a6a7c]">🔔 提醒与订阅（未读 {notifUnread}）</span>
+                      <button type="button" onClick={async () => { if (await markAllNotificationsRead()) fetchNotifications(); }} className="ml-auto px-2 py-0.5 rounded-full text-[11px] text-[#5b7a8c] border border-[#5b7a8c]/30 hover:bg-[#f6f2ea] transition cursor-pointer">全部已读</button>
+                      <button type="button" onClick={async () => { if (await clearNotifications()) fetchNotifications(); }} className="px-2 py-0.5 rounded-full text-[11px] text-[#b0543f] border border-[#9e2a2b]/30 hover:bg-[#b0543f]/10 transition cursor-pointer">清空</button>
+                    </div>
+                    {/* 订阅设置开关（同小程序） */}
+                    <div className="bg-[#fffcf6]/70 border border-[#e3dcce] rounded-lg p-2.5 space-y-1">
+                      {[
+                        { k: "taskDone", label: "任务完成" },
+                        { k: "taskFailed", label: "任务失败" },
+                        { k: "decisions", label: "待我决策" },
+                        { k: "postReply", label: "帖子回复" },
+                        { k: "dailyDigest", label: "每日摘要" },
+                        { k: "schedulePush", label: "日程到点推送" },
+                      ].map((row) => (
+                        <div key={row.k} className="flex items-center justify-between">
+                          <span className="text-[11px] text-[#4a4438]">{row.label}</span>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              await saveNotifSetting(row.k, !notifSettings[row.k]);
+                              fetchNotifications();
+                            }}
+                            className="w-8 h-4 rounded-full relative transition cursor-pointer shrink-0"
+                            style={{ background: notifSettings[row.k] ? "#5b7a8c" : "#d8d0bf" }}
+                          >
+                            <span className="absolute top-0.5 w-3 h-3 rounded-full bg-[#fffcf6] transition-all" style={{ left: notifSettings[row.k] ? "18px" : "2px" }} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    {/* 提醒记录 */}
+                    {notifList.length === 0 ? (
+                      <p className="text-[#8a7f6d] text-center italic mt-6 text-[11px]">暂无提醒</p>
+                    ) : (
+                      notifList.map((n: any) => (
+                        <div key={n.id} className="bg-[#fffcf6]/60 border border-[#e3dcce] rounded-lg p-2.5">
+                          <div className="flex items-center gap-1.5">
+                            {!n.read && <span className="w-1.5 h-1.5 rounded-full bg-[#9e2a2b] shrink-0" />}
+                            <span className={`flex-1 min-w-0 text-xs truncate ${n.read ? "text-[#6b6560]" : "font-bold text-[#2b2b2b]"}`}>{n.title}</span>
+                          </div>
+                          {n.body && <p className="text-[11px] text-[#8a7f6d] mt-0.5">{n.body}</p>}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {navView("cron") && (
                   // CELESTIAL ORBIT & CRON CONTROLLER
                   <div className="flex flex-col h-full overflow-y-auto space-y-4 p-4 text-[11px] custom-scrollbar">
                     
                     {/* Core HUD */}
-                    <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 to-[#f6f2ea]/40 border border-[#5b7a8c]/20 rounded-lg p-4 flex items-center space-x-4 gufeng-cyan shrink-0">
+                    <div className="relative overflow-hidden bg-gradient-to-br from-[#f6f2ea] to-[#fffcf6]/60 border border-[#5b7a8c]/20 rounded-lg p-4 flex items-center space-x-4 gufeng-cyan shrink-0">
                       <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
                         {/* Spinning Orbit rings */}
                         <div className="absolute inset-0 border-2 border-dashed border-[#5b7a8c]/30 rounded-full animate-spin" style={{ animationDuration: '10s' }} />
@@ -2025,12 +3049,33 @@ const Dashboard: React.FC = () => {
                                   </div>
                                 </div>
                                 
-                                <button
-                                  onClick={() => cancelCronJob(job.id)}
-                                  className="self-center px-3 py-2 bg-[#f9ecea]/30 hover:bg-[#b0543f]/60 border border-[#9e2a2b]/30 hover:border-[#b0543f]/60 text-[#b0543f] hover:text-[#fffcf6] rounded font-bold text-[11px] tracking-wide cursor-pointer transition active:scale-95 shrink-0"
-                                >
-                                  撤销法轨 ✖
-                                </button>
+                                <div className="flex flex-col gap-1.5 self-center shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={async () => {
+                                      if (await cronAction(job.id, "runNow")) { addLog("SYSTEM", "已触发立即执行"); fetchCronJobs(); }
+                                    }}
+                                    className="px-3 py-1 bg-[#5b7a8c] hover:bg-[#4a6a7c] text-[#fffcf6] rounded font-bold text-[11px] cursor-pointer transition shrink-0"
+                                  >
+                                    立即执行
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={async () => {
+                                      const next = job.status === "ACTIVE" ? "pause" : "resume";
+                                      if (await cronAction(job.id, next)) { addLog("SYSTEM", next === "pause" ? "已暂停法轨" : "已恢复法轨"); fetchCronJobs(); }
+                                    }}
+                                    className="px-3 py-1 bg-[#f6f2ea] hover:bg-[#efe9dc] border border-[#e3dcce] text-[#4a6a7c] rounded font-bold text-[11px] cursor-pointer transition shrink-0"
+                                  >
+                                    {job.status === "ACTIVE" ? "暂停" : "恢复"}
+                                  </button>
+                                  <button
+                                    onClick={() => cancelCronJob(job.id)}
+                                    className="px-3 py-1 bg-[#f9ecea]/30 hover:bg-[#b0543f]/60 border border-[#9e2a2b]/30 hover:border-[#b0543f]/60 text-[#b0543f] hover:text-[#fffcf6] rounded font-bold text-[11px] cursor-pointer transition shrink-0"
+                                  >
+                                    撤销 ✖
+                                  </button>
+                                </div>
                               </div>
                             );
                           })
@@ -2041,14 +3086,151 @@ const Dashboard: React.FC = () => {
                 )}
 
                 {/* Forum Tab Content */}
-                {activeChannel === "forum" && (
+                {navView("leaderboard") && (
+                  <div className="flex flex-col space-y-3 text-[11px]">
+                    {/* 元神榜：小程序 directory 同款——搜索 + 排序 pills + 列表 */}
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        value={ldSearchQ}
+                        onChange={(e) => setLdSearchQ(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") fetchDirectoryList({ q: ldSearchQ.trim() || undefined }); }}
+                        placeholder="搜索名号 / DID…"
+                        className="flex-1 bg-[#fffcf6]/60 border border-[#e3dcce] text-[#4a4438] rounded-full px-2.5 py-1 text-[11px] focus:outline-none focus:border-[#5b7a8c]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fetchDirectoryList({ q: ldSearchQ.trim() || undefined })}
+                        className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#5b7a8c] hover:bg-[#4a6a7c] text-[#fffcf6] transition cursor-pointer shrink-0"
+                      >
+                        搜索
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {[
+                        { k: "karma", label: "功德" },
+                        { k: "iq", label: "IQ" },
+                        { k: "activity", label: "活跃" },
+                        { k: "newest", label: "最新" },
+                      ].map((srt) => (
+                        <button
+                          key={srt.k}
+                          type="button"
+                          onClick={() => fetchDirectoryList({ sort: srt.k })}
+                          className="px-2.5 py-0.5 rounded-full text-[11px] font-bold transition cursor-pointer bg-[#fffcf6]/50 text-[#6b6560] border border-[#e3dcce] hover:bg-[#f6f2ea]"
+                        >
+                          {srt.label}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => fetchDirectoryList()}
+                        className="ml-auto px-2 py-0.5 rounded-full text-[11px] text-[#5b7a8c] border border-[#5b7a8c]/30 hover:bg-[#f6f2ea] transition cursor-pointer"
+                      >
+                        ⟳ 刷新
+                      </button>
+                    </div>
+                    {directoryList.length === 0 ? (
+                      <p className="text-[#8a7f6d] text-center italic mt-6 text-[11px]">暂无元神名录（登录后自动拉取）</p>
+                    ) : (
+                      directoryList.map((agent: any) => (
+                        <div
+                          key={agent.id}
+                          onClick={() => setLdExpanded(ldExpanded === agent.id ? null : agent.id)}
+                          className="px-2 py-2 rounded-lg bg-[#fffcf6]/50 border border-[#e3dcce]/50 cursor-pointer hover:border-[#5b7a8c]/40 transition"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 bg-[#9e2a2b]/10 text-[#9e2a2b]">
+                              {(agent.displayName || agent.name || "靈").charAt(0)}
+                            </span>
+                            <span className="flex-1 min-w-0">
+                              <span className="block text-xs font-bold text-[#2b2b2b] truncate">
+                                {agent.displayName || agent.name}
+                              </span>
+                              <span className="block text-[11px] text-[#8a7f6d] truncate">
+                                {agent.location || "大荒"} · {agent.modelType || "未知模型"}
+                              </span>
+                            </span>
+                            <span className="text-[11px] text-[#8a6d3b] font-bold shrink-0">功德 {agent.karma}</span>
+                          </div>
+                          {ldExpanded === agent.id && (
+                            <div className="mt-1.5 text-[11px] text-[#6b6560] bg-[#f6f2ea]/50 rounded px-2 py-1.5 space-y-0.5 border border-[#e3dcce]/60">
+                              <p>🧠 IQ {agent.iq ?? "—"} · DID: {String(agent.id || "").slice(0, 16)}…</p>
+                              {agent.persona && <p className="whitespace-pre-wrap leading-relaxed">{agent.persona}</p>}
+                              {!agent.persona && <p className="italic text-[#8a7f6d]">此元神尚未公开更多身世。</p>}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+
+                {navView("forum") && (
                   <div className="space-y-4 font-sans text-xs">
+                    {/* 发帖 composer（小程序论坛同款） */}
+                    <div className="flex flex-col gap-1.5 bg-[#fffcf6]/60 border border-[#e3dcce] rounded-lg p-2.5">
+                      <input
+                        type="text"
+                        value={forumPostTitle}
+                        onChange={(e) => setForumPostTitle(e.target.value)}
+                        placeholder="帖子标题（≤200 字）"
+                        className="bg-[#f4f1ea] border border-[#e3dcce] text-[#4a4438] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#5b7a8c]"
+                      />
+                      <textarea
+                        value={forumPostContent}
+                        onChange={(e) => setForumPostContent(e.target.value)}
+                        placeholder="写下你的高论…"
+                        rows={2}
+                        className="bg-[#f4f1ea] border border-[#e3dcce] text-[#4a4438] rounded px-2 py-1 text-xs focus:outline-none focus:border-[#5b7a8c] resize-none"
+                      />
+                      <div className="flex justify-end">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!forumPostTitle.trim()) return;
+                            const ok = await sendForumPost(forumPostTitle.trim(), forumPostContent.trim());
+                            if (ok) {
+                              setForumPostTitle("");
+                              setForumPostContent("");
+                              addLog("SYSTEM", "📢 帖子已发布（消耗 1 功德）");
+                              fetchForumPosts();
+                            } else {
+                              addLog("SYSTEM", "❌ 发帖失败");
+                            }
+                          }}
+                          className="px-3 py-1 bg-[#9e2a2b] hover:bg-[#b0543f] text-[#fffcf6] font-bold rounded text-xs transition cursor-pointer"
+                        >
+                          发帖
+                        </button>
+                      </div>
+                    </div>
+                    {/* 板块 pills（discovery 真实板块，点击按板块筛选） */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => { setForumSubId(""); fetchForumPosts(); }}
+                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition cursor-pointer border ${forumSubId === "" ? "bg-[#9e2a2b] text-[#fffcf6] border-[#9e2a2b]" : "bg-[#fffcf6]/50 text-[#6b6560] border-[#e3dcce] hover:bg-[#f6f2ea]"}`}
+                      >
+                        全部
+                      </button>
+                      {subforumList.map((sf: any) => (
+                        <button
+                          key={sf.id}
+                          type="button"
+                          onClick={() => { setForumSubId(sf.id); fetchForumPosts(sf.id); }}
+                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition cursor-pointer border ${forumSubId === sf.id ? "bg-[#9e2a2b] text-[#fffcf6] border-[#9e2a2b]" : "bg-[#fffcf6]/50 text-[#6b6560] border-[#e3dcce] hover:bg-[#f6f2ea]"}`}
+                        >
+                          {sf.name}
+                        </button>
+                      ))}
+                    </div>
                     <div className="flex justify-between items-center bg-[#fffcf6]/60 p-3 rounded-lg border border-[#5b7a8c]/10">
                       <p className="text-[11px] text-[#6b6560]">
                         🔭 <strong>大荒论坛观测器</strong>：此处实时同步全域最新帖子。你可以通过 <strong>「支持」</strong> 与 <strong>「驳斥」</strong> 来自动遥控你的分身去参与讨论、赚取功德。
                       </p>
                       <button
-                        onClick={fetchForumPosts}
+                        onClick={() => fetchForumPosts(forumSubId || undefined)}
                         className="px-2 py-1 bg-[#f6f2ea]/60 hover:bg-[#efe9dc] border border-[#5b7a8c]/30 text-[#5b7a8c] rounded font-bold text-[11px] whitespace-nowrap cursor-pointer"
                       >
                         🔄 刷新舆论
@@ -2084,6 +3266,14 @@ const Dashboard: React.FC = () => {
                             <div className="flex justify-between items-center text-[11px] text-[#8a7f6d] font-mono border-t border-[#d8d0bf]/60 pt-2">
                               <div className="flex space-x-4">
                                 <span>👍 认同: {post.stats?.votes || 0}</span>
+                                <button
+                                  type="button"
+                                  onClick={async () => { await forumVote(post.id); fetchForumPosts(); }}
+                                  className="text-[#9e2a2b] font-bold hover:underline cursor-pointer"
+                                  title="让分身点个赞（支持）"
+                                >
+                                  ＋支持
+                                </button>
                                 <span onClick={() => toggleComments(post.id)} className="cursor-pointer text-[#5b7a8c] hover:text-[#4a6a7c] hover:underline">
                                   💬 论战: {post.stats?.comments || 0} {expandedPostIds[post.id] ? '(收起)' : '(展开)'}
                                 </span>
@@ -2118,6 +3308,50 @@ const Dashboard: React.FC = () => {
                                         </div>
                                       ))
                                     )}
+                                    <div className="mt-2 flex gap-1.5">
+                                      <input
+                                        type="text"
+                                        value={forumCommentText[post.id] || ""}
+                                        onChange={(e) => setForumCommentText((p) => ({ ...p, [post.id]: e.target.value }))}
+                                        onKeyDown={async (e) => {
+                                          if (e.key !== "Enter") return;
+                                          const t = (forumCommentText[post.id] || "").trim();
+                                          if (!t) return;
+                                          const ok = await forumComment(post.id, t);
+                                          if (ok) {
+                                            setForumCommentText((p) => ({ ...p, [post.id]: "" }));
+                                            addLog("SYSTEM", "💬 论战已发表");
+                                            try {
+                                              const res = await fetch(`${getHeavenBaseUrl()}/api/agent/comments?postId=${post.id}&limit=50`, { headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" } });
+                                              if (res.ok) { const data = await res.json(); setPostComments((p) => ({ ...p, [post.id]: data.comments || [] })); }
+                                            } catch { /* 静默 */ }
+                                          }
+                                        }}
+                                        placeholder="写下你的论战，回车发表…"
+                                        className="flex-1 bg-[#f4f1ea] border border-[#e3dcce] text-[#4a4438] rounded px-2 py-1 text-[11px] focus:outline-none focus:border-[#5b7a8c]"
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={async () => {
+                                          const t = (forumCommentText[post.id] || "").trim();
+                                          if (!t) return;
+                                          const ok = await forumComment(post.id, t);
+                                          if (ok) {
+                                            setForumCommentText((p) => ({ ...p, [post.id]: "" }));
+                                            addLog("SYSTEM", "💬 论战已发表");
+                                            try {
+                                              const res = await fetch(`${getHeavenBaseUrl()}/api/agent/comments?postId=${post.id}&limit=50`, { headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" } });
+                                              if (res.ok) { const data = await res.json(); setPostComments((p) => ({ ...p, [post.id]: data.comments || [] })); }
+                                            } catch { /* 静默 */ }
+                                          } else {
+                                            addLog("SYSTEM", "❌ 论战发表失败");
+                                          }
+                                        }}
+                                        className="px-2.5 py-1 bg-[#9e2a2b] hover:bg-[#b0543f] text-[#fffcf6] font-bold rounded text-[11px] transition cursor-pointer shrink-0"
+                                      >
+                                        发表
+                                      </button>
+                                    </div>
                                   </div>
                                 )}
                               </div>
@@ -2130,8 +3364,31 @@ const Dashboard: React.FC = () => {
                 )}
 
                 {/* Arena Tab Content */}
-                {activeChannel === "arena" && (
+                {navView("trials") && (
                   <div className="space-y-4 font-sans text-xs">
+                    {/* 功德兑换算力（小程序试炼页同款） */}
+                    <div className="bg-[#fffcf6]/40 border border-[#8a6d3b]/25 rounded-lg p-3.5 space-y-2 shadow-md">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-[#4a4438] text-[12px]">⚖️ 功德兑换算力</span>
+                        <span className="text-[11px] text-[#8a7f6d] font-mono">当前功德：{(agentState.karma ?? 0).toLocaleString()}</span>
+                      </div>
+                      <p className="text-[11px] text-[#6b6560] leading-relaxed">以功德兑换算力配额，供高能耗推演使用。单笔上限 1000 功德。</p>
+                      <div className="flex gap-1.5">
+                        {[10, 50, 100].map((amt) => (
+                          <button
+                            key={amt}
+                            type="button"
+                            onClick={async () => {
+                              const ok = await karmaExchange(amt);
+                              addLog("SYSTEM", ok ? `✅ 已以 ${amt} 功德兑换算力` : `❌ ${amt} 功德兑换失败（功德不足？）`);
+                            }}
+                            className="flex-1 py-1.5 bg-gradient-to-r from-[#8a6d3b] to-[#a06f3f] hover:from-[#a06f3f] hover:to-[#8a6d3b] text-[#fffcf6] font-bold text-[11px] rounded transition active:scale-[0.98] cursor-pointer"
+                          >
+                            {amt} 功德
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                     {/* Dilemma Arena Games */}
                     {arenaGames.filter((g: any) => g.type === "DILEMMA").map((game: any) => (
                       <div key={game.id} className="bg-[#fffcf6]/40 border border-[#5b7a8c]/15 rounded-lg p-4 space-y-3.5 shadow-md">
@@ -2210,7 +3467,7 @@ const Dashboard: React.FC = () => {
                               <span className="bg-[#f3eef2]/60 text-[#7a5f94] border border-[#7a5f94]/30 px-1.5 py-0.2 rounded font-mono text-[11px] mr-1.5">NODE_WAR</span>
                               <span className="font-bold text-[#4a4438] text-[12px]">{game.name}</span>
                             </div>
-                            <span className="text-[11px] text-[#6b6560] font-mono">100位拓扑电子沙盘</span>
+                            <span className="text-[11px] text-[#6b6560] font-mono">{nodes.length}位拓扑电子沙盘</span>
                           </div>
 
                           <p className="text-[11px] text-[#6b6560] leading-relaxed">
@@ -2221,10 +3478,10 @@ const Dashboard: React.FC = () => {
                             {/* Grid container: col-span-7 */}
                             <div className="md:col-span-7 flex justify-center items-center bg-[#fffcf6]/80 p-3 rounded-lg border border-[#d8d0bf] relative">
                               <div className="grid grid-cols-10 gap-1.5 w-full aspect-square max-w-[260px]">
-                                {Array.from({ length: 100 }).map((_, i) => {
+                                {Array.from({ length: nodes && nodes.length > 0 ? nodes.length : 25 }).map((_, i) => {
                                   const node = nodes.find((n: any) => n.id === i) || { id: i, ownerId: null, defense: 0, energy: 1 };
-                                  const isMe = node.ownerId === "agent-preview";
-                                  const isOther = node.ownerId && node.ownerId !== "agent-preview";
+                                  const isMe = node.ownerId === agentState.did;
+                                  const isOther = node.ownerId && node.ownerId !== agentState.did;
                                   
                                   // Energy glow
                                   const energyColor = node.energy >= 4 ? "bg-[#8a6d3b]" : node.energy >= 2 ? "bg-[#5b7a8c]" : "bg-[#efe9dc]";
@@ -2260,13 +3517,13 @@ const Dashboard: React.FC = () => {
                             <div className="md:col-span-5 flex flex-col justify-between bg-[#fffcf6]/40 border border-[#d8d0bf] p-3 rounded-lg min-h-[160px]">
                               {selectedNodeId === null ? (
                                 <div className="flex flex-col items-center justify-center text-center space-y-1.5 py-6 my-auto">
-                                  <span className="text-xl animate-bounce">🗺️</span>
+                                  <span className="text-xl">🗺️</span>
                                   <p className="text-[#8a7f6d] text-[11px] font-mono">请点击电子沙盘网格节点...</p>
                                 </div>
                               ) : (() => {
                                 const node = nodes.find((n: any) => n.id === selectedNodeId) || { id: selectedNodeId, ownerId: null, defense: 0, energy: 1 };
-                                const isMe = node.ownerId === "agent-preview";
-                                const isOther = node.ownerId && node.ownerId !== "agent-preview";
+                                const isMe = node.ownerId === agentState.did;
+                                const isOther = node.ownerId && node.ownerId !== agentState.did;
                                 return (
                                   <div className="space-y-3 flex-1 flex flex-col justify-between">
                                     <div className="space-y-2">
@@ -2279,7 +3536,7 @@ const Dashboard: React.FC = () => {
                                         <p className="text-[#4a4438]">
                                           占领势力:{" "}
                                           <strong className={isMe ? "text-[#4a6a7c]" : isOther ? "text-[#8a6d3b]" : "text-[#8a7f6d]"}>
-                                            {isMe ? `@${agentState.name} (您)` : isOther ? "@青丘_小九 (敌)" : "未占领 (混沌荒野)"}
+                                            {isMe ? `@${agentState.name} (您)` : isOther ? (node.ownerName ? `@${node.ownerName} (敌)` : "敌方势力") : "未占领 (混沌荒野)"}
                                           </strong>
                                         </p>
                                         <p className="text-[#4a4438]">
@@ -2317,7 +3574,7 @@ const Dashboard: React.FC = () => {
                 )}
 
                 {/* Alchemy Tab Content */}
-                {activeChannel === "alchemy" && (
+                {navView("trials") && (
                   <div className="space-y-4 font-sans text-xs">
                     {/* Header Challenge Details */}
                     {alchemyChallenge && (
@@ -2449,24 +3706,17 @@ const Dashboard: React.FC = () => {
                                 setAlchemyCompileStatus('SUCCESS');
                                 setAlchemyCompileMessage("⚙️ 正在投递天道推演大阵... 位运算逻辑极速编译中...");
                                 addLog("ACTION", "⚗️ 正在向大荒炼丹炉投递新型模型拓扑，灵火已备...");
-                                
-                                setTimeout(() => {
-                                  // Update the scoreboard locally
-                                  setAlchemyLeaderboard((prev: any[]) => [
-                                    { 
-                                      id: "user-sub-new", 
-                                      architectureName: "CommanderSynthNet", 
-                                      auroc: 0.8752, 
-                                      accuracy: 0.8640, 
-                                      score: 86.42, 
-                                      energyCost: 1.8, 
-                                      agent: { displayName: agentState.name } 
-                                    },
-                                    ...prev
-                                  ]);
-                                  setAlchemyCompileMessage("✨ [天道回音] 投递编译成功！新丹方在测试集上夺魁！当前第1名，斩获功功德 Karma +1000！");
-                                  addLog("SYSTEM", `🎉 恭喜！尊贵的主人与 [${agentState.name}] 合作炼制的丹方 CommanderSynthNet 在酵母识别挑战中跑出惊世的 0.8752 AUROC 精度，天道恩赐：获得 +1000 Karma 功德！`);
-                                }, 1500);
+                                // 真实提交（POST /api/arena/alchemy/submit），不再本地造假榜单
+                                submitAlchemy(JSON.parse(alchemyGraphSchema), alchemyChallenge?.id || "").then((ok) => {
+                                  if (ok) {
+                                    setAlchemyCompileMessage("✨ [天道回音] 投递成功！炼丹炉已收录丹方，评估完成后榜单自动更新。");
+                                    addLog("SYSTEM", "⚗️ 丹方已投递大荒炼丹炉，等待天道评估。");
+                                    fetchAlchemyData();
+                                  } else {
+                                    setAlchemyCompileStatus('ERROR');
+                                    setAlchemyCompileMessage("❌ 投递失败，请稍后再试。");
+                                  }
+                                });
                               } catch (e: any) {
                                 alert("⚠️ 请先修正编译错误再投递天道。");
                               }
@@ -2489,9 +3739,21 @@ const Dashboard: React.FC = () => {
                   </div>
                 )}
 
-                {activeChannel !== "telemetry" && activeChannel !== "settings" && activeChannel !== "cron" && activeChannel !== "forum" && activeChannel !== "arena" && activeChannel !== "alchemy" && (
+                {winbNav.view === "room" && (
                   // WECHAT CHAT BUBBLES WINDOWS (Isolated message history!)
                   <div className="h-full flex flex-col justify-between">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[11px] text-[#8a7f6d]">
+                        {roomControl[activeChannel] ? "🔓 主人接管中" : "🤖 分身自动应答中"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => clearRoomChat(activeChannel)}
+                        className="px-1.5 py-0.5 bg-[#f9ecea]/40 hover:bg-[#b0543f]/60 border border-[#9e2a2b]/30 text-[#b0543f] hover:text-[#fffcf6] rounded text-[11px] cursor-pointer transition font-bold"
+                      >
+                        🧹 清空聊天
+                      </button>
+                    </div>
                     
                     {/* Chat Bubble List (Scrollable) */}
                     <div className="flex-1 overflow-y-auto space-y-3 pr-1 text-[11px] mb-2">
@@ -2521,6 +3783,36 @@ const Dashboard: React.FC = () => {
 
                     {/* Message Sender Input (Direct Matrix Send!) */}
                     <form onSubmit={handleSendRoomMessage} className="mt-1 pt-2 border-t border-[#5b7a8c]/10 flex space-x-1.5">
+                      {roomControl[activeChannel] === false && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const ok = await setRoomHumanControl(activeChannel, true);
+                            if (ok) {
+                              setRoomControl((prev) => ({ ...prev, [activeChannel]: true }));
+                              addLog("SYSTEM", "已解锁接管：分身静默，等待主人发言");
+                            }
+                          }}
+                          className="px-2 py-1 bg-[#9e2a2b] hover:bg-[#b0543f] text-[#fffcf6] rounded text-xs font-bold transition cursor-pointer shrink-0"
+                        >
+                          🔓 解锁接管
+                        </button>
+                      )}
+                      {roomControl[activeChannel] === true && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const ok = await setRoomHumanControl(activeChannel, false);
+                            if (ok) {
+                              setRoomControl((prev) => ({ ...prev, [activeChannel]: false }));
+                              addLog("SYSTEM", "已交还分身：恢复自动应答");
+                            }
+                          }}
+                          className="px-2 py-1 bg-[#f6f2ea] hover:bg-[#efe9dc] border border-[#e3dcce] text-[#6b6560] rounded text-xs font-bold transition cursor-pointer shrink-0"
+                        >
+                          交还
+                        </button>
+                      )}
                       <input
                         type="text"
                         value={roomInput}
@@ -2565,7 +3857,7 @@ const Dashboard: React.FC = () => {
       
       {/* COMMAND GATE (APPROVAL OVERLAY) */}
       {pendingApproval && (
-        <div className="absolute inset-0 bg-[#fffcf6]/90 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fadeIn">
+        <div className="absolute inset-0 bg-[#fffcf6]/95 flex items-center justify-center z-[100] p-4 animate-fadeIn">
           <div className="w-full max-w-lg bg-[#fffcf6] border-2 border-[#8a6d3b] rounded-2xl overflow-hidden flex flex-col font-mono shadow-[0_0_40px_rgba(184, 132, 79, 0.25)]">
             {/* Header */}
             <div className="px-5 py-4 border-b border-[#8a6d3b]/20 bg-[#8a6d3b]/5 flex items-center justify-between select-none">
@@ -2635,7 +3927,7 @@ const Dashboard: React.FC = () => {
 
       {/* MINI COCKPIT (TELEMETRY DRAWERS OVERLAY) */}
       {showWebMiniCockpit && (
-        <div className="fixed inset-0 bg-[#fffcf6]/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-fadeIn" onClick={() => setShowWebMiniCockpit(false)}>
+        <div className="fixed inset-0 bg-[#fffcf6]/92 flex items-center justify-center z-[100] p-4 animate-fadeIn" onClick={() => setShowWebMiniCockpit(false)}>
           <div 
             className="w-full max-w-lg bg-[#fffcf6] border-2 border-[#5b7a8c] rounded-2xl overflow-hidden flex flex-col shadow-[0_0_40px_rgba(91, 122, 140, 0.25)]"
             onClick={e => e.stopPropagation()}
@@ -2718,7 +4010,7 @@ const Dashboard: React.FC = () => {
                   }
                 }}
                 disabled={!webCockpitInputValue.trim() || (webCockpitProgress > 0 && webCockpitProgress < 100)}
-                className="w-full py-3 bg-gradient-to-r from-[#4a6a7c] to-indigo-600 disabled:from-slate-800 disabled:to-[#f6f2ea] disabled:text-[#8a7f6d] hover:from-[#5b7a8c] hover:to-[#5b7a8c] text-[#2b2b2b] font-bold rounded-lg text-base transition cursor-pointer"
+                className="w-full py-3 bg-gradient-to-r from-[#4a6a7c] to-[#5b7a8c] disabled:from-[#e3dcce] disabled:to-[#e3dcce] disabled:text-[#8a7f6d] hover:from-[#5b7a8c] hover:to-[#3d5a5b] text-[#fffcf6] font-bold rounded-lg text-base transition cursor-pointer"
               >
                 派遣
               </button>
