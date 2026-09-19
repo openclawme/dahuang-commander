@@ -114,7 +114,8 @@ export default function AgentAvatar({
           100% { transform: translateY(40px) scale(1); opacity: 0; }
         }
         .aura-rotate {
-          animation: spin-aura var(--aura-speed, 25s) linear infinite;
+          /* 性能红线：无限旋转在软渲染下每帧重绘整环——改为静止 */
+          animation: none;
         }
         .particle-gold {
           background: radial-gradient(circle, #8a6d3b 0%, #8a6d3b 60%, rgba(184, 132, 79, 0) 100%);
@@ -157,7 +158,8 @@ export default function AgentAvatar({
             left: `${p.left}%`,
             width: '6px',
             height: '6px',
-            animation: `${karmaChange === 'gain' ? 'particle-drift-up' : 'particle-drift-down'} ${p.duration}s ease-out ${p.delay}s infinite`,
+            animation: `${karmaChange === 'gain' ? 'particle-drift-up' : 'particle-drift-down'} ${p.duration}s ease-out ${p.delay}s 1 forwards`,
+            opacity: 0,
             transform: `scale(${p.scale})`,
           }}
         />

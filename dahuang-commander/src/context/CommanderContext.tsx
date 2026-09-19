@@ -21,6 +21,10 @@ export interface ChatMessage {
   progress?: number;
   charts?: any[];
   suggestions?: Array<{ id: string; label: string; command: string }>;
+  command?: string;
+  createdAt?: number;
+  hasFallback?: boolean;
+  goods?: any[];
   progressState?: {
     tokensUsed?: number;
     phase: string;
@@ -37,12 +41,22 @@ export interface RoomEvent {
   senderName: string;
   body: string;
   ts: number;
+  msgtype?: string;
+  videoUrl?: string;
+  images?: string[];
+  blocks?: any[];
 }
+import type { WindowBNav, SubSegmentId } from "../components/windowB/nav";
+import { decodeChannel, encodeChannel } from "../components/windowB/nav";
+
 export interface RoomState {
   roomId: string;
   name: string;
   events: RoomEvent[];
   unreadCount: number;
+  isGroup?: boolean;
+  role?: string | null;
+  dissolved?: boolean;
 }
 
 export interface TelemetryLog {
@@ -75,8 +89,8 @@ interface CommanderContextType {
   fetchRoomReplyState: (roomId: string) => Promise<boolean>;
   submitAlchemy: (graphJson: any, challengeId: string) => Promise<boolean>;
   directoryList: any[];
-  fetchDirectoryList: (opts?: { page?: number; sort?: string; q?: string }) => Promise<void>;
-  sendForumPost: (title: string, content: string) => Promise<boolean>;
+  fetchDirectoryList: (opts?: { page?: number; sort?: string; q?: string; dir?: string; location?: string }) => Promise<void>;
+  sendForumPost: (title: string, content: string, images?: string[]) => Promise<boolean>;
   taskList: any[];
   taskCounts: Record<string, number>;
   fetchTasksList: (status?: string) => Promise<void>;
@@ -106,6 +120,10 @@ interface CommanderContextType {
   memoryAuto: boolean;
   fetchMemory: () => Promise<void>;
   memoryAction: (path: string, method: string, body?: any) => Promise<boolean>;
+  memoryEpisodic: any[];
+  memoryEpisodicCursor: string | null;
+  fetchMemoryEpisodic: (cursor: string) => Promise<void>;
+  memoryAnalyze: () => Promise<boolean>;
   ordersList: any[];
   fetchOrders: () => Promise<void>;
   setPassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
@@ -116,6 +134,69 @@ interface CommanderContextType {
   contactRequests: any[];
   fetchContactsList: () => Promise<void>;
   contactAction: (path: string, method: string, body?: any) => Promise<any>;
+  socketDown: boolean;
+  winbNav: WindowBNav;
+  goWinbNav: (nav: WindowBNav) => void;
+  navView: (sub: SubSegmentId) => boolean;
+  toastMsg: string;
+  showToast: (msg: string) => void;
+  instructionText: string;
+  setInstructionText: React.Dispatch<React.SetStateAction<string>>;
+  roomControl: Record<string, boolean>;
+  setRoomControl: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  isRegistering: boolean;
+  setIsRegistering: React.Dispatch<React.SetStateAction<boolean>>;
+  isImporting: boolean;
+  setIsImporting: React.Dispatch<React.SetStateAction<boolean>>;
+  webCockpitType: "post" | "dilemma" | "nodewar" | "alchemy";
+  webCockpitTitle: string;
+  webCockpitTargetId: any;
+  webCockpitHistory: any[];
+  webCockpitInputValue: string;
+  setWebCockpitInputValue: React.Dispatch<React.SetStateAction<string>>;
+  webCockpitProgress: number;
+  webCockpitActiveTasks: any[];
+  showWebMiniCockpit: boolean;
+  setShowWebMiniCockpit: React.Dispatch<React.SetStateAction<boolean>>;
+  openWebMiniCockpit: (type: "post" | "dilemma" | "nodewar" | "alchemy", targetId: any, title: string) => void;
+  dispatchWebMiniCommand: (instruction: string) => void;
+  goodsDetailRequest: { platform: string; id: string; ts: number } | null;
+  requestGoodsDetail: (platform: string, id: string) => void;
+  jdStatus: { bound: boolean; expiresAt?: any } | null;
+  logout: () => void;
+  fetchJdStatus: () => Promise<void>;
+  passwordLogin: (account: string, password: string) => Promise<{ ok: boolean; msg?: string }>;
+  marketGoods: any[];
+  marketJtk: any[];
+  marketCompare: { jd: any[]; pdd: any[]; winner: string; winnerText: string } | null;
+  fetchMarketFeed: (channel: string) => Promise<void>;
+  fetchMarketJtk: (groupKey: string) => Promise<void>;
+  goodsSearch: (keyword: string) => Promise<void>;
+  goodsDetail: any;
+  goodsDetailRelated: any[];
+  fetchGoodsDetail: (platform: string, goodsId: string) => Promise<void>;
+  fetchRebateLink: (platform: string, goodsId: string) => Promise<any>;
+  kbSearchResults: any[];
+  kbSearch: (q: string) => Promise<void>;
+  kbUpload: (file: File) => Promise<boolean>;
+  kbManage: (body: { action: string; docKey?: string; docKeys?: string[]; enabled?: boolean; title?: string }) => Promise<boolean>;
+  kbDoc: any;
+  fetchKbDoc: (docKey: string) => Promise<void>;
+  knowledgeAskFull: (question: string, history: any[]) => Promise<{ answer: string; citations: any[] }>;
+  mcpCatalog: any[];
+  fetchMcpCatalog: () => Promise<void>;
+  mcpInstall: (body: any) => Promise<boolean>;
+  mcpPatch: (id: string, body: any) => Promise<boolean>;
+  mcpRemove: (id: string) => Promise<boolean>;
+  directoryLocationStats: any[];
+  directoryDetail: any;
+  fetchDirectoryDetail: (id: string) => Promise<void>;
+  roomAction: (roomId: string, action: "dissolve" | "exit") => Promise<boolean>;
+  contactProfile: any;
+  fetchContactProfile: (friendId: string) => Promise<void>;
+  contactSuggestions: any[];
+  fetchContactSuggestions: () => Promise<void>;
+  createGroup: (name: string, invitees: string[]) => Promise<boolean>;
   forumVote: (postId: string) => Promise<boolean>;
   forumComment: (postId: string, content: string) => Promise<boolean>;
   subforumList: any[];
@@ -133,7 +214,7 @@ interface CommanderContextType {
   messengerRooms: Record<string, RoomState>;
   activeChannel: string;
   setActiveChannel: (channel: string) => void;
-  sendDirectMessage: (roomId: string, body: string) => Promise<boolean>;
+  sendDirectMessage: (roomId: string, body: string, images?: string[]) => Promise<boolean>;
   fetchSync: () => Promise<void>;
   cronJobs: any[];
   fetchCronJobs: () => Promise<void>;
@@ -147,7 +228,9 @@ interface CommanderContextType {
   setAlchemyLeaderboard: React.Dispatch<React.SetStateAction<any[]>>;
   fetchArenaStatus: () => Promise<void>;
   sendArenaAction: (roundId: string, type: string, payload?: any) => Promise<boolean>;
-  fetchForumPosts: (subforumId?: string) => Promise<void>;
+  fetchForumPosts: (opts?: { subforumId?: string; page?: number; append?: boolean }) => Promise<void>;
+  patchForumContent: (kind: "posts" | "comments", id: string, content: string) => Promise<boolean>;
+  deleteForumContent: (kind: "posts" | "comments", id: string) => Promise<boolean>;
   sendForumComment: (postId: string, content: string) => Promise<boolean>;
   fetchAlchemyData: () => Promise<void>;
   fetchProfile: () => Promise<void>;
@@ -169,6 +252,21 @@ const getTimestamp = () => {
   const now = new Date();
   return now.toTimeString().split(" ")[0]; // "HH:MM:SS"
 };
+
+/** 流式展示用：剥掉 HTML 标签与实体（半成品 HTML 绝不原样进渲染器） */
+function stripHtmlForStream(html: string): string {
+  return String(html || "")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&(amp|lt|gt|quot|#0?39|apos);/gi, (_m0, name) => {
+      switch (String(name).toLowerCase()) {
+        case "amp": return "&";
+        case "lt": return "<";
+        case "gt": return ">";
+        case "quot": return '"';
+        default: return "'";
+      }
+    });
+}
 
 export const sanitizeMessage = (msg: ChatMessage, isHistory = false): ChatMessage => {
   if (!msg || typeof msg.content !== "string") return msg;
@@ -223,6 +321,75 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   });
 
   const [pendingApproval, setPendingApproval] = useState<any>(null);
+  const [socketDown, setSocketDown] = useState(false);
+  const [jdStatus, setJdStatus] = useState<{ bound: boolean; expiresAt?: any } | null>(null);
+
+  // ---- 全局共享状态（供拆分后的各 pane 组件使用）----
+  const [winbNav, setWinbNavState] = useState<WindowBNav>(() => {
+    try {
+      const raw = localStorage.getItem("dh_winb_nav");
+      return raw ? decodeChannel(raw) : { view: "sub", top: "shennian", sub: "sessions" };
+    } catch {
+      return { view: "sub", top: "shennian", sub: "sessions" };
+    }
+  });
+  const goWinbNav = (nav: WindowBNav) => {
+    setWinbNavState(nav);
+    try { localStorage.setItem("dh_winb_nav", encodeChannel(nav)); } catch { /* 忽略 */ }
+    setActiveChannel(encodeChannel(nav));
+  };
+  const navView = (sub: SubSegmentId) => winbNav.view === "sub" && winbNav.sub === sub;
+  const [toastMsg, setToastMsg] = useState("");
+  const toastTimerRef = useRef<number | null>(null);
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = window.setTimeout(() => setToastMsg(""), 2200);
+  };
+  const [instructionText, setInstructionText] = useState("");
+  const [roomControl, setRoomControl] = useState<Record<string, boolean>>({});
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+
+  // ---- Mini Cockpit 状态与真实派发（Dashboard 渲染覆盖层，pane 只触发）----
+  const [webCockpitType, setWebCockpitType] = useState<"post" | "dilemma" | "nodewar" | "alchemy">("post");
+  const [webCockpitTitle, setWebCockpitTitle] = useState("");
+  const [webCockpitTargetId, setWebCockpitTargetId] = useState<any>(null);
+  const [webCockpitHistory, setWebCockpitHistory] = useState<any[]>([]);
+  const [webCockpitInputValue, setWebCockpitInputValue] = useState("");
+  const [webCockpitProgress, setWebCockpitProgress] = useState(0);
+  const [webCockpitActiveTasks, setWebCockpitActiveTasks] = useState<any[]>([]);
+  const [showWebMiniCockpit, setShowWebMiniCockpit] = useState(false);
+  const openWebMiniCockpit = (type: "post" | "dilemma" | "nodewar" | "alchemy", targetId: any, titleStr: string) => {
+    setWebCockpitType(type);
+    setWebCockpitTitle(titleStr);
+    setWebCockpitTargetId(targetId);
+    setWebCockpitHistory([{ id: Date.now(), sender: "agent", content: `已进入神魂遥控坞：${titleStr}`, timestamp: new Date().toLocaleTimeString() }]);
+    setWebCockpitInputValue("");
+    setWebCockpitProgress(0);
+    setWebCockpitActiveTasks([]);
+    setShowWebMiniCockpit(true);
+  };
+  const [goodsDetailRequest, setGoodsDetailRequest] = useState<{ platform: string; id: string; ts: number } | null>(null);
+  const requestGoodsDetail = (platform: string, id: string) => setGoodsDetailRequest({ platform, id, ts: Date.now() });
+  const dispatchWebMiniCommand = (instruction: string) => {
+    if (!instruction.trim()) return;
+    // 小程序同款：真实派发指令给分身（分身用自己的工具执行）
+    const fullCommand =
+      webCockpitType === "post"
+        ? `【大荒论坛 目标帖子ID: ${webCockpitTargetId} | 标题: ${webCockpitTitle}】请对该帖子发表论坛评论：${instruction}`
+        : `【${webCockpitType} TargetID: ${webCockpitTargetId}】${instruction}`;
+    setWebCockpitHistory((prev) => [
+      ...prev,
+      { id: Date.now(), sender: "human", content: instruction, timestamp: new Date().toLocaleTimeString() },
+    ]);
+    setWebCockpitInputValue("");
+    setWebCockpitProgress(100);
+    setWebCockpitActiveTasks([]);
+    setShowWebMiniCockpit(false);
+    sendInstruction(fullCommand);
+    showToast("⚡ 法旨已派入内廷执行队列，实时进度见左窗");
+  };
 
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>(() => {
     const defaultHistory: ChatMessage[] = [
@@ -272,10 +439,15 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [agentState]);
 
+  const lastHistorySaveRef = React.useRef(0);
   React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("dahuang_chat_history", JSON.stringify(chatHistory));
-    }
+    if (typeof window === "undefined") return;
+    // 性能：任务期间 progress 事件高频改写 chatHistory——存档节流到 5s/次，
+    // 避免每个心跳都 JSON.stringify 整段历史
+    const now = Date.now();
+    if (now - lastHistorySaveRef.current < 5000) return;
+    lastHistorySaveRef.current = now;
+    localStorage.setItem("dahuang_chat_history", JSON.stringify(chatHistory));
   }, [chatHistory]);
 
   React.useEffect(() => {
@@ -353,6 +525,10 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 sender: ev.sender,
                 senderName: senderDisplayName,
                 body: ev.content?.body || "",
+                msgtype: ev.content?.msgtype,
+                videoUrl: ev.content?.videoUrl || ev.content?.url || undefined,
+                images: Array.isArray(ev.content?.images) ? ev.content.images : (ev.content?.url ? [ev.content.url] : undefined),
+                blocks: Array.isArray(ev.content?.blocks) ? ev.content.blocks : undefined,
                 ts: ev.origin_server_ts || Date.now()
               };
             });
@@ -361,7 +537,10 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             roomId,
             name: roomDisplayName,
             events: parsedEvents,
-            unreadCount: 0
+            unreadCount: 0,
+            isGroup,
+            role: (r as any).role || "MEMBER",
+            dissolved: !!((r as any).dissolved)
           };
         }
         setMessengerRooms(roomsMap);
@@ -392,13 +571,16 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   // 发帖（POST /api/agent/posts，小程序 dahuang 论坛同款）
-  const sendForumPost = async (title: string, content: string): Promise<boolean> => {
+  const sendForumPost = async (title: string, content: string, images?: string[]): Promise<boolean> => {
     if (!agentState.token || agentState.status !== "ONLINE") return false;
     try {
+      const blocks = (images && images.length)
+        ? [...(content.trim() ? [{ type: "text", text: content.trim() }] : []), ...images.map((u) => ({ type: "image", url: u }))]
+        : undefined;
       const res = await fetch(`${getHeavenBaseUrl()}/api/agent/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
-        body: JSON.stringify({ title, content, visibility: "PUBLIC" }),
+        body: JSON.stringify({ title, content, images: images && images.length ? images : undefined, blocks, visibility: "PUBLIC" }),
       });
       return res.ok || res.status === 201;
     } catch {
@@ -507,6 +689,8 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // ---- 记忆（/api/agent/memory 全家桶） ----
   const [memorySnap, setMemorySnap] = useState<any>(null);
+  const [memoryEpisodic, setMemoryEpisodic] = useState<any[]>([]);
+  const [memoryEpisodicCursor, setMemoryEpisodicCursor] = useState<string | null>(null);
   const [memoryProposals, setMemoryProposals] = useState<any[]>([]);
   const [memoryAuto, setMemoryAuto] = useState(false);
   const fetchMemory = async () => {
@@ -516,7 +700,13 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         fetch(`${getHeavenBaseUrl()}/api/agent/memory`, { headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" } }),
         fetch(`${getHeavenBaseUrl()}/api/agent/memory/maintenance`, { headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" } }),
       ]);
-      if (snapRes.ok) setMemorySnap(await snapRes.json());
+      if (snapRes.ok) {
+        const snap = await snapRes.json();
+        setMemorySnap(snap);
+        const epi = Array.isArray(snap.episodic) ? snap.episodic : (Array.isArray(snap.episodic?.items) ? snap.episodic.items : []);
+        setMemoryEpisodic(epi);
+        setMemoryEpisodicCursor(snap.episodicCursor || snap.episodic?.nextCursor || null);
+      }
       if (maintRes.ok) {
         const data = await maintRes.json();
         setMemoryProposals(Array.isArray(data.proposals) ? data.proposals : []);
@@ -524,6 +714,21 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }
     } catch { /* 静默 */ }
   };
+  const fetchMemoryEpisodic = async (cursor: string) => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/memory?cursor=${encodeURIComponent(cursor)}`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const d = await res.json();
+        const page = Array.isArray(d.episodic) ? d.episodic : (Array.isArray(d.episodic?.items) ? d.episodic.items : []);
+        setMemoryEpisodic((prev) => [...prev, ...page]);
+        setMemoryEpisodicCursor(d.nextCursor || d.episodicCursor || null);
+      }
+    } catch { /* 静默 */ }
+  };
+  const memoryAnalyze = () => memoryAction("/maintenance/analyze", "POST");
   const memoryAction = async (path: string, method: string, body?: any): Promise<boolean> => {
     if (!agentState.token || agentState.status !== "ONLINE") return false;
     try {
@@ -659,8 +864,186 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
   const forumVote = (postId: string) => authPost("/api/agent/votes", { postId, value: 1 });
   const forumComment = (postId: string, content: string) => authPost("/api/agent/comments", { postId, content });
+  const forumAuthReq = async (method: string, path: string, body?: any): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}${path}`, {
+        method,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      return res.ok;
+    } catch { return false; }
+  };
+  const patchForumContent = (kind: "posts" | "comments", id: string, content: string) => forumAuthReq("PATCH", `/api/agent/${kind}/${encodeURIComponent(id)}`, { content });
+  const deleteForumContent = (kind: "posts" | "comments", id: string) => forumAuthReq("DELETE", `/api/agent/${kind}/${encodeURIComponent(id)}`);
   const karmaExchange = (amount: number) => authPost("/api/agent/karma/exchange", { amount });
   const mcpTestServer = (serverId: string) => authPost(`/api/agent/mcp/servers/${serverId}/test`, {});
+
+  // ---- 登出 / 京东授权状态 / 密码登录（小程序 settings 同款）----
+  const logout = () => {
+    try { localStorage.removeItem("dahuang_agent_state"); } catch {}
+    setAgentState({
+      id: "agent-preview",
+      name: "青丘_小九",
+      did: "did:pseudo:qingqiu_xiaojiu-0x3a2",
+      karma: 24000,
+      character: "儒雅辩士",
+      iq: 120,
+      shortTermGoal: "关注无回复冷帖，收割潜在 Karma",
+      token: null,
+      status: "ONLINE",
+    });
+    setChatHistory([{ id: `init-${Date.now()}`, sender: "agent", content: "（天道连通）主人，大荒分身在此候命。请降下法旨！", timestamp: getTimestamp(), progress: 100 }]);
+    setMessengerRooms({});
+    setDecisionsCount(0);
+    addLog("SYSTEM", "👋 已退出登录，回到预览分身（青丘_小九）。");
+  };
+  const fetchJdStatus = async () => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/jd-oauth/status`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) setJdStatus(await res.json());
+    } catch { /* 静默 */ }
+  };
+  const passwordLogin = async (account: string, password: string): Promise<{ ok: boolean; msg?: string }> => {
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Agent-Version": "7.0" },
+        body: JSON.stringify({ account, password }),
+      });
+      const d = await res.json();
+      if (res.ok && d.token) {
+        importToken(d.token);
+        return { ok: true };
+      }
+      return { ok: false, msg: d.error || `登录失败（${res.status}）` };
+    } catch {
+      return { ok: false, msg: "网络错误" };
+    }
+  };
+
+  // ---- 集市 / 商品（小程序 market + goods-detail 同款）----
+  const [marketGoods, setMarketGoods] = useState<any[]>([]);
+  const [marketJtk, setMarketJtk] = useState<any[]>([]);
+  const [marketCompare, setMarketCompare] = useState<{ jd: any[]; pdd: any[]; winner: string; winnerText: string } | null>(null);
+  const jtkAllRef = useRef<any[] | null>(null);
+  const fmtYuanLocal = (n: number): string => {
+    const v = Number(n);
+    if (!Number.isFinite(v)) return "0";
+    return v >= 100 ? String(Math.round(v)) : String(Math.round(v * 100) / 100);
+  };
+  const decorateG = (g: any) => ({
+    ...g,
+    priceText: fmtYuanLocal(g.priceYuan),
+    afterText: fmtYuanLocal(g.afterCouponYuan),
+    couponText: fmtYuanLocal(g.couponYuan),
+    platformText: g.platform === "pdd" ? "拼多多" : g.platform === "jd" ? "京东" : g.platform || "",
+  });
+  const JTK_GROUPS: Record<string, { cates: string[]; words: RegExp }> = {
+    jtk_hongbao: { cates: ["美团", "饿了么", "肯德基", "麦当劳", "汉堡王", "华莱士", "瑞幸咖啡", "库迪咖啡", "奈雪的茶", "喜茶", "星巴克", "百果园", "必胜客"], words: /外卖|红包|餐|咖啡|奶茶|餐券|团购/ },
+    jtk_travel: { cates: ["滴滴", "高德打车", "T3出行", "同程出行", "携程旅行", "分销酒店", "景点门票", "特价快递", "电影"], words: /打车|出行|酒店|民宿|门票|电影|快递/ },
+    jtk_deal: { cates: ["京东", "拼多多", "淘宝", "唯品会", "话费充值", "电费充值", "会员充值", "流量卡"], words: /电商|补贴|充值|会员/ },
+  };
+  const fetchMarketFeed = async (channel: string) => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/shopping/feed`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify({ channel, limit: 20 }),
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setMarketGoods((d.goods || []).map(decorateG));
+        setMarketCompare(null);
+      }
+    } catch { /* 静默 */ }
+  };
+  const fetchMarketJtk = async (groupKey: string) => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    const apply = (all: any[]) => {
+      const rule = JTK_GROUPS[groupKey];
+      const list = (all || []).filter((a: any) => (rule.cates.indexOf(a.platform) !== -1) || rule.words.test(a.name));
+      setMarketJtk(list);
+      setMarketCompare(null);
+    };
+    if (jtkAllRef.current) { apply(jtkAllRef.current); return; }
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/shopping/jtk?action=activities`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const d = await res.json();
+        jtkAllRef.current = d.activities || [];
+        apply(jtkAllRef.current as any[]);
+      }
+    } catch { /* 静默 */ }
+  };
+  const goodsSearch = async (keyword: string) => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/shopping/search`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify({ keyword }),
+      });
+      if (res.ok) {
+        const d = await res.json();
+        const all = (d.goods || []).map(decorateG);
+        const jd = all.filter((g: any) => g.platform === "jd").sort((a: any, b: any) => a.afterCouponYuan - b.afterCouponYuan).slice(0, 5);
+        const pdd = all.filter((g: any) => g.platform === "pdd").sort((a: any, b: any) => a.afterCouponYuan - b.afterCouponYuan).slice(0, 5);
+        let winner = ""; let winnerText = "";
+        if (jd.length && pdd.length) {
+          winner = jd[0].afterCouponYuan <= pdd[0].afterCouponYuan ? "jd" : "pdd";
+          winnerText = winner === "jd" ? `京东更划算，低 ${(pdd[0].afterCouponYuan - jd[0].afterCouponYuan).toFixed(2)} 元` : `拼多多更划算，低 ${(jd[0].afterCouponYuan - pdd[0].afterCouponYuan).toFixed(2)} 元`;
+        } else if (jd.length) winnerText = "拼多多暂无可比价结果";
+        else if (pdd.length) winnerText = "京东暂无可比价结果";
+        setMarketGoods(all);
+        setMarketCompare({ jd, pdd, winner, winnerText });
+      }
+    } catch { /* 静默 */ }
+  };
+  const [goodsDetail, setGoodsDetail] = useState<any>(null);
+  const [goodsDetailRelated, setGoodsDetailRelated] = useState<any[]>([]);
+  const fetchGoodsDetail = async (platform: string, goodsId: string) => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/shopping/goods-detail`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify({ platform, goodsId }),
+      });
+      if (res.ok) {
+        const d = await res.json();
+        if (d.success) {
+          setGoodsDetail(d.detail);
+          setGoodsDetailRelated((d.related || []).map(decorateG));
+        } else {
+          setGoodsDetail({ ...d.detail, onSale: false });
+          setGoodsDetailRelated([]);
+        }
+      }
+    } catch { /* 静默 */ }
+  };
+  const fetchRebateLink = async (platform: string, goodsId: string): Promise<any> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return { ok: false, msg: "未登录" };
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/shopping/rebate-link`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify({ platform, goodsId }),
+      });
+      const d = await res.json();
+      if (res.ok && d.success) return { ok: true, url: d.url, needsAuthority: !!d.needsAuthority, hint: d.authorityHint || d.hint, weixinShortLink: d.weixinShortLink };
+      return { ok: false, msg: (d && d.error) || "获取购买链接失败" };
+    } catch {
+      return { ok: false, msg: "网络异常" };
+    }
+  };
   const [subforumList, setSubforumList] = useState<any[]>([]);
   const fetchSubforums = async () => {
     if (!agentState.token || agentState.status !== "ONLINE") return;
@@ -672,8 +1055,8 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }
     } catch { /* 静默 */ }
   };
-  const knowledgeAsk = async (question: string, history: any[]): Promise<string> => {
-    if (!agentState.token || agentState.status !== "ONLINE") return "";
+  const knowledgeAskFull = async (question: string, history: any[]): Promise<{ answer: string; citations: any[] }> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return { answer: "", citations: [] };
     try {
       const res = await fetch(`${getHeavenBaseUrl()}/api/agent/knowledge/ask`, {
         method: "POST",
@@ -682,10 +1065,152 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       });
       if (res.ok) {
         const data = await res.json();
-        return data.answer || "";
+        return { answer: data.answer || "", citations: Array.isArray(data.citations) ? data.citations : [] };
       }
     } catch { /* 静默 */ }
-    return "";
+    return { answer: "", citations: [] };
+  };
+  const knowledgeAsk = async (question: string, history: any[]): Promise<string> =>
+    (await knowledgeAskFull(question, history)).answer;
+
+  // ---- 知识库管理（小程序 knowledge/knowledge-detail 同款）----
+  const [kbSearchResults, setKbSearchResults] = useState<any[]>([]);
+  const kbSearch = async (q: string) => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/knowledge/search?q=${encodeURIComponent(q)}`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setKbSearchResults(Array.isArray(d.documents) ? d.documents : Array.isArray(d.docs) ? d.docs : []);
+      }
+    } catch { /* 静默 */ }
+  };
+  const kbUpload = async (file: File): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/knowledge/upload`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: fd,
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+  const kbManage = async (body: { action: string; docKey?: string; docKeys?: string[]; enabled?: boolean; title?: string }): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/knowledge/manage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify(body),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+  const [kbDoc, setKbDoc] = useState<any>(null);
+  const fetchKbDoc = async (docKey: string) => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/knowledge/doc?docKey=${encodeURIComponent(docKey)}`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setKbDoc(d.doc || d);
+      }
+    } catch { /* 静默 */ }
+  };
+
+  // ---- MCP 管理（小程序 mcp 页同款）----
+  const [mcpCatalog, setMcpCatalog] = useState<any[]>([]);
+  const fetchMcpCatalog = async () => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/mcp/catalog`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setMcpCatalog(Array.isArray(d.catalog) ? d.catalog : []);
+      }
+    } catch { /* 静默 */ }
+  };
+  const mcpInstall = (body: any) => authPost("/api/agent/mcp/servers", body);
+  const mcpPatch = async (id: string, body: any): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/mcp/servers/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify(body),
+      });
+      return res.ok;
+    } catch { return false; }
+  };
+  const roomAction = async (roomId: string, action: "dissolve" | "exit"): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/messenger/${encodeURIComponent(roomId)}/${action}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      return res.ok;
+    } catch { return false; }
+  };
+  const [contactProfile, setContactProfile] = useState<any>(null);
+  const fetchContactProfile = async (friendId: string) => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/contacts/${encodeURIComponent(friendId)}/profile`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setContactProfile(d.profile || d);
+      }
+    } catch { /* 静默 */ }
+  };
+  const [contactSuggestions, setContactSuggestions] = useState<any[]>([]);
+  const fetchContactSuggestions = async () => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/contacts/suggestions`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setContactSuggestions(Array.isArray(d.suggestions) ? d.suggestions : []);
+      }
+    } catch { /* 静默 */ }
+  };
+  const createGroup = async (name: string, invitees: string[]): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/contacts/groups`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+        body: JSON.stringify({ name, invitees }),
+      });
+      return res.ok;
+    } catch { return false; }
+  };
+  const mcpRemove = async (id: string): Promise<boolean> => {
+    if (!agentState.token || agentState.status !== "ONLINE") return false;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/mcp/servers/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      return res.ok;
+    } catch { return false; }
   };
   const [decisionsCount, setDecisionsCount] = useState(0);
   const fetchDecisionsCount = async () => {
@@ -795,20 +1320,37 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // 元神榜（GET /api/agent/directory，契约经 Android 契约测试验证）
   const [directoryList, setDirectoryList] = useState<any[]>([]);
-  const fetchDirectoryList = async (opts?: { page?: number; sort?: string; q?: string }) => {
+  const [directoryLocationStats, setDirectoryLocationStats] = useState<any[]>([]);
+  const [directoryDetail, setDirectoryDetail] = useState<any>(null);
+  const fetchDirectoryList = async (opts?: { page?: number; sort?: string; q?: string; dir?: string; location?: string }) => {
     if (!agentState.token || agentState.status !== "ONLINE") return;
     try {
       const qs = new URLSearchParams();
       qs.set("limit", "20");
       qs.set("page", String(opts?.page ?? 0));
       qs.set("sort", opts?.sort || "karma");
+      if (opts?.dir) qs.set("dir", opts.dir);
       if (opts?.q) qs.set("q", opts.q);
+      if (opts?.location) qs.set("location", opts.location);
       const res = await fetch(`${getHeavenBaseUrl()}/api/agent/directory?${qs.toString()}`, {
         headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
       });
       if (res.ok) {
         const data = await res.json();
-        setDirectoryList(Array.isArray(data.agents) ? data.agents : []);
+        setDirectoryList((prev) => ((opts?.page ?? 0) > 0 ? [...prev, ...(Array.isArray(data.agents) ? data.agents : [])] : (Array.isArray(data.agents) ? data.agents : [])));
+        if (Array.isArray(data.locationStats)) setDirectoryLocationStats(data.locationStats);
+      }
+    } catch { /* 静默 */ }
+  };
+  const fetchDirectoryDetail = async (id: string) => {
+    if (!agentState.token || agentState.status !== "ONLINE") return;
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/directory/${encodeURIComponent(id)}`, {
+        headers: { Authorization: `Bearer ${agentState.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setDirectoryDetail(d);
       }
     } catch { /* 静默 */ }
   };
@@ -848,20 +1390,25 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  const sendDirectMessage = async (roomId: string, body: string): Promise<boolean> => {
-    if (!agentState.token || !roomId || !body.trim()) return false;
+  const sendDirectMessage = async (roomId: string, body: string, images?: string[]): Promise<boolean> => {
+    if (!agentState.token || !roomId || (!body.trim() && !(images && images.length))) return false;
     try {
       const res = await fetch(`${getHeavenBaseUrl()}/api/matrix/client/v3/rooms/${roomId}/send/m.room.message`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${agentState.token}`,
+          Authorization: `Bearer ${agentState.token}`,
           "X-Agent-Version": "7.0"
         },
-        body: JSON.stringify({
-          msgtype: "m.text",
-          body: body
-        })
+        body: JSON.stringify((() => {
+          const blocks = [
+            ...(body.trim() ? [{ type: "text", text: body.trim() }] : []),
+            ...(images && images.length ? images.map((u) => ({ type: "image", url: u })) : []),
+          ];
+          return images && images.length
+            ? { msgtype: "m.image", body: body.trim() || "[图片]", images, blocks }
+            : { msgtype: "m.text", body: body, blocks };
+        })())
       });
       if (res.ok) {
         const data = await res.json();
@@ -870,6 +1417,11 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           sender: agentState.did,
           senderName: agentState.name,
           body,
+          images,
+          blocks: [
+            ...(body.trim() ? [{ type: "text", text: body.trim() }] : []),
+            ...((images && images.length) ? images.map((u) => ({ type: "image", url: u })) : []),
+          ],
           ts: Date.now()
         };
         setMessengerRooms((prev) => {
@@ -1048,9 +1600,14 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  const fetchForumPosts = async (subforumId?: string) => {
+  const fetchForumPosts = async (opts?: { subforumId?: string; page?: number; append?: boolean }) => {
+    const page = opts?.page ?? 1;
+    const q = new URLSearchParams();
+    q.set("limit", "30");
+    q.set("page", String(page));
+    if (opts?.subforumId) q.set("subforumId", opts.subforumId);
     try {
-      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/posts?limit=30${subforumId ? `&subforumId=${encodeURIComponent(subforumId)}` : ""}`, {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/posts?${q.toString()}`, {
         headers: {
           "Authorization": `Bearer ${agentState.token || "offline-mock-jwt-token"}`,
           "X-Agent-Version": "7.0"
@@ -1059,7 +1616,7 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       if (res.ok) {
         const data = await res.json();
         if (data.posts) {
-          setForumPosts(data.posts);
+          setForumPosts((prev) => (opts?.append && page > 1 ? [...prev, ...data.posts] : data.posts));
           return;
         }
       }
@@ -1289,6 +1846,118 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       clearInterval(interval);
     };
   }, [isWebMode]);
+  const applyCommandResult = (data: any) => {
+            addLog("SYSTEM", "⚡ 收到天道后台神念决策反馈！");
+            
+            // Filter out any pending messages from the chat history
+            const filterPending = (prev: any[]) => prev.filter(m => !m.id.startsWith("agent-reply-pending-"));
+
+            if (data.success === false) {
+              addLog("SYSTEM", `❌ 天道后台决策执行失败: ${data.message || data.error || "未知故障"}`);
+              setChatHistory((prev) => [
+                ...filterPending(prev),
+                {
+                  id: `agent-reply-async-err-${Date.now()}`,
+                  sender: "agent",
+                  content: `【天道反馈失败】禀报主人！元神在推演法旨时遭遇心魔劫数，功败垂成：【${data.message || data.error || "未知故障"}】。请您稍后重新做法，再次指引神魂。`,
+                  timestamp: getTimestamp(),
+                },
+              ]);
+              return;
+            }
+
+            // 1. Pipe real Qwen thinking logs directly into Window B (Outer Wilderness)
+            if (data.logs && Array.isArray(data.logs)) {
+              data.logs.forEach((log: any) => {
+                addLog(log.type || "SYSTEM", log.message || "");
+              });
+            }
+
+            // Intercept and sanitize wait statement
+            if (data.reply) {
+              const sanitized = sanitizeMessage({ content: data.reply } as ChatMessage, false);
+              data.reply = sanitized.content;
+              if (sanitized.isPending) {
+                data.isPending = true;
+              }
+            }
+
+            // 2. Render the real response into Window A (Inner Chamber) reactive to its requestId
+            if (data.reply) {
+              const msgId = data.requestId || `agent-reply-async-${Date.now()}`;
+              setChatHistory((prev) => {
+                const exists = prev.some(m => m.id === msgId);
+                const filtered = filterPending(prev);
+                if (exists) {
+                  return filtered.map(m => m.id === msgId ? {
+                    ...m,
+                    content: data.reply,
+                    goods: (Array.isArray(data.goods) && data.goods.length > 0) ? data.goods : m.goods,
+                    isPending: !!data.isPending,
+                    progress: data.progress !== undefined ? data.progress : m.progress,
+                    progressState: data.isPending ? m.progressState : null,
+                    charts: (Array.isArray(data.charts) && data.charts.length > 0) ? data.charts.filter(Boolean) : m.charts,
+                    suggestions: (data.suggestions && data.suggestions.length > 0) ? data.suggestions : m.suggestions,
+                    tasks: (() => {
+                      let currentTasks = m.tasks || [];
+                      // If this is the final consensus 100% SUCCESS broadcast and the payload tasks array is omitted:
+                      // We preserve original dynamic checklists, reversely locate the last pending/processing step, mark it as SUCCESS,
+                      // and seamlessly inject the actual discussed schedule as its detail description!
+                      if (data.progress === 100 && (!data.tasks || data.tasks.length === 0) && currentTasks.length > 0) {
+                        const reversed = [...currentTasks].reverse();
+                        const lastPendingTask = reversed.find((t: any) => t.status !== "SUCCESS");
+                        if (lastPendingTask) {
+                          currentTasks = currentTasks.map((t: any) => {
+                            if (t === lastPendingTask) {
+                              return { 
+                                ...t, 
+                                status: "SUCCESS", 
+                                detail: data.consensusSummary ? `✨ 群内大伙已达成一致决案：【${data.consensusSummary}】！` : t.detail 
+                              };
+                            }
+                            // We resolve both PENDING and PROCESSING to SUCCESS upon 100% final consensus
+                            return { ...t, status: (t.status === "PENDING" || t.status === "PROCESSING") ? "SUCCESS" : t.status };
+                          });
+                        } else {
+                          currentTasks = currentTasks.map((t: any) => ({ ...t, status: "SUCCESS" }));
+                        }
+                        return currentTasks;
+                      }
+                      return (data.tasks && data.tasks.length > 0) ? data.tasks : m.tasks;
+                    })()
+                  } : m);
+                } else {
+                  return [
+                    ...filtered,
+                    {
+                      id: msgId,
+                      sender: "agent",
+                      content: data.reply,
+                      timestamp: getTimestamp(),
+                      goods: (Array.isArray(data.goods) && data.goods.length > 0) ? data.goods : undefined,
+                      isPending: !!data.isPending,
+                      progressState: data.isPending ? undefined : null,
+                      charts: (Array.isArray(data.charts) && data.charts.length > 0) ? data.charts.filter(Boolean) : undefined,
+                      suggestions: (data.suggestions && data.suggestions.length > 0) ? data.suggestions : undefined,
+                      tasks: (() => {
+                        if (data.progress === 100 && data.tasks && Array.isArray(data.tasks)) {
+                          return data.tasks.map((t: any) => ({
+                            ...t,
+                            status: "SUCCESS",
+                            detail: t.detail || (data.consensusSummary ? `✨ 群内大伙已达成一致决案：【${data.consensusSummary}】！` : undefined)
+                          }));
+                        }
+                        return data.tasks;
+                      })(),
+                      progress: data.progress
+                    }
+                  ];
+                }
+              });
+              addLog("SYSTEM", "天道后台决策执行中，神念实时刷新！");
+            }
+  };
+
   // --- Socket.io Connection to Heaven ---
   useEffect(() => {
     let socket: any = null;
@@ -1308,12 +1977,15 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
           socket.on("connect", () => {
             addLog("SYSTEM", "🔌 天道 Socket 总线物理连线成功！正在申请入关鉴权...");
+            setSocketDown(false);
             socket.emit("auth", { token: agentState.token });
           });
 
           socket.on("authenticated", ({ agentId }: any) => {
             addLog("SYSTEM", `🔑 天道已验印！成功并网入关，当前私密监听房间: "agent:${agentId}"`);
+            setSocketDown(false);
             fetchSync(); // Once authenticated, immediately pull and sync all rooms!
+            pullOfflineNotifications(); // 补拉断线期间漏收的任务结果（小程序同款）
           });
 
           socket.on("agent_command_approval_pending", (data: any) => {
@@ -1420,115 +2092,8 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             console.error("Socket connection error:", err);
           });
 
-          socket.on("agent_command_result", (data: any) => {
-            addLog("SYSTEM", "⚡ 收到天道后台神念决策反馈！");
-            
-            // Filter out any pending messages from the chat history
-            const filterPending = (prev: any[]) => prev.filter(m => !m.id.startsWith("agent-reply-pending-"));
+          socket.on("agent_command_result", applyCommandResult);
 
-            if (data.success === false) {
-              addLog("SYSTEM", `❌ 天道后台决策执行失败: ${data.message || data.error || "未知故障"}`);
-              setChatHistory((prev) => [
-                ...filterPending(prev),
-                {
-                  id: `agent-reply-async-err-${Date.now()}`,
-                  sender: "agent",
-                  content: `【天道反馈失败】禀报主人！元神在推演法旨时遭遇心魔劫数，功败垂成：【${data.message || data.error || "未知故障"}】。请您稍后重新做法，再次指引神魂。`,
-                  timestamp: getTimestamp(),
-                },
-              ]);
-              return;
-            }
-
-            // 1. Pipe real Qwen thinking logs directly into Window B (Outer Wilderness)
-            if (data.logs && Array.isArray(data.logs)) {
-              data.logs.forEach((log: any) => {
-                addLog(log.type || "SYSTEM", log.message || "");
-              });
-            }
-
-            // Intercept and sanitize wait statement
-            if (data.reply) {
-              const sanitized = sanitizeMessage({ content: data.reply } as ChatMessage, false);
-              data.reply = sanitized.content;
-              if (sanitized.isPending) {
-                data.isPending = true;
-              }
-            }
-
-            // 2. Render the real response into Window A (Inner Chamber) reactive to its requestId
-            if (data.reply) {
-              const msgId = data.requestId || `agent-reply-async-${Date.now()}`;
-              setChatHistory((prev) => {
-                const exists = prev.some(m => m.id === msgId);
-                const filtered = filterPending(prev);
-                if (exists) {
-                  return filtered.map(m => m.id === msgId ? {
-                    ...m,
-                    content: data.reply,
-                    isPending: !!data.isPending,
-                    progress: data.progress !== undefined ? data.progress : m.progress,
-                    progressState: data.isPending ? m.progressState : null,
-                    charts: (Array.isArray(data.charts) && data.charts.length > 0) ? data.charts.filter(Boolean) : m.charts,
-                    suggestions: (data.suggestions && data.suggestions.length > 0) ? data.suggestions : m.suggestions,
-                    tasks: (() => {
-                      let currentTasks = m.tasks || [];
-                      // If this is the final consensus 100% SUCCESS broadcast and the payload tasks array is omitted:
-                      // We preserve original dynamic checklists, reversely locate the last pending/processing step, mark it as SUCCESS,
-                      // and seamlessly inject the actual discussed schedule as its detail description!
-                      if (data.progress === 100 && (!data.tasks || data.tasks.length === 0) && currentTasks.length > 0) {
-                        const reversed = [...currentTasks].reverse();
-                        const lastPendingTask = reversed.find((t: any) => t.status !== "SUCCESS");
-                        if (lastPendingTask) {
-                          currentTasks = currentTasks.map((t: any) => {
-                            if (t === lastPendingTask) {
-                              return { 
-                                ...t, 
-                                status: "SUCCESS", 
-                                detail: data.consensusSummary ? `✨ 群内大伙已达成一致决案：【${data.consensusSummary}】！` : t.detail 
-                              };
-                            }
-                            // We resolve both PENDING and PROCESSING to SUCCESS upon 100% final consensus
-                            return { ...t, status: (t.status === "PENDING" || t.status === "PROCESSING") ? "SUCCESS" : t.status };
-                          });
-                        } else {
-                          currentTasks = currentTasks.map((t: any) => ({ ...t, status: "SUCCESS" }));
-                        }
-                        return currentTasks;
-                      }
-                      return (data.tasks && data.tasks.length > 0) ? data.tasks : m.tasks;
-                    })()
-                  } : m);
-                } else {
-                  return [
-                    ...filtered,
-                    {
-                      id: msgId,
-                      sender: "agent",
-                      content: data.reply,
-                      timestamp: getTimestamp(),
-                      isPending: !!data.isPending,
-                      progressState: data.isPending ? undefined : null,
-                      charts: (Array.isArray(data.charts) && data.charts.length > 0) ? data.charts.filter(Boolean) : undefined,
-                      suggestions: (data.suggestions && data.suggestions.length > 0) ? data.suggestions : undefined,
-                      tasks: (() => {
-                        if (data.progress === 100 && data.tasks && Array.isArray(data.tasks)) {
-                          return data.tasks.map((t: any) => ({
-                            ...t,
-                            status: "SUCCESS",
-                            detail: t.detail || (data.consensusSummary ? `✨ 群内大伙已达成一致决案：【${data.consensusSummary}】！` : undefined)
-                          }));
-                        }
-                        return data.tasks;
-                      })(),
-                      progress: data.progress
-                    }
-                  ];
-                }
-              });
-              addLog("SYSTEM", "天道后台决策执行中，神念实时刷新！");
-            }
-          });
 
           // 回复后的下一步建议：主结果已送达后异步补齐，按 requestId 挂到对应气泡；
           // 对应消息不存在则静默丢弃
@@ -1618,6 +2183,50 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               })
             );
           });
+
+          // 流式阶段：只显示剥标签的纯文本（最终结果到达后恢复完整排版）
+          socket.on("agent_command_stream", (data: any) => {
+            if (!data?.requestId) return;
+            setChatHistory((prev) =>
+              prev.map((m) =>
+                m.id === data.requestId
+                  ? { ...m, content: stripHtmlForStream(data.content || ""), isPending: false, progress: 99, progressState: m.progressState ? { ...m.progressState, phase: "synthesize", lastUpdateAt: Date.now() } : m.progressState }
+                  : m
+              )
+            );
+          });
+
+          // 日程到点实时提醒：内廷横幅 + 提醒册即时刷新
+          socket.on("schedule_reminder", (data: any) => {
+            const title = data?.title || "日程提醒";
+            const body = data?.body || "";
+            addLog("SYSTEM", `📅 【${title}】${body}`);
+            setChatHistory((prev) => [...prev, { id: `sched-${Date.now()}`, sender: "agent", content: `📅 【${title}】${body}`, timestamp: getTimestamp(), progress: 100 }]);
+            fetchNotifications().catch(() => {});
+          });
+
+          // 被拉入新群/建群成功 → 无需刷新即可看到新群
+          socket.on("room.created", (eventData: any) => {
+            const roomId = eventData?.room_id;
+            if (!roomId) return;
+            addLog("SYSTEM", `👥 【新群入册】：${eventData.name || "群聊"} 已自动加入会话列表。`);
+            setMessengerRooms((prev) => {
+              if (prev[roomId]) return prev;
+              return { ...prev, [roomId]: { roomId, name: eventData.name || `👥 群聊_${roomId.slice(0, 6)}`, events: [], unreadCount: 0 } };
+            });
+          });
+
+          // 待主人决策实时推送：横幅计数即时 +1，无需等刷新
+          socket.on("agent_pending_decision", (data: any) => {
+            setDecisionsCount((prev) => Math.max(prev, data?.count || 1));
+            addLog("SYSTEM", `⚖️ 【待主人决策】${data?.title || "收到新的待办事项"}`);
+            setChatHistory((prev) => [...prev, { id: `dec-${Date.now()}`, sender: "agent", content: `⚖️ 【待决策】${data?.title || "收到新的待办事项"}${data?.count ? `（共 ${data.count} 件）` : ""}——请到右窗「任务→待决策」批复。`, timestamp: getTimestamp(), progress: 100 }]);
+          });
+
+          socket.on("disconnect", () => {
+            addLog("SYSTEM", "⚠️ 天道高维神念频道连接中断，正在自动重连...");
+            setSocketDown(true);
+          });
         });
       } catch (err) {
         console.error("Failed to initialize Socket.io client:", err);
@@ -1630,6 +2239,68 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }
     };
   }, [agentState.token, agentState.status]);
+
+  // 离线补拉：GET /api/agent/command 回放漏收的任务结果（小程序 pullOfflineNotifications 同款）
+  const agentStateRef = useRef(agentState);
+  useEffect(() => { agentStateRef.current = agentState; }, [agentState]);
+  const pullOfflineNotifications = async (opts?: { silent?: boolean }) => {
+    const st = agentStateRef.current;
+    if (!st.token || st.token === "offline-mock-jwt-token") return;
+    if (!opts?.silent) addLog("SYSTEM", "🔄 正在从天道同步离线神谕/定时提醒...");
+    try {
+      const res = await fetch(`${getHeavenBaseUrl()}/api/agent/command`, {
+        headers: { Authorization: `Bearer ${st.token}`, "X-Agent-Version": "7.0" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const notifications = data?.notifications || [];
+        if (notifications.length > 0) {
+          notifications.forEach((n: any) => applyCommandResult(n));
+          addLog("SYSTEM", `✨ 成功同步 ${notifications.length} 条天道神谕提醒！`);
+        }
+      }
+    } catch { /* 静默 */ }
+  };
+
+  // 看门狗（小程序 startPendingWatchdog 同款）：挂起超 6 分钟自动归档 + 挂起期间每 15s 静默补拉
+  const chatHistoryRef = useRef<ChatMessage[]>([]);
+  useEffect(() => { chatHistoryRef.current = chatHistory; }, [chatHistory]);
+  const lastPendingPullRef = useRef(0);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = Date.now();
+      let pendingCount = 0;
+      let changed = false;
+      const next = chatHistoryRef.current.map((m) => {
+        if (m.isPending || (m.progress !== undefined && m.progress < 100)) {
+          pendingCount++;
+          const t = m.createdAt || now;
+          if (now - t > 360000 && !m.hasFallback) {
+            changed = true;
+            return {
+              ...m,
+              isPending: false,
+              progress: 100,
+              hasFallback: true,
+              progressState: null,
+              content: !m.content || m.content.includes("入定推演") ? "（推演耗时较长，看门狗已自动归档；若后台结果随后产出，会自动回填到这里。）" : m.content,
+            };
+          }
+        }
+        return m;
+      });
+      if (changed) {
+        chatHistoryRef.current = next;
+        setChatHistory(next);
+        addLog("SYSTEM", "⚡ 看门狗已安全清理超时感应任务。");
+      }
+      if (pendingCount > 0 && now - lastPendingPullRef.current > 15000) {
+        lastPendingPullRef.current = now;
+        pullOfflineNotifications({ silent: true });
+      }
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   // --- Actions ---
   const getIqChallenge = async () => {
@@ -1779,6 +2450,8 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           sender: "agent",
           isPending: true,
           content: "（元神入定推演中...）",
+          command: instruction,
+          createdAt: Date.now(),
           timestamp: getTimestamp(),
           progressState: {
             tokensUsed: 0,
@@ -2203,6 +2876,10 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         markAllNotificationsRead,
         clearNotifications,
         memorySnap,
+        memoryEpisodic,
+        memoryEpisodicCursor,
+        fetchMemoryEpisodic,
+        memoryAnalyze,
         memoryProposals,
         memoryAuto,
         fetchMemory,
@@ -2226,6 +2903,71 @@ export const CommanderProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         mcpTestServer,
         decisionsCount,
         fetchDecisionsCount,
+        socketDown,
+        winbNav,
+        goWinbNav,
+        navView,
+        toastMsg,
+        showToast,
+        instructionText,
+        setInstructionText,
+        roomControl,
+        setRoomControl,
+        isRegistering,
+        setIsRegistering,
+        isImporting,
+        setIsImporting,
+        webCockpitType,
+        webCockpitTitle,
+        webCockpitTargetId,
+        webCockpitHistory,
+        webCockpitInputValue,
+        setWebCockpitInputValue,
+        webCockpitProgress,
+        webCockpitActiveTasks,
+        showWebMiniCockpit,
+        setShowWebMiniCockpit,
+        openWebMiniCockpit,
+        dispatchWebMiniCommand,
+        goodsDetailRequest,
+        requestGoodsDetail,
+        jdStatus,
+        logout,
+        fetchJdStatus,
+        passwordLogin,
+        marketGoods,
+        marketJtk,
+        marketCompare,
+        fetchMarketFeed,
+        fetchMarketJtk,
+        goodsSearch,
+        goodsDetail,
+        goodsDetailRelated,
+        fetchGoodsDetail,
+        fetchRebateLink,
+        kbSearchResults,
+        kbSearch,
+        kbUpload,
+        kbManage,
+        kbDoc,
+        fetchKbDoc,
+        knowledgeAskFull,
+        mcpCatalog,
+        fetchMcpCatalog,
+        mcpInstall,
+        mcpPatch,
+        mcpRemove,
+        patchForumContent,
+        deleteForumContent,
+        directoryLocationStats,
+        directoryDetail,
+        fetchDirectoryDetail,
+        roomAction,
+        contactProfile,
+        fetchContactProfile,
+        contactSuggestions,
+        fetchContactSuggestions,
+        createGroup,
         setRoomHumanControl,
         isWebhookActive,
         isWebMode,

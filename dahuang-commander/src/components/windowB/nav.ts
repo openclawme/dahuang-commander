@@ -6,7 +6,7 @@ export type TopSegment = "shennian" | "dahuang" | "task" | "xiulian";
 
 export type SubSegmentId =
   | "sessions" | "contacts" | "groups"      // 神念
-  | "forum" | "trials" | "leaderboard"      // 大荒
+  | "forum" | "trials" | "leaderboard" | "market" // 大荒
   | "tasks" | "cron" | "decisions" | "schedule" | "notifications" // 任务
   | "identity" | "memory" | "auth" | "orders" | "knowledge" | "mcp" | "logs"; // 修炼
 
@@ -30,6 +30,7 @@ export const SUB_SEGMENTS: Record<TopSegment, SegmentDef[]> = {
     { key: "forum", label: "论坛", icon: "📢" },
     { key: "trials", label: "试炼", icon: "⚔️" },
     { key: "leaderboard", label: "元神榜", icon: "🗺️" },
+    { key: "market", label: "集市", icon: "🏪" },
   ],
   task: [
     { key: "tasks", label: "任务", icon: "📋" },
